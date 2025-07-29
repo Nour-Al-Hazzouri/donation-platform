@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { NAV_ITEMS, COLORS } from '@/lib/constants'
+import { useModal } from '@/lib/contexts/ModalContext'
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const { openModal } = useModal()
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
@@ -52,20 +54,24 @@ export function Navbar() {
               )
             })}
             <div className="pt-4 border-t border-gray-200 flex flex-col space-y-3">
-              <Link
-                href="/auth/login"
+              <button
                 className={`w-full text-center py-2 px-4 rounded-full bg-[${COLORS.primary}] text-white`}
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false)
+                  openModal('signIn')
+                }}
               >
                 Sign In
-              </Link>
-              <Link
-                href="/auth/register"
+              </button>
+              <button
                 className={`w-full text-center py-2 px-4 rounded-full border border-[${COLORS.primary}] text-[${COLORS.primary}]`}
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false)
+                  openModal('signUp')
+                }}
               >
                 Sign Up
-              </Link>
+              </button>
             </div>
           </nav>
         </div>
