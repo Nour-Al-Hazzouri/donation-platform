@@ -26,7 +26,7 @@ export function Header() {
     
     const desktopClasses = `${
       isActive 
-        ? `text-[${COLORS.primary}] font-medium border-b-2 border-[${COLORS.primary}] pb-1` 
+        ? `text-[${COLORS.primary}] font-medium border-b-2 border-primary pb-1` 
         : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`
     } text-sm lg:text-base whitespace-nowrap`
 
@@ -36,6 +36,7 @@ export function Header() {
         href={item.href}
         className={isMobile ? mobileClasses : desktopClasses}
         onClick={closeMobileMenu}
+        style={isActive && !isMobile ? { borderBottomColor: COLORS.primary } : {}}
       >
         {item.name}
       </Link>
@@ -86,9 +87,10 @@ export function Header() {
                     href={item.href}
                     className={`hidden lg:inline-block ${
                       pathname === item.href 
-                        ? `text-[${COLORS.primary}] font-medium border-b-2 border-[${COLORS.primary}] pb-1` 
+                        ? `text-[${COLORS.primary}] font-medium border-b-2 pb-1` 
                         : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`
                     } text-sm lg:text-base whitespace-nowrap`}
+                    style={pathname === item.href ? { borderBottomColor: COLORS.primary } : {}}
                   >
                     {item.name}
                   </Link>
@@ -102,20 +104,21 @@ export function Header() {
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
             <Button
               variant="outline"
-              className={`
-                bg-[${COLORS.primary}] text-white border-[${COLORS.primary}]
-                hover:bg-[${COLORS.primaryHover}] hover:text-white hover:border-[${COLORS.primaryHover}]
-                transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base
-              `}
+              style={{
+                backgroundColor: COLORS.primary,
+                borderColor: COLORS.primary,
+                color: 'white'
+              }}
+              className="hover:bg-primaryHover hover:text-white hover:border-primaryHover transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
             >
               Sign In
             </Button>
             <Button 
-              className={`
-                bg-[${COLORS.primary}] text-white 
-                hover:bg-[${COLORS.primaryHover}] hover:text-white
-                transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base
-              `}
+              style={{
+                backgroundColor: COLORS.primary,
+                color: 'white'
+              }}
+              className="hover:bg-primaryHover hover:text-white transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
             >
               Sign Up
             </Button>
@@ -133,14 +136,16 @@ export function Header() {
               <div className="pt-4 border-t border-gray-200 flex flex-col space-y-3">
                 <Link
                   href="/auth/login"
-                  className={`w-full text-center py-2 px-4 rounded-full bg-[${COLORS.primary}] text-white`}
+                  style={{ backgroundColor: COLORS.primary, color: 'white' }}
+                  className="w-full text-center py-2 px-4 rounded-full"
                   onClick={closeMobileMenu}
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/auth/register"
-                  className={`w-full text-center py-2 px-4 rounded-full border border-[${COLORS.primary}] text-[${COLORS.primary}]`}
+                  style={{ borderColor: COLORS.primary, color: COLORS.primary }}
+                  className="w-full text-center py-2 px-4 rounded-full border"
                   onClick={closeMobileMenu}
                 >
                   Sign Up

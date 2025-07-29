@@ -8,7 +8,7 @@ import { ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { COLORS } from '@/lib/constants'
 
-interface DonationItem {
+interface RequestItem {
   id: string
   userId: string
   userName: string
@@ -20,11 +20,11 @@ interface DonationItem {
   isAvailable: boolean
 }
 
-interface LatestDonationsProps {
+interface LatestRequestsProps {
   className?: string
 }
 
-const mockDonations: DonationItem[] = [
+const mockRequests: RequestItem[] = [
   {
     id: '1',
     userId: 'user1',
@@ -82,56 +82,56 @@ const mockDonations: DonationItem[] = [
   },
 ]
 
-const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
+const RequestCard: React.FC<{ request: RequestItem }> = ({ request }) => {
   return (
     <Card className="flex-shrink-0 w-full h-full hover:shadow-lg transition-shadow duration-200 mx-1 sm:mx-2 flex flex-col bg-white">
       <CardContent className="p-4 sm:p-6 flex-1 flex flex-col">
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-            <AvatarImage src={donation.userAvatar || undefined} alt={donation.userName} />
+            <AvatarImage src={request.userAvatar || undefined} alt={request.userName} />
             <AvatarFallback className="bg-[#f90404] text-white text-xs sm:text-sm">
-              {donation.userName.charAt(0).toUpperCase()}
+              {request.userName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <span className="text-foreground font-medium text-sm sm:text-base">
-            {donation.userName}
+            {request.userName}
           </span>
         </div>
 
         <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 flex-1">
           <h3 className="font-semibold text-base sm:text-lg">
-            {donation.itemName} ({donation.quantity} available)
+            {request.itemName} ({request.quantity} needed)
           </h3>
           
           <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm">
             <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-[#f90404]" />
-            <span>{donation.location} • {donation.timeAgo}</span>
+            <span>{request.location} • {request.timeAgo}</span>
           </div>
         </div>
 
         <Button 
           className="w-full mt-auto text-sm sm:text-base"
           style={{
-            backgroundColor: donation.isAvailable ? COLORS.primary : '#f3f4f6',
-            color: donation.isAvailable ? 'white' : COLORS.text.secondary,
+            backgroundColor: request.isAvailable ? COLORS.primary : '#f3f4f6',
+            color: request.isAvailable ? 'white' : COLORS.text.secondary,
           }}
-          variant={donation.isAvailable ? "default" : "secondary"}
-          disabled={!donation.isAvailable}
+          variant={request.isAvailable ? "default" : "secondary"}
+          disabled={!request.isAvailable}
         >
-          {donation.isAvailable ? "Request" : "Unavailable"}
+          {request.isAvailable ? "Donate" : "Fulfilled"}
         </Button>
       </CardContent>
     </Card>
   )
 }
 
-const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
+const LatestRequests: React.FC<LatestRequestsProps> = ({ className }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0)
   const [visibleCards, setVisibleCards] = React.useState(3)
   const [isTransitioning, setIsTransitioning] = React.useState(false)
 
   // Clone the first few items to create infinite loop effect
-  const extendedDonations = [...mockDonations, ...mockDonations.slice(0, visibleCards)]
+  const extendedRequests = [...mockRequests, ...mockRequests.slice(0, visibleCards)]
 
   React.useEffect(() => {
     const updateVisibleCards = () => {
@@ -155,7 +155,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
     setIsTransitioning(true)
     setCurrentIndex(prev => {
       const newIndex = prev - 1
-      return newIndex < 0 ? mockDonations.length - 1 : newIndex
+      return newIndex < 0 ? mockRequests.length - 1 : newIndex
     })
     setTimeout(() => setIsTransitioning(false), 300)
   }
@@ -164,7 +164,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
     setIsTransitioning(true)
     setCurrentIndex(prev => {
       const newIndex = prev + 1
-      return newIndex >= mockDonations.length ? 0 : newIndex
+      return newIndex >= mockRequests.length ? 0 : newIndex
     })
     setTimeout(() => setIsTransitioning(false), 300)
   }
@@ -184,7 +184,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center mb-6 sm:mb-8">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center">
-            Latest Donations
+            Latest Requests
           </h2>
         </div>
 
@@ -197,7 +197,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
                 "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md mr-1 sm:mr-2 z-10"
               )}
               onClick={scrollLeft}
-              aria-label="Previous donations"
+              aria-label="Previous requests"
               style={{ color: COLORS.primary }}
             >
               <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -210,13 +210,13 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
                   transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
                 }}
               >
-                {extendedDonations.map((donation, index) => (
+                {extendedRequests.map((request, index) => (
                   <div
-                    key={`${donation.id}-${index}`}
+                    key={`${request.id}-${index}`}
                     className="flex-shrink-0 px-1 sm:px-2 h-full"
                     style={{ width: `${100 / visibleCards}%` }}
                   >
-                    <DonationCard donation={donation} />
+                    <RequestCard request={request} />
                   </div>
                 ))}
               </div>
@@ -229,7 +229,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
                 "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md ml-1 sm:ml-2 z-10"
               )}
               onClick={scrollRight}
-              aria-label="Next donations"
+              aria-label="Next requests"
               style={{ color: COLORS.primary }}
             >
               <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -245,7 +245,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
               color: 'white',
             }}
           >
-            View All Donations
+            View All Requests
           </Button>
         </div>
       </div>
@@ -253,4 +253,4 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
   )
 }
 
-export default LatestDonations
+export default LatestRequests
