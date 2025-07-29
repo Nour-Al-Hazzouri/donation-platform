@@ -1,73 +1,155 @@
 'use client'
 
+import { useState } from 'react'
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { NAV_ITEMS, COLORS } from "@/lib/constants"
 import { usePathname } from "next/navigation"
-import { Navbar } from "@/components/common/Navbar"
+import { Menu, X } from 'lucide-react'
+import Image from "next/image"
 
 export function Header() {
   const pathname = usePathname()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
+  const closeMobileMenu = () => setIsMobileMenuOpen(false)
+
+  // Shared link rendering logic
+  const renderNavLink = (item: typeof NAV_ITEMS[0], isMobile = false) => {
+    const isActive = pathname === item.href
+    const mobileClasses = `px-3 py-2 rounded-md text-base font-medium ${
+      isActive 
+        ? `text-[${COLORS.primary}] bg-gray-100` 
+        : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}] hover:bg-gray-50`
+    }`
+    
+    const desktopClasses = `${
+      isActive 
+        ? `text-[${COLORS.primary}] font-medium border-b-2 border-[${COLORS.primary}] pb-1` 
+        : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`
+    } text-sm lg:text-base whitespace-nowrap`
+
+    return (
+      <Link
+        key={item.name}
+        href={item.href}
+        className={isMobile ? mobileClasses : desktopClasses}
+        onClick={closeMobileMenu}
+      >
+        {item.name}
+      </Link>
+    )
+  }
 
   return (
-    <header className="w-full px-4 md:px-6 py-4 shadow-sm">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className={`w-8 h-8 bg-[${COLORS.primary}] rounded-sm flex items-center justify-center`}>
-            <span className="text-white text-lg font-bold">♥</span>
-          </div>
-          <span className={`text-[${COLORS.text.primary}] text-xl font-semibold`}>GiveLeb</span>
-        </Link>
-
-        {/* Mobile Navigation - Only visible on small screens */}
-        <div className="md:hidden">
-          <Navbar />
-        </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4 lg:gap-8">
-          {NAV_ITEMS.map((item, index) => {
-            // On medium screens (md), only show first 4 items
-            // On large screens (lg), show all items
-            if (index >= 4 && index < NAV_ITEMS.length - 1) {
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`hidden lg:inline-block ${pathname === item.href ? `text-[${COLORS.primary}] font-medium border-b-2 border-[${COLORS.primary}] pb-1` : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`} text-sm lg:text-base whitespace-nowrap`}
-                >
-                  {item.name}
-                </Link>
-              )
-            }
-            
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`${isActive ? `text-[${COLORS.primary}] font-medium border-b-2 border-[${COLORS.primary}] pb-1` : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`} text-sm lg:text-base whitespace-nowrap`}
-              >
-                {item.name}
-              </Link>
-            )
-          })}
-        </nav>
-
-        {/* Auth Buttons - Desktop Only */}
-        <div className="hidden md:flex items-center gap-2 lg:gap-3">
-          <Button
-            variant="outline"
-            className={`bg-[${COLORS.primary}] text-white border-[${COLORS.primary}] hover:bg-[${COLORS.primaryHover}] rounded-full px-3 lg:px-6 text-sm lg:text-base`}
+    <>
+      <header className="w-full px-4 md:px-6 py-4 shadow-sm sticky top-0 bg-white z-40">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Logo */}
+          <Link 
+            href="/" 
+            className="flex items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
           >
-            Sign In
-          </Button>
-          <Button className={`bg-[${COLORS.primary}] hover:bg-[${COLORS.primaryHover}] text-white rounded-full px-3 lg:px-6 text-sm lg:text-base`}>
-            Sign Up
-          </Button>
+            <div className="w-40 h-10 relative">
+              <Image 
+                src="/logo.png" 
+                alt="GiveLeb Logo" 
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+          </Link>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleMobileMenu}
+            className="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            aria-expanded={isMobileMenuOpen}
+          >
+            <span className="sr-only">Open main menu</span>
+            {isMobileMenuOpen ? (
+              <X className="block h-6 w-6" aria-hidden="true" />
+            ) : (
+              <Menu className="block h-6 w-6" aria-hidden="true" />
+            )}
+          </button>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-4 lg:gap-8">
+            {NAV_ITEMS.map((item, index) => {
+              if (index >= 4 && index < NAV_ITEMS.length - 1) {
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`hidden lg:inline-block ${
+                      pathname === item.href 
+                        ? `text-[${COLORS.primary}] font-medium border-b-2 border-[${COLORS.primary}] pb-1` 
+                        : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`
+                    } text-sm lg:text-base whitespace-nowrap`}
+                  >
+                    {item.name}
+                  </Link>
+                )
+              }
+              return renderNavLink(item)
+            })}
+          </nav>
+
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center gap-2 lg:gap-3">
+            <Button
+              variant="outline"
+              className={`
+                bg-[${COLORS.primary}] text-white border-[${COLORS.primary}]
+                hover:bg-[${COLORS.primaryHover}] hover:text-white hover:border-[${COLORS.primaryHover}]
+                transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base
+              `}
+            >
+              Sign In
+            </Button>
+            <Button 
+              className={`
+                bg-[${COLORS.primary}] text-white 
+                hover:bg-[${COLORS.primaryHover}] hover:text-white
+                transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base
+              `}
+            >
+              Sign Up
+            </Button>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 top-16 z-30 bg-white overflow-y-auto">
+          <div className="p-4">
+            <nav className="flex flex-col space-y-4">
+              {NAV_ITEMS.map(item => renderNavLink(item, true))}
+              
+              <div className="pt-4 border-t border-gray-200 flex flex-col space-y-3">
+                <Link
+                  href="/auth/login"
+                  className={`w-full text-center py-2 px-4 rounded-full bg-[${COLORS.primary}] text-white`}
+                  onClick={closeMobileMenu}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className={`w-full text-center py-2 px-4 rounded-full border border-[${COLORS.primary}] text-[${COLORS.primary}]`}
+                  onClick={closeMobileMenu}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            </nav>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
