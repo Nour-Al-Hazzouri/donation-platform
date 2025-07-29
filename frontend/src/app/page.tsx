@@ -1,7 +1,14 @@
-import Image from "next/image";
+import { MainLayout } from "@/components/layouts/MainLayout"
+import { Hero } from "@/components/common/Hero"
+import { ImageCollage } from "@/components/common/ImageCollage"
+import { CallToAction } from "@/components/common/CallToAction"
 
 export default function Home() {
   return (
-    <h1>Hello, World!</h1>
-  );
+    <MainLayout>
+      <Hero />
+      <ImageCollage />
+      <CallToAction />
+    </MainLayout>
+  )
 }
