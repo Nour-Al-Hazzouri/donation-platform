@@ -15,7 +15,7 @@ export function Navbar() {
   }
 
   return (
-    <div className="md:hidden">
+    <div>
       {/* Mobile menu button */}
       <button
         onClick={toggleMenu}

@@ -18,16 +18,16 @@ export function Hero() {
       </h1>
 
       {/* Email Signup */}
-      <div className="flex items-center justify-center gap-4 max-w-md mx-auto">
-        <div className="relative flex-1">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+        <div className="relative w-full sm:flex-1">
           <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-[${COLORS.text.secondary}] w-5 h-5`} />
           <Input
             type="email"
             placeholder="Enter email address"
-            className={`pl-10 py-3 rounded-full border-[${COLORS.border}] focus:border-[${COLORS.primary}]`}
+            className={`pl-10 py-3 rounded-full border-[${COLORS.border}] focus:border-[${COLORS.primary}] w-full`}
           />
         </div>
-        <Button className={`bg-[${COLORS.primary}] hover:bg-[${COLORS.primaryHover}] text-white rounded-full px-8 py-3`}>
+        <Button className={`bg-[${COLORS.primary}] hover:bg-[${COLORS.primaryHover}] text-white rounded-full px-8 py-3 w-full sm:w-auto`}>
           Join Community
         </Button>
       </div>
