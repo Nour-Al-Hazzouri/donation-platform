@@ -16,7 +16,7 @@ export default function SignUpPage() {
     phoneNumber: '',
     email: '',
     password: '',
-    agreeToTerms: true
+    agreeToTerms: false // Changed from true to false
   })
 
   const togglePasswordVisibility = () => {
