@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('community_posts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('event_id')->nullable()->constrained('donation_events');
+            $table->foreignId('event_id')->constrained('donation_events');
             $table->text('content');
             $table->json('images')->nullable();
             $table->json('tags')->nullable();
             $table->timestamps();
-            
+
             // Add index for faster lookups
             $table->index(['user_id', 'event_id']);
         });
