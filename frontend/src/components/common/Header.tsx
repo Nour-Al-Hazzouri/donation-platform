@@ -1,3 +1,4 @@
+// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\components\Header.tsx
 'use client'
 
 import { useState } from 'react'
@@ -15,7 +16,6 @@ export function Header() {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
 
-  // Shared link rendering logic
   const renderNavLink = (item: typeof NAV_ITEMS[0], isMobile = false) => {
     const isActive = pathname === item.href
     const mobileClasses = `px-3 py-2 rounded-md text-base font-medium ${
@@ -57,6 +57,7 @@ export function Header() {
                 src="/logo.png" 
                 alt="GiveLeb Logo" 
                 fill
+                sizes="(max-width: 768px) 160px, 200px"
                 className="object-contain"
                 priority
               />

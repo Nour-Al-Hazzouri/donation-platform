@@ -1,3 +1,4 @@
+// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\components\Footer.tsx
 'use client'
 
 import Link from "next/link"
@@ -22,17 +23,18 @@ export function Footer() {
                 href="/" 
                 className="transition-transform duration-200 hover:scale-105 active:scale-95"
               >
-                <div className="w-36 h-10 relative -ml-6"> {/* Adjusted width and shifted slightly left */}
+                <div className="w-36 h-10 relative -ml-6">
                   <Image 
                     src="/logo.png" 
                     alt="GiveLeb Logo" 
                     fill
+                    sizes="(max-width: 768px) 144px, 180px"
                     className="object-contain"
                     priority
                   />
                 </div>
               </Link>
-              <div className="space-y-1 pl-[2px]"> {/* Slight left padding to align text with logo visually */}
+              <div className="space-y-1 pl-[2px]">
                 <div className="text-2xl font-bold text-[#000000]">10k</div>
                 <div className="text-[#5a5a5a] text-sm leading-tight">
                   Worldwide Client
