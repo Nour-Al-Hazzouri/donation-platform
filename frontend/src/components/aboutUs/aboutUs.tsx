@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { COLORS } from "@/lib/constants"
 import { Handshake, Users, Heart } from 'lucide-react'
+import AboutUsSection from '@/components/aboutUs/AboutUsSection'
 
 export default function AboutUs() {
   return (
@@ -75,6 +76,14 @@ export default function AboutUs() {
           </div>
         </div>
       </div>
+      
+      {/* Visual separator */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 mt-12">
+        <div className="w-full h-px bg-gray-200"></div>
+      </div>
+      
+      {/* Add the AboutUsSection component */}
+      <AboutUsSection />
     </section>
   )
 }

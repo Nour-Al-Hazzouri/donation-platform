@@ -1,6 +1,6 @@
 import { Header } from '@/components/common/Header'
 import { Footer } from '@/components/common/Footer'
-import AboutUs from '@/components/home/aboutUs'
+import AboutUs from '@/components/aboutUs/aboutUs'
 
 export default function AboutPage() {
   return (
