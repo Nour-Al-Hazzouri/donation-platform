@@ -55,13 +55,13 @@ export default function AboutUsSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Image */}
           <div className="order-2 lg:order-1 flex justify-center lg:justify-start">
-            <div className="relative rounded-2xl overflow-hidden shadow-lg w-full sm:w-4/5 md:w-full">
+            <div className="relative rounded-2xl overflow-hidden shadow-lg w-full sm:w-3/4 md:w-4/5 lg:w-full">
               <Image
                 src="/donation1.png"
                 alt="Community volunteers helping those in need"
                 width={600}
                 height={400}
-                className="w-full h-auto object-cover"
+                className="w-full h-auto object-cover object-center"
                 priority
               />
             </div>

@@ -142,18 +142,18 @@ export default function TeamSection() {
           </Button>
 
           {/* Team Members Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8 justify-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-8 justify-items-center">
             {getCurrentSlideMembers().map((member) => (
               <div key={member.id} className="text-center space-y-4 w-full max-w-xs mx-auto">
                 {/* Profile Image */}
-                <div className="relative w-full sm:w-56 md:w-64 h-72 sm:h-80 mx-auto mb-6">
+                <div className="relative w-full sm:w-48 md:w-56 lg:w-64 h-64 sm:h-72 md:h-80 mx-auto mb-6">
                   <div className="w-full h-full bg-[#f5f5f5] rounded-t-full overflow-hidden">
                     <Image
                       src={member.image}
                       alt={`${member.name} - ${member.role}`}
                       width={300}
                       height={300}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-center"
                       priority
                     />
                   </div>

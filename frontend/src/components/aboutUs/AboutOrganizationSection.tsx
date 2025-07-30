@@ -55,13 +55,13 @@ export default function AboutOrganizationSection() {
 
           {/* Image */}
           <div className="order-first lg:order-last flex justify-center lg:justify-end">
-            <div className="relative rounded-2xl overflow-hidden shadow-lg w-full sm:w-4/5 md:w-full">
+            <div className="relative rounded-2xl overflow-hidden shadow-lg w-full sm:w-3/4 md:w-4/5 lg:w-full">
               <Image
                 src="/donation2.jpg"
                 alt="Hands coming together holding donation bags, symbolizing community support and giving"
                 width={600}
                 height={500}
-                className="w-full h-auto object-cover"
+                className="w-full h-auto object-cover object-center"
                 priority
               />
             </div>
