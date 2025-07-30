@@ -61,27 +61,27 @@ class User extends Authenticatable
 
     public function donationEvents(): HasMany
     {
-        return $this->hasMany(DonationEvent::class);
+        return $this->hasMany(DonationEvent::class, 'user_id');
     }
 
     public function transactions(): HasMany
     {
-        return $this->hasMany(DonationTransaction::class);
+        return $this->hasMany(DonationTransaction::class, 'user_id');
     }
 
     public function communityPosts(): HasMany
     {
-        return $this->hasMany(CommunityPost::class);
+        return $this->hasMany(CommunityPost::class, 'user_id');
     }
 
     public function comments(): HasMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Comment::class, 'user_id');
     }
 
     public function votes(): HasMany
     {
-        return $this->hasMany(Vote::class);
+        return $this->hasMany(Vote::class, 'user_id');
     }
 
     public function verificationRequests(): HasMany
@@ -91,7 +91,7 @@ class User extends Authenticatable
 
     public function handledVerifications(): HasMany
     {
-        return $this->hasMany(Verification::class, 'admin_id');
+        return $this->hasMany(Verification::class, 'verifier_id');
     }
 
     public function submittedReports(): HasMany
@@ -106,11 +106,11 @@ class User extends Authenticatable
 
     public function notifications(): HasMany
     {
-        return $this->hasMany(Notification::class);
+        return $this->hasMany(Notification::class, 'user_id');
     }
 
     public function announcements(): HasMany
     {
-        return $this->hasMany(Announcement::class, 'admin_id');
+        return $this->hasMany(Announcement::class, 'user_id');
     }
 }
