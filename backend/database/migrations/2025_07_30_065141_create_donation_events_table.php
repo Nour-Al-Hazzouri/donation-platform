@@ -21,9 +21,9 @@ return new class extends Migration
             $table->decimal('current_amount', 10, 2)->default(0);
             $table->decimal('possible_amount', 10, 2)->default(0);
             $table->enum('type', ['request', 'offer']);
-            $table->enum('status', ['active', 'fulfilled', 'closed'])->default('active');
+            $table->enum('status', ['active', 'completed', 'cancelled', 'suspended'])->default('active');
             $table->timestamps();
-            
+
             // Add index for faster lookups
             $table->index(['type', 'status']);
         });
