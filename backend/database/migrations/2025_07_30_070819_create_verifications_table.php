@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('verifier_id')->nullable()->constrained('users');
             $table->string('document_type');
-            $table->string('document_url');
+            $table->json('document_urls');
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('notes')->nullable();
             $table->timestamp('verified_at')->nullable();

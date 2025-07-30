@@ -12,7 +12,7 @@ class Verification extends Model
         'user_id',
         'verifier_id',
         'document_type',
-        'document_url',
+        'document_urls',
         'status',
         'notes',
         'verified_at'
