@@ -11,7 +11,8 @@ class Verification extends Model
     protected $fillable = [
         'user_id',
         'verifier_id',
-        'images',
+        'document_type',
+        'document_url',
         'status',
         'notes',
         'verified_at'
