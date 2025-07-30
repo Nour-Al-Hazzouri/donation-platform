@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { COLORS } from "@/lib/constants"
 import { Handshake, Users, Heart } from 'lucide-react'
 import AboutUsSection from '@/components/aboutUs/AboutUsSection'
+import AboutOrganizationSection from '@/components/aboutUs/AboutOrganizationSection'
+import TeamSection from '@/components/aboutUs/TeamSection'
 
 export default function AboutUs() {
   return (
@@ -45,21 +47,23 @@ export default function AboutUs() {
               </ul>
             </div>
 
-            <Button
-              className={`
-                mt-4 w-fit
-                bg-[${COLORS.primary}] text-white border-[${COLORS.primary}]
-                hover:bg-[${COLORS.primaryHover}] hover:text-white hover:border-[${COLORS.primaryHover}]
-                transition-colors duration-200 rounded-full px-6 text-base
-              `}
-            >
-              Learn More
-            </Button>
+            <div className="flex md:justify-start justify-center">
+              <Button
+                className={`
+                  mt-4 w-fit
+                  bg-[${COLORS.primary}] text-white border-[${COLORS.primary}]
+                  hover:bg-[${COLORS.primaryHover}] hover:text-white hover:border-[${COLORS.primaryHover}]
+                  transition-colors duration-200 rounded-full px-6 text-base
+                `}
+              >
+                Learn More
+              </Button>
+            </div>
           </div>
 
           {/* Image Section - Improved */}
           <div className="flex justify-center md:justify-end">
-            <div className="relative rounded-2xl overflow-hidden shadow-lg group">
+            <div className="relative rounded-2xl overflow-hidden shadow-lg group w-full sm:w-4/5 md:w-full">
               <div className="absolute inset-0 bg-gradient-to-br from-transparent to-gray-900/30 z-10"></div>
               <Image
                 src="/aboutUs1.png"
@@ -84,6 +88,22 @@ export default function AboutUs() {
       
       {/* Add the AboutUsSection component */}
       <AboutUsSection />
+      
+      {/* Visual separator */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 mt-12">
+        <div className="w-full h-px bg-gray-200"></div>
+      </div>
+      
+      {/* Add the AboutOrganizationSection component */}
+      <AboutOrganizationSection />
+      
+      {/* Visual separator */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 mt-12">
+        <div className="w-full h-px bg-gray-200"></div>
+      </div>
+      
+      {/* Add the TeamSection component */}
+      <TeamSection />
     </section>
   )
 }

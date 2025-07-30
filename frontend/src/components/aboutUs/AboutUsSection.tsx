@@ -54,8 +54,8 @@ export default function AboutUsSection() {
         {/* Main Content Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Image */}
-          <div className="order-2 lg:order-1">
-            <div className="relative rounded-2xl overflow-hidden shadow-lg">
+          <div className="order-2 lg:order-1 flex justify-center lg:justify-start">
+            <div className="relative rounded-2xl overflow-hidden shadow-lg w-full sm:w-4/5 md:w-full">
               <Image
                 src="/donation1.png"
                 alt="Community volunteers helping those in need"
