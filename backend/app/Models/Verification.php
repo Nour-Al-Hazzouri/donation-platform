@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Verification extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'user_id',
         'verifier_id',
@@ -17,8 +19,9 @@ class Verification extends Model
         'notes',
         'verified_at'
     ];
-
+    
     protected $casts = [
+        'document_urls' => 'array',
         'verified_at' => 'datetime',
     ];
 
