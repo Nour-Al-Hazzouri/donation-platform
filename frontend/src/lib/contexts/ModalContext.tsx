@@ -27,9 +27,10 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     // If there's already a modal open, close it first then open the new one
     if (modalType) {
       setModalType(null)
-      // Increased delay to ensure the previous modal is fully closed and animations complete
-      // Using 300ms to match the duration-300 animation class in AuthModals.tsx
-      setTimeout(() => setModalType(type), 300)
+      // Smooth transition between modals
+      // Using 250ms to match the duration-300 transition class in AuthModals.tsx
+      // Slightly shorter than the transition to ensure a smooth handoff
+      setTimeout(() => setModalType(type), 250)
     } else {
       setModalType(type)
     }

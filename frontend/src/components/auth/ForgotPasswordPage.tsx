@@ -23,12 +23,12 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="bg-white flex flex-col px-4 py-8 rounded-lg shadow-lg">
+    <div className="bg-white flex flex-col px-4 py-6 sm:py-8 rounded-lg shadow-lg transition-all duration-300">
       {/* Back Button */}
-      <div className="pb-4">
+      <div className="pb-3 sm:pb-4">
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-[#5a5a5a] hover:text-[#000000] transition-colors"
+          className="flex items-center gap-2 text-[#5a5a5a] hover:text-[#000000] transition-all duration-300"
           aria-label="Go back"
         >
           <ChevronLeft size={20} />
@@ -38,15 +38,15 @@ export default function ForgotPasswordPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-md space-y-6">
+        <div className="w-full max-w-md space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="space-y-4">
-            <h1 className="text-4xl font-bold text-[#f90404] leading-tight">
+          <div className="space-y-3 sm:space-y-4">
+            <h1 className="text-3xl sm:text-4xl font-bold text-[#f90404] leading-tight transition-all duration-300">
               Forgot
               <br />
               password?
             </h1>
-            <p className="text-[#5a5a5a] text-base leading-relaxed">
+            <p className="text-[#5a5a5a] text-sm sm:text-base leading-relaxed transition-all duration-300">
               Enter your email for the verification process,
               <br />
               we will send code to your email
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-[#000000] font-medium">
@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-12 px-4 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0"
+                className="w-full h-10 sm:h-12 px-4 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300"
                 required
               />
             </div>
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
             {/* Continue Button */}
             <Button
               type="submit"
-              className="w-full h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-colors mt-8"
+              className="w-full h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300 mt-6 sm:mt-8"
             >
               Continue
             </Button>

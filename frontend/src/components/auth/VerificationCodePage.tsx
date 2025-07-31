@@ -66,17 +66,17 @@ export default function VerificationCodePage() {
   const isCodeComplete = code.every(digit => digit !== '')
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+    <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-md transition-all duration-300">
       {/* Header */}
-      <div className="text-center space-y-4 mb-8">
-        <h1 className="text-2xl font-bold text-[#000000]">Enter 4 digit code</h1>
-        <p className="text-[#5a5a5a] text-sm leading-relaxed">
+      <div className="text-center space-y-3 sm:space-y-4 mb-6 sm:mb-8 transition-all duration-300">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#000000] transition-all duration-300">Enter 4 digit code</h1>
+        <p className="text-[#5a5a5a] text-xs sm:text-sm leading-relaxed transition-all duration-300">
           A four-digit code should have come to your email address that you indicated.
         </p>
       </div>
 
       {/* Code Input Fields */}
-      <div className="flex justify-center gap-4 mb-8">
+      <div className="flex justify-center gap-2 sm:gap-4 mb-6 sm:mb-8 transition-all duration-300">
         {code.map((digit, index) => (
           <Input
             key={index}
@@ -89,25 +89,25 @@ export default function VerificationCodePage() {
             onChange={(e) => handleInputChange(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
-            className="w-16 h-20 text-center text-2xl font-semibold bg-[#f5f5f5] border-0 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0"
+            className="w-12 sm:w-16 h-16 sm:h-20 text-center text-xl sm:text-2xl font-semibold bg-[#f5f5f5] border-0 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300"
             aria-label={`Digit ${index + 1}`}
           />
         ))}
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-4">
+      <div className="flex gap-3 sm:gap-4 transition-all duration-300">
         <Button
           onClick={handleConfirm}
           disabled={!isCodeComplete}
-          className="flex-1 h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Confirm
         </Button>
         <Button
           onClick={handleCancel}
           variant="outline"
-          className="flex-1 h-12 bg-white border-2 border-[#000000] text-[#000000] hover:bg-gray-50 font-semibold rounded-lg transition-colors"
+          className="flex-1 h-10 sm:h-12 bg-white border-2 border-[#000000] text-[#000000] hover:bg-gray-50 font-semibold rounded-lg transition-all duration-300"
         >
           Cancel
         </Button>

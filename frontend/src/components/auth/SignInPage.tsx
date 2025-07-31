@@ -29,16 +29,16 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="bg-white flex items-center justify-center px-4 py-8 rounded-lg shadow-lg">
-      <div className="w-full max-w-md space-y-6">
+    <div className="bg-white flex items-center justify-center px-4 py-6 sm:py-8 rounded-lg shadow-lg transition-all duration-300">
+      <div className="w-full max-w-md space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-[#f90404]">Sign in</h1>
-          <p className="text-[#5a5a5a] text-lg">Please log in into your account</p>
+        <div className="text-center space-y-1 sm:space-y-2">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#f90404] transition-all duration-300">Sign in</h1>
+          <p className="text-[#5a5a5a] text-base sm:text-lg transition-all duration-300">Please log in into your account</p>
         </div>
 
         {/* Sign In Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Email Field */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-[#000000] font-medium">
@@ -50,7 +50,7 @@ export default function SignInPage() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-12 px-4 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0"
+              className="w-full h-10 sm:h-12 px-4 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300"
               required
             />
           </div>
@@ -67,7 +67,7 @@ export default function SignInPage() {
                 placeholder="••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 px-4 pr-12 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0"
+                className="w-full h-10 sm:h-12 px-4 pr-12 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300"
                 required
               />
               <button
@@ -86,7 +86,7 @@ export default function SignInPage() {
             <button 
               type="button"
               onClick={() => openModal('forgotPassword')}
-              className="text-[#f90404] hover:text-[#d90404] font-medium transition-colors"
+              className="text-[#f90404] hover:text-[#d90404] font-medium transition-all duration-300 hover:underline"
             >
               Forgot password?
             </button>
@@ -95,19 +95,19 @@ export default function SignInPage() {
           {/* Sign In Button */}
           <Button
             type="submit"
-            className="w-full h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-colors"
+            className="w-full h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300"
           >
             Sign in
           </Button>
         </form>
 
         {/* Sign Up Link */}
-        <div className="text-center mt-4">
-          <span className="text-[#5a5a5a]">Don't have an account? </span>
+        <div className="text-center mt-4 sm:mt-6">
+          <span className="text-[#5a5a5a] text-sm sm:text-base transition-all duration-300">Don't have an account? </span>
           <button 
             type="button"
             onClick={() => openModal('signUp')}
-            className="text-[#f90404] hover:text-[#d90404] font-medium transition-colors"
+            className="text-[#f90404] hover:text-[#d90404] font-medium transition-all duration-300 hover:underline"
           >
             Sign up
           </button>
@@ -119,7 +119,7 @@ export default function SignInPage() {
             type="button"
             variant="outline"
             onClick={handleGoogleSignIn}
-            className="w-full h-12 border-2 border-[#4285f4] text-[#4285f4] hover:bg-[#4285f4] hover:text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-3"
+            className="w-full h-10 sm:h-12 border-2 border-[#4285f4] text-[#4285f4] hover:bg-[#4285f4] hover:text-white font-medium rounded-lg transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" className="fill-current">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
