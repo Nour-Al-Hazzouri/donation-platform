@@ -14,45 +14,53 @@ export function AuthModals() {
     <>
       {/* Sign In Modal */}
       <Dialog open={modalType === 'signIn'} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
-        <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none transition-all duration-300 ease-in-out">
+        <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none">
           <DialogTitle className="sr-only">Sign In</DialogTitle>
           <DialogDescription className="sr-only">
             Sign in to your account
           </DialogDescription>
-          <SignInPage />
+          <div className="animate-in fade-in-0 zoom-in-95 duration-300 relative z-50 isolate">
+            <SignInPage />
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Sign Up Modal */}
       <Dialog open={modalType === 'signUp'} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
-        <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none transition-all duration-300 ease-in-out">
+        <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none">
           <DialogTitle className="sr-only">Sign Up</DialogTitle>
           <DialogDescription className="sr-only">
             Create a new account
           </DialogDescription>
-          <SignUpPage />
+          <div className="animate-in fade-in-0 zoom-in-95 duration-300 relative z-50 isolate">
+            <SignUpPage />
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Forgot Password Modal */}
       <Dialog open={modalType === 'forgotPassword'} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
-        <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none transition-all duration-300 ease-in-out">
+        <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none">
           <DialogTitle className="sr-only">Forgot Password</DialogTitle>
           <DialogDescription className="sr-only">
             Reset your password
           </DialogDescription>
-          <ForgotPasswordPage />
+          <div className="animate-in fade-in-0 zoom-in-95 duration-300 relative z-50 isolate">
+            <ForgotPasswordPage />
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Verification Code Modal */}
       <Dialog open={modalType === 'verificationCode'} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
-        <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none transition-all duration-300 ease-in-out">
+        <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none">
           <DialogTitle className="sr-only">Verification Code</DialogTitle>
           <DialogDescription className="sr-only">
             Enter your verification code
           </DialogDescription>
-          <VerificationCodePage />
+          <div className="animate-in fade-in-0 zoom-in-95 duration-300 relative z-50 isolate">
+            <VerificationCodePage />
+          </div>
         </DialogContent>
       </Dialog>
     </>
