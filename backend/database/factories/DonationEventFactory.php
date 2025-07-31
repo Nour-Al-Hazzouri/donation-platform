@@ -25,6 +25,12 @@ class DonationEventFactory extends Factory
             'location_id' => Location::inRandomOrder()->first()->id,
             'title' => $this->faker->sentence(),
             'description' => $this->faker->paragraphs(3, true),
+            'images' => $this->faker->optional(0.7, [])->randomElements([
+                'https://picsum.photos/800/600?random=1',
+                'https://picsum.photos/800/600?random=2',
+                'https://picsum.photos/800/600?random=3',
+                'https://picsum.photos/800/600?random=4',
+            ], $this->faker->numberBetween(1, 4)),
             'goal_amount' => $this->faker->randomFloat(2, 1000, 100000),
             'current_amount' => fn (array $attributes) => $this->faker->randomFloat(2, 0, $attributes['goal_amount'] * 0.8),
             'possible_amount' => fn (array $attributes) => $this->faker->randomFloat(2, $attributes['current_amount'], $attributes['goal_amount'] * 1.2),
