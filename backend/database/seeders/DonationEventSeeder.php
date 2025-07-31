@@ -24,12 +24,19 @@ class DonationEventSeeder extends Seeder
         for ($i = 0; $i < 50; $i++) {
             $goalAmount = rand(1000, 50000);
             $currentAmount = rand(0, $goalAmount);
+            $imageCount = rand(0, 4);
 
             DonationEvent::create([
                 'user_id' => $users->random()->id,
                 'location_id' => $locations->random()->id,
                 'title' => $this->generateEventTitle(),
                 'description' => $this->generateEventDescription(),
+                'images' => $imageCount > 0 ? array_slice([
+                    'https://picsum.photos/800/600?random=' . rand(1, 1000),
+                    'https://picsum.photos/800/600?random=' . rand(1001, 2000),
+                    'https://picsum.photos/800/600?random=' . rand(2001, 3000),
+                    'https://picsum.photos/800/600?random=' . rand(3001, 4000),
+                ], 0, $imageCount) : [],
                 'goal_amount' => $goalAmount,
                 'current_amount' => $currentAmount,
                 'type' => $types[array_rand($types)],

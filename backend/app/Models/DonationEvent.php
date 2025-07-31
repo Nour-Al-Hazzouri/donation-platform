@@ -16,6 +16,7 @@ class DonationEvent extends Model
         'location_id',
         'title',
         'description',
+        'images',
         'goal_amount',
         'current_amount',
         'possible_amount',
@@ -24,6 +25,7 @@ class DonationEvent extends Model
     ];
 
     protected $casts = [
+        'images' => 'array',
         'goal_amount' => 'decimal:2',
         'current_amount' => 'decimal:2',
         'possible_amount' => 'decimal:2',
