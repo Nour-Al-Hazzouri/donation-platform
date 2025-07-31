@@ -29,12 +29,12 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="bg-white flex items-center justify-center px-4 py-6 sm:py-8 rounded-lg shadow-lg transition-all duration-300">
-      <div className="w-full max-w-md space-y-4 sm:space-y-6">
+    <div className="bg-white flex items-center justify-center px-4 py-6 sm:py-8 rounded-lg shadow-lg transition-all duration-300 ease-in-out">
+      <div className="w-full max-w-md space-y-4 sm:space-y-6 transition-all duration-300 ease-in-out">
         {/* Header */}
         <div className="text-center space-y-1 sm:space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#f90404] transition-all duration-300">Sign in</h1>
-          <p className="text-[#5a5a5a] text-base sm:text-lg transition-all duration-300">Please log in into your account</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#f90404] transition-all duration-300 ease-in-out">Sign in</h1>
+          <p className="text-[#5a5a5a] text-base sm:text-lg transition-all duration-300 ease-in-out">Please log in into your account</p>
         </div>
 
         {/* Sign In Form */}
@@ -50,7 +50,7 @@ export default function SignInPage() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-10 sm:h-12 px-4 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300"
+              className="w-full h-10 sm:h-12 px-4 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300 ease-in-out"
               required
             />
           </div>
@@ -73,7 +73,7 @@ export default function SignInPage() {
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#5a5a5a] hover:text-[#f90404] transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#5a5a5a] hover:text-[#f90404] transition-colors duration-300 ease-in-out"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -86,7 +86,7 @@ export default function SignInPage() {
             <button 
               type="button"
               onClick={() => openModal('forgotPassword')}
-              className="text-[#f90404] hover:text-[#d90404] font-medium transition-all duration-300 hover:underline"
+              className="text-[#f90404] hover:text-[#d90404] font-medium transition-all duration-300 ease-in-out hover:underline"
             >
               Forgot password?
             </button>
@@ -119,7 +119,7 @@ export default function SignInPage() {
             type="button"
             variant="outline"
             onClick={handleGoogleSignIn}
-            className="w-full h-10 sm:h-12 border-2 border-[#4285f4] text-[#4285f4] hover:bg-[#4285f4] hover:text-white font-medium rounded-lg transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3"
+            className="w-full h-10 sm:h-12 border-2 border-[#4285f4] text-[#4285f4] hover:bg-[#4285f4] hover:text-white font-medium rounded-lg transition-all duration-300 ease-in-out flex items-center justify-center gap-2 sm:gap-3"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" className="fill-current">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

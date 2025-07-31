@@ -26,11 +26,19 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const openModal = (type: ModalType) => {
     // If there's already a modal open, close it first then open the new one
     if (modalType) {
+      // For smooth transition between auth pages, we use a fade effect
+      // First set a flag to indicate we're transitioning between modals
+      const currentModal = modalType
+      
+      // Close current modal
       setModalType(null)
-      // Smooth transition between modals
-      // Using 250ms to match the duration-300 transition class in AuthModals.tsx
-      // Slightly shorter than the transition to ensure a smooth handoff
-      setTimeout(() => setModalType(type), 250)
+      
+      // Wait for the fade-out transition to complete before opening new modal
+      // Using 200ms which is slightly shorter than the duration-300 transition
+      // This creates a smooth crossfade effect without explicit animations
+      setTimeout(() => {
+        setModalType(type)
+      }, 200)
     } else {
       setModalType(type)
     }

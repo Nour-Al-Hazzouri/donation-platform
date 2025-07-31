@@ -43,7 +43,7 @@ export function AuthModals() {
           <DialogDescription className="sr-only">
             Sign in to your account
           </DialogDescription>
-          <div className="relative z-50 isolate transition-opacity duration-300">
+          <div className="relative z-50 isolate transition-opacity duration-300 ease-in-out">
             <SignInPage />
           </div>
         </DialogContent>
@@ -56,7 +56,7 @@ export function AuthModals() {
           <DialogDescription className="sr-only">
             Create a new account
           </DialogDescription>
-          <div className="relative z-50 isolate transition-opacity duration-300">
+          <div className="relative z-50 isolate transition-opacity duration-300 ease-in-out">
             <SignUpPage />
           </div>
         </DialogContent>
@@ -69,7 +69,7 @@ export function AuthModals() {
           <DialogDescription className="sr-only">
             Reset your password
           </DialogDescription>
-          <div className="relative z-50 isolate transition-opacity duration-300">
+          <div className="relative z-50 isolate transition-opacity duration-300 ease-in-out">
             <ForgotPasswordPage />
           </div>
         </DialogContent>
@@ -82,7 +82,7 @@ export function AuthModals() {
           <DialogDescription className="sr-only">
             Enter your verification code
           </DialogDescription>
-          <div className="relative z-50 isolate transition-opacity duration-300">
+          <div className="relative z-50 isolate transition-opacity duration-300 ease-in-out">
             <VerificationCodePage />
           </div>
         </DialogContent>

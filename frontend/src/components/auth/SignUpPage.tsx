@@ -44,12 +44,12 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="bg-white flex items-center justify-center px-4 py-6 sm:py-8 rounded-lg shadow-lg transition-all duration-300">
-      <div className="w-full max-w-md space-y-4 sm:space-y-6">
+    <div className="bg-white flex items-center justify-center px-4 py-6 sm:py-8 rounded-lg shadow-lg transition-all duration-300 ease-in-out">
+      <div className="w-full max-w-md space-y-4 sm:space-y-6 transition-all duration-300 ease-in-out">
         {/* Header */}
         <div className="text-center space-y-1 sm:space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#f90404] transition-all duration-300">Sign up</h1>
-          <p className="text-[#5a5a5a] text-base sm:text-lg transition-all duration-300">Please create a new account</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#f90404] transition-all duration-300 ease-in-out">Sign up</h1>
+          <p className="text-[#5a5a5a] text-base sm:text-lg transition-all duration-300 ease-in-out">Please create a new account</p>
         </div>
 
         {/* Sign Up Form */}
