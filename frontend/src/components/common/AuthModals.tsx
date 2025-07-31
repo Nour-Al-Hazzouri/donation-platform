@@ -7,10 +7,17 @@ import SignUpPage from '@/components/auth/SignUpPage'
 import ForgotPasswordPage from '@/components/auth/ForgotPasswordPage'
 import VerificationCodePage from '@/components/auth/VerificationCodePage'
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 
 export function AuthModals() {
-  const { modalType, closeModal } = useModal()
+  const { modalType, previousModalType, isTransitioning, transitionDirection, closeModal } = useModal()
   const [modalSize, setModalSize] = useState('md')
+  
+  // Determine if a modal should be shown (either current or previous during transition)
+  const shouldShowModal = (type: ModalType) => {
+    if (type === null) return false
+    return modalType === type || (isTransitioning && previousModalType === type)
+  }
   
   // Update modal size based on screen width
   useEffect(() => {
@@ -37,54 +44,98 @@ export function AuthModals() {
   return (
     <>
       {/* Sign In Modal */}
-      <Dialog open={modalType === 'signIn'} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
+      <Dialog open={shouldShowModal('signIn')} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
         <DialogContent className={`p-0 border-none bg-transparent shadow-none transition-all duration-300 ${modalSize === 'sm' ? 'max-w-[90%]' : modalSize === 'md' ? 'max-w-md' : 'max-w-lg'}`}>
           <DialogTitle className="sr-only">Sign In</DialogTitle>
           <DialogDescription className="sr-only">
             Sign in to your account
           </DialogDescription>
-          <div className="relative z-50 isolate transition-opacity duration-300 ease-in-out">
-            <SignInPage />
-          </div>
+          <AnimatePresence mode="wait">
+            {modalType === 'signIn' && (
+              <motion.div
+                key="signIn"
+                initial={transitionDirection === 'in' ? { opacity: 0, y: 10, scale: 0.98 } : {}}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="relative z-50 isolate"
+              >
+                <SignInPage />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
 
       {/* Sign Up Modal */}
-      <Dialog open={modalType === 'signUp'} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
+      <Dialog open={shouldShowModal('signUp')} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
         <DialogContent className={`p-0 border-none bg-transparent shadow-none transition-all duration-300 ${modalSize === 'sm' ? 'max-w-[90%]' : modalSize === 'md' ? 'max-w-md' : 'max-w-lg'}`}>
           <DialogTitle className="sr-only">Sign Up</DialogTitle>
           <DialogDescription className="sr-only">
             Create a new account
           </DialogDescription>
-          <div className="relative z-50 isolate transition-opacity duration-300 ease-in-out">
-            <SignUpPage />
-          </div>
+          <AnimatePresence mode="wait">
+            {modalType === 'signUp' && (
+              <motion.div
+                key="signUp"
+                initial={transitionDirection === 'in' ? { opacity: 0, y: 10, scale: 0.98 } : {}}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="relative z-50 isolate"
+              >
+                <SignUpPage />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
 
       {/* Forgot Password Modal */}
-      <Dialog open={modalType === 'forgotPassword'} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
+      <Dialog open={shouldShowModal('forgotPassword')} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
         <DialogContent className={`p-0 border-none bg-transparent shadow-none transition-all duration-300 ${modalSize === 'sm' ? 'max-w-[90%]' : modalSize === 'md' ? 'max-w-md' : 'max-w-lg'}`}>
           <DialogTitle className="sr-only">Forgot Password</DialogTitle>
           <DialogDescription className="sr-only">
             Reset your password
           </DialogDescription>
-          <div className="relative z-50 isolate transition-opacity duration-300 ease-in-out">
-            <ForgotPasswordPage />
-          </div>
+          <AnimatePresence mode="wait">
+            {modalType === 'forgotPassword' && (
+              <motion.div
+                key="forgotPassword"
+                initial={transitionDirection === 'in' ? { opacity: 0, y: 10, scale: 0.98 } : {}}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="relative z-50 isolate"
+              >
+                <ForgotPasswordPage />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
 
       {/* Verification Code Modal */}
-      <Dialog open={modalType === 'verificationCode'} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
+      <Dialog open={shouldShowModal('verificationCode')} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
         <DialogContent className={`p-0 border-none bg-transparent shadow-none transition-all duration-300 ${modalSize === 'sm' ? 'max-w-[90%]' : modalSize === 'md' ? 'max-w-md' : 'max-w-lg'}`}>
           <DialogTitle className="sr-only">Verification Code</DialogTitle>
           <DialogDescription className="sr-only">
             Enter your verification code
           </DialogDescription>
-          <div className="relative z-50 isolate transition-opacity duration-300 ease-in-out">
-            <VerificationCodePage />
-          </div>
+          <AnimatePresence mode="wait">
+            {modalType === 'verificationCode' && (
+              <motion.div
+                key="verificationCode"
+                initial={transitionDirection === 'in' ? { opacity: 0, y: 10, scale: 0.98 } : {}}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="relative z-50 isolate"
+              >
+                <VerificationCodePage />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
     </>

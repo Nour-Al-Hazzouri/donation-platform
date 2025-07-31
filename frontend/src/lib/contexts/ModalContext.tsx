@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, ReactNode, useRef } from 'react'
 
 // Define the modal types
 export type ModalType = 'signIn' | 'signUp' | 'forgotPassword' | 'verificationCode' | null
@@ -8,6 +8,9 @@ export type ModalType = 'signIn' | 'signUp' | 'forgotPassword' | 'verificationCo
 // Define the context type
 type ModalContextType = {
   modalType: ModalType
+  previousModalType: ModalType
+  isTransitioning: boolean
+  transitionDirection: 'in' | 'out' | null
   openModal: (type: ModalType) => void
   closeModal: () => void
 }
@@ -15,6 +18,9 @@ type ModalContextType = {
 // Create the context with default values
 const ModalContext = createContext<ModalContextType>({
   modalType: null,
+  previousModalType: null,
+  isTransitioning: false,
+  transitionDirection: null,
   openModal: () => {},
   closeModal: () => {}
 })
@@ -22,34 +28,82 @@ const ModalContext = createContext<ModalContextType>({
 // Create a provider component
 export function ModalProvider({ children }: { children: ReactNode }) {
   const [modalType, setModalType] = useState<ModalType>(null)
+  const [previousModalType, setPreviousModalType] = useState<ModalType>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [transitionDirection, setTransitionDirection] = useState<'in' | 'out' | null>(null)
+  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const openModal = (type: ModalType) => {
-    // If there's already a modal open, close it first then open the new one
+    // If there's already a modal open, transition between them
     if (modalType) {
-      // For smooth transition between auth pages, we use a fade effect
-      // First set a flag to indicate we're transitioning between modals
-      const currentModal = modalType
+      // Don't do anything if trying to open the same modal
+      if (modalType === type) return
       
-      // Close current modal
-      setModalType(null)
+      // Clear any existing timeout
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current)
+      }
       
-      // Wait for the fade-out transition to complete before opening new modal
-      // Using 200ms which is slightly shorter than the duration-300 transition
-      // This creates a smooth crossfade effect without explicit animations
-      setTimeout(() => {
+      // Start transition out
+      setIsTransitioning(true)
+      setTransitionDirection('out')
+      setPreviousModalType(modalType)
+      
+      // After a short delay, change the modal type and transition in
+      transitionTimeoutRef.current = setTimeout(() => {
         setModalType(type)
-      }, 200)
+        setTransitionDirection('in')
+        
+        // Complete the transition
+        transitionTimeoutRef.current = setTimeout(() => {
+          setIsTransitioning(false)
+          setTransitionDirection(null)
+        }, 300) // Match the duration-300 in the CSS
+      }, 300) // Match the duration-300 in the CSS
     } else {
+      // If no modal is open, simply open the new one with an in transition
       setModalType(type)
+      setIsTransitioning(true)
+      setTransitionDirection('in')
+      
+      // Complete the transition
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsTransitioning(false)
+        setTransitionDirection(null)
+      }, 300) // Match the duration-300 in the CSS
     }
   }
 
   const closeModal = () => {
-    setModalType(null)
+    // Only start close transition if a modal is open and we're not already transitioning out
+    if (modalType && transitionDirection !== 'out') {
+      setIsTransitioning(true)
+      setTransitionDirection('out')
+      setPreviousModalType(modalType)
+      
+      // After transition completes, actually close the modal
+      transitionTimeoutRef.current = setTimeout(() => {
+        setModalType(null)
+        setIsTransitioning(false)
+        setTransitionDirection(null)
+      }, 300) // Match the duration-300 in the CSS
+    } else {
+      // If no modal or already transitioning out, just close immediately
+      setModalType(null)
+      setIsTransitioning(false)
+      setTransitionDirection(null)
+    }
   }
 
   return (
-    <ModalContext.Provider value={{ modalType, openModal, closeModal }}>
+    <ModalContext.Provider value={{
+      modalType,
+      previousModalType,
+      isTransitioning,
+      transitionDirection,
+      openModal,
+      closeModal
+    }}>
       {children}
     </ModalContext.Provider>
   )
