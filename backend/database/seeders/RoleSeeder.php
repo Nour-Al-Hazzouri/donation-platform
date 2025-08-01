@@ -19,6 +19,11 @@ class RoleSeeder extends Seeder
 
         // Create permissions
         $permissions = [
+            // Location permissions
+            'view locations',
+            'create locations',
+            'edit locations',
+            'delete locations',
             // User permissions
             'view users',
             'create users',
@@ -63,6 +68,7 @@ class RoleSeeder extends Seeder
         $adminRole->givePermissionTo(Permission::all());
 
         $moderatorPermissions = [
+            'view locations',
             'view users',
             'view donation_events',
             'manage donation_events',
@@ -82,6 +88,7 @@ class RoleSeeder extends Seeder
         $moderatorRole->givePermissionTo($moderatorPermissions);
 
         $userPermissions = [
+            'view locations',
             'view donation_events',
             'create donation_events',
             'edit own donation_events',
