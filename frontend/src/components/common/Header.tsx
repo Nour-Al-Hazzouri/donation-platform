@@ -1,4 +1,3 @@
-// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\components\Header.tsx
 'use client'
 
 import { useState } from 'react'

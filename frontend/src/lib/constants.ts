@@ -18,5 +18,5 @@ export const NAV_ITEMS = [
   { name: 'Requests', href: '/requests' },
   { name: 'Community', href: '/community' },
   { name: 'Blog', href: '/blog' },
-  { name: 'Contact Us', href: '/contact' },
+  { name: 'Contact Us', href: '/contactUs' },
 ]
