@@ -4,11 +4,15 @@ import { useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useModal } from '@/lib/contexts/ModalContext'
+import { useAuthStore } from '@/lib/store/authStore'
+import { toast } from "@/components/ui/use-toast"
 
 export default function VerificationCodePage() {
   const [code, setCode] = useState(['', '', '', ''])
+  const [isLoading, setIsLoading] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const { closeModal } = useModal()
+  const { user, login } = useAuthStore()
 
   const handleInputChange = (index: number, value: string) => {
     // Only allow single digits
@@ -50,11 +54,52 @@ export default function VerificationCodePage() {
     inputRefs.current[focusIndex]?.focus()
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const verificationCode = code.join('')
     if (verificationCode.length === 4) {
-      // Handle verification logic here
-      console.log('Verification code:', verificationCode)
+      setIsLoading(true)
+      
+      try {
+        // Simulate API call with a delay
+        await new Promise(resolve => setTimeout(resolve, 1500))
+        
+        // Mock successful verification (for demo, we'll accept any 4-digit code)
+        if (user) {
+          // Update user with verified status
+          const updatedUser = {
+            ...user,
+            verified: true
+          }
+          
+          // Update the user in the store
+          login(updatedUser)
+          
+          // Close the modal
+          closeModal()
+          
+          // Show success toast
+          toast({
+            title: "Success",
+            description: "Your account has been verified successfully!",
+          })
+        } else {
+          // Show error toast if no user is logged in
+          toast({
+            title: "Error",
+            description: "You must be logged in to verify your account.",
+            variant: "destructive",
+          })
+        }
+      } catch (error) {
+        // Show error toast
+        toast({
+          title: "Error",
+          description: "Failed to verify account. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -99,10 +144,10 @@ export default function VerificationCodePage() {
       <div className="flex gap-3 sm:gap-4 transition-all duration-300 ease-in-out">
         <Button
           onClick={handleConfirm}
-          disabled={!isCodeComplete}
+          disabled={!isCodeComplete || isLoading}
           className="flex-1 h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Confirm
+          {isLoading ? "Verifying..." : "Confirm"}
         </Button>
         <Button
           onClick={handleCancel}

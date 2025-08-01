@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ChevronLeft } from 'lucide-react'
 import { useModal } from '@/lib/contexts/ModalContext'
+import { toast } from "@/components/ui/use-toast"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const { openModal } = useModal()
 
   const handleBack = () => {
@@ -16,10 +18,44 @@ export default function ForgotPasswordPage() {
     openModal('signIn')
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle forgot password logic here
-    console.log('Forgot password request for:', email)
+    
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    setIsLoading(true)
+    
+    try {
+      // Simulate API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Mock successful password reset request
+      toast({
+        title: "Success",
+        description: "Password reset instructions have been sent to your email",
+      })
+      
+      // Close the modal after success
+      setTimeout(() => {
+        openModal('signIn')
+      }, 2000)
+    } catch (error) {
+      // Show error toast
+      toast({
+        title: "Error",
+        description: "Failed to send password reset email. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -74,9 +110,10 @@ export default function ForgotPasswordPage() {
             {/* Continue Button */}
             <Button
               type="submit"
-              className="w-full h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300 ease-in-out mt-6 sm:mt-8"
+              disabled={isLoading}
+              className="w-full h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300 ease-in-out mt-6 sm:mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Continue
+              {isLoading ? "Sending..." : "Continue"}
             </Button>
           </form>
         </div>

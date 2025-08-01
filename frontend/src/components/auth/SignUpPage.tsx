@@ -7,10 +7,14 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff } from 'lucide-react'
 import { useModal } from '@/lib/contexts/ModalContext'
+import { useAuthStore } from '@/lib/store/authStore'
+import { toast } from "@/components/ui/use-toast"
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const { openModal } = useModal()
+  const [isLoading, setIsLoading] = useState(false)
+  const { openModal, closeModal } = useModal()
+  const { login } = useAuthStore()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -39,10 +43,63 @@ export default function SignUpPage() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle sign up logic here
-    console.log('Sign up attempt:', formData)
+    
+    // Validate form data
+    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName || !formData.username) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    if (!formData.agreeToTerms) {
+      toast({
+        title: "Error",
+        description: "You must agree to the terms and privacy policy",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    setIsLoading(true)
+    
+    try {
+      // Simulate API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Mock successful registration
+      const mockUser = {
+        id: '123',
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        verified: false
+      }
+      
+      // Login the user
+      login(mockUser)
+      
+      // Close the modal
+      closeModal()
+      
+      // Show success toast
+      toast({
+        title: "Success",
+        description: "Your account has been created successfully!",
+      })
+    } catch (error) {
+      // Show error toast
+      toast({
+        title: "Error",
+        description: "Failed to create account. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -181,10 +238,10 @@ export default function SignUpPage() {
           {/* Sign Up Button */}
           <Button
             type="submit"
-            disabled={!formData.agreeToTerms}
+            disabled={!formData.agreeToTerms || isLoading}
             className="w-full h-8 sm:h-9 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-0.5"
           >
-            Sign up
+            {isLoading ? "Creating account..." : "Sign up"}
           </Button>
         </form>
 
