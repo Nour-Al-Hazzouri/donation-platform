@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
@@ -22,7 +22,7 @@ export default function SignUpPage() {
   })
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
+    setShowPassword(prev => !prev)
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -157,7 +157,7 @@ export default function SignUpPage() {
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#4285f4] hover:text-[#3367d6] transition-all duration-300"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
             </div>
           </div>

@@ -14,7 +14,7 @@ export default function SignInPage() {
   const { openModal } = useModal()
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
+    setShowPassword(prev => !prev)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -76,7 +76,7 @@ export default function SignInPage() {
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#5a5a5a] hover:text-[#f90404] transition-colors duration-300 ease-in-out"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
               </button>
             </div>
           </div>
