@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
@@ -18,7 +18,7 @@ export default function SignUpPage() {
     phoneNumber: '',
     email: '',
     password: '',
-    agreeToTerms: false // Changed from true to false
+    agreeToTerms: false
   })
 
   const togglePasswordVisibility = () => {
@@ -163,12 +163,12 @@ export default function SignUpPage() {
           </div>
 
           {/* Terms and Privacy Checkbox */}
-          <div className="flex items-center space-x-1.5 pt-0.5">
+          <div className="flex items-center space-x-2 pt-0.5">
             <Checkbox
               id="terms"
               checked={formData.agreeToTerms}
               onCheckedChange={handleCheckboxChange}
-              className="w-3.5 h-3.5 border-2 border-[#4285f4] data-[state=checked]:bg-[#4285f4] data-[state=checked]:border-[#4285f4] rounded-sm"
+              className="border-[#4285f4] data-[state=checked]:bg-[#4285f4]"
             />
             <Label 
               htmlFor="terms" 
