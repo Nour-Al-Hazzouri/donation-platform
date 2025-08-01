@@ -6,6 +6,7 @@ type User = {
   name: string
   email: string
   verified: boolean
+  phoneNumber: string
 }
 
 type AuthState = {

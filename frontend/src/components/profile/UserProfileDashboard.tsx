@@ -16,12 +16,12 @@ export default function UserProfileDashboard() {
   const { openModal } = useModal()
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
-    fullName: user?.name || "Steve Rogers",
-    gender: "Male",
-    phoneNumber: "71414141",
-    email: user?.email || "steve@gmail.com",
-    governorate: "governorate",
-    district: "District",
+    fullName: user?.name || "",
+    gender: "",
+    phoneNumber: user?.phoneNumber || "",
+    email: user?.email || "",
+    governorate: "",
+    district: "",
   })
 
   const handleInputChange = (field: string, value: string) => {
@@ -182,14 +182,11 @@ export default function UserProfileDashboard() {
                   <Input
                     value={profileData.governorate}
                     onChange={(e) => handleInputChange("governorate", e.target.value)}
-                    placeholder="ex: Beirut"
+                    placeholder="Enter governorate"
                     className="w-full h-10 lg:h-12 px-3 lg:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]"
                   />
                 ) : (
-                  <div>
-                    <p className="text-[#5a5a5a] text-sm lg:text-base py-1">{profileData.governorate}</p>
-                    <p className="text-[#9ca3af] text-xs lg:text-sm">ex: Beirut</p>
-                  </div>
+                  <p className="text-[#5a5a5a] text-sm lg:text-base py-2">{profileData.governorate}</p>
                 )}
               </div>
 
@@ -200,14 +197,11 @@ export default function UserProfileDashboard() {
                   <Input
                     value={profileData.district}
                     onChange={(e) => handleInputChange("district", e.target.value)}
-                    placeholder="ex: Hamra St."
+                    placeholder="Enter district"
                     className="w-full h-10 lg:h-12 px-3 lg:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]"
                   />
                 ) : (
-                  <div>
-                    <p className="text-[#5a5a5a] text-sm lg:text-base py-1">{profileData.district}</p>
-                    <p className="text-[#9ca3af] text-xs lg:text-sm">ex: Hamra St.</p>
-                  </div>
+                  <p className="text-[#5a5a5a] text-sm lg:text-base py-2">{profileData.district}</p>
                 )}
               </div>
             </div>
