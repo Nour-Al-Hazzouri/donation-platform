@@ -4,6 +4,7 @@ import { ArrowLeft, Heart, BookOpen, Award, Home, School, Droplets, Users, Globe
 import { Button } from "@/components/ui/button"
 import { MOCK_BLOG_POSTS } from "../../../data/blog-posts"
 import { DETAILED_BLOG_CONTENT } from "../../../data/blog-content"
+import ReactMarkdown from "react-markdown"
 
 interface BlogPostDetailProps {
   postId: number
@@ -62,7 +63,11 @@ export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps)
 
         {/* Article Content */}
         <div className="prose prose-lg max-w-none">
-          <div className="text-gray-700 leading-relaxed whitespace-pre-line">{detailedContent.content}</div>
+          <ReactMarkdown components={{
+            p: ({children}) => <p className="text-gray-700 leading-relaxed">{children}</p>
+          }}>
+            {detailedContent.content}
+          </ReactMarkdown>
         </div>
       </div>
     </div>
