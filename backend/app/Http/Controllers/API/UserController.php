@@ -3,108 +3,137 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+
 class UserController extends Controller
 {
+    use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $users = User::with('location')->get();
-        return response()->json($users);
-    }
+        $this->authorize('view users');
+        $users = User::with('location')->paginate(15);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'data' => UserResource::collection($users),
+            'message' => 'Users retrieved successfully',
+        ], Response::HTTP_OK);
     }
 
     /**
      * Store a newly created resource in storage.
+     *
+     * @param  \App\Http\Requests\StoreUserRequest  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
-            'phone' => 'nullable|string|max:15',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        $this->authorize('create users');
 
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'username' => $request->username,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
+        $validated = $request->validated();
+        $validated['password'] = bcrypt($validated['password']);
+
+        $user = User::create($validated);
 
         return response()->json([
-            'success' => true,
+            'data' => new UserResource($user),
             'message' => 'User created successfully',
-            'user' => $user
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     /**
      * Display the specified resource.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(string $id)
+    public function show(User $user)
     {
-        $user = User::with('location')->findOrFail($id);
-        return response()->json($user);
-    }
+        $this->authorize('view users');
+        $user->load('location');
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        return response()->json([
+            'data' => new UserResource($user),
+            'message' => 'User retrieved successfully',
+        ], Response::HTTP_OK);
     }
 
     /**
      * Update the specified resource in storage.
+     *
+     * @param  \App\Http\Requests\UpdateUserRequest  $request
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $user = User::findOrFail($id);
-        $request->validate([
-            'first_name' => 'sometimes|required|string|max:255',
-            'last_name' => 'sometimes|required|string|max:255',
-            'username' => 'sometimes|required|string|max:255|unique:users,username,' . $user->id,
-            'phone' => 'nullable|string|max:15',
-            'location_id' => 'sometimes|nullable|exists:locations,id',
-        ]);
+        $this->authorize('edit users', $user);
 
-        $user->update($request->only(['first_name', 'last_name', 'username', 'location' , 'phone']));
+        $user->update($request->validated());
 
         return response()->json([
-            'success' => true,
+            'data' => new UserResource($user),
             'message' => 'User updated successfully',
-            'user' => $user
-        ]);
+        ], Response::HTTP_OK);
     }
 
     /**
      * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(string $id)
+    public function destroy(User $user): JsonResponse
     {
-        $user = User::findOrFail($id);
+        $this->authorize('delete users', $user);
+
         $user->delete();
 
         return response()->json([
-            'success' => true,
-            'message' => 'User deleted successfully'
-        ]);
+            'message' => 'User deleted successfully',
+        ], Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Get the authenticated user's profile.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function profile(Request $request): JsonResponse
+    {
+        return response()->json([
+            'data' => new UserResource($request->user()->load('location')),
+            'message' => 'User profile retrieved successfully',
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Update the authenticated user's profile.
+     *
+     * @param  \App\Http\Requests\UpdateUserRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateProfile(UpdateUserRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->update($request->validated());
+
+        return response()->json([
+            'data' => new UserResource($user->load('location')),
+            'message' => 'User profile updated successfully',
+        ], Response::HTTP_OK);
     }
 }

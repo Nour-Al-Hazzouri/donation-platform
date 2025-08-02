@@ -3,124 +3,169 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
-use Illuminate\Support\Facades\Password;
+use DB;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    /**
+     * Register a new user.
+     *
+     * @param  \App\Http\Requests\StoreUserRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function register(StoreUserRequest $request)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
-            'phone' => 'nullable|string|max:15',
-            // 'location_id' => 'required|exists:locations,id',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+        $validated = $request->validated();
+        $validated['password'] = Hash::make($validated['password']);
 
-        ]);
+        $user = User::create($validated);
 
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'username' => $request->username,
-            'phone' => $request->phone,
-            // 'location_id' => $request->location_id,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-             
-        ]);
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'success' => true,
             'message' => 'User registered successfully',
-            'user' => $user
-        ], 201);
+            'user' => new UserResource($user),
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ], Response::HTTP_CREATED);
     }
 
-    public function login(Request $request)
+    /**
+     * Authenticate user and create token.
+     *
+     * @param  \App\Http\Requests\LoginRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
+        $credentials = $request->validated();
 
-        if (!auth()->attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+        if (!auth()->attempt($credentials)) {
+            throw ValidationException::withMessages([
+                'email' => [trans('auth.failed')],
+            ]);
         }
 
-        $user = auth()->user();
+        $user = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'success' => true,
             'message' => 'Login successful',
-            'user' => $user,
-            'access_token' => $token
-            
-        ]);
-    
+            'user' => new UserResource($user),
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ], Response::HTTP_OK);
+
     }
+    /**
+     * Log the user out (Invalidate the token).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'User logged out successfully']);
+
+        return response()->json([
+            'message' => 'Successfully logged out'
+        ], Response::HTTP_OK);
     }
 
 
-    // Forgot Password: Send OTP code
+    /**
+     * Send password reset OTP code.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => 'required|email']);
 
-        $user = \App\Models\User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
+
+        // Always return success to prevent email enumeration
         if (!$user) {
-            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+            return response()->json([
+                'message' => 'If your email exists in our records, you will receive a password reset code.'
+            ]);
         }
 
-        $code = random_int(100000, 999999);
-        \DB::table('password_resets_codes')->updateOrInsert(
+        $code = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+        $expiresAt = now()->addMinutes(10);
+
+        DB::table('password_resets_codes')->updateOrInsert(
             ['email' => $request->email],
-            ['code' => $code, 'created_at' => now()]
+            [
+                'code' => $code,
+                'created_at' => now(),
+                'expires_at' => $expiresAt,
+            ]
         );
 
-        // Send code via email (log for local)
-        \Log::info('Password reset code for ' . $request->email . ': ' . $code);
+        // In production, you would send an email here
+        Log::info('Password reset code for ' . $request->email . ': ' . $code);
 
-        return response()->json(['success' => true, 'message' => 'OTP code sent to email']);
+        return response()->json([
+            'message' => 'If your email exists in our records, you will receive a password reset code.'
+        ], Response::HTTP_OK);
     }
 
-    // Reset Password: Update password using OTP code
+    /**
+     * Reset password with OTP code.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function resetPassword(Request $request)
     {
-        $request->validate([
-            'code' => 'required',
-            'email' => 'required|email',
+        $validated = $request->validate([
+            'code' => 'required|string',
+            'email' => 'required|email|exists:users,email',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $record = \DB::table('password_resets_codes')
-            ->where('email', $request->email)
-            ->where('code', $request->code)
+        $record = DB::table('password_resets_codes')
+            ->where('email', $validated['email'])
+            ->where('code', $validated['code'])
             ->first();
 
         if (!$record) {
-            return response()->json(['success' => false, 'message' => 'Invalid code or email'], 400);
+            return response()->json([
+                'message' => 'Invalid or expired reset code.'
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Optional: Check code expiration (10 min)
-        if (now()->diffInMinutes($record->created_at) > 10) {
-            return response()->json(['success' => false, 'message' => 'Code expired'], 400);
+        // Check if code is expired
+        if (now()->gt($record->expires_at)) {
+            DB::table('password_resets_codes')->where('email', $validated['email'])->delete();
+
+            return response()->json([
+                'message' => 'The reset code has expired. Please request a new one.'
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $user = \App\Models\User::where('email', $request->email)->first();
-        $user->password = bcrypt($request->password);
-        $user->save();
+        // Update user's password
+        User::where('email', $validated['email'])
+            ->update(['password' => Hash::make($validated['password'])]);
 
-        // Delete code after use
-        \DB::table('password_resets_codes')->where('email', $request->email)->delete();
+        // Delete all reset tokens for this email
+        DB::table('password_resets_codes')->where('email', $validated['email'])->delete();
 
-        return response()->json(['success' => true, 'message' => 'Password reset successful']);
+        return response()->json([
+            'message' => 'Password has been reset successfully.'
+        ], Response::HTTP_OK);
     }
 }

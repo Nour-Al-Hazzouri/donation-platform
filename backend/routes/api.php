@@ -1,39 +1,65 @@
 <?php
 
-use App\Http\Controllers\LocationController;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\LocationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\AuthController;
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
 
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
 
-// Authentication routes
-Route::post('/register', [\App\Http\Controllers\API\AuthController::class, 'register']);
-Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']);
-Route::post('/logout', [\App\Http\Controllers\API\AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::get("/up", function () {
+    return response()->json([
+        'message' => 'Application is up and running',
+    ], 200);
+});
 
-Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('reset-password', [AuthController::class, 'resetPassword']); // Now expects 'code' instead of 'token'
+// Public routes
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 
-// User routes
-//read all users
+    // Password reset routes
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+});
 
-Route::get('/users', [\App\Http\Controllers\API\UserController::class, 'index']);
-Route::get('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'show']);
-Route::post('/users', [\App\Http\Controllers\API\UserController::class, 'store']);
-Route::put('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'update']);
-Route::delete('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'destroy']);
-
-
+// Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
-    // Admin-only endpoints
-    Route::middleware('role:admin')->group(function () {
-        Route::apiResource('locations', LocationController::class)->except(['index', 'show']);
+    // Auth routes
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    // Current user
+    Route::get('/user', function (Request $request) {
+        return $request->user();
     });
 
-    // Public endpoints (for authenticated users)
+    // Users resource (protected by auth and permissions)
+    Route::apiResource('users', UserController::class)
+        ->except(['store']) // Registration is handled by auth/register
+        ->middleware(['permission:manage users']);
+
+    // User profile (no special permissions needed for own profile)
+    Route::prefix('user')->group(function () {
+        Route::get('/profile', [UserController::class, 'profile']);
+        Route::put('/profile', [UserController::class, 'updateProfile']);
+    });
+
+    // Admin only routes
+    Route::middleware(['role:admin'])->group(function () {
+        Route::apiResource('locations', LocationController::class);
+    });
+
+    // Public locations (for all authenticated users)
     Route::get('locations', [LocationController::class, 'index']);
     Route::get('locations/{location}', [LocationController::class, 'show']);
 });
