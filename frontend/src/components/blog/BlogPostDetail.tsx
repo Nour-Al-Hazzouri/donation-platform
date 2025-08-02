@@ -42,8 +42,6 @@ export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps)
                 <h1 className="text-2xl md:text-3xl font-bold text-black">{post.title}</h1>
                 <div className="flex items-center gap-4 text-gray-500 text-sm mt-1">
                   <span>{post.date}</span>
-                  <span>•</span>
-                  <span>{detailedContent.readTime}</span>
                 </div>
               </div>
             </div>
