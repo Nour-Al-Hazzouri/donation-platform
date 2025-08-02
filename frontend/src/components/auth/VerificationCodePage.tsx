@@ -3,10 +3,16 @@
 import { useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { ChevronLeft } from 'lucide-react'
 import { useModal } from '@/lib/contexts/ModalContext'
 
-export default function VerificationCodePage() {
-  const [code, setCode] = useState(['', '', '', ''])
+interface VerificationCodePageProps {
+  onBack?: () => void;
+  userEmail?: string;
+}
+
+export default function VerificationCodePage({ onBack, userEmail }: VerificationCodePageProps = {}) {
+  const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const { closeModal } = useModal()
 
@@ -19,7 +25,7 @@ export default function VerificationCodePage() {
     setCode(newCode)
 
     // Auto-focus next input
-    if (value && index < 3) {
+    if (value && index < 5) {
       inputRefs.current[index + 1]?.focus()
     }
   }
@@ -33,10 +39,10 @@ export default function VerificationCodePage() {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault()
-    const pastedData = e.clipboardData.getData('text').slice(0, 4)
+    const pastedData = e.clipboardData.getData('text').slice(0, 6)
     const newCode = [...code]
     
-    for (let i = 0; i < pastedData.length && i < 4; i++) {
+    for (let i = 0; i < pastedData.length && i < 6; i++) {
       if (/^\d$/.test(pastedData[i])) {
         newCode[i] = pastedData[i]
       }
@@ -46,37 +52,62 @@ export default function VerificationCodePage() {
     
     // Focus the next empty input or the last input
     const nextEmptyIndex = newCode.findIndex(digit => digit === '')
-    const focusIndex = nextEmptyIndex === -1 ? 3 : nextEmptyIndex
+    const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex
     inputRefs.current[focusIndex]?.focus()
   }
 
   const handleConfirm = () => {
     const verificationCode = code.join('')
-    if (verificationCode.length === 4) {
-      // Handle verification logic here
+    if (verificationCode.length === 6) {
+      // In a real app, we would validate the code with the backend
+      // For now, we'll just log it and show a success message
       console.log('Verification code:', verificationCode)
+      
+      // Simulate successful verification
+      alert('Verification successful! You can now reset your password.')
+      
+      // Close the modal after successful verification
+      closeModal()
     }
   }
 
   const handleCancel = () => {
-    // Close the modal
-    closeModal()
+    // If onBack is provided, use it to go back to the email form
+    // Otherwise, close the modal
+    if (onBack) {
+      onBack()
+    } else {
+      closeModal()
+    }
   }
 
   const isCodeComplete = code.every(digit => digit !== '')
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-md transition-all duration-300 ease-in-out">
+      {/* Back Button - Only show if onBack is provided */}
+      {onBack && (
+        <div className="pb-3 sm:pb-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-[#5a5a5a] hover:text-[#000000] transition-all duration-300 ease-in-out"
+            aria-label="Go back"
+          >
+            <ChevronLeft size={20} />
+            <span className="font-medium">Back</span>
+          </button>
+        </div>
+      )}
       {/* Header */}
       <div className="text-center space-y-3 sm:space-y-4 mb-6 sm:mb-8 transition-all duration-300 ease-in-out">
-        <h1 className="text-xl sm:text-2xl font-bold text-[#000000] transition-all duration-300 ease-in-out">Enter 4 digit code</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-[#000000] transition-all duration-300 ease-in-out">Enter 6 digit code</h1>
         <p className="text-[#5a5a5a] text-xs sm:text-sm leading-relaxed transition-all duration-300 ease-in-out">
-          A four-digit code should have come to your email address that you indicated.
+          A six-digit code has been sent to{userEmail ? ` ${userEmail}` : ' your email address'}.
         </p>
       </div>
 
       {/* Code Input Fields */}
-      <div className="flex justify-center gap-2 sm:gap-4 mb-6 sm:mb-8 transition-all duration-300 ease-in-out">
+      <div className="flex justify-center gap-1 sm:gap-1.5 md:gap-2 mb-6 sm:mb-8 transition-all duration-300 ease-in-out">
         {code.map((digit, index) => (
           <Input
             key={index}
@@ -89,7 +120,7 @@ export default function VerificationCodePage() {
             onChange={(e) => handleInputChange(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
-            className="w-12 sm:w-16 h-16 sm:h-20 text-center text-xl sm:text-2xl font-semibold bg-[#f5f5f5] border-0 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300 ease-in-out"
+            className="w-8 sm:w-10 md:w-11 lg:w-12 h-12 sm:h-14 text-center text-lg sm:text-xl font-semibold bg-[#f5f5f5] border-0 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300 ease-in-out"
             aria-label={`Digit ${index + 1}`}
           />
         ))}
