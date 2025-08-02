@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\LocationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
 
 // Authentication routes
 Route::post('/register', [\App\Http\Controllers\API\AuthController::class, 'register']);
@@ -23,4 +25,16 @@ Route::get('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'sho
 Route::post('/users', [\App\Http\Controllers\API\UserController::class, 'store']);
 Route::put('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'update']);
 Route::delete('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'destroy']);
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Admin-only endpoints
+    Route::middleware('role:admin')->group(function () {
+        Route::apiResource('locations', LocationController::class)->except(['index', 'show']);
+    });
+
+    // Public endpoints (for authenticated users)
+    Route::get('locations', [LocationController::class, 'index']);
+    Route::get('locations/{location}', [LocationController::class, 'show']);
+});
 

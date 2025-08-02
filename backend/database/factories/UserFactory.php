@@ -35,7 +35,7 @@ class UserFactory extends Factory
             'role' => 'user', // Default role, can be overridden
             'email_verified_at' => now(),
             'remember_token' => Str::random(10),
-            'location_id' => Location::inRandomOrder()->first()->id,
+            'location_id' => Location::factory()->create()->id,
         ];
     }
 
