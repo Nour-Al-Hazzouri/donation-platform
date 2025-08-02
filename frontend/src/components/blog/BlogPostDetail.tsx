@@ -18,7 +18,7 @@ export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps)
   if (!post || !detailedContent) return null
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* Header */}
       <div className="sticky top-0 bg-white border-b border-gray-100 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">

@@ -81,7 +81,11 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
   }
 
   if (selectedPost) {
-    return <BlogPostDetail postId={selectedPost} onClose={handleClosePost} />
+    return (
+      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+        <BlogPostDetail postId={selectedPost} onClose={handleClosePost} />
+      </div>
+    )
   }
 
   return (
