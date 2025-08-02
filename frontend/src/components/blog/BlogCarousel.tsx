@@ -73,6 +73,9 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
   }, [isTransitioning, selectedPost])
 
   const handlePostClick = (postId: number) => {
+    // First scroll to top to ensure consistent starting position
+    window.scrollTo(0, 0)
+    // Then set the selected post which will render the detail view
     setSelectedPost(postId)
   }
 
@@ -82,7 +85,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
 
   if (selectedPost) {
     return (
-      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+      <div className="fixed inset-0 z-50 bg-white overflow-y-auto" style={{ top: 0 }}>
         <BlogPostDetail postId={selectedPost} onClose={handleClosePost} />
       </div>
     )

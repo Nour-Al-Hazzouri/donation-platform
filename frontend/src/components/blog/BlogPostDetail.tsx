@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { ArrowLeft, Heart, BookOpen, Award, Home, School, Droplets, Users, Globe, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MOCK_BLOG_POSTS } from "../../../data/blog-posts"
@@ -14,13 +15,18 @@ interface BlogPostDetailProps {
 export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps) {
   const post = MOCK_BLOG_POSTS.find((p) => p.id === postId)
   const detailedContent = DETAILED_BLOG_CONTENT[postId as keyof typeof DETAILED_BLOG_CONTENT]
+  
+  // Ensure we scroll to the top when the component mounts
+  React.useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [postId])
 
   if (!post || !detailedContent) return null
 
   return (
-    <div className="bg-white">
+    <div className="bg-white" id="blog-post-top">
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-100 z-10">
+      <div className="sticky top-0 bg-white border-b border-gray-100 z-10 shadow-md">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -28,7 +34,7 @@ export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps)
                 onClick={onClose}
                 variant="destructive"
                 size="icon"
-                className="rounded-full"
+                className="rounded-full shadow-lg hover:scale-105 transition-transform"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
