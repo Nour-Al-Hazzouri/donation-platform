@@ -9,6 +9,7 @@ import { CheckCircle, AlertTriangle } from "lucide-react"
 import { useAuthStore } from "@/lib/store/authStore"
 import { useModal } from "@/lib/contexts/ModalContext"
 import ProfileSidebar from "./Sidebar"
+import AccVerification from "./AccVerification"
 
 interface UserProfileDashboardProps {
   onViewChange?: (view: 'profile' | 'notifications') => void
@@ -16,7 +17,7 @@ interface UserProfileDashboardProps {
 
 export default function UserProfileDashboard({ onViewChange }: UserProfileDashboardProps) {
   const { user } = useAuthStore()
-  const { openModal } = useModal()
+  const { openModal, modalType } = useModal()
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
     fullName: user?.name || "",
@@ -42,7 +43,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   }
 
   const handleVerify = () => {
-    openModal('verificationCode')
+    openModal('documentVerification')
   }
 
   return (
@@ -208,6 +209,8 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
           </div>
         </div>
       </div>
+
+      {modalType === 'documentVerification' && <AccVerification />}
     </section>
   )
 }

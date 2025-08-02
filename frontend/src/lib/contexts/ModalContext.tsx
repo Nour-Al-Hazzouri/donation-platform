@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useState, ReactNode, useRef } from 'react'
 
-// Define the modal types
-export type ModalType = 'signIn' | 'signUp' | 'forgotPassword' | 'verificationCode' | null
+// Define the modal types - Added 'documentVerification'
+export type ModalType = 'signIn' | 'signUp' | 'forgotPassword' | 'verificationCode' | 'documentVerification' | null
 
 // Define the context type
 type ModalContextType = {
