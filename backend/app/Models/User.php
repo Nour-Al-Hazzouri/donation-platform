@@ -14,6 +14,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
+
     /**
      * The attributes that are mass assignable.
      *
@@ -52,6 +53,16 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_verified' => 'boolean',
     ];
+
+    /**
+     * Send the password reset notification with a log-friendly link.
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $url = url('/reset-password/' . $token . '?email=' . urlencode($this->email));
+        \Log::info('Password reset link: ' . $url);
+        $this->notify(new \Illuminate\Auth\Notifications\ResetPassword($token));
+    }
 
     // Relationships
     public function location(): BelongsTo
