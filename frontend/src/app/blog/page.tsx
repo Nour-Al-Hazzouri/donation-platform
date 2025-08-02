@@ -9,9 +9,7 @@ export const metadata = {
 export default function BlogPage() {
   return (
     <MainLayout>
-      <div className="pt-16">
-        <NewsBlogSection />
-      </div>
+      <NewsBlogSection />
     </MainLayout>
   );
 }

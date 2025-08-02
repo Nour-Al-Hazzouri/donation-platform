@@ -13,7 +13,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className={`min-h-screen flex flex-col bg-[${COLORS.background}]`}>
       <Header />
-      <main className="flex-grow max-w-6xl mx-auto px-6 py-16 w-full">{children}</main>
+      <main className="flex-grow max-w-6xl mx-auto px-6 py-8 w-full">{children}</main>
       <Footer />
     </div>
   )
