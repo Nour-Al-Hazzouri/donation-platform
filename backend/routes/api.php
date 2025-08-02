@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\LocationController;
+use App\Http\Controllers\API\StatisticsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin only routes
     Route::middleware(['role:admin'])->group(function () {
         Route::apiResource('locations', LocationController::class);
+        Route::get('statistics', [StatisticsController::class, 'index']);
     });
 
     // Public locations (for all authenticated users)
