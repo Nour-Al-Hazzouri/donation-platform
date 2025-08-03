@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
             'is_verified' => true,
             'location_id' => Location::first()->id
         ]);
+        $admin->assignRole('admin');
 
         // Create test users
         User::factory(10)->create();
