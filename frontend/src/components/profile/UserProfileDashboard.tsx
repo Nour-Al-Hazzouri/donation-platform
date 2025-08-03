@@ -47,8 +47,8 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   }
 
   return (
-    <section className="bg-white">
-      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto">
+    <section className="bg-white min-h-screen">
+      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto lg:h-screen">
         <ProfileSidebar 
           activeItem="profile" 
           fullName={profileData.fullName} 
@@ -56,7 +56,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
           onViewChange={onViewChange}
         />
 
-        <div className="flex-1 p-4 lg:p-6">
+        <div className="flex-1 p-4 lg:p-6 lg:overflow-y-auto lg:h-screen">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <h1 className="text-2xl lg:text-3xl font-semibold text-[#5a5a5a] mb-4 sm:mb-0">
               Welcome, {profileData.fullName.split(' ')[0]}

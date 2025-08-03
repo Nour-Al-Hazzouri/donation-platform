@@ -57,7 +57,7 @@ export default function ProfileSidebar({
   ]
 
   return (
-    <div className="w-full lg:w-80 bg-white border-r border-gray-200 p-4">
+    <div className="w-full lg:w-80 bg-white border-r border-gray-200 p-4 -ml-4 lg:-ml-48 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
       <div className="text-center mb-6">
         <div className="relative inline-block mb-3">
           <Avatar className="w-20 h-20 lg:w-24 lg:h-24 bg-black rounded-full">

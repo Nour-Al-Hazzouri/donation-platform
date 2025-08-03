@@ -66,8 +66,8 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
   }
 
   return (
-    <section className="bg-white">
-      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto">
+    <section className="bg-white min-h-screen">
+      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto lg:h-screen">
         <ProfileSidebar 
           activeItem="notifications" 
           fullName={user?.name || "Guest"} 
@@ -75,7 +75,7 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
           onViewChange={onViewChange}
         />
 
-        <div className="flex-1 p-4 lg:p-8">
+        <div className="flex-1 p-4 lg:p-8 lg:overflow-y-auto lg:h-screen">
           <div className="max-w-4xl">
             <h1 className="text-2xl lg:text-3xl font-semibold text-[#5a5a5a] mb-6">
               Notifications
