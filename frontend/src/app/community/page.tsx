@@ -1,16 +1,29 @@
-import { MainLayout } from "@/components/layouts/MainLayout";
+"use client"
 
+import { MainLayout } from "@/components/layouts/MainLayout";
 import CommunityFeed from "@/components/community/communityFeed";
-export const metadata = {
-  title: "Community - Lebanon Donation Platform",
-  description: "Connect with others and share donation-related posts in our community.",
-};
+import CommunityWritePost from "@/components/community/communityWritePost";
+import { useState } from 'react';
 
 export default function CommunityPage() {
+  const [isWritingPost, setIsWritingPost] = useState(false);
+
+  const handlePostSubmit = () => {
+    // Handle any post-submission logic if needed
+    setIsWritingPost(false);
+  };
+
   return (
     <MainLayout>
       <div className="container py-8">
-        <CommunityFeed />
+        {isWritingPost ? (
+          <CommunityWritePost 
+            onCancel={() => setIsWritingPost(false)}
+            onSubmitSuccess={handlePostSubmit}
+          />
+        ) : (
+          <CommunityFeed onWritePost={() => setIsWritingPost(true)} />
+        )}
       </div>
     </MainLayout>
   );
