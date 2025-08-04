@@ -86,7 +86,7 @@ export default function NewPasswordForm() {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500 hover:bg-transparent"
+                  className="absolute top-1/2 right-0 -translate-y-1/2 flex items-center pr-3 text-blue-500 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -113,7 +113,7 @@ export default function NewPasswordForm() {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500 hover:bg-transparent"
+                  className="absolute top-1/2 right-0 -translate-y-1/2 flex items-center pr-3 text-blue-500 hover:bg-transparent"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 >
