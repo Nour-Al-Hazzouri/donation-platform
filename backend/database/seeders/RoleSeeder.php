@@ -63,6 +63,7 @@ class RoleSeeder extends Seeder
             'manage settings',
             'manage users',
             'view statistics',
+            'promote users',
         ];
 
         foreach ($permissions as $permission) {
@@ -114,7 +115,8 @@ class RoleSeeder extends Seeder
             'manage verifications',
             'manage settings',
             'manage users',
-            'view statistics'
+            'view statistics',
+            'promote users'
         ];
 
         // Combine moderator and admin permissions

@@ -181,6 +181,181 @@ class UserControllerTest extends TestCase
     }
 
     /** @test */
+    public function admin_can_promote_user_to_moderator()
+    {
+        $regularUser = User::factory()->create();
+        $regularUser->assignRole('user');
+
+        $response = $this->actingAsAdmin()
+            ->postJson("/api/users/{$regularUser->id}/promote-to-moderator");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'User promoted to moderator successfully',
+            ]);
+
+        $this->assertTrue($regularUser->fresh()->hasRole('moderator'));
+    }
+
+    /** @test */
+    public function cannot_promote_nonexistent_user()
+    {
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/users/9999/promote-to-moderator');
+
+        $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function cannot_promote_user_twice()
+    {
+        $moderator = User::factory()->create();
+        $moderator->assignRole('moderator');
+
+        $response = $this->actingAsAdmin()
+            ->postJson("/api/users/{$moderator->id}/promote-to-moderator");
+
+        $response->assertStatus(409)
+            ->assertJson([
+                'message' => 'User is already a moderator',
+            ]);
+    }
+
+    /** @test */
+    public function non_admin_cannot_promote_users()
+    {
+        $regularUser = User::factory()->create();
+        $regularUser->assignRole('user');
+
+        $regularUserToken = $regularUser->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $regularUserToken,
+            'Accept' => 'application/json',
+        ])->postJson("/api/users/{$this->user->id}/promote-to-moderator");
+
+        $response->assertStatus(403);
+    }
+
+    /** @test */
+    public function admin_can_create_new_user()
+    {
+        $userData = [
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'username' => 'testuser',
+            'email' => 'test@example.com',
+            'phone' => '1234567890',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/users', $userData);
+
+        $response->assertStatus(201)
+            ->assertJson([
+                'message' => 'User created successfully',
+                'data' => [
+                    'first_name' => 'Test',
+                    'last_name' => 'User',
+                    'username' => 'testuser',
+                    'email' => 'test@example.com',
+                    'phone' => '1234567890',
+                ]
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+            'username' => 'testuser',
+        ]);
+    }
+
+    /** @test */
+    public function non_admin_cannot_create_user()
+    {
+        $regularUser = User::factory()->create();
+        $regularUser->assignRole('user');
+
+        $userData = [
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'username' => 'testuser2',
+            'email' => 'test2@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ];
+
+        $token = $regularUser->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Accept' => 'application/json',
+        ])->postJson('/api/users', $userData);
+
+        $response->assertStatus(403);
+    }
+
+    /** @test */
+    public function it_validates_required_fields_when_creating_user()
+    {
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/users', []);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors([
+                'first_name',
+                'last_name',
+                'username',
+                'email',
+                'password',
+            ]);
+    }
+
+    /** @test */
+    public function it_validates_email_and_username_are_unique()
+    {
+        $existingUser = User::factory()->create([
+            'email' => 'existing@example.com',
+            'username' => 'existinguser'
+        ]);
+
+        $userData = [
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'username' => 'existinguser',
+            'email' => 'existing@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/users', $userData);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email', 'username']);
+    }
+
+    /** @test */
+    public function it_validates_password_confirmation()
+    {
+        $userData = [
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'username' => 'testuser3',
+            'email' => 'test3@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'mismatched',
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/users', $userData);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
+    }
+
+    /** @test */
     public function it_can_get_authenticated_user_profile()
     {
         $response = $this->actingAsAdmin()

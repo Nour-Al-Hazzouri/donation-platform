@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Users resource (protected by auth and permissions)
     Route::apiResource('users', UserController::class)
-        ->except(['store']) // Registration is handled by auth/register
+        ->except('promoteToModerator')
         ->middleware(['permission:manage users']);
 
     // User profile (no special permissions needed for own profile)
@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::apiResource('locations', LocationController::class);
         Route::get('statistics', [StatisticsController::class, 'index']);
+        Route::post('users/{user}/promote-to-moderator', [UserController::class, 'promoteToModerator']);
     });
 
     // Public locations (for all authenticated users)
