@@ -18,7 +18,7 @@ export default function PasswordResetSuccess() {
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-[#000000] transition-all duration-300 ease-in-out">Successfully</h1>
         <p className="text-sm sm:text-base text-[#5a5a5a] transition-all duration-300 ease-in-out">
-          Your password has been <span className="bg-yellow-200 px-1 rounded">reset</span> successfully
+          Your password has been reset successfully
         </p>
         <div>
           <Button

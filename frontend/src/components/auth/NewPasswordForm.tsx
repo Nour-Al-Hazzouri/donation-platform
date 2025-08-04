@@ -88,9 +88,9 @@ export default function NewPasswordForm() {
                   size="icon"
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
+                  {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                 </Button>
               </div>
             </div>
@@ -115,9 +115,9 @@ export default function NewPasswordForm() {
                   size="icon"
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500 hover:bg-transparent"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  <span className="sr-only">{showConfirmPassword ? "Hide password" : "Show password"}</span>
+                  {showConfirmPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                 </Button>
               </div>
             </div>
