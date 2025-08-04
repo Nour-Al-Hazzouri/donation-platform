@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode, useRef } from 'react'
 
 // Define the modal types
-export type ModalType = 'signIn' | 'signUp' | 'forgotPassword' | 'verificationCode' | null
+export type ModalType = 'signIn' | 'signUp' | 'forgotPassword' | 'verificationCode' | 'newPassword' | 'passwordResetSuccess' | null
 
 // Define the context type
 type ModalContextType = {
