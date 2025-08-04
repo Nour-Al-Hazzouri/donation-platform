@@ -14,7 +14,7 @@ interface VerificationCodePageProps {
 export default function VerificationCodePage({ onBack, userEmail }: VerificationCodePageProps = {}) {
   const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-  const { closeModal } = useModal()
+  const { closeModal, openModal } = useModal()
 
   const handleInputChange = (index: number, value: string) => {
     // Only allow single digits
@@ -60,14 +60,11 @@ export default function VerificationCodePage({ onBack, userEmail }: Verification
     const verificationCode = code.join('')
     if (verificationCode.length === 6) {
       // In a real app, we would validate the code with the backend
-      // For now, we'll just log it and show a success message
+      // For now, we'll just log it and proceed to the new password form
       console.log('Verification code:', verificationCode)
       
-      // Simulate successful verification
-      alert('Verification successful! You can now reset your password.')
-      
-      // Close the modal after successful verification
-      closeModal()
+      // Open the new password form modal
+      openModal('newPassword')
     }
   }
 

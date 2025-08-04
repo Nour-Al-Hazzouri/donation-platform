@@ -6,6 +6,8 @@ import SignInPage from '@/components/auth/SignInPage'
 import SignUpPage from '@/components/auth/SignUpPage'
 import ForgotPasswordPage from '@/components/auth/ForgotPasswordPage'
 import VerificationCodePage from '@/components/auth/VerificationCodePage'
+import NewPasswordForm from '@/components/auth/NewPasswordForm'
+import PasswordResetSuccess from '@/components/auth/PasswordResetSuccess'
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
@@ -133,6 +135,53 @@ export function AuthModals() {
                 className="relative z-50 isolate"
               >
                 <VerificationCodePage />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </DialogContent>
+      </Dialog>
+      {/* New Password Modal */}
+      <Dialog open={shouldShowModal('newPassword')} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
+        <DialogContent className={`p-0 border-none bg-transparent shadow-none transition-all duration-300 ${modalSize === 'sm' ? 'max-w-[90%]' : modalSize === 'md' ? 'max-w-md' : 'max-w-lg'}`}>
+          <DialogTitle className="sr-only">New Password</DialogTitle>
+          <DialogDescription className="sr-only">
+            Set your new password
+          </DialogDescription>
+          <AnimatePresence mode="wait">
+            {modalType === 'newPassword' && (
+              <motion.div
+                key="newPassword"
+                initial={transitionDirection === 'in' ? { opacity: 0, y: 10, scale: 0.98 } : {}}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="relative z-50 isolate"
+              >
+                <NewPasswordForm />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Reset Success Modal */}
+      <Dialog open={shouldShowModal('passwordResetSuccess')} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
+        <DialogContent className={`p-0 border-none bg-transparent shadow-none transition-all duration-300 ${modalSize === 'sm' ? 'max-w-[90%]' : modalSize === 'md' ? 'max-w-md' : 'max-w-lg'}`}>
+          <DialogTitle className="sr-only">Password Reset Success</DialogTitle>
+          <DialogDescription className="sr-only">
+            Your password has been reset successfully
+          </DialogDescription>
+          <AnimatePresence mode="wait">
+            {modalType === 'passwordResetSuccess' && (
+              <motion.div
+                key="passwordResetSuccess"
+                initial={transitionDirection === 'in' ? { opacity: 0, y: 10, scale: 0.98 } : {}}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="relative z-50 isolate"
+              >
+                <PasswordResetSuccess />
               </motion.div>
             )}
           </AnimatePresence>
