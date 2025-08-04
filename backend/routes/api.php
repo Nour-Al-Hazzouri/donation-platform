@@ -72,11 +72,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->post('/verifications', [VerificationController::class, 'store']);
 
 //verification update status
-<<<<<<< HEAD
+
 Route::middleware(['auth:sanctum'])->post('/verifications/{verification}/status', [VerificationController::class, 'updateStatus']);
-
-=======
-Route::middleware(['auth:sanctum', 'is_admin'])->patch('/verifications/{verification}/status', [VerificationController::class, 'updateStatus']);
->>>>>>> 2875acf44eda7b5020c504c796814dbd42ba5cbc
-
 

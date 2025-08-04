@@ -45,35 +45,35 @@ class VerificationController extends Controller
     }
 
     public function updateStatus(Request $request, Verification $verification)
-{
-    if (auth()->user()->role !== 'admin') {
-        return response()->json(['message' => 'Unauthorized. Admins only.'], 403);
-    }
+        {
+            if (auth()->user()->role !== 'admin') {
+                return response()->json(['message' => 'Unauthorized. Admins only.'], 403);
+            }
 
-    if ($verification->status !== 'pending') {
-        return response()->json([
-            'success' => false,
-            'message' => 'Verification has already been processed.',
-        ], 400);
-    }
+            if ($verification->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Verification has already been processed.',
+                ], 400);
+            }
 
-    $request->validate([
-        'status' => 'required|in:approved,rejected',
-        'notes' => 'nullable|string|max:1000',
-    ]);
+            $request->validate([
+                'status' => 'required|in:approved,rejected',
+                'notes' => 'nullable|string|max:1000',
+            ]);
 
-    $verification->update([
-        'status' => $request->status,
-        'notes' => $request->notes,
-        'verified_at' => now(),
-        'verifier_id' => auth()->id(),
-    ]);
+            $verification->update([
+                'status' => $request->status,
+                'notes' => $request->notes,
+                'verified_at' => now(),
+                'verifier_id' => auth()->id(),
+            ]);
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Verification status updated successfully.',
-        'data' => $verification,
-    ]);
-}
+            return response()->json([
+                'success' => true,
+                'message' => 'Verification status updated successfully.',
+                'data' => $verification,
+            ]);
+        }
 
 }
