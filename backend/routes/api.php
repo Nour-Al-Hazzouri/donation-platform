@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\LocationController;
 use App\Http\Controllers\API\StatisticsController;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,8 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     // Current user
-    Route::get('/user', function (Request $request) {
-        return $request->user();
+    Route::get('/me', function (Request $request) {
+        return new UserResource($request->user());
     });
 
     // Users resource (protected by auth and permissions)
