@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\LocationController;
 use App\Http\Controllers\API\StatisticsController;
+use App\Http\Controllers\API\VerificationController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -67,4 +68,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('locations', [LocationController::class, 'index']);
     Route::get('locations/{location}', [LocationController::class, 'show']);
 });
+
+//verification request 
+Route::middleware('auth:sanctum')->post('/verifications', [VerificationController::class, 'store']);
+
+//verification update status
+
+Route::middleware(['auth:sanctum'])->post('/verifications/{verification}/status', [VerificationController::class, 'updateStatus']);
 
