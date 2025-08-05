@@ -21,6 +21,7 @@ interface CommunityPost {
   isLiked?: boolean
   isDisliked?: boolean
   createdAt: string
+  tags: string[] // Added tags field
 }
 
 const mockUser: User = {
@@ -32,21 +33,22 @@ const mockUser: User = {
 const mockPosts: CommunityPost[] = [
   {
     id: '1',
-    content: 'Anyone can take me there pleasee I need to relax\n\nUrgent !!!',
+    content: 'Just donated to the local food bank! Who else wants to join me in supporting this great cause?',
     user: {
       id: 'user1',
       name: 'Tony Stark',
       verified: false,
     },
-    images: ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1504281623087-1f6f7c0fd8ce?w=500&h=300&fit=crop'],
     likes: 1,
     dislikes: 0,
-    comments: ['omg!! ana kmn please'],
+    comments: ['Thank you for your generosity! The food bank really needs support right now.'],
     createdAt: new Date(Date.now() - 3600000).toISOString(),
+    tags: ['#FoodBank', '#Donation', '#CommunitySupport']
   },
   {
     id: '2',
-    content: 'Looking for hiking partners this weekend!\n\nAnyone interested?',
+    content: 'Looking for volunteers to help distribute supplies at the homeless shelter this weekend. Can anyone lend a hand?',
     user: {
       id: 'user2',
       name: 'Steve Rogers',
@@ -54,22 +56,24 @@ const mockPosts: CommunityPost[] = [
     },
     likes: 5,
     dislikes: 1,
-    comments: ['I might be available!', 'What trail are you thinking?'],
+    comments: ['I can help on Saturday!', 'What time do you need people?'],
     createdAt: new Date(Date.now() - 7200000).toISOString(),
+    tags: ['#Volunteer', '#HomelessShelter', '#HelpNeeded']
   },
   {
     id: '3',
-    content: 'Check out this amazing view from my hike yesterday! Absolutely breathtaking scenery that everyone should experience at least once in their lifetime.',
+    content: 'Check out this amazing work being done by our local charity! They\'ve helped over 500 families this month alone. Consider donating if you can.',
     user: {
       id: 'user3',
       name: 'Natasha Romanoff',
       verified: true,
     },
-    images: ['https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&h=800&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1200&h=800&fit=crop'],
     likes: 42,
     dislikes: 2,
-    comments: ['Wow! Where is this?', 'Incredible shot!', 'What camera did you use?'],
+    comments: ['Just made a donation!', 'This organization does incredible work', 'Where can I sign up to volunteer?'],
     createdAt: new Date(Date.now() - 86400000).toISOString(),
+    tags: ['#Charity', '#Donate', '#MakeADifference', '#VolunteerOpportunity']
   },
 ]
 
@@ -172,10 +176,18 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           <p className="text-gray-900 text-sm mb-1 line-clamp-3 leading-snug">
             {post.content}
           </p>
-          {post.content.includes('#') && (
-            <p className="text-blue-600 text-xs">
-              {post.content.match(/#\w+/g)?.join(' ')}
-            </p>
+          {/* Display tags */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {post.tags.map((tag, index) => (
+                <span 
+                  key={index} 
+                  className="text-blue-600 text-xs bg-blue-50 px-2 py-1 rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
         </div>
 

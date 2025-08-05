@@ -63,18 +63,17 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             {/* Circular indicator like in carousel */}
-            <div 
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: COLORS.primary }}
-            />
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onCancel}
-              className="hover:bg-accent"
-            >
-              <ArrowLeft className="w-5 h-5 text-foreground" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onCancel}
+                className="h-8 w-8 rounded-full bg-white/80 hover:bg-white/90 shadow-md"
+                style={{ color: COLORS.primary }}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <h1 className="text-lg font-medium text-foreground">Tags</h1>
         </div>
