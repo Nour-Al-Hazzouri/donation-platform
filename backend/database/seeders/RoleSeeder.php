@@ -29,6 +29,14 @@ class RoleSeeder extends Seeder
             'create users',
             'edit users',
             'delete users',
+            'promote users',
+            // Announcement permissions
+            'view announcements',
+            'create announcements',
+            'edit announcements',
+            'edit own announcements',
+            'delete announcements',
+            'delete own announcements',
             // Donation Event permissions
             'view donation_events',
             'create donation_events',
@@ -84,7 +92,8 @@ class RoleSeeder extends Seeder
             'view comments',
             'create comments',
             'edit own comments',
-            'delete own comments'
+            'delete own comments',
+            'view announcements'
         ];
 
         // Define additional moderator permissions (on top of user permissions)
@@ -116,7 +125,12 @@ class RoleSeeder extends Seeder
             'manage settings',
             'manage users',
             'view statistics',
-            'promote users'
+            'promote users',
+            'create announcements',
+            'edit own announcements',
+            'delete own announcements',
+            'edit announcements',
+            'delete announcements'
         ];
 
         // Combine moderator and admin permissions

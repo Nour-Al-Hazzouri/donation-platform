@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\LocationController;
+use App\Http\Controllers\API\AnnouncementController;
 use App\Http\Controllers\API\StatisticsController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -61,7 +62,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('locations', LocationController::class);
         Route::get('statistics', [StatisticsController::class, 'index']);
         Route::post('users/{user}/promote-to-moderator', [UserController::class, 'promoteToModerator']);
+        Route::apiResource('announcements', AnnouncementController::class)->except(['index', 'show']);
     });
+
+    // Announcements (public for all authenticated users to view, but only admins/moderators can create/update/delete)
+    Route::apiResource('announcements', AnnouncementController::class)->only(['index', 'show']);
 
     // Public locations (for all authenticated users)
     Route::get('locations', [LocationController::class, 'index']);
