@@ -155,32 +155,23 @@ const Sidebar = React.forwardRef<
     )
   }
 
-  if (isMobile) {
-    return (
-      <div
-        className={cn(
-          "fixed inset-0 z-50 bg-black/50 transition-opacity",
-          openMobile ? "opacity-100" : "opacity-0 pointer-events-none",
-        )}
-        onClick={() => setOpenMobile(false)}
-      >
-        <div
-          className={cn(
-            "fixed inset-y-0 left-0 z-50 w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground transition-transform",
-            openMobile ? "translate-x-0" : "-translate-x-full",
-          )}
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex h-full w-full flex-col">{children}</div>
-        </div>
-      </div>
-    )
-  }
+if (isMobile) {
+  // Always show sidebar on mobile - no overlay or sliding
+  return (
+    <div
+      className={cn(
+        "fixed inset-y-0 left-0 z-50 w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground",
+      )}
+      style={
+        {
+          "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+        } as React.CSSProperties
+      }
+    >
+      <div className="flex h-full w-full flex-col">{children}</div>
+    </div>
+  )
+}
 
   return (
     <div

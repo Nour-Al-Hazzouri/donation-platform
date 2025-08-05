@@ -1,4 +1,5 @@
 "use client"
+
 import type React from "react"
 import { AdminHeader } from "@/components/common/AdminHeader"
 import { Footer } from "@/components/common/Footer"
@@ -13,11 +14,11 @@ export function AdminLayout({ children }: MainLayoutProps) {
     <div className={`min-h-screen flex flex-col bg-[${COLORS.background}]`}>
       <AdminHeader />
 
-      {/* Main content area with sidebar */}
-      <div className="flex flex-1">{children}</div>
+      {/* Main content area */}
+      <div className="flex flex-1 w-full overflow-x-hidden">{children}</div>
 
-      {/* Footer with proper margin to account for sidebar */}
-      <div className="ml-64 transition-all duration-200 ease-linear">
+      {/* Footer - no sidebar overlap on mobile, margin on md+ screens */}
+      <div className="ml-0 md:ml-64 transition-all duration-200 ease-linear">
         <div className="max-w-6xl mx-auto px-6 w-full">
           <Footer />
         </div>

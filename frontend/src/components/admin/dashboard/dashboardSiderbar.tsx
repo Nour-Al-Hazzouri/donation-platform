@@ -13,12 +13,12 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboard, FileText, Users, ChevronRight } from "lucide-react"
+import { LayoutDashboard, FileText, Users, ChevronRight, MapPin } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible" 
 
 export function DashboardSidebar() {
   return (
-    <Sidebar className="border-r">
+    <Sidebar className="w-64 border-r">
       <SidebarContent className="pt-16">
         <SidebarGroup>
           <SidebarGroupContent>
@@ -48,7 +48,12 @@ export function DashboardSidebar() {
                   <span>manage blogs</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-
+              <SidebarMenuItem>
+                <SidebarMenuButton className="text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+                  <MapPin className="h-4 w-4" />
+                  <span>manage location</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <Collapsible defaultOpen className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
