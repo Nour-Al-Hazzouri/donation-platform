@@ -57,6 +57,32 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/profile', [UserController::class, 'updateProfile']);
     });
 
+    // Verification routes
+    Route::prefix('verifications')->group(function () {
+        // Public verification request submission
+        Route::post('/', [VerificationController::class, 'store']);
+        
+        // View own verification requests
+        Route::get('/my-verifications', function () {
+            return app(VerificationController::class)->userVerifications(auth()->user());
+        });
+
+        // View specific verification request (users can view their own, admins can view any)
+        Route::get('/{verification}', [VerificationController::class, 'show']);
+
+        // Admin only routes
+        Route::middleware(['role:admin'])->group(function () {
+            // List all verification requests
+            Route::get('/', [VerificationController::class, 'index']);
+            
+            // Get verifications for a specific user
+            Route::get('/user/{user}', [VerificationController::class, 'userVerifications']);
+            
+            // Update verification status
+            Route::post('/{verification}/{status}', [VerificationController::class, 'updateStatus']);
+        });
+    });
+
     // Admin only routes
     Route::middleware(['role:admin'])->group(function () {
         Route::apiResource('locations', LocationController::class);
@@ -69,10 +95,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('locations/{location}', [LocationController::class, 'show']);
 });
 
-//verification request 
-Route::middleware('auth:sanctum')->post('/verifications', [VerificationController::class, 'store']);
-
-//verification update status
-
-Route::middleware(['auth:sanctum'])->post('/verifications/{verification}/status', [VerificationController::class, 'updateStatus']);
 
