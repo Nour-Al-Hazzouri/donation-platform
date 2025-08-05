@@ -23,14 +23,14 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen w-full overflow-x-hidden">
           {/* Desktop sidebar */}
           <div className="hidden md:block w-64 flex-shrink-0">
             <DashboardSidebar />
           </div>
 
           {/* Main content */}
-          <div className="flex-1">
+          <div className="flex-1 w-0 min-w-0 flex flex-col">
             {/* Mobile toggle button */}
             <div className="md:hidden p-4">
               <Button variant="outline" size="sm" onClick={() => setSidebarOpen(true)}>
@@ -38,9 +38,11 @@ export default function AdminDashboard() {
               </Button>
             </div>
 
-            <SidebarInset className="p-6">
+            <SidebarInset className="p-4 md:p-6 flex-1 flex flex-col">
               <StatsCards />
-              <CommunityChart />
+              <div className="flex-1">
+                <CommunityChart />
+              </div>
             </SidebarInset>
           </div>
         </div>
