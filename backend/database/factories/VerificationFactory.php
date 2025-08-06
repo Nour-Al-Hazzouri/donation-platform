@@ -24,7 +24,7 @@ class VerificationFactory extends Factory
             'user_id' => User::factory(),
             'verifier_id' => $status !== 'pending' ? $verifier->id : null,
             'document_type' => $this->faker->randomElement(['id_card', 'passport', 'driver_license']),
-            'document_url' => 'documents/' . $this->faker->uuid() . '.jpg',
+            'document_urls' => ['documents/' . $this->faker->uuid() . '.jpg'],
             'status' => $status,
             'notes' => $this->faker->optional(0.7)->sentence(),
             'verified_at' => $status !== 'pending' ? $this->faker->dateTimeBetween('-1 year') : null,
