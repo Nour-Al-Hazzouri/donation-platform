@@ -3,7 +3,10 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\LocationController;
+use App\Http\Controllers\API\AnnouncementController;
 use App\Http\Controllers\API\StatisticsController;
+use App\Http\Controllers\API\VerificationController;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,13 +43,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     // Current user
-    Route::get('/user', function (Request $request) {
-        return $request->user();
+    Route::get('/me', function (Request $request) {
+        return new UserResource($request->user());
     });
 
     // Users resource (protected by auth and permissions)
     Route::apiResource('users', UserController::class)
-        ->except(['store']) // Registration is handled by auth/register
+        ->except('promoteToModerator')
         ->middleware(['permission:manage users']);
 
     // User profile (no special permissions needed for own profile)
@@ -55,14 +58,46 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/profile', [UserController::class, 'updateProfile']);
     });
 
+    // Verification routes
+    Route::prefix('verifications')->group(function () {
+        // Public verification request submission
+        Route::post('/', [VerificationController::class, 'store']);
+        
+        // View own verification requests
+        Route::get('/my-verifications', function () {
+            return app(VerificationController::class)->userVerifications(auth()->user());
+        });
+
+        // View specific verification request (users can view their own, admins can view any)
+        Route::get('/{verification}', [VerificationController::class, 'show']);
+
+        // Admin only routes
+        Route::middleware(['role:admin'])->group(function () {
+            // List all verification requests
+            Route::get('/', [VerificationController::class, 'index']);
+            
+            // Get verifications for a specific user
+            Route::get('/user/{user}', [VerificationController::class, 'userVerifications']);
+            
+            // Update verification status
+            Route::post('/{verification}/{status}', [VerificationController::class, 'updateStatus']);
+        });
+    });
+
     // Admin only routes
     Route::middleware(['role:admin'])->group(function () {
         Route::apiResource('locations', LocationController::class);
         Route::get('statistics', [StatisticsController::class, 'index']);
+        Route::post('users/{user}/promote-to-moderator', [UserController::class, 'promoteToModerator']);
+        Route::apiResource('announcements', AnnouncementController::class)->except(['index', 'show']);
     });
+
+    // Announcements (public for all authenticated users to view, but only admins/moderators can create/update/delete)
+    Route::apiResource('announcements', AnnouncementController::class)->only(['index', 'show']);
 
     // Public locations (for all authenticated users)
     Route::get('locations', [LocationController::class, 'index']);
     Route::get('locations/{location}', [LocationController::class, 'show']);
 });
+
 

@@ -22,7 +22,11 @@ class StatisticsController extends Controller
         $stats = [
             'total_users' => User::count(),
             'total_donation_events' => DonationEvent::count(),
+            'total_donation_requests' => DonationEvent::where('type', 'request')->count(),
+            'total_donation_offers' => DonationEvent::where('type', 'offer')->count(),
             'total_transactions' => DonationTransaction::count(),
+            'total_transaction_contributions' => DonationTransaction::where('transaction_type', 'contribution')->count(),
+            'total_transaction_claims' => DonationTransaction::where('transaction_type', 'claim')->count(),
             'total_amount_donated' => DonationTransaction::sum('amount'),
             'active_donation_events' => DonationEvent::where('status', 'active')->count(),
             'recent_transactions' => DonationTransaction::with('user', 'donationEvent')
@@ -35,6 +39,8 @@ class StatisticsController extends Controller
                         'amount' => $transaction->amount,
                         'user' => $transaction->user->name,
                         'event' => $transaction->donationEvent->title,
+                        'transaction_type' => $transaction->transaction_type,
+                        'status' => $transaction->status,
                         'created_at' => $transaction->created_at->toDateTimeString(),
                     ];
                 }),

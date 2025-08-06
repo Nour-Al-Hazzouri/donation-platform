@@ -5,14 +5,22 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { NAV_ITEMS, COLORS } from "@/lib/constants"
 import { usePathname } from "next/navigation"
-import { Menu, X } from 'lucide-react'
+import { Menu, X, User, LogOut } from 'lucide-react'
 import Image from "next/image"
 import { useModal } from '@/lib/contexts/ModalContext'
+import { useAuthStore } from '@/lib/store/authStore'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function Header() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { openModal } = useModal()
+  const { user, isAuthenticated, logout } = useAuthStore()
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
@@ -102,30 +110,63 @@ export function Header() {
             })}
           </nav>
 
-          {/* Desktop Auth Buttons */}
+          {/* Desktop Auth Buttons or Profile */}
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
-            <Button
-              variant="outline"
-              style={{
-                backgroundColor: COLORS.primary,
-                borderColor: COLORS.primary,
-                color: 'white'
-              }}
-              className="hover:bg-primaryHover hover:text-white hover:border-primaryHover transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
-              onClick={() => openModal('signIn')}
-            >
-              Sign In
-            </Button>
-            <Button 
-              style={{
-                backgroundColor: COLORS.primary,
-                color: 'white'
-              }}
-              className="hover:bg-primaryHover hover:text-white transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
-              onClick={() => openModal('signUp')}
-            >
-              Sign Up
-            </Button>
+            {isAuthenticated && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    style={{
+                      backgroundColor: COLORS.primary,
+                      borderColor: COLORS.primary,
+                      color: 'white'
+                    }}
+                    className="hover:bg-primaryHover hover:text-white hover:border-primaryHover transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
+                  >
+                    <User size={16} />
+                    <span>{user.name}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
+                      <User size={16} />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logout()} className="flex items-center gap-2 cursor-pointer">
+                    <LogOut size={16} />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  style={{
+                    backgroundColor: COLORS.primary,
+                    borderColor: COLORS.primary,
+                    color: 'white'
+                  }}
+                  className="hover:bg-primaryHover hover:text-white hover:border-primaryHover transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
+                  onClick={() => openModal('signIn')}
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  style={{
+                    backgroundColor: COLORS.primary,
+                    color: 'white'
+                  }}
+                  className="hover:bg-primaryHover hover:text-white transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
+                  onClick={() => openModal('signUp')}
+                >
+                  Sign Up
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -138,27 +179,56 @@ export function Header() {
               {NAV_ITEMS.map(item => renderNavLink(item, true))}
               
               <div className="pt-4 border-t border-gray-200 flex flex-col space-y-3">
-                <Button
-                  style={{ backgroundColor: COLORS.primary, color: 'white' }}
-                  className="w-full text-center py-2 px-4 rounded-full"
-                  onClick={() => {
-                    closeMobileMenu()
-                    openModal('signIn')
-                  }}
-                >
-                  Sign In
-                </Button>
-                <Button
-                  variant="outline"
-                  style={{ borderColor: COLORS.primary, color: COLORS.primary }}
-                  className="w-full text-center py-2 px-4 rounded-full border"
-                  onClick={() => {
-                    closeMobileMenu()
-                    openModal('signUp')
-                  }}
-                >
-                  Sign Up
-                </Button>
+                {isAuthenticated && user ? (
+                  <>
+                    <Link href="/profile">
+                      <Button
+                        style={{ backgroundColor: COLORS.primary, color: 'white' }}
+                        className="w-full text-center py-2 px-4 rounded-full flex items-center justify-center gap-2"
+                        onClick={closeMobileMenu}
+                      >
+                        <User size={16} />
+                        Profile
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      style={{ borderColor: COLORS.primary, color: COLORS.primary }}
+                      className="w-full text-center py-2 px-4 rounded-full border flex items-center justify-center gap-2"
+                      onClick={() => {
+                        closeMobileMenu()
+                        logout()
+                      }}
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      style={{ backgroundColor: COLORS.primary, color: 'white' }}
+                      className="w-full text-center py-2 px-4 rounded-full"
+                      onClick={() => {
+                        closeMobileMenu()
+                        openModal('signIn')
+                      }}
+                    >
+                      Sign In
+                    </Button>
+                    <Button
+                      variant="outline"
+                      style={{ borderColor: COLORS.primary, color: COLORS.primary }}
+                      className="w-full text-center py-2 px-4 rounded-full border"
+                      onClick={() => {
+                        closeMobileMenu()
+                        openModal('signUp')
+                      }}
+                    >
+                      Sign Up
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>
