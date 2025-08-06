@@ -1,7 +1,9 @@
-"use client"
+'use client'
 
 import React, { useState } from 'react'
 import { MessageCircle, ThumbsUp, ThumbsDown, Pen, Check } from 'lucide-react'
+import { useAuthStore } from '@/lib/store/authStore'
+import { useModal } from '@/lib/contexts/ModalContext'
 
 interface User {
   id: string
@@ -21,7 +23,7 @@ interface CommunityPost {
   isLiked?: boolean
   isDisliked?: boolean
   createdAt: string
-  tags: string[] // Added tags field
+  tags: string[]
 }
 
 const mockUser: User = {
@@ -30,7 +32,7 @@ const mockUser: User = {
   verified: false,
 }
 
-const mockPosts: CommunityPost[] = [
+const initialMockPosts: CommunityPost[] = [
   {
     id: '1',
     content: 'Just donated to the local food bank! Who else wants to join me in supporting this great cause?',
@@ -93,10 +95,21 @@ interface PostCreatorProps {
 }
 
 const PostCreator = ({ onWritePost }: PostCreatorProps) => {
+  const { isAuthenticated } = useAuthStore()
+  const { openModal } = useModal()
+
+  const handleClick = () => {
+    if (!isAuthenticated) {
+      openModal('signIn')
+      return
+    }
+    onWritePost()
+  }
+
   return (
     <div 
       className="bg-white rounded-lg p-3 mb-3 shadow-sm border border-gray-200 mx-auto w-full max-w-4xl cursor-pointer hover:bg-gray-50"
-      onClick={onWritePost}
+      onClick={handleClick}
     >
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
@@ -116,23 +129,38 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
   const [newComment, setNewComment] = useState('')
   const [showComments, setShowComments] = useState(false)
   const [comments, setComments] = useState(post.comments)
+  
+  const { isAuthenticated, user } = useAuthStore()
+  const { openModal } = useModal()
+
+  const requireAuth = (action: () => void) => {
+    if (!isAuthenticated) {
+      openModal('signIn')
+      return
+    }
+    action()
+  }
 
   const handleLike = () => {
-    if (isDisliked) {
-      setIsDisliked(false)
-      setDislikesCount(dislikesCount - 1)
-    }
-    setIsLiked(!isLiked)
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1)
+    requireAuth(() => {
+      if (isDisliked) {
+        setIsDisliked(false)
+        setDislikesCount(dislikesCount - 1)
+      }
+      setIsLiked(!isLiked)
+      setLikesCount(isLiked ? likesCount - 1 : likesCount + 1)
+    })
   }
 
   const handleDislike = () => {
-    if (isLiked) {
-      setIsLiked(false)
-      setLikesCount(likesCount - 1)
-    }
-    setIsDisliked(!isDisliked)
-    setDislikesCount(isDisliked ? dislikesCount - 1 : dislikesCount + 1)
+    requireAuth(() => {
+      if (isLiked) {
+        setIsLiked(false)
+        setLikesCount(likesCount - 1)
+      }
+      setIsDisliked(!isDisliked)
+      setDislikesCount(isDisliked ? dislikesCount - 1 : dislikesCount + 1)
+    })
   }
 
   const toggleComments = () => {
@@ -141,8 +169,10 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
 
   const handleCommentSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && newComment.trim()) {
-      setComments([...comments, newComment])
-      setNewComment('')
+      requireAuth(() => {
+        setComments([...comments, newComment])
+        setNewComment('')
+      })
     }
   }
 
@@ -246,16 +276,19 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
             {/* Comment input */}
             <div className="flex items-center gap-2 mt-2">
               <div className="w-6 h-6 bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-[10px] font-bold">W</span>
+                <span className="text-white text-[10px] font-bold">
+                  {user?.name ? user.name.split(' ').map(n => n[0]).join('') : 'W'}
+                </span>
               </div>
               <div className="flex-1">
                 <input
                   type="text"
-                  placeholder="Write a comment..."
+                  placeholder={isAuthenticated ? "Write a comment..." : "Sign in to comment"}
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   onKeyDown={handleCommentSubmit}
                   className="w-full p-1.5 border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs text-gray-700 placeholder-gray-500"
+                  disabled={!isAuthenticated}
                 />
               </div>
             </div>
@@ -268,14 +301,30 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
 
 interface CommunityFeedProps {
   onWritePost: () => void;
+  newPost?: CommunityPost | null;
 }
 
-export default function CommunityFeed({ onWritePost }: CommunityFeedProps) {
+export default function CommunityFeed({ onWritePost, newPost }: CommunityFeedProps) {
+  const [posts, setPosts] = useState<CommunityPost[]>(initialMockPosts);
+
+  // Add new post to the beginning of the posts array
+  React.useEffect(() => {
+    if (newPost) {
+      setPosts(prevPosts => {
+        // Check if the post already exists to prevent duplicates
+        if (!prevPosts.some(post => post.id === newPost.id)) {
+          return [newPost, ...prevPosts];
+        }
+        return prevPosts;
+      });
+    }
+  }, [newPost]);
+
   return (
     <div className="min-h-screen py-3 px-2 sm:px-4">
       <div className="mx-auto w-full flex flex-col gap-2 max-w-4xl">
         <PostCreator onWritePost={onWritePost} />
-        {mockPosts.map((post) => (
+        {posts.map((post) => (
           <PostItem key={post.id} post={post} />
         ))}
       </div>

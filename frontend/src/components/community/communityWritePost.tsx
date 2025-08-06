@@ -6,10 +6,11 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { COLORS } from '@/lib/constants'
+import { useAuthStore } from '@/lib/store/authStore'
 
 interface CommunityWritePostProps {
   onCancel: () => void;
-  onSubmitSuccess?: () => void;
+  onSubmitSuccess?: (newPost: any) => void;
 }
 
 export default function CommunityWritePost({ onCancel, onSubmitSuccess }: CommunityWritePostProps) {
@@ -17,6 +18,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   const [postContent, setPostContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { user } = useAuthStore()
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -34,21 +36,36 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!postContent.trim()) return
+    
     setIsSubmitting(true)
     
     try {
-      console.log('Post content:', postContent)
-      console.log('Images:', images)
+      // Create a new post object
+      const newPost = {
+        id: Date.now().toString(), // Use timestamp for more unique ID
+        content: postContent,
+        user: {
+          id: user?.id || 'user' + Math.random().toString(36).substring(2, 5),
+          name: user?.name || 'Anonymous',
+          verified: false
+        },
+        images: images,
+        likes: 0,
+        dislikes: 0,
+        comments: [],
+        createdAt: new Date().toISOString(),
+        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+      }
       
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      if (onSubmitSuccess) {
+        onSubmitSuccess(newPost)
+      }
       
+      // Reset form
       setTags('')
       setPostContent('')
       setImages([])
-      
-      if (onSubmitSuccess) {
-        onSubmitSuccess()
-      }
     } catch (error) {
       console.error('Error creating post:', error)
     } finally {
@@ -62,7 +79,6 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       <div className="bg-white border-b border-border px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            {/* Circular indicator like in carousel */}
             <div className="flex items-center gap-2">
               <Button 
                 variant="ghost" 
@@ -79,7 +95,6 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
         </div>
       </div>
 
-      {/* Rest of the component remains the same */}
       <div className="px-4 py-6">
         <form onSubmit={handleSubmit}>
           {/* Tags Field */}

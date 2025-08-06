@@ -7,9 +7,10 @@ import { useState } from 'react';
 
 export default function CommunityPage() {
   const [isWritingPost, setIsWritingPost] = useState(false);
+  const [newPost, setNewPost] = useState<CommunityPost | null>(null);
 
-  const handlePostSubmit = () => {
-    // Handle any post-submission logic if needed
+  const handlePostSubmit = (createdPost: CommunityPost) => {
+    setNewPost(createdPost);
     setIsWritingPost(false);
   };
 
@@ -22,9 +23,28 @@ export default function CommunityPage() {
             onSubmitSuccess={handlePostSubmit}
           />
         ) : (
-          <CommunityFeed onWritePost={() => setIsWritingPost(true)} />
+          <CommunityFeed 
+            onWritePost={() => setIsWritingPost(true)} 
+            newPost={newPost}
+          />
         )}
       </div>
     </MainLayout>
   );
+}
+
+interface CommunityPost {
+  id: string;
+  content: string;
+  user: {
+    id: string;
+    name: string;
+    verified: boolean;
+  };
+  images?: string[];
+  likes: number;
+  dislikes: number;
+  comments: string[];
+  createdAt: string;
+  tags: string[];
 }
