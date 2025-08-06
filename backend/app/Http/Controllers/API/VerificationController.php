@@ -229,6 +229,12 @@ class VerificationController extends Controller
                 'verifier_id' => auth()->id(),
             ]);
 
+            if ($status === 'approved') {
+                $verification->user->update([
+                    'is_verified' => true,
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Verification status updated successfully.',
