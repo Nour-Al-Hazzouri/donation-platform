@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff } from 'lucide-react'
 import { useModal } from '@/lib/contexts/ModalContext'
+import { useRouter } from 'next/navigation'
 
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { openModal } = useModal()
+  const { openModal, closeModal } = useModal()
+  const router = useRouter()
 
   const togglePasswordVisibility = () => {
     setShowPassword(prev => !prev)
@@ -19,10 +21,17 @@ export default function SignInPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle sign in logic here
-    console.log('Sign in attempt:', { email, password })
-  }
+    const isAdmin = email === 'admin@gmail.com' && password === 'admin123'
 
+    console.log('Sign in attempt:', { email, password })
+
+    if (isAdmin) {
+      closeModal()
+      router.push('/admin')
+    } else {
+      alert('Logged in successfully (non-admin).')
+    }
+  }
   const handleGoogleSignIn = () => {
     // Handle Google sign in logic here
     console.log('Google sign in attempt')
