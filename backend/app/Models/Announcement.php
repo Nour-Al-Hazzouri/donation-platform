@@ -10,12 +10,30 @@ class Announcement extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id',
         'title',
         'content',
         'priority',
         'images',
+        'user_id'
     ];
+
+    protected $casts = [
+        'images' => 'array',
+        'priority' => 'string'
+    ];
+
+    public const PRIORITY_LOW = 'low';
+    public const PRIORITY_MEDIUM = 'medium';
+    public const PRIORITY_HIGH = 'high';
+
+    public static function getPriorities(): array
+    {
+        return [
+            self::PRIORITY_LOW,
+            self::PRIORITY_MEDIUM,
+            self::PRIORITY_HIGH,
+        ];
+    }
 
     // Relationships
     public function user(): BelongsTo
