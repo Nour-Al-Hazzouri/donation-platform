@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChevronLeft } from 'lucide-react'
 import { useModal } from '@/lib/contexts/ModalContext'
+import { useAuthStore } from '@/lib/store/authStore'
+import { toast } from "@/components/ui/use-toast"
 
 interface VerificationCodePageProps {
   onBack?: () => void;
@@ -15,6 +17,7 @@ export default function VerificationCodePage({ onBack, userEmail }: Verification
   const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const { closeModal, openModal } = useModal()
+
 
   const handleInputChange = (index: number, value: string) => {
     // Only allow single digits
@@ -56,8 +59,9 @@ export default function VerificationCodePage({ onBack, userEmail }: Verification
     inputRefs.current[focusIndex]?.focus()
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const verificationCode = code.join('')
+    
     if (verificationCode.length === 6) {
       // In a real app, we would validate the code with the backend
       // For now, we'll just log it and proceed to the new password form
@@ -65,6 +69,7 @@ export default function VerificationCodePage({ onBack, userEmail }: Verification
       
       // Open the new password form modal
       openModal('newPassword')
+
     }
   }
 
@@ -127,10 +132,10 @@ export default function VerificationCodePage({ onBack, userEmail }: Verification
       <div className="flex gap-3 sm:gap-4 transition-all duration-300 ease-in-out">
         <Button
           onClick={handleConfirm}
-          disabled={!isCodeComplete}
+          disabled={!isCodeComplete || isLoading}
           className="flex-1 h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Confirm
+          {isLoading ? "Verifying..." : "Confirm"}
         </Button>
         <Button
           onClick={handleCancel}

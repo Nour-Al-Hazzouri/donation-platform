@@ -6,12 +6,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff } from 'lucide-react'
 import { useModal } from '@/lib/contexts/ModalContext'
+import { useAuthStore } from '@/lib/store/authStore'
+import { toast } from "@/components/ui/use-toast"
 
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { openModal } = useModal()
+  const [isLoading, setIsLoading] = useState(false)
+  const { openModal, closeModal } = useModal()
+  const { login } = useAuthStore()
 
   const togglePasswordVisibility = () => {
     setShowPassword(prev => !prev)
@@ -19,8 +23,36 @@ export default function SignInPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle sign in logic here
-    console.log('Sign in attempt:', { email, password })
+    setIsLoading(true)
+    
+    // Mock login with a delay to simulate API call
+    setTimeout(() => {
+      // Mock user data - in a real app this would come from the backend
+      if (email && password) {
+        const mockUser = {
+          id: '1',
+          name: email.split('@')[0], // Use part of email as name
+          email: email,
+          verified: false
+        }
+        
+        login(mockUser)
+        closeModal()
+        
+        toast({
+          title: "Logged in successfully",
+          description: `Welcome back, ${mockUser.name}!`,
+        })
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Please enter valid credentials",
+          variant: "destructive"
+        })
+      }
+      
+      setIsLoading(false)
+    }, 1000)
   }
 
   const handleGoogleSignIn = () => {
@@ -96,8 +128,9 @@ export default function SignInPage() {
           <Button
             type="submit"
             className="w-full h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300"
+            disabled={isLoading}
           >
-            Sign in
+            {isLoading ? "Signing in..." : "Sign in"}
           </Button>
         </form>
 

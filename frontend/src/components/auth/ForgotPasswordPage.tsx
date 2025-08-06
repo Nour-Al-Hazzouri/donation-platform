@@ -18,12 +18,14 @@ export default function ForgotPasswordPage() {
     openModal('signIn')
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     // In a real app, we would validate the email and send a verification code
     // For now, we'll just show the verification code component
     console.log('Forgot password request for:', email)
     setShowVerification(true)
+
   }
 
   return (
@@ -96,6 +98,7 @@ export default function ForgotPasswordPage() {
           onBack={() => setShowVerification(false)} 
         />
       )}
+
     </div>
   )
 }
