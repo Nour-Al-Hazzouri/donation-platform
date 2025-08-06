@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone')->nullable();
             $table->string('avatar_url')->nullable();
-            $table->foreignId('location_id')->constrained('locations');
+            $table->foreignId('location_id')->nullable()->constrained('locations');
             $table->boolean('is_verified')->default(false);
             $table->enum('role', ['admin', 'moderator', 'user'])->default('user');
             $table->rememberToken();

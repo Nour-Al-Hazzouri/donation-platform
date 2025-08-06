@@ -5,6 +5,7 @@ import LatestDonations from "@/components/home/latestDonations";
 import LatestRequests from "@/components/home/latestRequests";
 import ContactUs from "@/components/contactUs/contactUs";
 import AboutIntroSection from "@/components/aboutUs/AboutIntroSection";
+import BlogCarousel from "@/components/blog/BlogCarousel";
 
 export default function HomePage() {
   return (
@@ -13,6 +14,7 @@ export default function HomePage() {
       <AboutIntroSection />
       <LatestDonations />
       <LatestRequests />
+      <BlogCarousel />
       <ContactUs />
     </MainLayout>
   );
