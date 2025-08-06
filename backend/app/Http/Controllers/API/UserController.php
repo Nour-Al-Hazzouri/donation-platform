@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Spatie\Permission\Models\Role;
 
 
 class UserController extends Controller
@@ -134,6 +135,32 @@ class UserController extends Controller
         return response()->json([
             'data' => new UserResource($user->load('location')),
             'message' => 'User profile updated successfully',
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Promote a user to moderator role.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function promoteToModerator(User $user): JsonResponse
+    {
+        $this->authorize('promote users');
+
+        // Check if user already has moderator role
+        if ($user->hasRole('moderator')) {
+            return response()->json([
+                'message' => 'User is already a moderator',
+            ], Response::HTTP_CONFLICT);
+        }
+
+        // Assign moderator role
+        $user->assignRole('moderator');
+
+        return response()->json([
+            'data' => new UserResource($user->load('roles')),
+            'message' => 'User promoted to moderator successfully',
         ], Response::HTTP_OK);
     }
 }
