@@ -17,7 +17,7 @@ export const requestsData: RequestData[] = [
     name: "Rahul Kadam",
     title: "Need help for treatment of cancer",
     description: "We are facing an incredibly difficult battle as our son fights cancer. His strength gives us hope, but we cannot do it alone. We humbly ask for your support during this challenging time. Every donation, no matter the amount, brings us closer to the treatment he desperately needs.",
-    imageUrl: "/pills.jpg",
+    imageUrl: "/pills.jpg?height=120&width=280",
     avatarUrl: "/admin.jpg?height=48&width=48",
     initials: "RK",
     isVerified: true
@@ -94,6 +94,7 @@ export function RequestCards({ requests, searchTerm }: RequestCardsProps) {
       {requests.map((request) => (
         <RequestCard
           key={request.id}
+          id={request.id}
           name={request.name}
           title={request.title}
           description={request.description}

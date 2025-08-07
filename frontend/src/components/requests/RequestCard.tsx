@@ -1,9 +1,13 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
 
 interface RequestCardProps {
+  id: number
   name: string
   title: string
   description: string
@@ -33,6 +37,7 @@ function highlightText(text: string, searchTerm: string) {
 }
 
 export function RequestCard({ 
+  id,
   name, 
   title, 
   description, 
@@ -42,31 +47,37 @@ export function RequestCard({
   isVerified = true,
   searchTerm = ""
 }: RequestCardProps) {
+  const router = useRouter()
+
+  const handleCardClick = () => {
+    router.push(`/requests/${id}`)
+  }
+
+  const handleDonateClick = (e: React.MouseEvent) => {
+    e.stopPropagation() //
+    router.push(`/requests/${id}`)
+  }
+
   return (
-    <Card className="bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
-      <CardContent className="p-6 flex flex-col flex-grow">
+    <Card 
+      className="bg-white shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.02]"
+      onClick={handleCardClick}
+    >
+      <CardContent className="p-6">
         <div className="flex items-center mb-4">
-          <div className="relative mr-3">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={name} />
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            {isVerified && (
-              <div className="absolute -top-1 -right-1">
-                <Image 
-                  src="/verification.png" 
-                  alt="Verified" 
-                  width={16} 
-                  height={16}
-                  className="w-4 h-4"
-                />
-              </div>
-            )}
-          </div>
+          <Avatar className="h-12 w-12 mr-3">
+            <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={name} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
           <div>
             <h3 className="font-semibold text-gray-900">
               {highlightText(name, searchTerm)}
             </h3>
+            {isVerified && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                ✓
+              </Badge>
+            )}
           </div>
         </div>
         
@@ -84,15 +95,16 @@ export function RequestCard({
           </div>
         )}
         
-        <p className="text-sm text-gray-600 mb-4 line-clamp-4 flex-grow">
+        <p className="text-sm text-gray-600 mb-4 line-clamp-4">
           {highlightText(description, searchTerm)}
         </p>
         
-        <div className="mt-auto">
-          <Button className="w-full bg-red-500 hover:bg-red-600 text-white h-10">
-            Donate Now
-          </Button>
-        </div>
+        <Button 
+          onClick={handleDonateClick}
+          className="w-full bg-red-500 hover:bg-red-600 text-white"
+        >
+          Donate Now
+        </Button>
       </CardContent>
     </Card>
   )
