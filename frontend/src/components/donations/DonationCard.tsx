@@ -1,9 +1,14 @@
+// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\components\donations\DonationCard.tsx
+"use client"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 interface DonationCardProps {
+  id: number
   name: string
   title: string
   description: string
@@ -33,6 +38,7 @@ function highlightText(text: string, searchTerm: string) {
 }
 
 export function DonationCard({ 
+  id,
   name, 
   title, 
   description, 
@@ -42,6 +48,12 @@ export function DonationCard({
   isVerified = true,
   searchTerm = ""
 }: DonationCardProps) {
+  const router = useRouter()
+
+  const handleClick = () => {
+    router.push(`/donations/${id}`)
+  }
+
   return (
     <Card className="bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
       <CardContent className="p-6 flex flex-col flex-grow">
@@ -92,7 +104,10 @@ export function DonationCard({
         </p>
         
         <div className="mt-auto">
-          <Button className="w-full bg-red-500 hover:bg-red-600 text-white h-10">
+          <Button 
+            className="w-full bg-red-500 hover:bg-red-600 text-white h-10"
+            onClick={handleClick}
+          >
             Request Now
           </Button>
         </div>

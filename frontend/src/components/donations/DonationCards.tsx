@@ -94,6 +94,7 @@ export function DonationCards({ donations, searchTerm }: DonationCardsProps) {
       {donations.map((donation) => (
         <DonationCard
           key={donation.id}
+          id={donation.id}
           name={donation.name}
           title={donation.title}
           description={donation.description}
