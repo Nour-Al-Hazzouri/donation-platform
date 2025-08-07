@@ -17,7 +17,7 @@ export const donationsData: DonationData[] = [
     name: "Rahul Kadam",
     title: "Offering help for cancer treatment",
     description: "I want to support families battling cancer. My donation will help cover treatment costs for those in need. Together we can make a difference in their fight against this disease.",
-    //imageUrl: "/placeholder.svg?height=120&width=280",
+    imageUrl: "/cancer.jpg", // Added image for first card
     avatarUrl: "/placeholder.svg?height=48&width=48",
     initials: "RK",
     isVerified: true
@@ -97,7 +97,7 @@ export function DonationCards({ donations, searchTerm }: DonationCardsProps) {
           name={donation.name}
           title={donation.title}
           description={donation.description}
-          //imageUrl={donation.imageUrl}
+          imageUrl={donation.imageUrl} // Uncommented to show images
           avatarUrl={donation.avatarUrl}
           initials={donation.initials}
           isVerified={donation.isVerified}

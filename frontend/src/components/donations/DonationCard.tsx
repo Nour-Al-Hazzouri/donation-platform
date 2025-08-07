@@ -74,22 +74,14 @@ export function DonationCard({
           {highlightText(title, searchTerm)}
         </h4>
         
-        {/* Added image under the title */}
-        <div className="mb-4">
-          <Image 
-            src="/donation-banner.jpg" 
-            alt="Donation" 
-            width={400}
-            height={200}
-            className="w-full h-32 object-cover rounded-md"
-          />
-        </div>
-        
+        {/* Only show image if imageUrl is provided */}
         {imageUrl && (
           <div className="mb-4">
-            <img 
-              src={imageUrl || "/placeholder.svg"} 
-              alt={title} 
+            <Image 
+              src={imageUrl}
+              alt={title}
+              width={400}
+              height={200}
               className="w-full h-32 object-cover rounded-md"
             />
           </div>
