@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import Image from 'next/image'
 
 interface RequestCardProps {
   id: number
@@ -18,7 +18,6 @@ interface RequestCardProps {
   searchTerm?: string
 }
 
-// Helper function to highlight matching text
 function highlightText(text: string, searchTerm: string) {
   if (!searchTerm) return text
   
@@ -54,31 +53,37 @@ export function RequestCard({
   }
 
   const handleDonateClick = (e: React.MouseEvent) => {
-    e.stopPropagation() //
+    e.stopPropagation()
     router.push(`/requests/${id}`)
   }
 
   return (
     <Card 
-      className="bg-white shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.02]"
+      className="bg-white shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.02] flex flex-col h-full"
       onClick={handleCardClick}
     >
-      <CardContent className="p-6">
-        <div className="flex items-center mb-4">
-          <Avatar className="h-12 w-12 mr-3">
-            <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={name} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="font-semibold text-gray-900">
-              {highlightText(name, searchTerm)}
-            </h3>
+      <CardContent className="p-6 flex flex-col flex-grow">
+        <div className="flex items-center mb-4 gap-4">
+          <div className="relative">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={name} />
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
             {isVerified && (
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                ✓
-              </Badge>
+              <div className="absolute -top-1 -right-1">
+                <Image 
+                  src="/verification.png" 
+                  alt="Verified" 
+                  width={20} 
+                  height={20}
+                  className="rounded-full border-2 border-white"
+                />
+              </div>
             )}
           </div>
+          <h3 className="font-semibold text-gray-900">
+            {highlightText(name, searchTerm)}
+          </h3>
         </div>
         
         <h4 className="font-semibold text-gray-900 mb-3">
@@ -95,13 +100,13 @@ export function RequestCard({
           </div>
         )}
         
-        <p className="text-sm text-gray-600 mb-4 line-clamp-4">
+        <p className="text-sm text-gray-600 mb-4 line-clamp-4 flex-grow">
           {highlightText(description, searchTerm)}
         </p>
         
         <Button 
           onClick={handleDonateClick}
-          className="w-full bg-red-500 hover:bg-red-600 text-white"
+          className="w-full bg-red-500 hover:bg-red-600 text-white mt-auto"
         >
           Donate Now
         </Button>

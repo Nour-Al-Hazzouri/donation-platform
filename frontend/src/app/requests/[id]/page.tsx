@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { requestsData } from "@/components/requests/RequestCards"
 import { MainLayout } from '@/components/layouts/MainLayout'
+import { COLORS } from '@/lib/constants'
+import Image from 'next/image'
 
 export default function RequestDetailsPage() {
   const params = useParams()
@@ -16,24 +18,23 @@ export default function RequestDetailsPage() {
   // Find the request by ID
   const request = requestsData.find(req => req.id === requestId)
   
-if (!request) {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <MainLayout>
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Request Not Found</h1>
-            <p className="text-gray-600 mb-6">The request you're looking for doesn't exist.</p>
-            <Button onClick={() => router.push('/')} className="bg-red-500 hover:bg-red-600 text-white">
-              Back to Requests
-            </Button>
-          </div>
-        </main>
-      </MainLayout>
-    </div>
-  )
-}
-
+  if (!request) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <MainLayout>
+          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Request Not Found</h1>
+              <p className="text-gray-600 mb-6">The request you're looking for doesn't exist.</p>
+              <Button onClick={() => router.push('/')} className="bg-red-500 hover:bg-red-600 text-white">
+                Back to Requests
+              </Button>
+            </div>
+          </main>
+        </MainLayout>
+      </div>
+    )
+  }
 
   // Mock data for request details (in real app, this would come from API)
   const requestDetails = {
@@ -52,10 +53,7 @@ if (!request) {
     fullDescription: request.description + ' ' + 
       'We are reaching out to our community for support during this difficult time. Every contribution, no matter how small, brings us closer to our goal and gives us hope for a better tomorrow. Your kindness and generosity mean everything to us.',
     dateCreated: '2 days ago',
-    location: 'Lebanon',
-    category: request.title.includes('cancer') || request.title.includes('heart') || request.title.includes('medical') ? 'Medical' :
-              request.title.includes('fire') ? 'Emergency' :
-              request.title.includes('education') ? 'Education' : 'General'
+    location: 'Lebanon'
   }
 
   const progressPercentage = (parseFloat(requestDetails.currentAmount.replace(',', '')) / parseFloat(requestDetails.requestAmount.replace(',', ''))) * 100
@@ -63,132 +61,137 @@ if (!request) {
   return (
     <div className="min-h-screen bg-gray-50">
       <MainLayout>
-      
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => router.back()}
-            className="flex items-center text-gray-600 hover:text-gray-900 p-2"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back
-          </Button>
-        </div>
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+          {/* Updated Back Button to match Community page */}
+          <div className="mb-4 md:mb-6">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => router.back()}
+              className="h-8 w-8 rounded-full bg-white/80 hover:bg-white/90 shadow-md"
+              style={{ color: COLORS.primary }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </div>
 
-        {/* Page Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Request Details</h1>
-        </div>
+          {/* Page Title */}
+          <div className="text-center mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Request Details</h1>
+          </div>
 
-        {/* Request Details Card */}
-        <div className="bg-white rounded-lg shadow-sm border p-8">
-          {/* User Profile Section */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <Avatar className="h-16 w-16 mr-4">
-                <AvatarImage src={request.avatarUrl || "/placeholder.svg"} alt={request.name} />
-                <AvatarFallback className="text-lg">{request.initials}</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-xl font-semibold text-gray-900">{request.name}</h2>
+          {/* Request Details Card */}
+          <div className="bg-white rounded-lg shadow-sm border p-4 md:p-8">
+            {/* User Profile Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center">
+                <div className="relative mr-3 md:mr-4">
+                  <Avatar className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16">
+                    <AvatarImage src={request.avatarUrl || "/placeholder.svg"} alt={request.name} />
+                    <AvatarFallback className="text-sm md:text-lg">{request.initials}</AvatarFallback>
+                  </Avatar>
                   {request.isVerified && (
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                      ✓
-                    </Badge>
+                    <div className="absolute -top-1 -right-1">
+                      <Image 
+                        src="/verification.png" 
+                        alt="Verified" 
+                        width={16} 
+                        height={16}
+                        className="rounded-full border-2 border-white"
+                      />
+                    </div>
                   )}
                 </div>
-                <p className="text-gray-600 text-sm">{requestDetails.location} • {requestDetails.dateCreated}</p>
-                <Badge variant="outline" className="mt-1">
-                  {requestDetails.category}
-                </Badge>
+                <div>
+                  <div className="flex items-center gap-1 md:gap-2 mb-1">
+                    <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900">{request.name}</h2>
+                  </div>
+                  <p className="text-xs sm:text-sm text-gray-600">{requestDetails.location} • {requestDetails.dateCreated}</p>
+                </div>
               </div>
+              <Button variant="destructive" size="sm" className="self-end sm:self-auto">
+                Report
+              </Button>
             </div>
-            <Button variant="destructive" size="sm">
-              Report
-            </Button>
-          </div>
 
-          {/* Request Title */}
-          <div className="mb-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">{request.title}</h3>
-          </div>
+            {/* Request Title */}
+            <div className="mb-4 md:mb-6">
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1 md:mb-2">{request.title}</h3>
+            </div>
 
-          {/* Progress Section */}
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-700">Progress</span>
-              <span className="text-sm text-gray-500">{Math.round(progressPercentage)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-              <div 
-                className="bg-red-500 h-3 rounded-full transition-all duration-300" 
-                style={{ width: `${Math.min(progressPercentage, 100)}%` }}
-              ></div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-2xl font-bold text-red-500">{requestDetails.currency}{requestDetails.currentAmount}</p>
-                <p className="text-sm text-gray-600">Raised so far</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-2xl font-bold text-gray-900">{requestDetails.currency}{requestDetails.requestAmount}</p>
-                <p className="text-sm text-gray-600">Goal amount</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Request Image */}
-          {request.imageUrl && (
+            {/* Progress Section */}
             <div className="mb-6">
-              <img 
-                src={request.imageUrl || "/placeholder.svg"} 
-                alt={request.title}
-                className="w-full max-w-md mx-auto h-64 object-cover rounded-lg"
-              />
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs sm:text-sm font-medium text-gray-700">Progress</span>
+                <span className="text-xs sm:text-sm text-gray-500">{Math.round(progressPercentage)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 mb-3 sm:mb-4">
+                <div 
+                  className="bg-red-500 h-2 sm:h-3 rounded-full transition-all duration-300" 
+                  style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                ></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
+                <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-500">{requestDetails.currency}{requestDetails.currentAmount}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Raised so far</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{requestDetails.currency}{requestDetails.requestAmount}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Goal amount</p>
+                </div>
+              </div>
             </div>
-          )}
 
-          {/* Full Description */}
-          <div className="mb-8">
-            <h4 className="text-lg font-semibold text-gray-900 mb-3">About this request</h4>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-              {requestDetails.fullDescription}
-            </p>
+            {/* Request Image - Updated for better responsiveness */}
+            {request.imageUrl && (
+              <div className="mb-4 md:mb-6 w-full aspect-video relative rounded-lg overflow-hidden">
+                <Image
+                  src={request.imageUrl || "/placeholder.svg"}
+                  alt={request.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
+                  priority
+                />
+              </div>
+            )}
+
+            {/* Full Description */}
+            <div className="mb-6 md:mb-8">
+              <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-2 md:mb-3">About this request</h4>
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line">
+                {requestDetails.fullDescription}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-center">
+              <Button className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg">
+                Donate Now
+              </Button>
+            </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 justify-center">
-            <Button className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 text-lg">
-              Donate Now
-            </Button>
-            <Button variant="outline" className="px-8 py-3 text-lg">
-              Share Request
-            </Button>
-          </div>
-        </div>
-
-        {/* Additional Info Section */}
-        <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">How your donation helps</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-red-50 rounded-lg">
-              <div className="text-2xl font-bold text-red-500 mb-2">100%</div>
-              <p className="text-sm text-gray-600">of donations go directly to the cause</p>
-            </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-500 mb-2">24/7</div>
-              <p className="text-sm text-gray-600">Support and updates on progress</p>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-500 mb-2">Secure</div>
-              <p className="text-sm text-gray-600">Safe and encrypted transactions</p>
+          {/* Additional Info Section */}
+          <div className="mt-6 md:mt-8 bg-white rounded-lg shadow-sm border p-4 md:p-6">
+            <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">How your donation helps</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+              <div className="text-center p-3 md:p-4 bg-red-50 rounded-lg">
+                <div className="text-xl sm:text-2xl font-bold text-red-500 mb-1 md:mb-2">100%</div>
+                <p className="text-xs sm:text-sm text-gray-600">of donations go directly to the cause</p>
+              </div>
+              <div className="text-center p-3 md:p-4 bg-blue-50 rounded-lg">
+                <div className="text-xl sm:text-2xl font-bold text-blue-500 mb-1 md:mb-2">24/7</div>
+                <p className="text-xs sm:text-sm text-gray-600">Support and updates on progress</p>
+              </div>
+              <div className="text-center p-3 md:p-4 bg-green-50 rounded-lg">
+                <div className="text-xl sm:text-2xl font-bold text-green-500 mb-1 md:mb-2">Secure</div>
+                <p className="text-xs sm:text-sm text-gray-600">Safe and encrypted transactions</p>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
       </MainLayout>
     </div>
   )
