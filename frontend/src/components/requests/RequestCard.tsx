@@ -71,10 +71,10 @@ export function RequestCard({
             </Avatar>
             {isVerified && (
               <div className="absolute -top-1 -right-1">
-                <Image 
-                  src="/verification.png" 
-                  alt="Verified" 
-                  width={20} 
+                <Image
+                  src="/verification.png"
+                  alt="Verified"
+                  width={20}
                   height={20}
                   className="rounded-full border-2 border-white"
                 />

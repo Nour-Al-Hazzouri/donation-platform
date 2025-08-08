@@ -5,19 +5,26 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { requestsData } from "@/components/requests/RequestCards"
+import { useRequestsStore, initialRequestsData } from "@/lib/store/requestsStore"
 import { MainLayout } from '@/components/layouts/MainLayout'
 import { COLORS } from '@/lib/constants'
 import Image from 'next/image'
+import { useEffect } from 'react'
 
 export default function RequestDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const requestId = parseInt(params.id as string)
-  
-  // Find the request by ID
-  const request = requestsData.find(req => req.id === requestId)
-  
+  const { requests, initializeRequests } = useRequestsStore()
+
+  // Initialize requests store with initial data on first load
+  useEffect(() => {
+    initializeRequests(initialRequestsData)
+  }, [initializeRequests])
+
+  // Find the request by ID from the store
+  const request = requests.find(req => req.id === requestId)
+
   if (!request) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -36,23 +43,66 @@ export default function RequestDetailsPage() {
     )
   }
 
-  // Mock data for request details (in real app, this would come from API)
+  // Enhanced request details logic
+  const getRequestAmount = (request: any) => {
+    // If the request has a goalAmount (new requests), use it
+    if (request.goalAmount) {
+      return request.goalAmount
+    }
+    
+    // Fallback to title-based logic for old requests
+    if (request.title.includes('cancer')) return '50,000'
+    if (request.title.includes('heart')) return '75,000'
+    if (request.title.includes('survive')) return '25,000'
+    if (request.title.includes('medical')) return '30,000'
+    if (request.title.includes('fire')) return '15,000'
+    return '10,000'
+  }
+
+  const getCurrentAmount = (request: any) => {
+    const goalAmount = parseFloat(getRequestAmount(request).replace(',', ''))
+    // For new requests, start with a small random amount (0-20% of goal)
+    if (request.goalAmount) {
+      const percentage = Math.random() * 0.2 // 0-20%
+      return Math.floor(goalAmount * percentage).toLocaleString()
+    }
+    
+    // Fallback amounts for old requests
+    if (request.title.includes('cancer')) return '12,500'
+    if (request.title.includes('heart')) return '23,000'
+    if (request.title.includes('survive')) return '8,750'
+    if (request.title.includes('medical')) return '5,200'
+    if (request.title.includes('fire')) return '3,800'
+    return '2,100'
+  }
+
+  const getDateCreated = (request: any) => {
+    if (request.createdAt) {
+      const createdDate = new Date(request.createdAt)
+      const now = new Date()
+      const diffInHours = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60))
+      
+      if (diffInHours < 1) return 'Just now'
+      if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`
+      
+      const diffInDays = Math.floor(diffInHours / 24)
+      if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`
+      
+      const diffInWeeks = Math.floor(diffInDays / 7)
+      return `${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`
+    }
+    return '2 days ago' // Fallback for old requests
+  }
+
+  // Request details with enhanced logic
   const requestDetails = {
     ...request,
-    requestAmount: request.title.includes('cancer') ? '50,000' : 
-                   request.title.includes('heart') ? '75,000' :
-                   request.title.includes('survive') ? '25,000' :
-                   request.title.includes('medical') ? '30,000' :
-                   request.title.includes('fire') ? '15,000' : '10,000',
-    currentAmount: request.title.includes('cancer') ? '12,500' : 
-                   request.title.includes('heart') ? '23,000' :
-                   request.title.includes('survive') ? '8,750' :
-                   request.title.includes('medical') ? '5,200' :
-                   request.title.includes('fire') ? '3,800' : '2,100',
+    requestAmount: getRequestAmount(request),
+    currentAmount: getCurrentAmount(request),
     currency: '$',
     fullDescription: request.description + ' ' + 
       'We are reaching out to our community for support during this difficult time. Every contribution, no matter how small, brings us closer to our goal and gives us hope for a better tomorrow. Your kindness and generosity mean everything to us.',
-    dateCreated: '2 days ago',
+    dateCreated: getDateCreated(request),
     location: 'Lebanon'
   }
 
@@ -65,8 +115,8 @@ export default function RequestDetailsPage() {
           {/* Updated Back Button to match Community page */}
           <div className="mb-4 md:mb-6">
             <Button 
-              variant="ghost" 
-              size="icon" 
+              variant="ghost"
+              size="icon"
               onClick={() => router.back()}
               className="h-8 w-8 rounded-full bg-white/80 hover:bg-white/90 shadow-md"
               style={{ color: COLORS.primary }}
@@ -92,10 +142,10 @@ export default function RequestDetailsPage() {
                   </Avatar>
                   {request.isVerified && (
                     <div className="absolute -top-1 -right-1">
-                      <Image 
-                        src="/verification.png" 
-                        alt="Verified" 
-                        width={16} 
+                      <Image
+                        src="/verification.png"
+                        alt="Verified"
+                        width={16}
                         height={16}
                         className="rounded-full border-2 border-white"
                       />

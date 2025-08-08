@@ -1,6 +1,11 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useAuthStore } from '@/lib/store/authStore'
+import { useModal } from '@/lib/contexts/ModalContext'
 
 interface SearchSectionProps {
   searchTerm: string
@@ -15,9 +20,21 @@ export function SearchSection({
   onSearchSubmit, 
   resultsCount 
 }: SearchSectionProps) {
+  const router = useRouter()
+  const { isAuthenticated } = useAuthStore()
+  const { openModal } = useModal()
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSearchSubmit()
+  }
+
+  const handleAddRequest = () => {
+    if (!isAuthenticated) {
+      openModal('signIn')
+      return
+    }
+    router.push('/add-request')
   }
 
   return (
@@ -57,7 +74,10 @@ export function SearchSection({
       
       {/* Add Request Button */}
       <div className="flex justify-end mb-8">
-        <Button className="bg-red-500 hover:bg-red-600 text-white">
+        <Button 
+          onClick={handleAddRequest}
+          className="bg-red-500 hover:bg-red-600 text-white"
+        >
           Add Request
         </Button>
       </div>
