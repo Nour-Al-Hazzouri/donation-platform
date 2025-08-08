@@ -49,9 +49,14 @@ export function DashboardSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton className="text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-                  <FileText className="h-4 w-4" />
-                  <span>manage blogs</span>
+                <SidebarMenuButton 
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  asChild
+                >
+                  <a href="/admin/blogs">
+                    <FileText className="h-4 w-4" />
+                    <span>manage blogs</span>
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
