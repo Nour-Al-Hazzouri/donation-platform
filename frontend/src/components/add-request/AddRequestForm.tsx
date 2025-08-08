@@ -111,7 +111,7 @@ export function AddRequestForm() {
       console.log('Request created successfully:', newRequest)
       
       // Redirect to requests page with success message
-      router.push('/?success=request-created')
+      router.push('/requests')
     } catch (error) {
       console.error('Error submitting request:', error)
       // In a real app, you'd show an error message to the user
