@@ -6,6 +6,8 @@ use App\Http\Controllers\API\LocationController;
 use App\Http\Controllers\API\AnnouncementController;
 use App\Http\Controllers\API\StatisticsController;
 use App\Http\Controllers\API\VerificationController;
+use App\Http\Controllers\API\CommunityPostController;
+use App\Http\Controllers\API\CommentController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -98,6 +100,17 @@ Route::middleware('auth:sanctum')->group(function () {
     // Public locations (for all authenticated users)
     Route::get('locations', [LocationController::class, 'index']);
     Route::get('locations/{location}', [LocationController::class, 'show']);
+
+    // Community Posts
+    Route::apiResource('community-posts', CommunityPostController::class);
+    
+    // Comments for community posts
+    Route::prefix('community-posts/{communityPost}/comments')->group(function () {
+        Route::get('/', [CommentController::class, 'index']);
+        Route::post('/', [CommentController::class, 'store']);
+        Route::put('/{comment}', [CommentController::class, 'update']);
+        Route::delete('/{comment}', [CommentController::class, 'destroy']);
+    });
 });
 
 
