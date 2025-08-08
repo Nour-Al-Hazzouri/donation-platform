@@ -7,42 +7,25 @@ import { Label } from "@/components/ui/label"
 import { ChevronLeft } from 'lucide-react'
 import { useModal } from '@/lib/contexts/ModalContext'
 import VerificationCodePage from './VerificationCodePage'
-import { toast } from "@/components/ui/use-toast"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [showVerification, setShowVerification] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const { openModal } = useModal()
 
   const handleBack = () => {
+    // Navigate back to sign-in
     openModal('signIn')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
-    try {
-      // Here you would typically make an API call to send the verification code
-      // For demonstration, we'll simulate a network request
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log('Verification code sent to:', email)
-      setShowVerification(true)
-      toast({
-        title: "Verification code sent",
-        description: `We've sent a 6-digit code to ${email}`,
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to send verification code. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    // In a real app, we would validate the email and send a verification code
+    // For now, we'll just show the verification code component
+    console.log('Forgot password request for:', email)
+    setShowVerification(true)
+
   }
 
   return (
@@ -100,9 +83,8 @@ export default function ForgotPasswordPage() {
                 <Button
                   type="submit"
                   className="w-full h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300 ease-in-out mt-6 sm:mt-8"
-                  disabled={isLoading}
                 >
-                  {isLoading ? "Sending..." : "Continue"}
+                  Continue
                 </Button>
               </form>
             </div>
@@ -114,9 +96,9 @@ export default function ForgotPasswordPage() {
         <VerificationCodePage 
           userEmail={email} 
           onBack={() => setShowVerification(false)} 
-          onSuccess={() => openModal('newPassword')}
         />
       )}
+
     </div>
   )
 }

@@ -8,8 +8,6 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useModal } from '@/lib/contexts/ModalContext'
 import { useAuthStore } from '@/lib/store/authStore'
 import { toast } from "@/components/ui/use-toast"
-import { useRouter } from 'next/navigation'
-
 
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -18,49 +16,45 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false)
   const { openModal, closeModal } = useModal()
   const { login } = useAuthStore()
-  const router = useRouter()
 
   const togglePasswordVisibility = () => {
     setShowPassword(prev => !prev)
   }
 
-
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault()
-  setIsLoading(true)
-
-  setTimeout(() => {
-    if (email && password) {
-      const mockUser = {
-        id: '1',
-        name: email.split('@')[0],
-        email,
-        verified: false,
-      }
-
-      login(mockUser)
-
-      if (email === 'admin@gmail.com' && password === 'admin123') {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    
+    // Mock login with a delay to simulate API call
+    setTimeout(() => {
+      // Mock user data - in a real app this would come from the backend
+      if (email && password) {
+        const mockUser = {
+          id: '1',
+          name: email.split('@')[0], // Use part of email as name
+          email: email,
+          verified: false
+        }
+        
+        login(mockUser)
         closeModal()
-        router.push('/admin')
-      } else {
-        closeModal()
+        
         toast({
           title: "Logged in successfully",
           description: `Welcome back, ${mockUser.name}!`,
         })
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Please enter valid credentials",
+          variant: "destructive"
+        })
       }
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Please enter valid credentials",
-        variant: "destructive",
-      })
-    }
+      
+      setIsLoading(false)
+    }, 1000)
+  }
 
-    setIsLoading(false)
-  }, 1000)
-}
   const handleGoogleSignIn = () => {
     // Handle Google sign in logic here
     console.log('Google sign in attempt')
