@@ -12,7 +12,6 @@ import { useRequestsStore, initialRequestsData } from "@/lib/store/requestsStore
 import { useAuthStore } from '@/lib/store/authStore'
 import { useModal } from '@/lib/contexts/ModalContext'
 
-// More robust helper to parse amounts, handling various types and ensuring a number is returned
 const parseAmount = (value: string | number | undefined | null): number => {
   if (typeof value === 'number') {
     return isNaN(value) ? 0 : value;
@@ -25,12 +24,10 @@ const parseAmount = (value: string | number | undefined | null): number => {
 };
 
 export default function DonatePage() {
-  // ALL HOOKS MUST BE CALLED UNCONDITIONALLY AT THE TOP LEVEL
   const params = useParams()
   const router = useRouter()
   const { requests, initializeRequests, updateRequestCurrentAmount } = useRequestsStore()
   const { isAuthenticated, user } = useAuthStore()
-  const { deductBalance } = useAuthStore()
   const { openModal } = useModal()
   
   const [donationAmount, setDonationAmount] = useState([0])
@@ -39,7 +36,6 @@ export default function DonatePage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [donationError, setDonationError] = useState<string | null>(null)
 
-  // All useEffects must also be unconditional
   useEffect(() => {
     initializeRequests(initialRequestsData)
   }, [initializeRequests])
@@ -51,29 +47,20 @@ export default function DonatePage() {
     }
   }, [isAuthenticated, router, openModal])
 
-  // Retrieve request data after hooks are called
   const requestId = parseInt(params.id as string)
   const request = requests.find(req => req.id === requestId)
 
-  // Calculate amounts and maxDonationAllowed *before* any conditional returns that render different JSX
-  const requestGoalAmount = parseAmount(request?.goalAmount) // Use optional chaining
-  const requestCurrentAmount = parseAmount(request?.currentAmount) // Use optional chaining
+  const requestGoalAmount = parseAmount(request?.goalAmount)
+  const requestCurrentAmount = parseAmount(request?.currentAmount)
   const remainingAmountNeeded = requestGoalAmount - requestCurrentAmount
 
-  const userBalance = user?.balance || 0
-  const maxDonationAllowed = Math.floor(Math.min(remainingAmountNeeded, userBalance))
-
-  // THIS useEffect is now called unconditionally
   useEffect(() => {
-    if (maxDonationAllowed > 0 && donationAmount[0] === 0) {
-      setDonationAmount([Math.min(50, maxDonationAllowed)])
+    if (remainingAmountNeeded > 0 && donationAmount[0] === 0) {
+      setDonationAmount([Math.min(50, remainingAmountNeeded)])
     }
-  }, [maxDonationAllowed, donationAmount]) // Dependencies are correct
+  }, [remainingAmountNeeded, donationAmount])
 
-  // Conditional returns come AFTER all hooks are called.
   if (!isAuthenticated) {
-    // This return is fine because the useEffect above already triggered the redirect.
-    // The component will unmount or redirect before rendering further.
     return null 
   }
 
@@ -123,14 +110,6 @@ export default function DonatePage() {
       setDonationError('Please enter a valid donation amount.')
       return
     }
-    if (finalAmount > maxDonationAllowed) {
-      setDonationError(`You can only donate up to $${maxDonationAllowed.toLocaleString()} (remaining needed: $${remainingAmountNeeded.toLocaleString()}, your balance: $${userBalance.toLocaleString()}).`)
-      return
-    }
-    if (finalAmount > userBalance) {
-      setDonationError(`You do not have enough balance. Your current balance is $${userBalance.toLocaleString()}.`)
-      return
-    }
     if (finalAmount > remainingAmountNeeded) {
       setDonationError(`This request only needs $${remainingAmountNeeded.toLocaleString()} more.`)
       return
@@ -142,7 +121,6 @@ export default function DonatePage() {
     try {
       await new Promise(resolve => setTimeout(resolve, 2000))
       
-      deductBalance(finalAmount)
       updateRequestCurrentAmount(requestId, finalAmount)
       
       console.log('Donation processed:', {
@@ -190,9 +168,6 @@ export default function DonatePage() {
             <p className="text-gray-700">
               <span className="font-medium">Remaining needed:</span> ${remainingAmountNeeded.toLocaleString()}
             </p>
-            <p className="text-gray-700">
-              <span className="font-medium">Your balance:</span> ${userBalance.toLocaleString()}
-            </p>
           </div>
 
           {/* Request Title */}
@@ -212,22 +187,22 @@ export default function DonatePage() {
               <Label className="text-sm font-medium text-gray-700">
                 Amount: ${displayAmount.toLocaleString()}
               </Label>
-              <span className="text-sm text-gray-500">Max: ${maxDonationAllowed.toLocaleString()}</span>
+              <span className="text-sm text-gray-500">Max: ${remainingAmountNeeded.toLocaleString()}</span>
             </div>
             
             <Slider
               value={donationAmount}
               onValueChange={handleSliderChange}
-              max={maxDonationAllowed > 0 ? maxDonationAllowed : 1}
+              max={remainingAmountNeeded > 0 ? remainingAmountNeeded : 1}
               min={1}
               step={1}
               className="w-full"
-              disabled={maxDonationAllowed <= 0}
+              disabled={remainingAmountNeeded <= 0}
             />
             
             <div className="flex justify-between text-xs text-gray-500 mt-2">
               <span>$1</span>
-              <span>${maxDonationAllowed.toLocaleString()}</span>
+              <span>${remainingAmountNeeded.toLocaleString()}</span>
             </div>
           </div>
 
@@ -244,8 +219,8 @@ export default function DonatePage() {
               onChange={(e) => handleCustomAmountChange(e.target.value)}
               className="w-full"
               min="1"
-              max={maxDonationAllowed}
-              disabled={maxDonationAllowed <= 0}
+              max={remainingAmountNeeded}
+              disabled={remainingAmountNeeded <= 0}
             />
           </div>
 
@@ -262,7 +237,7 @@ export default function DonatePage() {
                   setDonationError(null)
                 }}
                 className="text-sm"
-                disabled={amount > maxDonationAllowed || maxDonationAllowed <= 0}
+                disabled={amount > remainingAmountNeeded || remainingAmountNeeded <= 0}
               >
                 ${amount}
               </Button>
@@ -279,7 +254,7 @@ export default function DonatePage() {
           {/* Donate Button */}
           <Button
             onClick={handleDonate}
-            disabled={isProcessing || displayAmount <= 0 || displayAmount > maxDonationAllowed || maxDonationAllowed <= 0}
+            disabled={isProcessing || displayAmount <= 0 || displayAmount > remainingAmountNeeded || remainingAmountNeeded <= 0}
             className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-medium"
           >
             {isProcessing ? 'Processing...' : `Donate $${displayAmount.toLocaleString()}`}

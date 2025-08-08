@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { AddRequestForm } from './AddRequestForm'
+import { AddRequestForm } from "@/components/add-request/AddRequestForm"
 
 export function AddRequestContent() {
   const router = useRouter()

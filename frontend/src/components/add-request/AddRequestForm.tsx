@@ -1,154 +1,245 @@
 'use client'
 
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Upload } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { useAuthStore } from '@/lib/store/authStore'
+import { useRequestsStore } from '@/lib/store/requestsStore'
 
-export interface RequestData {
-  id: number
-  name: string
-  title: string
-  description: string
-  imageUrl?: string
-  avatarUrl?: string
-  initials: string
-  isVerified: boolean
-  goalAmount: string // Changed to be always present and string for consistency with input
-  currentAmount: number // Added currentAmount as a number
-  createdAt?: string
+// Helper function to get user initials
+function getUserInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase())
+    .join('')
+    .slice(0, 2)
 }
 
-interface RequestsState {
-  requests: RequestData[]
-  addRequest: (request: Omit<RequestData, 'id' | 'currentAmount'>) => void // Omit currentAmount as it's initialized to 0
-  updateRequestCurrentAmount: (requestId: number, amount: number) => void // New action to update current amount
-  getRequests: () => RequestData[]
-  initializeRequests: (initialRequests: RequestData[]) => void
-}
+export function AddRequestForm() {
+  const router = useRouter()
+  const { user } = useAuthStore()
+  const { addRequest } = useRequestsStore()
+  
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    title: '',
+    description: '',
+    goalAmount: '',
+    image: null as File | null
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-// Initial mock data with fixed currentAmount values
-const initialRequestsData: RequestData[] = [
-  {
-    id: 1,
-    name: "Rahul Kadam",
-    title: "Need help for treatment of cancer",
-    description: "We are facing an incredibly difficult battle as our son fights cancer. His strength gives us hope, but we cannot do it alone. We humbly ask for your support during this challenging time. Every donation, no matter the amount, brings us closer to the treatment he desperately needs.",
-    imageUrl: "/pills.jpg?height=120&width=280",
-    avatarUrl: "/admin.jpg?height=48&width=48",
-    initials: "RK",
-    isVerified: true,
-    goalAmount: "50000",
-    currentAmount: 12500, // Fixed current amount
-    createdAt: new Date(Date.now() - 86400000).toISOString() // 1 day ago
-  },
-  {
-    id: 2,
-    name: "Rahul Kadam",
-    title: "Need help for heart surgery",
-    description: "Our loved one urgently needs heart surgery, and we can't cover the medical costs alone. Any donation, big or small, brings us hope. Please consider contributing and sharing our story—your support means everything.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "RK",
-    isVerified: true,
-    goalAmount: "75000",
-    currentAmount: 23000, // Fixed current amount
-    createdAt: new Date(Date.now() - 172800000).toISOString() // 2 days ago
-  },
-  {
-    id: 3,
-    name: "Rajesh Joy",
-    title: "Need help to survive the whole life",
-    description: "We are facing a life-threatening situation and urgently need financial support to survive. Medical costs are overwhelming, and without help, we can't afford the care required. Every donation, no matter the amount, brings us hope for a better future. Please consider contributing—your generosity can make a life-saving difference.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "RJ",
-    isVerified: true,
-    goalAmount: "25000",
-    currentAmount: 8750, // Fixed current amount
-    createdAt: new Date(Date.now() - 259200000).toISOString() // 3 days ago
-  },
-  {
-    id: 4,
-    name: "Sarah Ahmed",
-    title: "Emergency medical treatment needed",
-    description: "My daughter needs urgent medical treatment that we cannot afford. The doctors say time is critical, and we are running out of options. Please help us save her life. Any contribution will make a difference in our fight against time.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "SA",
-    isVerified: true,
-    goalAmount: "30000",
-    currentAmount: 5200, // Fixed current amount
-    createdAt: new Date(Date.now() - 345600000).toISOString() // 4 days ago
-  },
-  {
-    id: 5,
-    name: "Michael Chen",
-    title: "Help rebuild after house fire",
-    description: "Our family lost everything in a devastating house fire last week. We are grateful to be alive, but now we need help rebuilding our lives. Any support for temporary housing, clothing, and basic necessities would mean the world to us.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "MC",
-    isVerified: false,
-    goalAmount: "15000",
-    currentAmount: 3800, // Fixed current amount
-    createdAt: new Date(Date.now() - 432000000).toISOString() // 5 days ago
-  },
-  {
-    id: 6,
-    name: "Priya Sharma",
-    title: "Education fund for underprivileged children",
-    description: "We are raising funds to provide education and school supplies for children in our community who cannot afford them. Education is the key to breaking the cycle of poverty. Help us give these children a brighter future.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "PS",
-    isVerified: true,
-    goalAmount: "10000",
-    currentAmount: 2100, // Fixed current amount
-    createdAt: new Date(Date.now() - 518400000).toISOString() // 6 days ago
-  }
-]
-
-export const useRequestsStore = create<RequestsState>()(
-  persist(
-    (set, get) => ({
-      requests: [],
-      
-      initializeRequests: (initialRequests) => {
-        const currentRequests = get().requests
-        if (currentRequests.length === 0) {
-          set({ requests: initialRequests })
-        }
-      },
-      
-      addRequest: (newRequest) => {
-        const currentRequests = get().requests
-        const newId = Math.max(...currentRequests.map(r => r.id), 0) + 1
-        
-        const requestWithId: RequestData = {
-          ...newRequest,
-          id: newId,
-          currentAmount: 0, // New requests start with 0 current amount
-          createdAt: new Date().toISOString()
-        }
-        
-        // Add new request at the beginning (most recent first)
-        set({ requests: [requestWithId, ...currentRequests] })
-      },
-
-      updateRequestCurrentAmount: (requestId, amount) => {
-        set((state) => ({
-          requests: state.requests.map((req) =>
-            req.id === requestId
-              ? { ...req, currentAmount: req.currentAmount + amount }
-              : req
-          ),
-        }));
-      },
-      
-      getRequests: () => {
-        return get().requests
-      }
-    }),
-    {
-      name: 'requests-storage',
-      partialize: (state) => ({ requests: state.requests })
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
     }
-  )
-)
+  }
 
-// Export the initial data for backward compatibility
-export { initialRequestsData }
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setFormData(prev => ({ ...prev, image: file }))
+    }
+  }
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required'
+    }
+
+    if (!formData.title.trim()) {
+      newErrors.title = 'Title is required'
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = 'Description is required'
+    }
+
+    if (!formData.goalAmount.trim()) {
+      newErrors.goalAmount = 'Goal amount is required'
+    } else if (isNaN(Number(formData.goalAmount)) || Number(formData.goalAmount) <= 0) {
+      newErrors.goalAmount = 'Please enter a valid amount'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+    
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Create image URL if image was uploaded (in real app, this would be uploaded to a server)
+      let imageUrl: string | undefined
+      if (formData.image) {
+        imageUrl = URL.createObjectURL(formData.image)
+      }
+      
+      // Create the new request object
+      const newRequest = {
+        name: formData.name,
+        title: formData.title,
+        description: formData.description,
+        goalAmount: formData.goalAmount,
+        imageUrl: imageUrl,
+        avatarUrl: "/placeholder.svg?height=48&width=48",
+        initials: getUserInitials(formData.name),
+        isVerified: user?.verified || false
+      }
+      
+      // Add request to the store
+      addRequest(newRequest)
+      
+      // Redirect to requests page
+      router.push('/requests')
+    } catch (error) {
+      console.error('Error submitting request:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Name Field */}
+      <div>
+        <Label htmlFor="name" className="text-base font-medium text-gray-900">
+          Name
+        </Label>
+        <Input
+          id="name"
+          type="text"
+          placeholder="Steve Rogers"
+          value={formData.name}
+          onChange={(e) => handleInputChange('name', e.target.value)}
+          className={`mt-2 ${errors.name ? 'border-red-500' : ''}`}
+        />
+        {errors.name && (
+          <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+        )}
+      </div>
+
+      {/* Title Field */}
+      <div>
+        <Label htmlFor="title" className="text-base font-medium text-gray-900">
+          Title <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="title"
+          type="text"
+          placeholder="in need for..."
+          value={formData.title}
+          onChange={(e) => handleInputChange('title', e.target.value)}
+          className={`mt-2 ${errors.title ? 'border-red-500' : ''}`}
+        />
+        {errors.title && (
+          <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+        )}
+      </div>
+
+      {/* Description Field */}
+      <div>
+        <Label htmlFor="description" className="text-base font-medium text-gray-900">
+          Description <span className="text-red-500">*</span>
+        </Label>
+        <Textarea
+          id="description"
+          placeholder="I want..."
+          value={formData.description}
+          onChange={(e) => handleInputChange('description', e.target.value)}
+          className={`mt-2 min-h-[120px] ${errors.description ? 'border-red-500' : ''}`}
+        />
+        {errors.description && (
+          <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+        )}
+      </div>
+
+      {/* Goal Amount Field */}
+      <div>
+        <Label htmlFor="goalAmount" className="text-base font-medium text-gray-900">
+          Goal Amount <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="goalAmount"
+          type="number"
+          placeholder="ex: 10000"
+          value={formData.goalAmount}
+          onChange={(e) => handleInputChange('goalAmount', e.target.value)}
+          className={`mt-2 ${errors.goalAmount ? 'border-red-500' : ''}`}
+        />
+        {errors.goalAmount && (
+          <p className="mt-1 text-sm text-red-500">{errors.goalAmount}</p>
+        )}
+      </div>
+
+      {/* Image Upload */}
+      <div>
+        <Label className="text-base font-medium text-gray-900 mb-3 block">
+          Upload Image
+        </Label>
+        <div className="flex items-center space-x-4">
+          <label htmlFor="image-upload">
+            <Button
+              type="button"
+              className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2"
+              onClick={() => document.getElementById('image-upload')?.click()}
+            >
+              <Upload className="h-4 w-4" />
+              Upload Image
+            </Button>
+          </label>
+          <span className="text-gray-500 text-sm">
+            {formData.image ? formData.image.name : 'No file chosen'}
+          </span>
+          <input
+            id="image-upload"
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </div>
+        
+        {/* Image Preview */}
+        {formData.image && (
+          <div className="mt-4">
+            <img 
+              src={URL.createObjectURL(formData.image)} 
+              alt="Preview" 
+              className="w-full max-w-md h-32 object-cover rounded-md border"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Submit Button */}
+      <div className="pt-6">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg"
+        >
+          {isSubmitting ? 'Creating Request...' : 'Create Request'}
+        </Button>
+      </div>
+    </form>
+  )
+}
