@@ -54,7 +54,7 @@ export function RequestCard({
 
   const handleDonateClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    router.push(`/requests/${id}`)
+    router.push(`/donate/${id}`)
   }
 
   return (

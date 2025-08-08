@@ -108,6 +108,10 @@ export default function RequestDetailsPage() {
 
   const progressPercentage = (parseFloat(requestDetails.currentAmount.replace(',', '')) / parseFloat(requestDetails.requestAmount.replace(',', ''))) * 100
 
+  const handleDonateClick = () => {
+    router.push(`/donate/${requestId}`)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <MainLayout>
@@ -217,7 +221,10 @@ export default function RequestDetailsPage() {
 
             {/* Action Buttons */}
             <div className="flex justify-center">
-              <Button className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg">
+              <Button 
+                onClick={handleDonateClick}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg"
+              >
                 Donate Now
               </Button>
             </div>
