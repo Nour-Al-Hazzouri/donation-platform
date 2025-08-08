@@ -11,18 +11,28 @@ import { COLORS } from '@/lib/constants'
 import Image from 'next/image'
 import { useEffect } from 'react'
 
+// More robust helper to parse amounts, handling various types and ensuring a number is returned
+const parseAmount = (value: string | number | undefined | null): number => {
+  if (typeof value === 'number') {
+    return isNaN(value) ? 0 : value;
+  }
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = parseFloat(value.replace(/[^0-9.-]+/g,""));
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+};
+
 export default function RequestDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const requestId = parseInt(params.id as string)
   const { requests, initializeRequests } = useRequestsStore()
 
-  // Initialize requests store with initial data on first load
   useEffect(() => {
     initializeRequests(initialRequestsData)
   }, [initializeRequests])
 
-  // Find the request by ID from the store
   const request = requests.find(req => req.id === requestId)
 
   if (!request) {
@@ -43,38 +53,9 @@ export default function RequestDetailsPage() {
     )
   }
 
-  // Enhanced request details logic
-  const getRequestAmount = (request: any) => {
-    // If the request has a goalAmount (new requests), use it
-    if (request.goalAmount) {
-      return request.goalAmount
-    }
-    
-    // Fallback to title-based logic for old requests
-    if (request.title.includes('cancer')) return '50,000'
-    if (request.title.includes('heart')) return '75,000'
-    if (request.title.includes('survive')) return '25,000'
-    if (request.title.includes('medical')) return '30,000'
-    if (request.title.includes('fire')) return '15,000'
-    return '10,000'
-  }
-
-  const getCurrentAmount = (request: any) => {
-    const goalAmount = parseFloat(getRequestAmount(request).replace(',', ''))
-    // For new requests, start with a small random amount (0-20% of goal)
-    if (request.goalAmount) {
-      const percentage = Math.random() * 0.2 // 0-20%
-      return Math.floor(goalAmount * percentage).toLocaleString()
-    }
-    
-    // Fallback amounts for old requests
-    if (request.title.includes('cancer')) return '12,500'
-    if (request.title.includes('heart')) return '23,000'
-    if (request.title.includes('survive')) return '8,750'
-    if (request.title.includes('medical')) return '5,200'
-    if (request.title.includes('fire')) return '3,800'
-    return '2,100'
-  }
+  // Use the robust parseAmount function for both goal and current amounts
+  const requestGoalAmount = parseAmount(request.goalAmount)
+  const requestCurrentAmount = parseAmount(request.currentAmount)
 
   const getDateCreated = (request: any) => {
     if (request.createdAt) {
@@ -94,11 +75,10 @@ export default function RequestDetailsPage() {
     return '2 days ago' // Fallback for old requests
   }
 
-  // Request details with enhanced logic
   const requestDetails = {
     ...request,
-    requestAmount: getRequestAmount(request),
-    currentAmount: getCurrentAmount(request),
+    requestAmount: requestGoalAmount.toLocaleString(),
+    currentAmount: requestCurrentAmount.toLocaleString(),
     currency: '$',
     fullDescription: request.description + ' ' + 
       'We are reaching out to our community for support during this difficult time. Every contribution, no matter how small, brings us closer to our goal and gives us hope for a better tomorrow. Your kindness and generosity mean everything to us.',
@@ -106,7 +86,7 @@ export default function RequestDetailsPage() {
     location: 'Lebanon'
   }
 
-  const progressPercentage = (parseFloat(requestDetails.currentAmount.replace(',', '')) / parseFloat(requestDetails.requestAmount.replace(',', ''))) * 100
+  const progressPercentage = (requestCurrentAmount / requestGoalAmount) * 100
 
   const handleDonateClick = () => {
     router.push(`/donate/${requestId}`)

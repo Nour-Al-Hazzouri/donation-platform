@@ -12,18 +12,20 @@ export interface RequestData {
   avatarUrl?: string
   initials: string
   isVerified: boolean
-  goalAmount?: string
+  goalAmount: string // Changed to be always present and string for consistency with input
+  currentAmount: number // Added currentAmount as a number
   createdAt?: string
 }
 
 interface RequestsState {
   requests: RequestData[]
-  addRequest: (request: Omit<RequestData, 'id'>) => void
+  addRequest: (request: Omit<RequestData, 'id' | 'currentAmount'>) => void // Omit currentAmount as it's initialized to 0
+  updateRequestCurrentAmount: (requestId: number, amount: number) => void // New action to update current amount
   getRequests: () => RequestData[]
   initializeRequests: (initialRequests: RequestData[]) => void
 }
 
-// Initial mock data
+// Initial mock data with fixed currentAmount values
 const initialRequestsData: RequestData[] = [
   {
     id: 1,
@@ -35,6 +37,7 @@ const initialRequestsData: RequestData[] = [
     initials: "RK",
     isVerified: true,
     goalAmount: "50000",
+    currentAmount: 12500, // Fixed current amount
     createdAt: new Date(Date.now() - 86400000).toISOString() // 1 day ago
   },
   {
@@ -46,6 +49,7 @@ const initialRequestsData: RequestData[] = [
     initials: "RK",
     isVerified: true,
     goalAmount: "75000",
+    currentAmount: 23000, // Fixed current amount
     createdAt: new Date(Date.now() - 172800000).toISOString() // 2 days ago
   },
   {
@@ -57,6 +61,7 @@ const initialRequestsData: RequestData[] = [
     initials: "RJ",
     isVerified: true,
     goalAmount: "25000",
+    currentAmount: 8750, // Fixed current amount
     createdAt: new Date(Date.now() - 259200000).toISOString() // 3 days ago
   },
   {
@@ -68,6 +73,7 @@ const initialRequestsData: RequestData[] = [
     initials: "SA",
     isVerified: true,
     goalAmount: "30000",
+    currentAmount: 5200, // Fixed current amount
     createdAt: new Date(Date.now() - 345600000).toISOString() // 4 days ago
   },
   {
@@ -79,6 +85,7 @@ const initialRequestsData: RequestData[] = [
     initials: "MC",
     isVerified: false,
     goalAmount: "15000",
+    currentAmount: 3800, // Fixed current amount
     createdAt: new Date(Date.now() - 432000000).toISOString() // 5 days ago
   },
   {
@@ -90,6 +97,7 @@ const initialRequestsData: RequestData[] = [
     initials: "PS",
     isVerified: true,
     goalAmount: "10000",
+    currentAmount: 2100, // Fixed current amount
     createdAt: new Date(Date.now() - 518400000).toISOString() // 6 days ago
   }
 ]
@@ -113,11 +121,22 @@ export const useRequestsStore = create<RequestsState>()(
         const requestWithId: RequestData = {
           ...newRequest,
           id: newId,
+          currentAmount: 0, // New requests start with 0 current amount
           createdAt: new Date().toISOString()
         }
         
         // Add new request at the beginning (most recent first)
         set({ requests: [requestWithId, ...currentRequests] })
+      },
+
+      updateRequestCurrentAmount: (requestId, amount) => {
+        set((state) => ({
+          requests: state.requests.map((req) =>
+            req.id === requestId
+              ? { ...req, currentAmount: Number(req.currentAmount) + Number(amount) } // Explicitly convert to number
+              : req
+          ),
+        }));
       },
       
       getRequests: () => {
