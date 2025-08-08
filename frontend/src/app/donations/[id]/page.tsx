@@ -5,15 +5,18 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { donationsData } from "@/components/donations/DonationCards"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { COLORS } from '@/lib/constants'
+import { donationsData } from "@/components/donations/DonationCards"
+import { useAuthStore } from '@/lib/store/authStore'
+import { useModal } from '@/lib/contexts/ModalContext'
 import Image from 'next/image'
 
 export default function DonationDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const donationId = parseInt(params.id as string)
+  const { isAuthenticated } = useAuthStore()
+  const { openModal } = useModal()
   
   // Find the donation by ID
   const donation = donationsData.find(donation => donation.id === donationId)
@@ -26,7 +29,7 @@ export default function DonationDetailsPage() {
             <div className="text-center">
               <h1 className="text-2xl font-bold text-gray-900 mb-4">Donation Not Found</h1>
               <p className="text-gray-600 mb-6">The donation you're looking for doesn't exist.</p>
-              <Button onClick={() => router.push('/')} className="bg-red-500 hover:bg-red-600 text-white">
+              <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white">
                 Back to Donations
               </Button>
             </div>
@@ -36,7 +39,7 @@ export default function DonationDetailsPage() {
     )
   }
 
-  // Mock data for donation details (in real app, this would come from API)
+  // Mock data for donation details
   const donationDetails = {
     ...donation,
     donationAmount: donation.title.includes('cancer') ? '50,000' : 
@@ -58,18 +61,25 @@ export default function DonationDetailsPage() {
 
   const progressPercentage = (parseFloat(donationDetails.currentAmount.replace(',', '')) / parseFloat(donationDetails.donationAmount.replace(',', ''))) * 100
 
+  const handleRequest = () => {
+    if (!isAuthenticated) {
+      openModal('signIn')
+      return
+    }
+    router.push(`/request/${donationId}`)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <MainLayout>
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-          {/* Updated Back Button to match Community page */}
+          {/* Back Button */}
           <div className="mb-4 md:mb-6">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => router.back()}
               className="h-8 w-8 rounded-full bg-white/80 hover:bg-white/90 shadow-md"
-              style={{ color: COLORS.primary }}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -143,7 +153,7 @@ export default function DonationDetailsPage() {
               </div>
             </div>
 
-            {/* Donation Image - Updated for better responsiveness */}
+            {/* Donation Image */}
             {donation.imageUrl && (
               <div className="mb-4 md:mb-6 w-full aspect-video relative rounded-lg overflow-hidden">
                 <Image
@@ -165,9 +175,12 @@ export default function DonationDetailsPage() {
               </p>
             </div>
 
-            {/* Action Buttons */}
+            {/* Request Button */}
             <div className="flex justify-center">
-              <Button className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg">
+              <Button 
+                onClick={handleRequest}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg"
+              >
                 Request Now
               </Button>
             </div>
