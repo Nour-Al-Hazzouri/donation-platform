@@ -1,6 +1,11 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useAuthStore } from '@/lib/store/authStore'
+import { useModal } from '@/lib/contexts/ModalContext'
 
 interface SearchSectionProps {
   searchTerm: string
@@ -15,16 +20,27 @@ export function SearchSection({
   onSearchSubmit, 
   resultsCount 
 }: SearchSectionProps) {
+  const router = useRouter()
+  const { isAuthenticated } = useAuthStore()
+  const { openModal } = useModal()
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSearchSubmit()
+  }
+
+  const handleAddDonation = () => {
+    if (!isAuthenticated) {
+      openModal('signIn')
+      return
+    }
+    router.push('/add-donation')
   }
 
   return (
     <div className="text-center mb-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Latest Donations</h1>
       
-      {/* Search Bar */}
       <form onSubmit={handleSubmit} className="flex justify-center items-center max-w-md mx-auto mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -43,21 +59,22 @@ export function SearchSection({
         </Button>
       </form>
 
-      {/* Search Results Info */}
       {searchTerm && (
         <div className="mb-4">
           <p className="text-sm text-gray-600">
             {resultsCount > 0 
-              ? `Found ${resultsCount} donation${resultsCount !== 1 ? 's' : ''} matching "${searchTerm}"`
-              : `No donations found for "${searchTerm}"`
+              ? `Found ${resultsCount} donation${resultsCount !== 1 ? 's' : ''} for "${searchTerm}"`
+              : `No results found for "${searchTerm}"`
             }
           </p>
         </div>
       )}
       
-      {/* Add Donation Button */}
       <div className="flex justify-end mb-8">
-        <Button className="bg-red-500 hover:bg-red-600 text-white">
+        <Button 
+          onClick={handleAddDonation}
+          className="bg-red-500 hover:bg-red-600 text-white"
+        >
           Add Donation
         </Button>
       </div>
