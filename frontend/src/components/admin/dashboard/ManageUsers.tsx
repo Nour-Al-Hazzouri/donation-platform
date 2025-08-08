@@ -167,8 +167,17 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                   <Button 
                     size="sm" 
                     className="bg-red-500 hover:bg-red-600 text-white px-4"
+                    onClick={() => {
+                      if (activeTab === "Verification") {
+                        // Navigate to verification request details page
+                        window.location.href = `/admin/verification-requests/${user.id}`;
+                      } else {
+                        // Navigate to user management page
+                        window.location.href = `/admin/users/manage/${user.id}`;
+                      }
+                    }}
                   >
-                    {activeTab === "Verification" ? "Verify" : "Manage"}
+                    {activeTab === "Verification" ? "View Request" : "Manage"}
                   </Button>
                 </div>
               </div>
