@@ -4,19 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function CommunityChart() {
   return (
-    <Card className="bg-white w-full h-full flex flex-col">
-      <CardHeader className="text-center pb-2"> {/* Reduced padding-bottom */}
-        <CardTitle className="text-lg font-medium">Community Members</CardTitle>
+    <Card className="bg-white w-full shadow-sm hover:shadow transition-shadow duration-200">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-semibold">Community Growth</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
-        {/* Stats section with reduced margin-bottom */}
-        <div className="mb-2 text-center"> {/* Changed from mb-4 to mb-2 */}
-          <div className="text-4xl font-bold">11,756</div> {/* Removed mb-1 */}
-          <div className="text-sm text-green-600 mt-1">+8.2%</div> {/* Changed to mt-1 */}
+      <CardContent>
+        {/* Stats section */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="text-4xl font-bold">11,756</div>
+            <div className="text-sm text-muted-foreground">Total Members</div>
+          </div>
+          <div className="text-sm font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
+            +8.2% from last month
+          </div>
         </div>
 
-        {/* Chart Area - moved closer to stats */}
-        <div className="relative flex-1 min-h-[200px]"> {/* Removed mb-2 */}
+        {/* Chart Area */}
+        <div className="relative h-[250px] md:h-[300px] w-full mt-4">
           <svg className="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -36,15 +41,15 @@ export function CommunityChart() {
             />
             {/* Data point for August */}
             <circle cx="200" cy="110" r="4" fill="#ef4444" />
-            <line x1="200" y1="110" x2="200" y2="180" stroke="#ef4444" strokeWidth="2" />
+            <line x1="200" y1="110" x2="200" y2="180" stroke="#ef4444" strokeWidth="2" strokeDasharray="2" />
           </svg>
         </div>
 
         {/* Month labels */}
-        <div className="flex justify-between text-xs sm:text-sm text-gray-500 mt-auto pt-2"> {/* Added pt-2 */}
+        <div className="flex justify-between text-sm text-muted-foreground mt-2">
           <span>June</span>
           <span>July</span>
-          <span className="bg-red-500 text-white px-2 py-1 rounded text-xs">August</span>
+          <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded-md font-medium">August</span>
           <span>Sept</span>
           <span>Oct</span>
         </div>

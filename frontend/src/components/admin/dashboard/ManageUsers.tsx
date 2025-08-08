@@ -1,0 +1,179 @@
+"use client"
+
+import { useState } from "react"
+import Image from "next/image"
+import { Search } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+
+interface User {
+  id: string
+  name: string
+  email: string
+  phone: string
+  avatar: string
+}
+
+// Mock data for users
+const users: User[] = [
+  {
+    id: "1",
+    name: "Tomiwa Oyeledu Dolapo",
+    email: "tomiwaledu@me.com",
+    phone: "+2349034526771",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "2",
+    name: "Bessie Cooper",
+    email: "michael.mitc@me.com",
+    phone: "(505) 555-0125",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "3",
+    name: "Albert Flores",
+    email: "alma.lawson@we.com",
+    phone: "(808) 555-0111",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "4",
+    name: "Brooklyn Simmons",
+    email: "debbie.baker@you.com",
+    phone: "(480) 555-0103",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "5",
+    name: "Devon Lane",
+    email: "felicia.reid@us.com",
+    phone: "(217) 555-0113",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "6",
+    name: "Jerome Bell",
+    email: "sara.cruz@them.com",
+    phone: "(629) 555-0129",
+    avatar: "/placeholder.svg?height=40&width=40"
+  }
+]
+
+// Mock data for verification requests
+const verificationRequests: User[] = [
+  {
+    id: "2",
+    name: "Bessie Cooper",
+    email: "michael.mitc@me.com",
+    phone: "(505) 555-0125",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "5",
+    name: "Devon Lane",
+    email: "felicia.reid@us.com",
+    phone: "(217) 555-0113",
+    avatar: "/placeholder.svg?height=40&width=40"
+  }
+]
+
+interface ManageUsersProps {
+  activeTab?: string;
+}
+
+export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
+  const [searchQuery, setSearchQuery] = useState("")
+  
+  // Determine which data to use based on active tab
+  const dataSource = activeTab === "Verification" ? verificationRequests : users
+  
+  // Filter users based on search query
+  const filteredUsers = dataSource.filter(user => 
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.phone.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  return (
+    <div className="flex-1 flex flex-col">
+      {/* Header */}
+      <div className="bg-white border-b px-6 py-4 rounded-t-lg">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-800">
+            {activeTab === "All" ? "All Users" : "Verification Requests"}
+          </h2>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-80 bg-gray-50 border-gray-200"
+              />
+            </div>
+            <Button className="bg-red-500 hover:bg-red-600 text-white">
+              Add User
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 bg-white rounded-b-lg shadow-sm">
+        {/* Table Header */}
+        <div className="grid grid-cols-4 gap-4 p-4 border-b bg-gray-50 font-medium text-gray-700">
+          <div>Name</div>
+          <div>Email</div>
+          <div>Phone Number</div>
+          <div></div>
+        </div>
+
+        {/* Table Body */}
+        <div className="divide-y">
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((user) => (
+              <div key={user.id} className="grid grid-cols-4 gap-4 p-4 items-center hover:bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                    <Image
+                      src={user.avatar || "/placeholder.svg"}
+                      alt={user.name}
+                      width={40}
+                      height={40}
+                      className="rounded-full object-cover"
+                    />
+                  </div>
+                  <span className="font-medium text-gray-900">{user.name}</span>
+                </div>
+                <div className="text-gray-600">{user.email}</div>
+                <div className="text-gray-600">{user.phone}</div>
+                <div className="flex justify-end gap-2">
+                  {activeTab === "Verification" && (
+                    <div className="flex items-center">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Pending
+                      </span>
+                    </div>
+                  )}
+                  <Button 
+                    size="sm" 
+                    className="bg-red-500 hover:bg-red-600 text-white px-4"
+                  >
+                    {activeTab === "Verification" ? "Verify" : "Manage"}
+                  </Button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="p-8 text-center text-gray-500">
+              No users found matching your search criteria.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

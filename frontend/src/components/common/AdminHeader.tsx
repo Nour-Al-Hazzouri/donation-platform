@@ -100,7 +100,7 @@ export function AdminHeader() {
           </nav>
           <div className="hidden md:flex items-center gap-3">
             {/* Dashboard Button */}
-            <Link href="/admin">
+            <Link href="/admin/dashboard">
               <Button
                 style={{
                   backgroundColor: COLORS.primary,
@@ -138,7 +138,7 @@ export function AdminHeader() {
                 </div>
 
                 {/* Mobile Dashboard Button */}
-                <Link href="/admin" onClick={closeMobileMenu}>
+                <Link href="/admin/dashboard" onClick={closeMobileMenu}>
                   <Button
                     style={{ backgroundColor: COLORS.primary, color: "white" }}
                     className="w-full text-center py-2 px-4 rounded-md"

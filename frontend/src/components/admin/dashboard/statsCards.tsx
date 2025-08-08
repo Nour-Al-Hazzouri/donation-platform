@@ -8,12 +8,12 @@ export function StatsCards() {
   ]
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6 w-full">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
       {stats.map((stat, index) => (
-        <Card key={index} className="bg-white">
-          <CardContent className="p-4 sm:p-6 text-center">
-            <div className="text-sm text-gray-600 mb-2">{stat.label}</div>
-            <div className="text-2xl sm:text-3xl font-bold">{stat.value}</div>
+        <Card key={index} className="bg-white shadow-sm hover:shadow transition-shadow duration-200">
+          <CardContent className="p-6 text-center">
+            <div className="text-sm font-medium text-muted-foreground mb-2">{stat.label}</div>
+            <div className="text-3xl font-bold">{stat.value}</div>
           </CardContent>
         </Card>
       ))}

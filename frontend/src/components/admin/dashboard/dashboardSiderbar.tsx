@@ -37,9 +37,15 @@ export function DashboardSidebar() {
               </div>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton isActive className="bg-red-50 text-red-600 hover:bg-red-100">
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span>Dashboard</span>
+                <SidebarMenuButton 
+                  isActive 
+                  className="bg-red-50 text-red-600 hover:bg-red-100"
+                  asChild
+                >
+                  <a href="/admin">
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -66,13 +72,19 @@ export function DashboardSidebar() {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton className="text-gray-500 hover:text-gray-700 hover:bg-gray-50">
-                          <span>All</span>
+                        <SidebarMenuSubButton 
+                          className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                          asChild
+                        >
+                          <a href="/admin/users">All</a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton className="text-gray-500 hover:text-gray-700 hover:bg-gray-50">
-                          <span>Verification Requests</span>
+                        <SidebarMenuSubButton 
+                          className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                          asChild
+                        >
+                          <a href="/admin/users?tab=verification">Verification Requests</a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
