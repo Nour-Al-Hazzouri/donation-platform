@@ -98,23 +98,23 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b px-6 py-4 rounded-t-lg">
-        <div className="flex items-center justify-between">
+      <div className="bg-white border-b px-4 sm:px-6 py-4 rounded-t-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 className="text-xl font-semibold text-gray-800">
             {activeTab === "All" ? "All Users" : "Verification Requests"}
           </h2>
-          <div className="flex items-center gap-4">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 type="text"
                 placeholder="Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-80 bg-gray-50 border-gray-200"
+                className="pl-10 w-full sm:w-60 md:w-80 bg-gray-50 border-gray-200"
               />
             </div>
-            <Button className="bg-red-500 hover:bg-red-600 text-white">
+            <Button className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto">
               Add User
             </Button>
           </div>
@@ -122,9 +122,9 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 bg-white rounded-b-lg shadow-sm">
-        {/* Table Header */}
-        <div className="grid grid-cols-4 gap-4 p-4 border-b bg-gray-50 font-medium text-gray-700">
+      <div className="flex-1 bg-white rounded-b-lg shadow-sm overflow-x-auto">
+        {/* Table Header - Hidden on mobile */}
+        <div className="hidden md:grid md:grid-cols-4 gap-4 p-4 border-b bg-gray-50 font-medium text-gray-700">
           <div>Name</div>
           <div>Email</div>
           <div>Phone Number</div>
@@ -135,9 +135,9 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
         <div className="divide-y">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((user) => (
-              <div key={user.id} className="grid grid-cols-4 gap-4 p-4 items-center hover:bg-gray-50">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+              <div key={user.id} className="flex flex-col md:grid md:grid-cols-4 gap-2 md:gap-4 p-4 items-start md:items-center hover:bg-gray-50">
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                     <Image
                       src={user.avatar || "/placeholder.svg"}
                       alt={user.name}
@@ -146,11 +146,17 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                       className="rounded-full object-cover"
                     />
                   </div>
-                  <span className="font-medium text-gray-900">{user.name}</span>
+                  <span className="font-medium text-gray-900 truncate">{user.name}</span>
                 </div>
-                <div className="text-gray-600">{user.email}</div>
-                <div className="text-gray-600">{user.phone}</div>
-                <div className="flex justify-end gap-2">
+                <div className="text-gray-600 w-full md:w-auto">
+                  <span className="md:hidden font-medium text-gray-700">Email: </span>
+                  {user.email}
+                </div>
+                <div className="text-gray-600 w-full md:w-auto">
+                  <span className="md:hidden font-medium text-gray-700">Phone: </span>
+                  {user.phone}
+                </div>
+                <div className="flex justify-start md:justify-end gap-2 w-full md:w-auto mt-2 md:mt-0">
                   {activeTab === "Verification" && (
                     <div className="flex items-center">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
