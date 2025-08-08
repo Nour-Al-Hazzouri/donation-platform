@@ -60,9 +60,14 @@ export function DashboardSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton className="text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-                  <MapPin className="h-4 w-4" />
-                  <span>manage location</span>
+                <SidebarMenuButton 
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  asChild
+                >
+                  <a href="/admin/locations">
+                    <MapPin className="h-4 w-4" />
+                    <span>manage location</span>
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <Collapsible defaultOpen className="group/collapsible">
