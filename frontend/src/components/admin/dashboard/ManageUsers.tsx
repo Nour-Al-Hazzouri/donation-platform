@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Search } from 'lucide-react'
 import { useRouter } from "next/navigation"
@@ -15,8 +15,8 @@ interface User {
   avatar: string
 }
 
-// Mock data constants
-const MOCK_USERS: User[] = [
+// Default mock data constants
+const DEFAULT_MOCK_USERS: User[] = [
   {
     id: "1",
     name: "Tomiwa Oyeledu Dolapo",
@@ -61,6 +61,24 @@ const MOCK_USERS: User[] = [
   }
 ]
 
+// Function to get users from localStorage or use default mock data
+const getUsersFromStorage = (): User[] => {
+  if (typeof window === 'undefined') return DEFAULT_MOCK_USERS;
+  
+  const storedUsers = localStorage.getItem('mockUsers');
+  return storedUsers ? JSON.parse(storedUsers) : DEFAULT_MOCK_USERS;
+};
+
+// Function to save users to localStorage
+const saveUsersToStorage = (users: User[]) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('mockUsers', JSON.stringify(users));
+  }
+};
+
+// Get initial users from storage or defaults
+const MOCK_USERS: User[] = getUsersFromStorage();
+
 // IDs of users with pending verification requests
 const VERIFICATION_REQUEST_USER_IDS = ["2", "5"]
 
@@ -73,12 +91,88 @@ interface ManageUsersProps {
   activeTab?: string;
 }
 
+// Create a custom hook to manage users state
+export function useUsers() {
+  const [users, setUsers] = useState<User[]>([]);
+
+  // Load users from localStorage on component mount
+  useEffect(() => {
+    const storedUsers = getUsersFromStorage();
+    setUsers(storedUsers);
+  }, []);
+
+  // Function to add a new user
+  const addUser = (userData: any) => {
+    // Create a new user object from the form data
+    const newUser: User = {
+      id: String(Date.now()), // Generate a unique ID
+      name: userData.personalDetails.name,
+      email: userData.personalDetails.email,
+      phone: userData.personalDetails.phoneNumber,
+      avatar: "/placeholder.svg?height=40&width=40" // Default avatar
+    };
+
+    // Add the new user to the list
+    const updatedUsers = [...users, newUser];
+    setUsers(updatedUsers);
+    
+    // Save to localStorage
+    saveUsersToStorage(updatedUsers);
+    
+    return newUser;
+  };
+  
+  // Function to delete a user
+  const deleteUser = (userId: string) => {
+    // Filter out the user with the given ID
+    const updatedUsers = users.filter(user => user.id !== userId);
+    setUsers(updatedUsers);
+    
+    // Save to localStorage
+    saveUsersToStorage(updatedUsers);
+    
+    return true;
+  };
+
+  return { users, addUser, deleteUser };
+}
+
+// Create a global context for users
+import { createContext, useContext } from "react";
+
+interface UsersContextType {
+  users: User[];
+  addUser: (userData: any) => User;
+  deleteUser: (userId: string) => boolean;
+}
+
+const UsersContext = createContext<UsersContextType | undefined>(undefined);
+
+export function UsersProvider({ children }: { children: React.ReactNode }) {
+  const usersData = useUsers();
+  
+  return (
+    <UsersContext.Provider value={usersData}>
+      {children}
+    </UsersContext.Provider>
+  );
+}
+
+export function useUsersContext() {
+  const context = useContext(UsersContext);
+  if (context === undefined) {
+    throw new Error("useUsersContext must be used within a UsersProvider");
+  }
+  return context;
+}
+
 export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
+  const { users } = useUsersContext();
   
   // Determine which data to use based on active tab
-  const dataSource = activeTab === "Verification" ? MOCK_VERIFICATION_REQUESTS : MOCK_USERS
+  const dataSource = activeTab === "Verification" ? MOCK_VERIFICATION_REQUESTS : users
   
   // Filter users based on search query
   const filteredUsers = dataSource.filter(user => 

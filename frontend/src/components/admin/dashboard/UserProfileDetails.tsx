@@ -5,6 +5,7 @@ import Image from "next/image"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import { useUsersContext } from "./ManageUsers"
 
 // Mock data constants
 const USER_PROFILE_DATA = {
@@ -58,6 +59,7 @@ export function UserProfileDetails({
 }: UserProfileDetailsProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
+  const { deleteUser } = useUsersContext()
 
   const handleBack = () => {
     if (onBack) {
@@ -83,8 +85,8 @@ export function UserProfileDetails({
         if (onDelete) {
           await onDelete(userData.id)
         } else {
-          // Implement API call to delete user
-          // await deleteUser(userData.id)
+          // Delete user using the context function
+          deleteUser(userData.id)
           router.push("/admin/users")
         }
       } finally {
