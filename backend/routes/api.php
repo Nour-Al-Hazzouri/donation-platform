@@ -6,6 +6,7 @@ use App\Http\Controllers\API\LocationController;
 use App\Http\Controllers\API\AnnouncementController;
 use App\Http\Controllers\API\StatisticsController;
 use App\Http\Controllers\API\VerificationController;
+use App\Http\Controllers\API\DonationEventController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -98,6 +99,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Public locations (for all authenticated users)
     Route::get('locations', [LocationController::class, 'index']);
     Route::get('locations/{location}', [LocationController::class, 'show']);
+
+    // Donation events (public for all authenticated users to view, but only admins/moderators can create/update/delete)
+    Route::prefix('donation-events')->group(function () {
+        Route::get('/', [DonationEventController::class, 'index']);
+        Route::get('/{donationEvent}', [DonationEventController::class, 'show']);
+        Route::post('/', [DonationEventController::class, 'store']);
+        Route::put('/{donationEvent}', [DonationEventController::class, 'update']);
+        Route::delete('/{donationEvent}', [DonationEventController::class, 'destroy']);
+    }); 
 });
 
 
