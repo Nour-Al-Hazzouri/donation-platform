@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
@@ -47,13 +47,27 @@ interface Location {
 export function LocationsAdminPage() {
   const router = useRouter()
   
-  // Convert mock data to include IDs for table display
-  const [locations, setLocations] = useState<Location[]>(
-    LOCATIONS.slice(0, 4).map((location, index) => ({
-      id: `location-${index + 1}`,
-      ...location
-    }))
-  )
+  // Initialize locations state
+  const [locations, setLocations] = useState<Location[]>([])
+  
+  // Load locations from localStorage or use mock data if none exist
+  useEffect(() => {
+    const storedLocations = localStorage.getItem('adminLocations')
+    if (storedLocations) {
+      // Use locations from localStorage
+      setLocations(JSON.parse(storedLocations))
+    } else {
+      // Initialize with mock data
+      const initialLocations = LOCATIONS.slice(0, 4).map((location, index) => ({
+        id: `location-${index + 1}`,
+        ...location
+      }))
+      setLocations(initialLocations)
+      
+      // Store initial locations in localStorage
+      localStorage.setItem('adminLocations', JSON.stringify(initialLocations))
+    }
+  }, [])
 
   const [selectedGovernorate, setSelectedGovernorate] = useState("")
   const [selectedDistrict, setSelectedDistrict] = useState("")
@@ -94,7 +108,11 @@ export function LocationsAdminPage() {
         id: `location-${Date.now()}`,
         ...newLocation
       }
-      setLocations(prev => [...prev, newLocationWithId])
+      const updatedLocations = [...locations, newLocationWithId]
+      setLocations(updatedLocations)
+      
+      // Update localStorage
+      localStorage.setItem('adminLocations', JSON.stringify(updatedLocations))
       
       // Reset form
       setSelectedGovernorate("")
@@ -116,7 +134,11 @@ export function LocationsAdminPage() {
   }
 
   const handleDelete = (id: string) => {
-    setLocations(prev => prev.filter(loc => loc.id !== id))
+    const updatedLocations = locations.filter(loc => loc.id !== id)
+    setLocations(updatedLocations)
+    
+    // Update localStorage
+    localStorage.setItem('adminLocations', JSON.stringify(updatedLocations))
   }
 
   const handleCancel = () => {

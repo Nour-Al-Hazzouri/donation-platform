@@ -22,6 +22,22 @@ export default function EditLocationPage() {
   const handleSave = (locationData: LocationData) => {
     // In a real app, this would save to the backend
     console.log('Saving location:', locationData)
+    
+    // Store the updated location in localStorage to persist between page navigations
+    if (locationData.id) {
+      // Get existing locations from localStorage or initialize empty array
+      const storedLocations = localStorage.getItem('adminLocations')
+      let locations = storedLocations ? JSON.parse(storedLocations) : []
+      
+      // Update the location with matching id
+      locations = locations.map((loc: LocationData) => 
+        loc.id === locationData.id ? locationData : loc
+      )
+      
+      // Save back to localStorage
+      localStorage.setItem('adminLocations', JSON.stringify(locations))
+    }
+    
     // Navigate back to locations page
     router.push('/admin/locations')
   }
