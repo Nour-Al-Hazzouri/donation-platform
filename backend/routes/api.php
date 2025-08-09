@@ -6,6 +6,8 @@ use App\Http\Controllers\API\LocationController;
 use App\Http\Controllers\API\AnnouncementController;
 use App\Http\Controllers\API\StatisticsController;
 use App\Http\Controllers\API\VerificationController;
+use App\Http\Controllers\API\CommunityPostController;
+use App\Http\Controllers\API\CommentController;
 use App\Http\Controllers\API\DonationEventController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -100,6 +102,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('locations', [LocationController::class, 'index']);
     Route::get('locations/{location}', [LocationController::class, 'show']);
 
+    // Community Posts
+    Route::apiResource('community-posts', CommunityPostController::class);
+    
+    // Comments for community posts
+    Route::prefix('community-posts/{communityPost}/comments')->group(function () {
+        Route::get('/', [CommentController::class, 'index']);
+        Route::post('/', [CommentController::class, 'store']);
+        Route::put('/{comment}', [CommentController::class, 'update']);
+        Route::delete('/{comment}', [CommentController::class, 'destroy']);
+    });
+
     // Donation events (public for all authenticated users to view, but only admins/moderators can create/update/delete)
     Route::prefix('donation-events')->group(function () {
         Route::get('/', [DonationEventController::class, 'index']);
@@ -108,6 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{donationEvent}', [DonationEventController::class, 'update']);
         Route::delete('/{donationEvent}', [DonationEventController::class, 'destroy']);
     }); 
+
 });
 
 

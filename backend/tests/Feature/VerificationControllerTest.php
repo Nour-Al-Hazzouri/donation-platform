@@ -90,6 +90,10 @@ class VerificationControllerTest extends TestCase
             'id' => $this->verification->id,
             'status' => 'approved'
         ]);
+        $this->assertDatabaseHas('users', [
+            'id' => $this->user->id,
+            'is_verified' => true
+        ]);
     }
 
     /** @test */
@@ -118,7 +122,7 @@ class VerificationControllerTest extends TestCase
     {
         $this->actingAs($this->user);
         $response = $this->postJson('/api/verifications', []);
-        
+
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['document_type', 'documents']);
     }
@@ -129,7 +133,7 @@ class VerificationControllerTest extends TestCase
         $this->actingAs($this->admin);
         $nonExistentId = 9999;
         $response = $this->postJson("/api/verifications/{$nonExistentId}/approved");
-        
+
         $response->assertStatus(404);
     }
 
@@ -152,7 +156,7 @@ class VerificationControllerTest extends TestCase
         $this->actingAs($this->admin);
         $nonExistentId = 9999;
         $response = $this->getJson("/api/verifications/{$nonExistentId}");
-        
+
         $response->assertStatus(404);
     }
 
@@ -160,13 +164,13 @@ class VerificationControllerTest extends TestCase
     public function cannot_update_already_processed_verification()
     {
         $this->actingAs($this->admin);
-        
+
         // First update to approved
         $this->postJson("/api/verifications/{$this->verification->id}/approved");
-        
+
         // Try to update again
         $response = $this->postJson("/api/verifications/{$this->verification->id}/rejected");
-        
+
         $response->assertStatus(400)
             ->assertJson(['success' => false]);
     }
@@ -189,7 +193,7 @@ class VerificationControllerTest extends TestCase
     {
         $this->actingAs($this->user);
         $tooManyDocuments = array_fill(0, 11, 'https://example.com/doc.jpg');
-        
+
         $response = $this->postJson('/api/verifications', [
             'document_type' => 'id_card',
             'documents' => $tooManyDocuments
