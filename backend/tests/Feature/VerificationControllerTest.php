@@ -202,4 +202,23 @@ class VerificationControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['documents']);
     }
+    public function test_is_verified_changes_on_approval()
+{
+    $admin = User::factory()->create(['role' => 'admin']);
+    $admin->assignRole('admin');
+    $user = User::factory()->create(['is_verified' => false]);
+    $verification = Verification::factory()->create([
+        'user_id' => $user->id,
+        'status' => 'pending',
+    ]);
+
+    $this->actingAs($admin)
+        ->postJson("/api/verifications/{$verification->id}/approved", [
+            'notes' => 'Test approval'
+        ])
+        ->assertStatus(200);
+
+    $user->refresh();
+    $this->assertTrue($user->is_verified);
+}
 }

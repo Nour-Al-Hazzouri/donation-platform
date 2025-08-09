@@ -31,9 +31,10 @@ class DonationEventFactory extends Factory
                 'https://picsum.photos/800/600?random=3',
                 'https://picsum.photos/800/600?random=4',
             ], $this->faker->numberBetween(1, 4)),
+            'type' => $this->faker->randomElement(['request', 'offer']),
             'goal_amount' => $this->faker->randomFloat(2, 1000, 100000),
-            'current_amount' => fn (array $attributes) => $this->faker->randomFloat(2, 0, $attributes['goal_amount'] * 0.8),
-            'possible_amount' => fn (array $attributes) => $this->faker->randomFloat(2, $attributes['current_amount'], $attributes['goal_amount'] * 1.2),
+            'current_amount' => fn(array $attributes) => $this->faker->randomFloat(2, 0, $attributes['goal_amount'] * 0.8),
+            'possible_amount' => fn(array $attributes) => $this->faker->randomFloat(2, $attributes['current_amount'], $attributes['goal_amount'] * 1.2),
             'status' => $this->faker->randomElement($statuses),
         ];
     }
