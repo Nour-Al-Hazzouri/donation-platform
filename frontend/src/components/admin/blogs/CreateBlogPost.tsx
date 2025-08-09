@@ -147,7 +147,7 @@ export function CreateBlogPost({
   const isFormValid = formData.title.trim() && formData.content.trim() && formData.priority
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-4xl mx-auto">
         {onBack && (
           <Button
@@ -155,7 +155,7 @@ export function CreateBlogPost({
             size="icon"
             onClick={handleBack}
             className={cn(
-              "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md mb-6 z-10"
+              "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md mb-4 sm:mb-6 z-10"
             )}
             style={{ color: COLORS.primary }}
             aria-label="Go back"
@@ -164,10 +164,10 @@ export function CreateBlogPost({
           </Button>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Title Field */}
           <div>
-            <label htmlFor="title" className="block text-lg font-medium text-gray-900 mb-2">
+            <label htmlFor="title" className="block text-base sm:text-lg font-medium text-gray-900 mb-1 sm:mb-2">
               Title<span className="text-red-500">*</span>
             </label>
             <Input
@@ -176,14 +176,14 @@ export function CreateBlogPost({
               placeholder="Blog post title"
               value={formData.title}
               onChange={(e) => handleInputChange("title", e.target.value)}
-              className="w-full text-base border-gray-300 focus:border-red-500 focus:ring-red-500"
+              className="w-full text-sm sm:text-base border-gray-300 focus:border-red-500 focus:ring-red-500"
               required
             />
           </div>
 
           {/* Content Field */}
           <div>
-            <label htmlFor="content" className="block text-lg font-medium text-gray-900 mb-2">
+            <label htmlFor="content" className="block text-base sm:text-lg font-medium text-gray-900 mb-1 sm:mb-2">
               Content<span className="text-red-500">*</span>
             </label>
             <Textarea
@@ -191,14 +191,14 @@ export function CreateBlogPost({
               placeholder="Blog post content"
               value={formData.content}
               onChange={(e) => handleInputChange("content", e.target.value)}
-              className="w-full min-h-[120px] text-base border-gray-300 focus:border-red-500 focus:ring-red-500 resize-vertical"
+              className="w-full min-h-[120px] text-sm sm:text-base border-gray-300 focus:border-red-500 focus:ring-red-500 resize-vertical"
               required
             />
           </div>
 
           {/* Priority Field */}
           <div>
-            <label htmlFor="priority" className="block text-lg font-medium text-gray-900 mb-2">
+            <label htmlFor="priority" className="block text-base sm:text-lg font-medium text-gray-900 mb-1 sm:mb-2">
               Priority<span className="text-red-500">*</span>
             </label>
             <Select
@@ -206,7 +206,7 @@ export function CreateBlogPost({
               onValueChange={(value) => handleInputChange("priority", value)}
               required
             >
-              <SelectTrigger className="w-full max-w-xs border-gray-300 focus:border-red-500 focus:ring-red-500">
+              <SelectTrigger className="w-full max-w-full sm:max-w-xs border-gray-300 focus:border-red-500 focus:ring-red-500 text-sm sm:text-base">
                 <SelectValue placeholder="Select priority" />
               </SelectTrigger>
               <SelectContent>
@@ -221,16 +221,16 @@ export function CreateBlogPost({
 
           {/* Image Upload Field */}
           <div>
-            <label htmlFor="image" className="block text-lg font-medium text-gray-900 mb-2">
+            <label htmlFor="image" className="block text-base sm:text-lg font-medium text-gray-900 mb-1 sm:mb-2">
               Featured Image
             </label>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 sm:gap-4">
               {imagePreview ? (
                 <div className="relative group">
                   <img 
                     src={imagePreview} 
                     alt="Preview" 
-                    className="w-full h-64 object-cover rounded-lg"
+                    className="w-full h-48 sm:h-64 object-cover rounded-lg"
                   />
                   <button
                     type="button"
@@ -244,11 +244,11 @@ export function CreateBlogPost({
                 <div className="flex items-center justify-center w-full">
                   <label
                     htmlFor="image-upload"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                    className="flex flex-col items-center justify-center w-full h-28 sm:h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
                   >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-8 h-8 mb-2 text-gray-500" />
-                      <p className="mb-2 text-sm text-gray-500">
+                    <div className="flex flex-col items-center justify-center pt-4 sm:pt-5 pb-4 sm:pb-6 px-2 text-center">
+                      <Upload className="w-6 h-6 sm:w-8 sm:h-8 mb-1 sm:mb-2 text-gray-500" />
+                      <p className="mb-1 sm:mb-2 text-xs sm:text-sm text-gray-500">
                         <span className="font-semibold">Click to upload</span> or drag and drop
                       </p>
                       <p className="text-xs text-gray-500">
@@ -265,16 +265,16 @@ export function CreateBlogPost({
                   </label>
                 </div>
               )}
-              {imageError && <p className="mt-2 text-sm text-red-600">{imageError}</p>}
+              {imageError && <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600">{imageError}</p>}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-4 pt-4">
+          <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:space-x-4 pt-3 sm:pt-4">
             <Button
               type="button"
               onClick={handleCancel}
-              className="bg-white hover:bg-gray-100 text-red-500 border border-red-500 px-8"
+              className="bg-white hover:bg-gray-100 text-red-500 border border-red-500 px-4 sm:px-8 w-full sm:w-auto order-2 sm:order-1"
               disabled={isSubmitting}
             >
               Cancel
@@ -282,7 +282,7 @@ export function CreateBlogPost({
             <Button
               type="submit"
               disabled={!isFormValid || isSubmitting}
-              className="bg-[#f90404] hover:bg-[#d90404] text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#f90404] hover:bg-[#d90404] text-white px-4 sm:px-8 w-full sm:w-auto order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Processing..." : mode === "create" ? "Create" : "Update"}
             </Button>
