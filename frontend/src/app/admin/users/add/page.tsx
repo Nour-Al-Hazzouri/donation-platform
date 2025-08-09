@@ -1,52 +1,28 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { AdminLayout } from "@/components/layouts/AdminLayout"
 import { DashboardSidebar } from "@/components/admin/dashboard/dashboardSiderbar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import EditUserProfile from "@/components/admin/users/EditUserProfile"
 
-// Mock data for fetching user by ID
-const fetchUserById = (id: string) => {
-  // This would be replaced with an actual API call
-  return {
-    id,
-    personalDetails: {
-      name: `User ${id}`,
-      gender: "male",
-      phoneNumber: "09034867656",
-      email: `user${id}@example.com`,
-      address: {
-        district: "Hamra",
-        governorate: "Beirut",
-      },
-      profileImage: null,
-    },
-  }
-}
-
-export default function EditUserPage() {
-  const params = useParams()
+export default function AddUserPage() {
   const router = useRouter()
-  const userId = params.id as string
-  
-  // In a real application, you would fetch the user data from an API
-  const userData = fetchUserById(userId)
   
   const handleBack = () => {
-    router.push(`/admin/users/manage/${userId}`)
+    router.push('/admin/users')
   }
 
   const handleSave = (userData: any) => {
-    // In a real application, you would make an API call to update the user
-    console.log('Updating user:', userData)
+    // In a real application, you would make an API call to create the user
+    console.log('Creating user:', userData)
     
-    // Navigate back to user profile
-    router.push(`/admin/users/manage/${userId}`)
+    // Navigate back to users list
+    router.push('/admin/users')
   }
 
   const handleCancel = () => {
-    router.push(`/admin/users/manage/${userId}`)
+    router.push('/admin/users')
   }
 
   return (
@@ -62,8 +38,7 @@ export default function EditUserPage() {
           <div className="flex-1 w-full min-w-0 flex flex-col">
             <SidebarInset className="p-0 flex-1 flex flex-col">
               <EditUserProfile 
-                initialData={userData}
-                mode="edit"
+                mode="add"
                 onBack={handleBack}
                 onSave={handleSave}
                 onCancel={handleCancel}

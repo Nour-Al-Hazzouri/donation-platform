@@ -116,7 +116,10 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                 className="pl-10 w-full sm:w-60 md:w-80 bg-gray-50 border-gray-200"
               />
             </div>
-            <Button className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto">
+            <Button 
+              className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto"
+              onClick={() => router.push('/admin/users/add')}
+            >
               Add User
             </Button>
           </div>
