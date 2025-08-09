@@ -94,7 +94,7 @@ export function DashboardSidebar() {
                           className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                           asChild
                         >
-                          <a href="/admin/verification-requests">Verification Requests</a>
+                          <a href="/admin/users?tab=verification">Verification Requests</a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>

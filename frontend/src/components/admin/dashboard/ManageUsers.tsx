@@ -105,19 +105,19 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
           <h2 className="text-xl font-semibold text-gray-800">
             {activeTab === "All" ? "All Users" : "Verification Requests"}
           </h2>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="relative w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 type="text"
                 placeholder="Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-full sm:w-60 md:w-80 bg-gray-50 border-gray-200"
+                className="pl-10 w-full bg-gray-50 border-gray-200"
               />
             </div>
             <Button 
-              className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto"
+              className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto whitespace-nowrap"
               onClick={() => router.push('/admin/users/add')}
             >
               Add User
@@ -127,7 +127,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 bg-white rounded-b-lg shadow-sm overflow-x-auto">
+      <div className="flex-1 bg-white rounded-b-lg shadow-sm overflow-hidden">
         {/* Table Header - Hidden on mobile */}
         <div className="hidden md:grid md:grid-cols-4 gap-4 p-4 border-b bg-gray-50 font-medium text-gray-700">
           <div>Name</div>
@@ -137,10 +137,10 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
         </div>
 
         {/* Table Body */}
-        <div className="divide-y">
+        <div className="divide-y overflow-x-auto">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((user) => (
-              <div key={user.id} className="flex flex-col md:grid md:grid-cols-4 gap-2 md:gap-4 p-4 items-start md:items-center hover:bg-gray-50">
+              <div key={user.id} className="flex flex-col md:grid md:grid-cols-4 gap-3 p-4 items-start md:items-center hover:bg-gray-50">
                 <div className="flex items-center gap-3 w-full md:w-auto">
                   <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                     <Image
@@ -155,15 +155,15 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                 </div>
                 <div className="text-gray-600 w-full md:w-auto">
                   <span className="md:hidden font-medium text-gray-700">Email: </span>
-                  {user.email}
+                  <span className="break-all">{user.email}</span>
                 </div>
                 <div className="text-gray-600 w-full md:w-auto">
                   <span className="md:hidden font-medium text-gray-700">Phone: </span>
                   {user.phone}
                 </div>
-                <div className="flex justify-start md:justify-end gap-2 w-full md:w-auto mt-2 md:mt-0">
+                <div className="flex flex-wrap justify-start md:justify-end gap-2 w-full md:w-auto mt-2 md:mt-0">
                   {activeTab === "Verification" && (
-                    <div className="flex items-center">
+                    <div className="flex items-center mr-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                         Pending
                       </span>
@@ -171,11 +171,11 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                   )}
                   <Button 
                     size="sm" 
-                    className="bg-red-500 hover:bg-red-600 text-white px-4"
+                    className="bg-red-500 hover:bg-red-600 text-white px-4 w-full sm:w-auto"
                     onClick={() => {
                       if (activeTab === "Verification") {
                         // Navigate to verification request details page
-                        router.push(`/admin/verification-requests/${user.id}`);
+                        router.push(`/admin/users/verification/${user.id}`);
                       } else {
                         // Navigate to user management page
                         router.push(`/admin/users/manage/${user.id}`);

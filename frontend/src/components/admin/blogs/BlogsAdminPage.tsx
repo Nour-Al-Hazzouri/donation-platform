@@ -190,19 +190,19 @@ export function BlogsAdminPage() {
                     </Button>
                   </div>
 
-                  <div className="flex-1 bg-white rounded-lg shadow-sm overflow-x-auto">
+                  <div className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden">
                     <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b bg-gray-50 font-medium text-gray-700">
                       <div className="col-span-5">Title</div>
                       <div className="col-span-3">Date</div>
                       <div className="col-span-2">Priority</div>
                       <div className="col-span-2">Actions</div>
                     </div>
-
-                    <div className="divide-y">
+                    <div className="overflow-x-auto">
+                      <div className="divide-y">
                       {filteredBlogPosts.length > 0 ? (
                         filteredBlogPosts.map((post) => (
-                          <div key={post.id} className="md:grid md:grid-cols-12 flex flex-col gap-4 p-4 items-start md:items-center hover:bg-gray-50">
-                            <div className="md:col-span-5 font-medium text-gray-900 truncate flex items-center gap-3 w-full">
+                          <div key={post.id} className="md:grid md:grid-cols-12 flex flex-col gap-3 p-4 items-start md:items-center hover:bg-gray-50">
+                            <div className="md:col-span-5 font-medium text-gray-900 flex items-center gap-3 w-full">
                               {post.imageUrl && (
                                 <img 
                                   src={post.imageUrl} 
@@ -210,14 +210,14 @@ export function BlogsAdminPage() {
                                   className="w-10 h-10 rounded object-cover flex-shrink-0"
                                 />
                               )}
-                              <span className="truncate">{post.title}</span>
+                              <span className="truncate max-w-full">{post.title}</span>
                             </div>
                             <div className="md:col-span-3 text-gray-600 text-sm md:text-base w-full md:w-auto flex items-center gap-2">
-                              <span className="md:hidden font-medium">Date:</span>
+                              <span className="md:hidden font-medium text-gray-700">Date:</span>
                               {post.createdAt}
                             </div>
                             <div className="md:col-span-2 w-full md:w-auto flex items-center gap-2">
-                              <span className="md:hidden font-medium">Priority:</span>
+                              <span className="md:hidden font-medium text-gray-700">Priority:</span>
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                 post.priority === 'high' ? 'bg-red-100 text-red-800' :
                                 post.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
@@ -226,11 +226,11 @@ export function BlogsAdminPage() {
                                 {post.priority.charAt(0).toUpperCase() + post.priority.slice(1)}
                               </span>
                             </div>
-                            <div className="md:col-span-2 flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+                            <div className="md:col-span-2 flex flex-wrap gap-2 w-full md:w-auto mt-2 md:mt-0">
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="text-gray-600 border-gray-300 hover:bg-gray-50 flex-1 md:flex-auto"
+                                className="text-gray-600 border-gray-300 hover:bg-gray-50 flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
                                 onClick={() => startEditing(post)}
                               >
                                 Edit
@@ -238,7 +238,7 @@ export function BlogsAdminPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="text-red-600 border-red-300 hover:bg-red-50 flex-1 md:flex-auto"
+                                className="text-red-600 border-red-300 hover:bg-red-50 flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
                                 onClick={() => handleDeleteBlogPost(post.id)}
                               >
                                 Delete
@@ -251,6 +251,7 @@ export function BlogsAdminPage() {
                           No blog posts found. Create your first blog post!
                         </div>
                       )}
+                    </div>
                     </div>
                   </div>
                 </>
