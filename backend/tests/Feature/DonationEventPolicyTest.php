@@ -12,51 +12,54 @@ use App\Models\Location;
 class DonationEventPolicyTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
     public function test_user_with_approved_verification_can_create()
-{
-    $user = User::factory()->create();
-    $location = Location::factory()->create();
-    Verification::factory()->create([
-        'user_id' => $user->id,
-        'status' => 'approved'
-    ]);
+    {
+        $user = User::factory()->create();
+        $location = Location::factory()->create();
+        Verification::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'approved'
+        ]);
 
-    $this->actingAs($user, 'sanctum');
-    $response = $this->postJson('/api/donation-events', [
-        'title' => 'Test Event',
-        'description' => 'Test Description',
-        'goal_amount' => 1000,
-        'type' => 'request',
-        'location_id' => $location->id,
-        // add other required fields if needed
-    ]);
+        $this->actingAs($user, 'sanctum');
+        $response = $this->postJson('/api/donation-events', [
+            'title' => 'Test Event',
+            'description' => 'Test Description',
+            'goal_amount' => 1000,
+            'type' => 'request',
+            'location_id' => $location->id,
+            // add other required fields if needed
+        ]);
 
-    $response->assertStatus(201);
-}
+        $response->assertStatus(201);
+    }
 
-public function test_user_without_approved_verification_cannot_create()
-{
-    $user = User::factory()->create();
-    $location = Location::factory()->create();
-    $this->actingAs($user, 'sanctum');
-    $response = $this->postJson('/api/donation-events', [
-        'title' => 'Test Event',
-        'description' => 'Test Description',
-        'goal_amount' => 1000,
-        'type' => 'request',
-        'location_id' => $location->id,
-        // add other required fields if needed
-    ]);
-
-    $response->assertStatus(403); // Forbidden
-}
+    public function test_user_without_approved_verification_cannot_create()
+    {
+        $user = User::factory()->create();
+        $location = Location::factory()->create();
+        
+        // Create a pending verification (not approved)
+        Verification::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'pending' // Not approved
+        ]);
+        
+        $this->actingAs($user, 'sanctum');
+        
+        // Create valid donation event data
+        $donationEventData = [
+            'title' => 'Test Event',
+            'description' => 'Test Description',
+            'goal_amount' => 1000,
+            'type' => 'request',
+            'location_id' => $location->id,
+            'images' => ['https://example.com/image.jpg']
+        ];
+        
+        $response = $this->postJson('/api/donation-events', $donationEventData);
+        
+        // Should be forbidden due to missing approved verification
+        $response->assertStatus(403);
+    }
 }
