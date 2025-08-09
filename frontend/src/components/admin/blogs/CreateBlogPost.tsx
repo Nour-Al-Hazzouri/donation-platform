@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronDown, Upload, ArrowLeft, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { COLORS } from "@/lib/constants"
+import { cn } from '@/lib/utils'
 
-// Mock data constants
 const PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
   { value: "medium", label: "Medium" },
@@ -29,9 +30,9 @@ const INITIAL_FORM_DATA = {
 
 interface CreateBlogPostProps {
   onCancel?: () => void
-  onCreate?: (formData: BlogPostFormData) => void
+  onCreate?: (formData: BlogPostFormData) => Promise<void> | void
   onBack?: () => void
-  initialData?: Partial<BlogPostFormData>
+  initialData?: Partial<BlogPostFormData> & { imageUrl?: string }
   mode?: "create" | "edit"
 }
 
@@ -53,8 +54,16 @@ export function CreateBlogPost({
     ...INITIAL_FORM_DATA,
     ...initialData
   })
-  const [imageFileName, setImageFileName] = useState<string>("") 
-  const [imageError, setImageError] = useState<string>("") 
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imageError, setImageError] = useState<string>("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Initialize image preview when in edit mode
+  useEffect(() => {
+    if (mode === "edit" && initialData?.imageUrl) {
+      setImagePreview(initialData.imageUrl)
+    }
+  }, [mode, initialData?.imageUrl])
 
   const handleInputChange = (field: keyof BlogPostFormData, value: string) => {
     setFormData(prev => ({
@@ -72,8 +81,18 @@ export function CreateBlogPost({
         return
       }
       
+      // Check file type
+      if (!file.type.match('image.*')) {
+        setImageError("Please select an image file")
+        return
+      }
+
       setImageError("")
-      setImageFileName(file.name)
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file)
+      setImagePreview(previewUrl)
+      
       setFormData(prev => ({
         ...prev,
         image: file
@@ -83,27 +102,46 @@ export function CreateBlogPost({
   
   const handleRemoveImage = () => {
     setFormData(prev => ({ ...prev, image: null }))
-    setImageFileName("")
+    if (imagePreview) {
+      // Only revoke object URL if it's not the initial image URL
+      if (!initialData?.imageUrl || imagePreview !== initialData.imageUrl) {
+        URL.revokeObjectURL(imagePreview)
+      }
+    }
+    setImagePreview(null)
     setImageError("")
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (formData.title && formData.content && formData.priority) {
-      onCreate?.(formData)
+    if (!formData.title || !formData.content || !formData.priority) return
+    
+    try {
+      setIsSubmitting(true)
+      await onCreate?.(formData)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleCancel = () => {
-    if (onCancel) {
-      onCancel()
+    if (imagePreview) {
+      // Only revoke object URL if it's not the initial image URL
+      if (!initialData?.imageUrl || imagePreview !== initialData.imageUrl) {
+        URL.revokeObjectURL(imagePreview)
+      }
     }
+    onCancel?.()
   }
 
   const handleBack = () => {
-    if (onBack) {
-      onBack()
+    if (imagePreview) {
+      // Only revoke object URL if it's not the initial image URL
+      if (!initialData?.imageUrl || imagePreview !== initialData.imageUrl) {
+        URL.revokeObjectURL(imagePreview)
+      }
     }
+    onBack?.()
   }
 
   const isFormValid = formData.title.trim() && formData.content.trim() && formData.priority
@@ -111,14 +149,19 @@ export function CreateBlogPost({
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Back Button */}
         {onBack && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleBack}
-            className="mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-black transition-colors"
+            className={cn(
+              "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md mb-6 z-10"
+            )}
+            style={{ color: COLORS.primary }}
+            aria-label="Go back"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+          </Button>
         )}
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -130,7 +173,7 @@ export function CreateBlogPost({
             <Input
               id="title"
               type="text"
-              placeholder="whatever"
+              placeholder="Blog post title"
               value={formData.title}
               onChange={(e) => handleInputChange("title", e.target.value)}
               className="w-full text-base border-gray-300 focus:border-red-500 focus:ring-red-500"
@@ -145,7 +188,7 @@ export function CreateBlogPost({
             </label>
             <Textarea
               id="content"
-              placeholder="whatever"
+              placeholder="Blog post content"
               value={formData.content}
               onChange={(e) => handleInputChange("content", e.target.value)}
               className="w-full min-h-[120px] text-base border-gray-300 focus:border-red-500 focus:ring-red-500 resize-vertical"
@@ -156,14 +199,15 @@ export function CreateBlogPost({
           {/* Priority Field */}
           <div>
             <label htmlFor="priority" className="block text-lg font-medium text-gray-900 mb-2">
-              Priority
+              Priority<span className="text-red-500">*</span>
             </label>
             <Select
               value={formData.priority}
               onValueChange={(value) => handleInputChange("priority", value)}
+              required
             >
               <SelectTrigger className="w-full max-w-xs border-gray-300 focus:border-red-500 focus:ring-red-500">
-                <SelectValue placeholder="select priority" />
+                <SelectValue placeholder="Select priority" />
               </SelectTrigger>
               <SelectContent>
                 {PRIORITY_OPTIONS.map((option) => (
@@ -180,8 +224,23 @@ export function CreateBlogPost({
             <label htmlFor="image" className="block text-lg font-medium text-gray-900 mb-2">
               Featured Image
             </label>
-            <div className="flex items-start space-x-4">
-              <div className="flex-1">
+            <div className="flex flex-col gap-4">
+              {imagePreview ? (
+                <div className="relative group">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+                  >
+                    <X className="w-5 h-5 text-red-500" />
+                  </button>
+                </div>
+              ) : (
                 <div className="flex items-center justify-center w-full">
                   <label
                     htmlFor="image-upload"
@@ -190,7 +249,10 @@ export function CreateBlogPost({
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <Upload className="w-8 h-8 mb-2 text-gray-500" />
                       <p className="mb-2 text-sm text-gray-500">
-                        <span className="font-semibold">Upload Image</span>
+                        <span className="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG (MAX. 2MB)
                       </p>
                     </div>
                     <input
@@ -202,12 +264,8 @@ export function CreateBlogPost({
                     />
                   </label>
                 </div>
-                {imageError && <p className="mt-2 text-sm text-red-600">{imageError}</p>}
-              </div>
-              
-              {!formData.image && (
-                <div className="text-gray-500 mt-2">image.png</div>
               )}
+              {imageError && <p className="mt-2 text-sm text-red-600">{imageError}</p>}
             </div>
           </div>
 
@@ -217,15 +275,16 @@ export function CreateBlogPost({
               type="button"
               onClick={handleCancel}
               className="bg-white hover:bg-gray-100 text-red-500 border border-red-500 px-8"
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={!isFormValid}
-              className="bg-green-500 hover:bg-green-600 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!isFormValid || isSubmitting}
+              className="bg-[#f90404] hover:bg-[#d90404] text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create
+              {isSubmitting ? "Processing..." : mode === "create" ? "Create" : "Update"}
             </Button>
           </div>
         </form>
