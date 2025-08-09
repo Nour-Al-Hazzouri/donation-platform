@@ -44,12 +44,12 @@ function UserProfileWrapper({ userId }: { userId: string }) {
     id: user.id,
     personalDetails: {
       name: user.name,
-      gender: "male", // Default to male since we don't have this in the list
+      gender: "male", // Default since list data lacks gender
       phoneNumber: user.phone,
       email: user.email,
       address: {
-        district: "Unknown", // We don't have this in the list
-        governorate: "Unknown", // We don't have this in the list
+        district: "Hamra", // Use same defaults as edit page for consistency
+        governorate: "Beirut",
       },
       profileImage: user.avatar || "/placeholder.svg?height=300&width=300&text=Profile",
     },

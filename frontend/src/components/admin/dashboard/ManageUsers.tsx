@@ -122,6 +122,30 @@ export function useUsers() {
     return newUser;
   };
   
+  // Function to update an existing user
+  const updateUser = (updatedData: any) => {
+    const { id, personalDetails } = updatedData || {};
+    if (!id || !personalDetails) return null as unknown as User;
+
+    const updatedUsers = users.map((u) =>
+      u.id === id
+        ? {
+            ...u,
+            name: personalDetails.name ?? u.name,
+            email: personalDetails.email ?? u.email,
+            phone: personalDetails.phoneNumber ?? u.phone,
+            // keep avatar unchanged for now
+          }
+        : u
+    );
+
+    setUsers(updatedUsers);
+    saveUsersToStorage(updatedUsers);
+
+    const result = updatedUsers.find((u) => u.id === id)!;
+    return result;
+  };
+  
   // Function to delete a user
   const deleteUser = (userId: string) => {
     // Filter out the user with the given ID
@@ -134,7 +158,7 @@ export function useUsers() {
     return true;
   };
 
-  return { users, addUser, deleteUser };
+  return { users, addUser, updateUser, deleteUser };
 }
 
 // Create a global context for users
@@ -143,6 +167,7 @@ import { createContext, useContext } from "react";
 interface UsersContextType {
   users: User[];
   addUser: (userData: any) => User;
+  updateUser: (updatedData: any) => User | null;
   deleteUser: (userId: string) => boolean;
 }
 
