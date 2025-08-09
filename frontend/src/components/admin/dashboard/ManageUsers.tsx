@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { Search } from 'lucide-react'
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -84,6 +85,7 @@ interface ManageUsersProps {
 
 export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
   const [searchQuery, setSearchQuery] = useState("")
+  const router = useRouter()
   
   // Determine which data to use based on active tab
   const dataSource = activeTab === "Verification" ? verificationRequests : users
@@ -170,10 +172,10 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                     onClick={() => {
                       if (activeTab === "Verification") {
                         // Navigate to verification request details page
-                        window.location.href = `/admin/verification-requests/${user.id}`;
+                        router.push(`/admin/verification-requests/${user.id}`);
                       } else {
                         // Navigate to user management page
-                        window.location.href = `/admin/users/manage/${user.id}`;
+                        router.push(`/admin/users/manage/${user.id}`);
                       }
                     }}
                   >
