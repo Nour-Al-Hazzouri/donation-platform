@@ -21,6 +21,17 @@ class CommunityPostResource extends JsonResource
             'tags' => $this->tags ?? [],
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
+            'votes' => $this->when($this->relationLoaded('votes'), function () {
+                $upvotes = $this->votes->where('type', 'upvote')->count();
+                $downvotes = $this->votes->where('type', 'downvote')->count();
+                
+                return [
+                    'upvotes' => $upvotes,
+                    'downvotes' => $downvotes,
+                    'total' => $upvotes - $downvotes,
+                    'user_vote' => $this->votes->firstWhere('user_id', auth()->id())?->type
+                ];
+            }),
             'user' => $this->whenLoaded('user', function () {
                 return [
                     'id' => $this->user->id,
@@ -41,23 +52,6 @@ class CommunityPostResource extends JsonResource
                     return $this->votes->count();
                 }, 0);
             }),
-            'upvotes_count' => $this->when(isset($this->upvotes_count), $this->upvotes_count, function () {
-                return $this->whenLoaded('votes', function () {
-                    return $this->votes->where('type', 'upvote')->count();
-                }, 0);
-            }),
-            'downvotes_count' => $this->when(isset($this->downvotes_count), $this->downvotes_count, function () {
-                return $this->whenLoaded('votes', function () {
-                    return $this->votes->where('type', 'downvote')->count();
-                }, 0);
-            }),
-            'user_vote' => $this->when(
-                $request->user() && $this->relationLoaded('votes'),
-                function () use ($request) {
-                    $userVote = $this->votes->firstWhere('user_id', $request->user()->id);
-                    return $userVote ? $userVote->type : null;
-                }
-            ),
             'comments_count' => $this->when(isset($this->comments_count), $this->comments_count, function () {
                 return $this->whenLoaded('comments', function () {
                     return $this->comments->count();

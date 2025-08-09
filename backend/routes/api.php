@@ -9,6 +9,7 @@ use App\Http\Controllers\API\VerificationController;
 use App\Http\Controllers\API\CommunityPostController;
 use App\Http\Controllers\API\CommentController;
 use App\Http\Controllers\API\DonationEventController;
+use App\Http\Controllers\API\VoteController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -104,6 +105,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Community Posts
     Route::apiResource('community-posts', CommunityPostController::class);
+    
+    // Votes for community posts
+    Route::prefix('community-posts/{postId}')->group(function () {
+        Route::post('/vote', [VoteController::class, 'vote']);
+        Route::get('/my-vote', [VoteController::class, 'getUserVote']);
+    });
     
     // Comments for community posts
     Route::prefix('community-posts/{communityPost}/comments')->group(function () {
