@@ -1,12 +1,38 @@
 "use client"
 
-import type React from "react"
+import { useState } from "react";
+import { ArrowLeft, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { COLORS } from "@/lib/constants";
+import { cn } from '@/lib/utils';
 
-import { useState } from "react"
-import { ArrowLeft, Upload } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// Location data structure
+const locations = [
+  { governorate: 'Beirut', district: 'Achrafieh' },
+  { governorate: 'Beirut', district: 'Hamra' },
+  { governorate: 'Beirut', district: 'Verdun' },
+  { governorate: 'Mount Lebanon', district: 'Jounieh' },
+  { governorate: 'Mount Lebanon', district: 'Baabda' },
+  { governorate: 'Mount Lebanon', district: 'Metn' },
+  { governorate: 'North', district: 'Tripoli' },
+  { governorate: 'North', district: 'Koura' },
+  { governorate: 'North', district: 'Zgharta' },
+  { governorate: 'South', district: 'Sidon' },
+  { governorate: 'South', district: 'Tyre' },
+  { governorate: 'South', district: 'Nabatieh' },
+  { governorate: 'Bekaa', district: 'Zahle' },
+  { governorate: 'Bekaa', district: 'Baalbek' },
+  { governorate: 'Bekaa', district: 'Rachaya' },
+  { governorate: 'Nabatieh', district: 'Bint Jbeil' },
+  { governorate: 'Nabatieh', district: 'Marjeyoun' },
+  { governorate: 'Akkar', district: 'Halba' },
+  { governorate: 'Baalbek-Hermel', district: 'Hermel' },
+];
+
+// Get unique governorates
+const governorates = [...new Set(locations.map(loc => loc.governorate))];
 
 // Mock data constants
 const INITIAL_USER_DATA = {
@@ -18,50 +44,39 @@ const INITIAL_USER_DATA = {
     email: "",
     address: {
       district: "",
-      governorate: "Beirut",
+      governorate: "",
     },
     profileImage: null as File | null,
   },
-}
+};
 
 const GENDER_OPTIONS = [
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
   { value: "other", label: "Other" },
-]
-
-const GOVERNORATE_OPTIONS = [
-  "Beirut",
-  "Mount Lebanon",
-  "North",
-  "South",
-  "Bekaa",
-  "Nabatieh",
-  "Akkar",
-  "Baalbek-Hermel",
-]
+];
 
 interface UserFormData {
-  id: string
+  id: string;
   personalDetails: {
-    name: string
-    gender: string
-    phoneNumber: string
-    email: string
+    name: string;
+    gender: string;
+    phoneNumber: string;
+    email: string;
     address: {
-      district: string
-      governorate: string
-    }
-    profileImage: File | null
-  }
+      district: string;
+      governorate: string;
+    };
+    profileImage: File | null;
+  };
 }
 
 interface EditUserProfileProps {
-  initialData?: UserFormData
-  mode?: "add" | "edit"
-  onBack?: () => void
-  onSave?: (userData: UserFormData) => void
-  onCancel?: () => void
+  initialData?: UserFormData;
+  mode?: "add" | "edit";
+  onBack?: () => void;
+  onSave?: (userData: UserFormData) => void;
+  onCancel?: () => void;
 }
 
 export default function EditUserProfile({
@@ -71,13 +86,31 @@ export default function EditUserProfile({
   onSave,
   onCancel,
 }: EditUserProfileProps) {
-  const [formData, setFormData] = useState<UserFormData>(initialData)
-  const [imageFileName, setImageFileName] = useState<string>("")
+  const [formData, setFormData] = useState<UserFormData>({
+    ...initialData,
+    personalDetails: {
+      ...initialData.personalDetails,
+      address: {
+        governorate: initialData.personalDetails.address.governorate || "",
+        district: initialData.personalDetails.address.district || "",
+      },
+    },
+  });
+
+  const [imageFileName, setImageFileName] = useState<string>("");
+
+  // Get districts for the selected governorate
+  const getDistricts = () => {
+    if (!formData.personalDetails.address.governorate) return [];
+    return locations
+      .filter(loc => loc.governorate === formData.personalDetails.address.governorate)
+      .map(loc => loc.district);
+  };
 
   const handleInputChange = (field: string, value: string) => {
     if (field.includes(".")) {
-      const [parent, child, subChild] = field.split(".")
-      setFormData((prev) => ({
+      const [parent, child, subChild] = field.split(".");
+      setFormData(prev => ({
         ...prev,
         [parent]: {
           ...(prev[parent as keyof typeof prev] as Record<string, unknown>),
@@ -88,43 +121,65 @@ export default function EditUserProfile({
               }
             : value,
         },
-      }))
+      }));
     } else {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         personalDetails: {
           ...prev.personalDetails,
           [field]: value,
         },
-      }))
+      }));
     }
-  }
+  };
+
+  const handleAddressChange = (field: "governorate" | "district", value: string) => {
+    setFormData(prev => {
+      const newAddress = { ...prev.personalDetails.address };
+      
+      if (field === "governorate") {
+        // Reset district when governorate changes
+        newAddress.governorate = value;
+        newAddress.district = "";
+      } else {
+        newAddress[field] = value;
+      }
+
+      return {
+        ...prev,
+        personalDetails: {
+          ...prev.personalDetails,
+          address: newAddress,
+        },
+      };
+    });
+  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (file) {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         personalDetails: {
           ...prev.personalDetails,
           profileImage: file,
         },
-      }))
-      setImageFileName(file.name)
+      }));
+      setImageFileName(file.name);
     }
-  }
+  };
 
   const handleBack = () => {
-    onBack?.()
-  }
+    onBack?.();
+  };
 
   const handleSave = () => {
-    onSave?.(formData)
-  }
+    onSave?.(formData);
+  };
 
   const handleCancel = () => {
-    onCancel?.()
-  }
+    onCancel?.();
+  };
 
   const isFormValid =
     formData.personalDetails.name.trim() &&
@@ -132,18 +187,24 @@ export default function EditUserProfile({
     formData.personalDetails.phoneNumber.trim() &&
     formData.personalDetails.email.trim() &&
     formData.personalDetails.address.district.trim() &&
-    formData.personalDetails.address.governorate
+    formData.personalDetails.address.governorate;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleBack}
-          className="mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-black transition-colors"
+          className={cn(
+            "mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md z-10"
+          )}
+          aria-label="Go back"
+          style={{ color: COLORS.primary }}
         >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
 
         {/* Personal Details Section */}
         <div className="bg-white rounded-lg shadow-sm p-8">
@@ -157,7 +218,10 @@ export default function EditUserProfile({
               {/* Image Upload */}
               <div className="flex justify-center lg:justify-start">
                 <label htmlFor="profile-image">
-                  <div className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-md cursor-pointer flex items-center gap-2 transition-colors">
+                  <div 
+                    className="text-white px-6 py-3 rounded-md cursor-pointer flex items-center gap-2 transition-colors hover:bg-[#f90404]"
+                    style={{ backgroundColor: COLORS.primaryHover }}
+                  >
                     <Upload className="w-5 h-5" />
                     Upload Image
                   </div>
@@ -233,33 +297,48 @@ export default function EditUserProfile({
             {/* Right Column - Address */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-blue-500 mb-6">Address</h3>
+                <h3 className="text-xl font-semibold text-black mb-6">Address</h3>
 
                 <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">District</label>
-                    <Input
-                      type="text"
-                      value={formData.personalDetails.address.district}
-                      onChange={(e) => handleInputChange("address.district", e.target.value)}
-                      className="w-full border-gray-300 focus:border-red-500 focus:ring-red-500"
-                      placeholder="Enter district"
-                    />
-                  </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-2">Governorate</label>
                     <Select
                       value={formData.personalDetails.address.governorate}
-                      onValueChange={(value) => handleInputChange("address.governorate", value)}
+                      onValueChange={(value) => handleAddressChange("governorate", value)}
                     >
                       <SelectTrigger className="w-full border-gray-300 focus:border-red-500 focus:ring-red-500">
                         <SelectValue placeholder="Select governorate" />
                       </SelectTrigger>
                       <SelectContent>
-                        {GOVERNORATE_OPTIONS.map((governorate) => (
+                        {governorates.map((governorate) => (
                           <SelectItem key={governorate} value={governorate}>
                             {governorate}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">District</label>
+                    <Select
+                      value={formData.personalDetails.address.district}
+                      onValueChange={(value) => handleAddressChange("district", value)}
+                      disabled={!formData.personalDetails.address.governorate}
+                    >
+                      <SelectTrigger className="w-full border-gray-300 focus:border-red-500 focus:ring-red-500">
+                        <SelectValue 
+                          placeholder={
+                            formData.personalDetails.address.governorate 
+                              ? "Select district" 
+                              : "First select governorate"
+                          } 
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getDistricts().map((district) => (
+                          <SelectItem key={district} value={district}>
+                            {district}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -278,7 +357,8 @@ export default function EditUserProfile({
             <Button
               onClick={handleSave}
               disabled={!isFormValid}
-              className="bg-green-500 hover:bg-green-600 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#f90404]"
+              style={{ backgroundColor: COLORS.primaryHover }}
             >
               {mode === "edit" ? "Update" : "Add"}
             </Button>
@@ -286,5 +366,5 @@ export default function EditUserProfile({
         </div>
       </div>
     </div>
-  )
+  );
 }
