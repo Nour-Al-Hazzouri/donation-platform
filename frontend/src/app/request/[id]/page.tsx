@@ -8,15 +8,15 @@ import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { useDonationsStore, initialDonationsData } from "@/lib/store/donationsStore"
+import { useDonationsStore } from "@/lib/store/donationsStore"
 import { useAuthStore } from '@/lib/store/authStore'
 import { useModal } from '@/lib/contexts/ModalContext'
 
 export default function RequestPage() {
   const params = useParams()
   const router = useRouter()
-  const donationId = parseInt(params.id as string)
-  const { donations, initializeDonations } = useDonationsStore()
+  const donationId = Number(params.id)
+  const { donations } = useDonationsStore()
   const { isAuthenticated } = useAuthStore()
   const { openModal } = useModal()
   
@@ -24,19 +24,6 @@ export default function RequestPage() {
   const [customAmount, setCustomAmount] = useState('')
   const [isCustom, setIsCustom] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
-
-  // Initialize donations store
-  useEffect(() => {
-    initializeDonations(initialDonationsData)
-  }, [initializeDonations])
-
-  // Check authentication
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/')
-      openModal('signIn')
-    }
-  }, [isAuthenticated, router, openModal])
 
   // Find the donation by ID
   const donation = donations.find(donation => donation.id === donationId)
@@ -57,40 +44,8 @@ export default function RequestPage() {
     )
   }
 
-  // Enhanced donation details logic
-  const getDonationAmount = (donation: any) => {
-    if (donation.goalAmount) {
-      return donation.goalAmount
-    }
-    
-    if (donation.title.includes('cancer')) return '50,000'
-    if (donation.title.includes('heart')) return '75,000'
-    if (donation.title.includes('lifelong')) return '25,000'
-    if (donation.title.includes('medical')) return '30,000'
-    if (donation.title.includes('disaster')) return '15,000'
-    return '10,000'
-  }
-
-  const getCurrentAmount = (donation: any) => {
-    const goalAmount = parseFloat(getDonationAmount(donation).replace(',', ''))
-    if (donation.goalAmount) {
-      const percentage = Math.random() * 0.2
-      return Math.floor(goalAmount * percentage).toLocaleString()
-    }
-    
-    if (donation.title.includes('cancer')) return '12,500'
-    if (donation.title.includes('heart')) return '23,000'
-    if (donation.title.includes('lifelong')) return '8,750'
-    if (donation.title.includes('medical')) return '5,200'
-    if (donation.title.includes('disaster')) return '3,800'
-    return '2,100'
-  }
-
-  const donationAmountStr = getDonationAmount(donation)
-  const currentAmountStr = getCurrentAmount(donation)
-  const donationAmount = parseFloat(donationAmountStr.replace(',', ''))
-  const currentAmount = parseFloat(currentAmountStr.replace(',', ''))
-  const remainingAmount = Math.max(1, donationAmount - currentAmount)
+  const donationAmount = parseFloat(donation.donationAmount || '1000')
+  const remainingAmount = donationAmount // Simplified for this example
 
   const handleSliderChange = (value: number[]) => {
     setRequestAmount(value)
@@ -120,12 +75,6 @@ export default function RequestPage() {
       const finalAmount = isCustom
         ? Math.min(Math.max(Number(customAmount), 1), remainingAmount)
         : requestAmount[0]
-
-      console.log('Request submitted:', {
-        donationId,
-        amount: finalAmount,
-        donationTitle: donation.title
-      })
 
       router.push(`/request/success?amount=${finalAmount}&donationId=${donationId}`)
     } catch (error) {
@@ -161,23 +110,18 @@ export default function RequestPage() {
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Donation Info</h2>
           
-          {/* Amount Information */}
           <div className="space-y-2 mb-6">
             <p className="text-gray-700">
-              <span className="font-medium">Donation amount:</span> ${donationAmountStr}
+              <span className="font-medium">Donation title:</span> {donation.title}
             </p>
             <p className="text-gray-700">
-              <span className="font-medium">Distributed amount:</span> ${currentAmountStr}
-            </p>
-            <p className="text-gray-700">
-              <span className="font-medium">Remaining amount:</span> ${remainingAmount.toLocaleString()}
+              <span className="font-medium">Donation amount:</span> ${donationAmount.toLocaleString()}
             </p>
           </div>
 
-          {/* Donation Title and Description */}
           <div className="border-t pt-4">
-            <h3 className="font-semibold text-gray-900 mb-2">{donation.title}</h3>
-            <p className="text-sm text-gray-600 line-clamp-2">{donation.description}</p>
+            <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+            <p className="text-sm text-gray-600">{donation.description}</p>
           </div>
         </div>
 
@@ -201,7 +145,6 @@ export default function RequestPage() {
               min={1}
               step={1}
               className="w-full"
-              disabled={remainingAmount <= 1}
             />
             
             <div className="flex justify-between text-xs text-gray-500 mt-2">
@@ -224,7 +167,6 @@ export default function RequestPage() {
               className="w-full"
               min="1"
               max={remainingAmount}
-              disabled={remainingAmount <= 1}
             />
           </div>
 
@@ -240,7 +182,7 @@ export default function RequestPage() {
                   setCustomAmount('')
                 }}
                 className="text-sm"
-                disabled={remainingAmount <= 1 || amount > remainingAmount}
+                disabled={amount > remainingAmount}
               >
                 ${amount}
               </Button>
@@ -250,7 +192,7 @@ export default function RequestPage() {
           {/* Submit Button */}
           <Button
             onClick={handleSubmitRequest}
-            disabled={isProcessing || finalAmount <= 0 || remainingAmount <= 1}
+            disabled={isProcessing || finalAmount <= 0}
             className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-medium"
           >
             {isProcessing ? 'Processing...' : `Request $${finalAmount.toLocaleString()}`}

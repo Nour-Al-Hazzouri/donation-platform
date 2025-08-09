@@ -9,11 +9,12 @@ import { useDonationsStore } from '@/lib/store/donationsStore'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useModal } from '@/lib/contexts/ModalContext'
 import Image from 'next/image'
+import { COLORS } from '@/lib/constants'
 
 export default function DonationDetailsPage() {
   const params = useParams()
   const router = useRouter()
-  const donationId = parseInt(params.id as string)
+  const donationId = Number(params.id)
   const { donations } = useDonationsStore()
   const { isAuthenticated } = useAuthStore()
   const { openModal } = useModal()
@@ -39,11 +40,6 @@ export default function DonationDetailsPage() {
     )
   }
 
-  // Calculate progress percentage
-  const donationAmount = parseFloat(donation.donationAmount || '0')
-  const currentAmount = donation.currentAmount || 0
-  const progressPercentage = donationAmount > 0 ? (currentAmount / donationAmount) * 100 : 0
-
   const handleRequest = () => {
     if (!isAuthenticated) {
       openModal('signIn')
@@ -56,15 +52,18 @@ export default function DonationDetailsPage() {
     <div className="min-h-screen bg-gray-50">
       <MainLayout>
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-          {/* Back Button */}
+          {/* Back Button - Updated to match carousel style */}
           <div className="mb-4 md:mb-6">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => router.back()}
-              className="h-8 w-8 rounded-full bg-white/80 hover:bg-white/90 shadow-md"
+              className={cn(
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md"
+              )}
+              style={{ color: COLORS.primary }}
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
 
@@ -99,7 +98,7 @@ export default function DonationDetailsPage() {
                   <div className="flex items-center gap-1 md:gap-2 mb-1">
                     <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900">{donation.name}</h2>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-600">Lebanon • {new Date(donation.createdAt || '').toLocaleDateString()}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Lebanon • {new Date().toLocaleDateString()}</p>
                 </div>
               </div>
               <Button variant="destructive" size="sm" className="self-end sm:self-auto">
@@ -112,35 +111,11 @@ export default function DonationDetailsPage() {
               <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1 md:mb-2">{donation.title}</h3>
             </div>
 
-            {/* Progress Section */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs sm:text-sm font-medium text-gray-700">Progress</span>
-                <span className="text-xs sm:text-sm text-gray-500">{Math.round(progressPercentage)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 mb-3 sm:mb-4">
-                <div 
-                  className="bg-red-500 h-2 sm:h-3 rounded-full transition-all duration-300" 
-                  style={{ width: `${Math.min(progressPercentage, 100)}%` }}
-                ></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
-                <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
-                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-500">${currentAmount.toLocaleString()}</p>
-                  <p className="text-xs sm:text-sm text-gray-600">Distributed so far</p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
-                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">${donationAmount.toLocaleString()}</p>
-                  <p className="text-xs sm:text-sm text-gray-600">Total amount</p>
-                </div>
-              </div>
-            </div>
-
             {/* Donation Image */}
             {donation.imageUrl && (
               <div className="mb-4 md:mb-6 w-full aspect-video relative rounded-lg overflow-hidden">
                 <Image
-                  src={donation.imageUrl || "/placeholder.svg"}
+                  src={donation.imageUrl}
                   alt={donation.title}
                   fill
                   className="object-cover"
@@ -191,4 +166,8 @@ export default function DonationDetailsPage() {
       </MainLayout>
     </div>
   )
+}
+
+function cn(...classes: string[]) {
+  return classes.filter(Boolean).join(' ')
 }

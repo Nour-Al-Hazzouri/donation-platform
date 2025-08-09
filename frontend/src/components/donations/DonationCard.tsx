@@ -1,4 +1,3 @@
-// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\components\donations\DonationCard.tsx
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,7 +18,6 @@ interface DonationCardProps {
   searchTerm?: string
 }
 
-// Helper function to highlight matching text
 function highlightText(text: string, searchTerm: string) {
   if (!searchTerm) return text
   
@@ -86,16 +84,16 @@ export function DonationCard({
           {highlightText(title, searchTerm)}
         </h4>
         
-        {/* Only show image if imageUrl is provided */}
         {imageUrl && (
-          <div className="mb-4">
-            <Image 
-              src={imageUrl}
-              alt={title}
-              width={400}
-              height={200}
-              className="w-full h-32 object-cover rounded-md"
-            />
+          <div className="mb-4 rounded-md overflow-hidden">
+            <div className="relative w-full h-48">
+              <Image 
+                src={imageUrl}
+                alt={title}
+                fill
+                className="object-cover"
+              />
+            </div>
           </div>
         )}
         

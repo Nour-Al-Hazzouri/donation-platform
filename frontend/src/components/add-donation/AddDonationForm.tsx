@@ -82,14 +82,14 @@ export function AddDonationForm() {
     setIsSubmitting(true)
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
       let imageUrl: string | undefined
       if (formData.image) {
+        // Create a blob URL for the image
         imageUrl = URL.createObjectURL(formData.image)
       }
       
       const newDonation = {
+        id: Date.now(), // Generate a unique ID
         name: formData.name,
         title: formData.title,
         description: formData.description,
