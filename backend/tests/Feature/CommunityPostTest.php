@@ -94,6 +94,46 @@ class CommunityPostTest extends TestCase
     }
 
     /** @test */
+    public function post_response_includes_vote_data()
+    {
+        $post = CommunityPost::factory()->create([
+            'user_id' => $this->user->id,
+        ]);
+
+        // Create some votes
+        $post->votes()->createMany([
+            ['user_id' => $this->user->id, 'type' => 'upvote'],
+            ['user_id' => $this->admin->id, 'type' => 'upvote'],
+            ['user_id' => User::factory()->create()->id, 'type' => 'downvote'],
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/community-posts/{$post->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'votes' => [
+                        'upvotes',
+                        'downvotes',
+                        'total',
+                        'user_vote'
+                    ]
+                ]
+            ])
+            ->assertJson([
+                'data' => [
+                    'votes' => [
+                        'upvotes' => 2,
+                        'downvotes' => 1,
+                        'total' => 1,
+                        'user_vote' => 'upvote'
+                    ]
+                ]
+            ]);
+    }
+
+    /** @test */
     public function user_can_view_their_own_posts()
     {
         $post = CommunityPost::factory()->create([

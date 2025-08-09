@@ -22,7 +22,20 @@ class CommunityPostController extends Controller
      */
     public function index(): JsonResponse
     {
-        $posts = CommunityPost::with(['user', 'event', 'comments', 'votes'])
+        $posts = CommunityPost::with([
+                'user', 
+                'event', 
+                'comments',
+                'votes'
+            ])
+            ->withCount([
+                'votes as upvotes_count' => function($query) {
+                    $query->where('type', 'upvote');
+                },
+                'votes as downvotes_count' => function($query) {
+                    $query->where('type', 'downvote');
+                }
+            ])
             ->latest()
             ->paginate(10);
 
