@@ -128,8 +128,8 @@ const fetchUserById = (id: string) => {
 }
 
 export default function UserManagePage() {
-  const params = useParams()
-  const userId = params.id as string
+  const params = useParams<{ id: string }>()
+  const userId = params.id
   
   // In a real application, you would fetch the user data from an API
   const userData = fetchUserById(userId)

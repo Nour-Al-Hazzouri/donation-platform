@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { ArrowLeft } from 'lucide-react'
@@ -76,9 +76,11 @@ const MOCK_VERIFICATION_DATA = {
   }
 }
 
-export default function VerificationRequestDetailsPage({ params }: { params: { id: string } }) {
+export default function VerificationRequestDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
-  const userId = params.id
+  // Unwrap params using React.use() to avoid the warning
+  const { id } = use(params)
+  const userId = id
   
   // Get the verification data for this specific user ID
   const userData = MOCK_VERIFICATION_DATA[userId as keyof typeof MOCK_VERIFICATION_DATA] || {
@@ -117,7 +119,6 @@ export default function VerificationRequestDetailsPage({ params }: { params: { i
   const [notes, setNotes] = useState(userData.notes)
 
   // In a real app, you would fetch the verification request data based on the ID
-  // const { id } = params;
   // useEffect(() => { fetch data based on id }, [id]);
 
   const handleApprove = async () => {

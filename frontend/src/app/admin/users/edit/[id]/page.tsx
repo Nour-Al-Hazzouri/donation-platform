@@ -114,9 +114,9 @@ const fetchUserById = (id: string) => {
 }
 
 export default function EditUserPage() {
-  const params = useParams()
+  const params = useParams<{ id: string }>()
   const router = useRouter()
-  const userId = params.id as string
+  const userId = params.id
   
   // In a real application, you would fetch the user data from an API
   const userData = fetchUserById(userId)
