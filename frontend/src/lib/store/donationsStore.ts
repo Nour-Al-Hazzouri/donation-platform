@@ -33,7 +33,7 @@ const initialDonationsData: DonationData[] = [
     title: "Offering help for cancer treatment",
     description:
       "I want to support families battling cancer. My donation will help cover treatment costs for those in need.",
-    imageUrl: "/pills.jpg",
+    imageUrl: "/cancer.jpg",
     avatarUrl: "/admin.jpg",
     initials: "RK",
     isVerified: true,

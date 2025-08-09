@@ -48,12 +48,20 @@ export function DonationCard({
 }: DonationCardProps) {
   const router = useRouter()
 
-  const handleClick = () => {
+  const handleCardClick = () => {
+    router.push(`/donations/${id}`)
+  }
+
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
     router.push(`/donations/${id}`)
   }
 
   return (
-    <Card className="bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
+    <Card 
+      className="bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer"
+      onClick={handleCardClick}
+    >
       <CardContent className="p-6 flex flex-col flex-grow">
         <div className="flex items-center mb-4">
           <div className="relative mr-3">
@@ -104,7 +112,7 @@ export function DonationCard({
         <div className="mt-auto">
           <Button 
             className="w-full bg-red-500 hover:bg-red-600 text-white h-10"
-            onClick={handleClick}
+            onClick={handleButtonClick}
           >
             Request Now
           </Button>
