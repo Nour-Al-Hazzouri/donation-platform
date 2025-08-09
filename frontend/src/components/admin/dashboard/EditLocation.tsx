@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { COLORS } from "@/lib/constants"
 
 // Mock data constants - same as manage locations
 const LOCATIONS = [
@@ -110,13 +111,20 @@ export default function EditLocation({
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Back Button */}
-        <button
+        {/* Back Button - Updated to match carousel left indicator */}
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleBack}
-          className="mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-black transition-colors"
+          className={cn(
+            "mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md z-10",
+            "transition-all duration-200 hover:scale-105"
+          )}
+          aria-label="Go back"
+          style={{ color: COLORS.primary }}
         >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
 
         {/* Page Title */}
         <h1 className="text-2xl font-semibold text-gray-900 mb-8">Edit Location</h1>
@@ -130,7 +138,7 @@ export default function EditLocation({
                 Governorate:
               </label>
               <Select value={selectedGovernorate} onValueChange={handleGovernorateChange}>
-                <SelectTrigger className="w-full max-w-xs border-gray-300 focus:border-red-500 focus:ring-red-500">
+                <SelectTrigger className="w-full max-w-xs border-gray-300 focus:border-[#f90404] focus:ring-[#f90404]">
                   <SelectValue placeholder="Select Governorate" />
                 </SelectTrigger>
                 <SelectContent>
@@ -149,7 +157,7 @@ export default function EditLocation({
                 District
               </label>
               <Select value={selectedDistrict} onValueChange={handleDistrictChange} disabled={!selectedGovernorate}>
-                <SelectTrigger className="w-full max-w-xs border-gray-300 focus:border-red-500 focus:ring-red-500 disabled:opacity-50">
+                <SelectTrigger className="w-full max-w-xs border-gray-300 focus:border-[#f90404] focus:ring-[#f90404] disabled:opacity-50">
                   <SelectValue placeholder="Select District" />
                 </SelectTrigger>
                 <SelectContent>
@@ -169,7 +177,7 @@ export default function EditLocation({
               type="button"
               variant="ghost"
               onClick={handleCancel}
-              className="text-red-500 hover:text-red-600 hover:bg-red-50"
+              className="text-[#f90404] hover:text-[#d90404] hover:bg-[#d90404]/10"
             >
               Cancel
             </Button>
@@ -177,7 +185,7 @@ export default function EditLocation({
               type="button"
               disabled={!isFormValid || !hasChanges}
               onClick={handleSave}
-              className="bg-green-500 hover:bg-green-600 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#f90404] hover:bg-[#d90404] text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Edit
             </Button>
@@ -186,4 +194,8 @@ export default function EditLocation({
       </div>
     </div>
   )
+}
+
+function cn(...classes: string[]) {
+  return classes.filter(Boolean).join(' ')
 }
