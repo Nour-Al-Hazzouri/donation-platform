@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { AdminLayout } from "@/components/layouts/AdminLayout"
 
 // Mock data constants - In a real app, this would come from an API call
-const VERIFICATION_REQUEST = {
+const MOCK_VERIFICATION_DATA = {
   id: "1",
   personalDetails: {
     name: "moe",
@@ -43,7 +43,7 @@ const VERIFICATION_REQUEST = {
 
 export default function VerificationRequestDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const [notes, setNotes] = useState(VERIFICATION_REQUEST.notes)
+  const [notes, setNotes] = useState(MOCK_VERIFICATION_DATA.notes)
 
   // In a real app, you would fetch the verification request data based on the ID
   // const { id } = params;
@@ -89,7 +89,7 @@ export default function VerificationRequestDetailsPage({ params }: { params: { i
                 <div className="flex justify-center">
                   <div className="w-40 h-40 sm:w-56 sm:h-56 rounded-lg overflow-hidden bg-gray-100 shadow-md">
                     <Image
-                      src={VERIFICATION_REQUEST.personalDetails.profileImage || "/placeholder.svg"}
+                      src={MOCK_VERIFICATION_DATA.personalDetails.profileImage || "/placeholder.svg"}
                       alt="Profile"
                       width={224}
                       height={224}
@@ -103,19 +103,19 @@ export default function VerificationRequestDetailsPage({ params }: { params: { i
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-1">
                     <p className="text-sm text-gray-500">Full Name</p>
-                    <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.personalDetails.name}</p>
+                    <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.personalDetails.name}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-gray-500">Gender</p>
-                    <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.personalDetails.gender}</p>
+                    <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.personalDetails.gender}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-gray-500">Phone Number</p>
-                    <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.personalDetails.phoneNumber}</p>
+                    <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.personalDetails.phoneNumber}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-gray-500">Email</p>
-                    <p className="font-medium text-gray-900 break-all">{VERIFICATION_REQUEST.personalDetails.email}</p>
+                    <p className="font-medium text-gray-900 break-all">{MOCK_VERIFICATION_DATA.personalDetails.email}</p>
                   </div>
                 </div>
 
@@ -125,19 +125,19 @@ export default function VerificationRequestDetailsPage({ params }: { params: { i
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">District</p>
-                      <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.personalDetails.address.district}</p>
+                      <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.personalDetails.address.district}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">Street</p>
-                      <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.personalDetails.address.street}</p>
+                      <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.personalDetails.address.street}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">Governorate</p>
-                      <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.personalDetails.address.governorate}</p>
+                      <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.personalDetails.address.governorate}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">City</p>
-                      <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.personalDetails.address.city}</p>
+                      <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.personalDetails.address.city}</p>
                     </div>
                   </div>
                 </div>
@@ -153,7 +153,7 @@ export default function VerificationRequestDetailsPage({ params }: { params: { i
                 <div className="flex justify-center">
                   <div className="w-full max-w-md rounded-lg overflow-hidden bg-gray-100 shadow-md">
                     <Image
-                      src={VERIFICATION_REQUEST.submittedDocuments.idCard.image}
+                      src={MOCK_VERIFICATION_DATA.submittedDocuments.idCard.image}
                       alt="ID Card"
                       width={400}
                       height={250}
@@ -166,11 +166,11 @@ export default function VerificationRequestDetailsPage({ params }: { params: { i
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-1">
                     <p className="text-sm text-gray-500">ID Type</p>
-                    <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.submittedDocuments.idCard.type}</p>
+                    <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.submittedDocuments.idCard.type}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-gray-500">Additional Info</p>
-                    <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.submittedDocuments.idCard.additionalInfo}</p>
+                    <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.submittedDocuments.idCard.additionalInfo}</p>
                   </div>
                 </div>
 
@@ -180,19 +180,19 @@ export default function VerificationRequestDetailsPage({ params }: { params: { i
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">Name on ID</p>
-                      <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.submittedDocuments.idCard.fields.name}</p>
+                      <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.submittedDocuments.idCard.fields.name}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">ID Number</p>
-                      <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.submittedDocuments.idCard.fields.idNumber}</p>
+                      <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.submittedDocuments.idCard.fields.idNumber}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">Date of Birth</p>
-                      <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.submittedDocuments.idCard.fields.dateOfBirth}</p>
+                      <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.submittedDocuments.idCard.fields.dateOfBirth}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">Expiration Date</p>
-                      <p className="font-medium text-gray-900">{VERIFICATION_REQUEST.submittedDocuments.idCard.fields.expirationDate}</p>
+                      <p className="font-medium text-gray-900">{MOCK_VERIFICATION_DATA.submittedDocuments.idCard.fields.expirationDate}</p>
                     </div>
                   </div>
                 </div>
@@ -201,7 +201,7 @@ export default function VerificationRequestDetailsPage({ params }: { params: { i
                 <div className="pt-2 sm:pt-4">
                   <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Barcode</h3>
                   <div className="bg-gray-100 p-3 sm:p-4 rounded-md font-mono text-sm overflow-x-auto">
-                    <p>{VERIFICATION_REQUEST.submittedDocuments.idCard.barcode}</p>
+                    <p>{MOCK_VERIFICATION_DATA.submittedDocuments.idCard.barcode}</p>
                   </div>
                 </div>
               </div>

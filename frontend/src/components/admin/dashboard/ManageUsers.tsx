@@ -15,8 +15,8 @@ interface User {
   avatar: string
 }
 
-// Mock data for users
-const users: User[] = [
+// Mock data constants
+const MOCK_USERS: User[] = [
   {
     id: "1",
     name: "Tomiwa Oyeledu Dolapo",
@@ -61,23 +61,13 @@ const users: User[] = [
   }
 ]
 
-// Mock data for verification requests
-const verificationRequests: User[] = [
-  {
-    id: "2",
-    name: "Bessie Cooper",
-    email: "michael.mitc@me.com",
-    phone: "(505) 555-0125",
-    avatar: "/placeholder.svg?height=40&width=40"
-  },
-  {
-    id: "5",
-    name: "Devon Lane",
-    email: "felicia.reid@us.com",
-    phone: "(217) 555-0113",
-    avatar: "/placeholder.svg?height=40&width=40"
-  }
-]
+// IDs of users with pending verification requests
+const VERIFICATION_REQUEST_USER_IDS = ["2", "5"]
+
+// Generate verification requests from users with matching IDs
+const MOCK_VERIFICATION_REQUESTS: User[] = MOCK_USERS.filter(user => 
+  VERIFICATION_REQUEST_USER_IDS.includes(user.id)
+)
 
 interface ManageUsersProps {
   activeTab?: string;
@@ -88,7 +78,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
   const router = useRouter()
   
   // Determine which data to use based on active tab
-  const dataSource = activeTab === "Verification" ? verificationRequests : users
+  const dataSource = activeTab === "Verification" ? MOCK_VERIFICATION_REQUESTS : MOCK_USERS
   
   // Filter users based on search query
   const filteredUsers = dataSource.filter(user => 
