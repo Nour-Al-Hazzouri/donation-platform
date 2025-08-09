@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -43,6 +44,8 @@ interface Location {
 }
 
 export function LocationsAdminPage() {
+  const router = useRouter()
+  
   // Convert mock data to include IDs for table display
   const [locations, setLocations] = useState<Location[]>(
     LOCATIONS.slice(0, 4).map((location, index) => ({
@@ -99,8 +102,16 @@ export function LocationsAdminPage() {
   }
 
   const handleEdit = (id: string) => {
-    // In a real app, this would open an edit form or modal
-    console.log("Edit location", id)
+    // Find the location to edit
+    const locationToEdit = locations.find(loc => loc.id === id)
+    if (locationToEdit) {
+      // Navigate to edit page with location data
+      const params = new URLSearchParams()
+      params.set('id', id)
+      params.set('governorate', locationToEdit.governorate)
+      params.set('district', locationToEdit.district)
+      router.push(`/admin/locations/edit?${params.toString()}`)
+    }
   }
 
   const handleDelete = (id: string) => {
