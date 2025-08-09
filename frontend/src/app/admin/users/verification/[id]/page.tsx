@@ -6,6 +6,8 @@ import Image from "next/image"
 import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { AdminLayout } from "@/components/layouts/AdminLayout"
+import { DashboardSidebar } from "@/components/admin/dashboard/dashboardSiderbar"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 
 // Mock data constants - In a real app, this would come from an API call
 // Using the same user IDs as in ManageUsers component (users with IDs 2 and 5 have verification requests)
@@ -141,15 +143,25 @@ export default function VerificationRequestDetailsPage({ params }: { params: Pro
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gray-50 p-4 md:p-6 w-full">
-        <div className="w-full max-w-6xl mx-auto">
-          {/* Back Button */}
-          <button
-            onClick={handleBack}
-            className="mb-4 sm:mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full overflow-x-hidden">
+          {/* Desktop sidebar - only visible on md screens and up */}
+          <div className="hidden md:block w-64 flex-shrink-0">
+            <DashboardSidebar />
+          </div>
+
+          {/* Main content */}
+          <div className="flex-1 w-full min-w-0 flex flex-col">
+            <SidebarInset className="p-4 md:p-6 flex-1 flex flex-col">
+              <div className="w-full max-w-6xl mx-auto">
+                {/* Back Button */}
+                <button
+                  onClick={handleBack}
+                  className="mb-4 sm:mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+              </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-8 w-full">
             {/* Personal Details Section */}
@@ -314,9 +326,11 @@ export default function VerificationRequestDetailsPage({ params }: { params: Pro
                 </Button>
               </div>
             </div>
+              </div>
+            </SidebarInset>
           </div>
         </div>
-      </div>
+      </SidebarProvider>
     </AdminLayout>
   )
 }

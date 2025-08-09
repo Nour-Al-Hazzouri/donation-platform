@@ -13,8 +13,9 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboard, FileText, Users, ChevronRight, MapPin } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible" 
+import { LayoutDashboard, FileText, Users, MapPin } from "lucide-react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 
 // Mock data for admin profile
 const ADMIN_PROFILE = {
@@ -24,35 +25,38 @@ const ADMIN_PROFILE = {
   avatarFallback: "A"
 }
 
-// Mock data for sidebar menu items
-const SIDEBAR_MENU_ITEMS = [
+// Sidebar menu items definition
+const getSidebarMenuItems = (pathname: string) => [
   { 
     href: "/admin", 
     icon: LayoutDashboard, 
     label: "Dashboard", 
-    isActive: true 
+    isActive: pathname === "/admin"
   },
   { 
     href: "/admin/blogs", 
     icon: FileText, 
     label: "manage blogs", 
-    isActive: false 
+    isActive: pathname.startsWith("/admin/blogs")
   },
   { 
     href: "/admin/locations", 
     icon: MapPin, 
     label: "manage location", 
-    isActive: false 
+    isActive: pathname.startsWith("/admin/locations")
+  },
+  { 
+    href: "/admin/users", 
+    icon: Users, 
+    label: "manage users", 
+    isActive: pathname.startsWith("/admin/users")
   }
 ]
 
-// Mock data for user management submenu
-const USER_MANAGEMENT_SUBMENU = [
-  { href: "/admin/users", label: "All" },
-  { href: "/admin/users?tab=verification", label: "Verification Requests" }
-]
-
 export function DashboardSidebar() {
+  const pathname = usePathname()
+  const sidebarMenuItems = getSidebarMenuItems(pathname)
+  
   return (
     <Sidebar className="w-64 border-r">
       <SidebarContent className="pt-16">
@@ -73,45 +77,20 @@ export function DashboardSidebar() {
                 </div>
               </SidebarMenuItem>
               {/* Main menu items */}
-              {SIDEBAR_MENU_ITEMS.map((item, index) => (
+              {sidebarMenuItems.map((item, index) => (
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton 
                     isActive={item.isActive}
                     className={item.isActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}
                     asChild
                   >
-                    <a href={item.href}>
+                    <Link href={item.href}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-                      <Users className="h-4 w-4" />
-                      <span>manage Users</span>
-                      <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {USER_MANAGEMENT_SUBMENU.map((item, index) => (
-                        <SidebarMenuSubItem key={index}>
-                          <SidebarMenuSubButton 
-                            className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                            asChild
-                          >
-                            <a href={item.href}>{item.label}</a>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

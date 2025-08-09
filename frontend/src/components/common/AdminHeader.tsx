@@ -158,6 +158,7 @@ export function AdminHeader() {
                       <span>All Users</span>
                     </Link>
                     <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2 pl-6">
+                      <FileText className="h-4 w-4" />
                       <span>Verification Requests</span>
                     </Link>
                   </div>
