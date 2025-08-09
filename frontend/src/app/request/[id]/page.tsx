@@ -11,8 +11,6 @@ import { MainLayout } from '@/components/layouts/MainLayout'
 import { useDonationsStore, initialDonationsData } from "@/lib/store/donationsStore"
 import { useAuthStore } from '@/lib/store/authStore'
 import { useModal } from '@/lib/contexts/ModalContext'
-import Image from 'next/image'
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function RequestPage() {
   const params = useParams()
@@ -93,7 +91,6 @@ export default function RequestPage() {
   const donationAmount = parseFloat(donationAmountStr.replace(',', ''))
   const currentAmount = parseFloat(currentAmountStr.replace(',', ''))
   const remainingAmount = Math.max(1, donationAmount - currentAmount)
-  const progressPercentage = (currentAmount / donationAmount) * 100
 
   const handleSliderChange = (value: number[]) => {
     setRequestAmount(value)
@@ -175,19 +172,6 @@ export default function RequestPage() {
             <p className="text-gray-700">
               <span className="font-medium">Remaining amount:</span> ${remainingAmount.toLocaleString()}
             </p>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mb-4">
-            <div className="flex justify-between text-sm mb-1">
-              <span>Progress: {Math.round(progressPercentage)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-red-500 h-2 rounded-full" 
-                style={{ width: `${Math.min(progressPercentage, 100)}%` }}
-              ></div>
-            </div>
           </div>
 
           {/* Donation Title and Description */}

@@ -4,9 +4,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { donationsData } from "@/components/donations/DonationCards"
+import { useDonationsStore } from '@/lib/store/donationsStore'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useModal } from '@/lib/contexts/ModalContext'
 import Image from 'next/image'
@@ -15,11 +14,12 @@ export default function DonationDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const donationId = parseInt(params.id as string)
+  const { donations } = useDonationsStore()
   const { isAuthenticated } = useAuthStore()
   const { openModal } = useModal()
   
-  // Find the donation by ID
-  const donation = donationsData.find(donation => donation.id === donationId)
+  // Find the donation by ID from the store
+  const donation = donations.find(donation => donation.id === donationId)
   
   if (!donation) {
     return (
@@ -39,27 +39,10 @@ export default function DonationDetailsPage() {
     )
   }
 
-  // Mock data for donation details
-  const donationDetails = {
-    ...donation,
-    donationAmount: donation.title.includes('cancer') ? '50,000' : 
-                   donation.title.includes('heart') ? '75,000' :
-                   donation.title.includes('lifelong') ? '25,000' :
-                   donation.title.includes('medical') ? '30,000' :
-                   donation.title.includes('disaster') ? '15,000' : '10,000',
-    currentAmount: donation.title.includes('cancer') ? '12,500' : 
-                   donation.title.includes('heart') ? '23,000' :
-                   donation.title.includes('lifelong') ? '8,750' :
-                   donation.title.includes('medical') ? '5,200' :
-                   donation.title.includes('disaster') ? '3,800' : '2,100',
-    currency: '$',
-    fullDescription: donation.description + ' ' + 
-      'This donation offer is available to those in genuine need. We carefully review all requests to ensure the funds go to those who need them most. Please provide detailed information about your situation when making a request.',
-    dateCreated: '2 days ago',
-    location: 'Lebanon'
-  }
-
-  const progressPercentage = (parseFloat(donationDetails.currentAmount.replace(',', '')) / parseFloat(donationDetails.donationAmount.replace(',', ''))) * 100
+  // Calculate progress percentage
+  const donationAmount = parseFloat(donation.donationAmount || '0')
+  const currentAmount = donation.currentAmount || 0
+  const progressPercentage = donationAmount > 0 ? (currentAmount / donationAmount) * 100 : 0
 
   const handleRequest = () => {
     if (!isAuthenticated) {
@@ -116,7 +99,7 @@ export default function DonationDetailsPage() {
                   <div className="flex items-center gap-1 md:gap-2 mb-1">
                     <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900">{donation.name}</h2>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-600">{donationDetails.location} • {donationDetails.dateCreated}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Lebanon • {new Date(donation.createdAt || '').toLocaleDateString()}</p>
                 </div>
               </div>
               <Button variant="destructive" size="sm" className="self-end sm:self-auto">
@@ -143,11 +126,11 @@ export default function DonationDetailsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
                 <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
-                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-500">{donationDetails.currency}{donationDetails.currentAmount}</p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-500">${currentAmount.toLocaleString()}</p>
                   <p className="text-xs sm:text-sm text-gray-600">Distributed so far</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
-                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{donationDetails.currency}{donationDetails.donationAmount}</p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">${donationAmount.toLocaleString()}</p>
                   <p className="text-xs sm:text-sm text-gray-600">Total amount</p>
                 </div>
               </div>
@@ -171,7 +154,7 @@ export default function DonationDetailsPage() {
             <div className="mb-6 md:mb-8">
               <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-2 md:mb-3">About this donation</h4>
               <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line">
-                {donationDetails.fullDescription}
+                {donation.description}
               </p>
             </div>
 
