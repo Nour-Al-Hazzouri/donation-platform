@@ -6,15 +6,15 @@ import { DashboardSidebar } from "@/components/admin/dashboard/dashboardSiderbar
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import EditUserProfile from "@/components/admin/users/EditUserProfile"
 
-// Mock data constant for user profiles
+// Mock data constant for user profiles - matches the IDs and data from ManageUsers component
 const MOCK_USER_DATA = {
-  "user-1": {
-    id: "user-1",
+  "1": {
+    id: "1",
     personalDetails: {
-      name: "John Doe",
+      name: "Tomiwa Oyeledu Dolapo",
       gender: "male",
-      phoneNumber: "09034867656",
-      email: "john.doe@example.com",
+      phoneNumber: "+2349034526771",
+      email: "tomiwaledu@me.com",
       address: {
         district: "Hamra",
         governorate: "Beirut",
@@ -22,13 +22,13 @@ const MOCK_USER_DATA = {
       profileImage: null,
     },
   },
-  "user-2": {
-    id: "user-2",
+  "2": {
+    id: "2",
     personalDetails: {
-      name: "Jane Smith",
+      name: "Bessie Cooper",
       gender: "female",
-      phoneNumber: "09045678912",
-      email: "jane.smith@example.com",
+      phoneNumber: "(505) 555-0125",
+      email: "michael.mitc@me.com",
       address: {
         district: "Achrafieh",
         governorate: "Beirut",
@@ -36,16 +36,58 @@ const MOCK_USER_DATA = {
       profileImage: null,
     },
   },
-  "user-3": {
-    id: "user-3",
+  "3": {
+    id: "3",
     personalDetails: {
-      name: "Ahmad Hassan",
+      name: "Albert Flores",
       gender: "male",
-      phoneNumber: "09076543210",
-      email: "ahmad.hassan@example.com",
+      phoneNumber: "(808) 555-0111",
+      email: "alma.lawson@we.com",
       address: {
         district: "Tripoli",
         governorate: "North",
+      },
+      profileImage: null,
+    },
+  },
+  "4": {
+    id: "4",
+    personalDetails: {
+      name: "Brooklyn Simmons",
+      gender: "female",
+      phoneNumber: "(480) 555-0103",
+      email: "debbie.baker@you.com",
+      address: {
+        district: "Sidon",
+        governorate: "South",
+      },
+      profileImage: null,
+    },
+  },
+  "5": {
+    id: "5",
+    personalDetails: {
+      name: "Devon Lane",
+      gender: "male",
+      phoneNumber: "(217) 555-0113",
+      email: "felicia.reid@us.com",
+      address: {
+        district: "Zahle",
+        governorate: "Bekaa",
+      },
+      profileImage: null,
+    },
+  },
+  "6": {
+    id: "6",
+    personalDetails: {
+      name: "Jerome Bell",
+      gender: "male",
+      phoneNumber: "(629) 555-0129",
+      email: "sara.cruz@them.com",
+      address: {
+        district: "Nabatieh",
+        governorate: "Nabatieh",
       },
       profileImage: null,
     },
