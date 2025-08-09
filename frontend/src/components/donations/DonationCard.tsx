@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -59,12 +59,12 @@ export function DonationCard({
 
   return (
     <Card 
-      className="bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer"
+      className="bg-white shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.02] flex flex-col h-full"
       onClick={handleCardClick}
     >
       <CardContent className="p-6 flex flex-col flex-grow">
-        <div className="flex items-center mb-4">
-          <div className="relative mr-3">
+        <div className="flex items-center mb-4 gap-4">
+          <div className="relative">
             <Avatar className="h-12 w-12">
               <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={name} />
               <AvatarFallback>{initials}</AvatarFallback>
@@ -74,18 +74,16 @@ export function DonationCard({
                 <Image 
                   src="/verification.png" 
                   alt="Verified" 
-                  width={16} 
-                  height={16}
-                  className="w-4 h-4"
+                  width={20}
+                  height={20}
+                  className="rounded-full border-2 border-white"
                 />
               </div>
             )}
           </div>
-          <div>
-            <h3 className="font-semibold text-gray-900">
-              {highlightText(name, searchTerm)}
-            </h3>
-          </div>
+          <h3 className="font-semibold text-gray-900">
+            {highlightText(name, searchTerm)}
+          </h3>
         </div>
         
         <h4 className="font-semibold text-gray-900 mb-3">
@@ -93,15 +91,12 @@ export function DonationCard({
         </h4>
         
         {imageUrl && (
-          <div className="mb-4 rounded-md overflow-hidden">
-            <div className="relative w-full h-48">
-              <Image 
-                src={imageUrl}
-                alt={title}
-                fill
-                className="object-cover"
-              />
-            </div>
+          <div className="mb-4">
+            <img 
+              src={imageUrl || "/placeholder.svg"} 
+              alt={title} 
+              className="w-full h-32 object-cover rounded-md"
+            />
           </div>
         )}
         
@@ -109,14 +104,12 @@ export function DonationCard({
           {highlightText(description, searchTerm)}
         </p>
         
-        <div className="mt-auto">
-          <Button 
-            className="w-full bg-red-500 hover:bg-red-600 text-white h-10"
-            onClick={handleButtonClick}
-          >
-            Request Now
-          </Button>
-        </div>
+        <Button 
+          className="w-full bg-red-500 hover:bg-red-600 text-white mt-auto"
+          onClick={handleButtonClick}
+        >
+          Request Now
+        </Button>
       </CardContent>
     </Card>
   )
