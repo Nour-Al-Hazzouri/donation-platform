@@ -103,9 +103,12 @@ export function useUsers() {
 
   // Function to add a new user
   const addUser = (userData: any) => {
+    // Generate a unique ID for the new user
+    const userId = String(Date.now());
+    
     // Create a new user object from the form data
     const newUser: User = {
-      id: String(Date.now()), // Generate a unique ID
+      id: userId,
       name: userData.personalDetails.name,
       email: userData.personalDetails.email,
       phone: userData.personalDetails.phoneNumber,
@@ -118,6 +121,17 @@ export function useUsers() {
     
     // Save to localStorage
     saveUsersToStorage(updatedUsers);
+    
+    // Store address information in localStorage
+    if (typeof window !== 'undefined') {
+      const addressKey = `user_${userId}_address`;
+      const addressData = {
+        governorate: userData.personalDetails.address?.governorate,
+        district: userData.personalDetails.address?.district
+      };
+      localStorage.setItem(addressKey, JSON.stringify(addressData));
+      console.log('Saved address data for new user:', addressData);
+    }
     
     return newUser;
   };

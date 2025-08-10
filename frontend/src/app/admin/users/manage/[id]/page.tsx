@@ -42,8 +42,8 @@ function UserProfileWrapper({ userId }: { userId: string }) {
             phoneNumber: "N/A",
             email: `user${userId}@example.com`,
             address: {
-              district: savedAddress.district || "Unknown",
-              governorate: savedAddress.governorate || "Unknown",
+              district: savedAddress.district || "",
+              governorate: savedAddress.governorate || "",
             },
             profileImage: "/placeholder.svg?height=300&width=300&text=Profile",
           },
@@ -63,8 +63,8 @@ function UserProfileWrapper({ userId }: { userId: string }) {
       phoneNumber: user.phone,
       email: user.email,
       address: {
-        district: savedAddress.district || "Hamra", // Use saved data or defaults
-        governorate: savedAddress.governorate || "Beirut",
+        district: savedAddress.district || "", // Use saved data or empty string
+        governorate: savedAddress.governorate || "",
       },
       profileImage: user.avatar || "/placeholder.svg?height=300&width=300&text=Profile",
     },

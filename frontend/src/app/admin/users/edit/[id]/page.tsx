@@ -25,7 +25,7 @@ function EditUserWrapper({ userId }: { userId: string }) {
   }
   
   // Try to get saved address data from localStorage
-  let savedAddress = { governorate: "Beirut", district: "Hamra" };
+  let savedAddress = { governorate: "", district: "" };
   if (typeof window !== 'undefined' && userId) {
     try {
       const addressKey = `user_${userId}_address`;
@@ -48,9 +48,9 @@ function EditUserWrapper({ userId }: { userId: string }) {
       phoneNumber: user.phone,
       email: user.email,
       address: {
-        // Use saved address data if available, otherwise use defaults
-        district: savedAddress.district || "Hamra",
-        governorate: savedAddress.governorate || "Beirut",
+        // Use saved address data if available, otherwise use empty string
+        district: savedAddress.district || "",
+        governorate: savedAddress.governorate || "",
       },
       profileImage: null,
     },
@@ -62,8 +62,8 @@ function EditUserWrapper({ userId }: { userId: string }) {
       phoneNumber: "N/A",
       email: `user${userId}@example.com`,
       address: {
-        district: savedAddress.district || "Unknown",
-        governorate: savedAddress.governorate || "Unknown",
+        district: savedAddress.district || "",
+        governorate: savedAddress.governorate || "",
       },
       profileImage: null,
     },

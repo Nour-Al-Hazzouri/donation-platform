@@ -16,8 +16,8 @@ const USER_PROFILE_DATA = {
     phoneNumber: "09034867656",
     email: "moe@me.com",
     address: {
-      district: "Hamra",
-      governorate: "Beirut",
+      district: "",
+      governorate: "",
     },
     profileImage: "/placeholder.svg?height=300&width=300&text=Profile",
   },
