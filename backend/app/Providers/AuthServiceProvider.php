@@ -23,6 +23,7 @@ class AuthServiceProvider extends ServiceProvider
         CommunityPost::class => CommunityPostPolicy::class,
         Comment::class => CommentPolicy::class,
         \App\Models\DonationEvent::class => \App\Policies\DonationEventPolicy::class,
+        \App\Models\DonationTransaction::class => \App\Policies\DonationTransactionPolicy::class,
     ];
 
     /**
