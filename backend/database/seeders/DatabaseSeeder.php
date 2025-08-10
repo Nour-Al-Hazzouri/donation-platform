@@ -51,6 +51,7 @@ class DatabaseSeeder extends Seeder
         // Create other data
         $this->call([
             DonationEventSeeder::class,
+            DonationTransactionSeeder::class,
             CommunityPostSeeder::class,
             CommentSeeder::class,
             VoteSeeder::class,
