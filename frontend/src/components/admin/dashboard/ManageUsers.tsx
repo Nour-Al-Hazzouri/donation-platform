@@ -127,6 +127,21 @@ export function useUsers() {
     const { id, personalDetails } = updatedData || {};
     if (!id || !personalDetails) return null as unknown as User;
 
+    // Log the updated data to help with debugging
+    console.log('Updating user with data:', updatedData);
+    
+    // Store address information in localStorage for reference
+    // This won't be displayed in the user list but will be available when editing
+    if (typeof window !== 'undefined') {
+      const addressKey = `user_${id}_address`;
+      const addressData = {
+        governorate: personalDetails.address?.governorate,
+        district: personalDetails.address?.district
+      };
+      localStorage.setItem(addressKey, JSON.stringify(addressData));
+      console.log('Saved address data:', addressData);
+    }
+
     const updatedUsers = users.map((u) =>
       u.id === id
         ? {

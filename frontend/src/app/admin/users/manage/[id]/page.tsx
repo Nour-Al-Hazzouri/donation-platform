@@ -14,6 +14,21 @@ function UserProfileWrapper({ userId }: { userId: string }) {
   // Find the user in the context
   const user = users.find(user => user.id === userId);
   
+  // Retrieve saved address data from localStorage if available
+  let savedAddress = { district: "", governorate: "" };
+  if (typeof window !== 'undefined') {
+    const addressKey = `user_${userId}_address`;
+    const savedAddressData = localStorage.getItem(addressKey);
+    if (savedAddressData) {
+      try {
+        savedAddress = JSON.parse(savedAddressData);
+        console.log('Retrieved saved address data:', savedAddress);
+      } catch (error) {
+        console.error('Error parsing saved address data:', error);
+      }
+    }
+  }
+
   // If user not found, return a default user
   if (!user) {
     return (
@@ -27,8 +42,8 @@ function UserProfileWrapper({ userId }: { userId: string }) {
             phoneNumber: "N/A",
             email: `user${userId}@example.com`,
             address: {
-              district: "Unknown",
-              governorate: "Unknown",
+              district: savedAddress.district || "Unknown",
+              governorate: savedAddress.governorate || "Unknown",
             },
             profileImage: "/placeholder.svg?height=300&width=300&text=Profile",
           },
@@ -38,7 +53,7 @@ function UserProfileWrapper({ userId }: { userId: string }) {
       />
     );
   }
-  
+
   // Convert the user from the list format to the detailed format
   const userData = {
     id: user.id,
@@ -48,8 +63,8 @@ function UserProfileWrapper({ userId }: { userId: string }) {
       phoneNumber: user.phone,
       email: user.email,
       address: {
-        district: "Hamra", // Use same defaults as edit page for consistency
-        governorate: "Beirut",
+        district: savedAddress.district || "Hamra", // Use saved data or defaults
+        governorate: savedAddress.governorate || "Beirut",
       },
       profileImage: user.avatar || "/placeholder.svg?height=300&width=300&text=Profile",
     },

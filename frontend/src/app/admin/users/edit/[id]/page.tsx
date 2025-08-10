@@ -24,6 +24,21 @@ function EditUserWrapper({ userId }: { userId: string }) {
     } catch {}
   }
   
+  // Try to get saved address data from localStorage
+  let savedAddress = { governorate: "Beirut", district: "Hamra" };
+  if (typeof window !== 'undefined' && userId) {
+    try {
+      const addressKey = `user_${userId}_address`;
+      const storedAddress = localStorage.getItem(addressKey);
+      if (storedAddress) {
+        savedAddress = JSON.parse(storedAddress);
+        console.log('Retrieved saved address:', savedAddress);
+      }
+    } catch (error) {
+      console.error('Error retrieving saved address:', error);
+    }
+  }
+
   // Build initial data for the edit form
   const userData = user ? {
     id: user.id,
@@ -33,8 +48,9 @@ function EditUserWrapper({ userId }: { userId: string }) {
       phoneNumber: user.phone,
       email: user.email,
       address: {
-        district: "Hamra", // Reasonable default
-        governorate: "Beirut",
+        // Use saved address data if available, otherwise use defaults
+        district: savedAddress.district || "Hamra",
+        governorate: savedAddress.governorate || "Beirut",
       },
       profileImage: null,
     },
@@ -46,8 +62,8 @@ function EditUserWrapper({ userId }: { userId: string }) {
       phoneNumber: "N/A",
       email: `user${userId}@example.com`,
       address: {
-        district: "Unknown",
-        governorate: "Unknown",
+        district: savedAddress.district || "Unknown",
+        governorate: savedAddress.governorate || "Unknown",
       },
       profileImage: null,
     },
