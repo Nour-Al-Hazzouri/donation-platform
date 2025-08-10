@@ -5,6 +5,16 @@ import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/authStore"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/utils"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
+import Link from "next/link"
 
 interface SidebarProps {
   activeItem: "profile" | "notifications"
@@ -35,71 +45,87 @@ export default function ProfileSidebar({
     }
   }
 
-  const menuItems = [
+  // Define sidebar menu items
+  const getSidebarMenuItems = () => [
     { 
+      href: "#", 
       icon: User, 
       label: "Profile", 
-      active: activeItem === "profile",
+      isActive: activeItem === "profile",
       onClick: () => handleNavigation('profile')
     },
     { 
+      href: "#", 
       icon: Bell, 
       label: "Notifications", 
-      active: activeItem === "notifications",
+      isActive: activeItem === "notifications",
       onClick: () => handleNavigation('notifications')
     },
     { 
+      href: "#", 
       icon: LogOut, 
       label: "Log out", 
-      active: false, 
+      isActive: false, 
       onClick: handleLogout 
     },
   ]
 
+  const sidebarMenuItems = getSidebarMenuItems()
+  
   return (
-    <div className="w-full lg:w-80 bg-white border-r border-gray-200 p-4 -ml-4 lg:-ml-48 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
-      <div className="text-center mb-6">
-        <div className="relative inline-block mb-3">
-          <Avatar className="w-20 h-20 lg:w-24 lg:h-24 bg-black rounded-full">
-            <AvatarImage src={profileImage} />
-            <AvatarFallback className="bg-black">
-              <User size={40} className="text-white" />
-            </AvatarFallback>
-          </Avatar>
-          {user?.verified && (
-            <img
-              src="/verification.png"
-              alt="Verified"
-              className="absolute top-1 right-1 w-5 h-5"
-            />
-          )}
-        </div>
-        <h2 className="text-lg lg:text-xl font-semibold text-[#000000]">{fullName}</h2>
-      </div>
-
-      <div className="space-y-1">
-        <h3 className="text-[#f90404] font-medium text-sm lg:text-base mb-3">Explore panel</h3>
-        {menuItems.map((item, index) => (
-          <button
-            key={index}
-            className={cn(
-              "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors",
-              item.active ? "bg-[#f90404] text-white" : "text-[#000000] hover:bg-gray-100"
-            )}
-            onClick={item.onClick}
-          >
-            <div
-              className={cn(
-                "w-6 h-6 rounded flex items-center justify-center",
-                item.active ? "bg-white bg-opacity-20" : "bg-[#f90404]"
-              )}
-            >
-              <item.icon size={14} className="text-white" />
-            </div>
-            <span className="text-sm lg:text-base">{item.label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
+    <Sidebar className="w-64 border-r">
+      <SidebarContent className="pt-16">
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {/* Avatar Menu Item */}
+              <SidebarMenuItem>
+                <div className="flex flex-col items-center space-y-3 px-2 py-4 rounded-md hover:bg-gray-50">
+                  <div className="relative">
+                    <Avatar className="w-20 h-20">
+                      <AvatarImage src={profileImage} alt={fullName} />
+                      <AvatarFallback className="bg-black">
+                        <User size={40} className="text-white" />
+                      </AvatarFallback>
+                    </Avatar>
+                    {user?.verified && (
+                      <img
+                        src="/verification.png"
+                        alt="Verified"
+                        className="absolute top-1 right-1 w-5 h-5"
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="font-semibold text-gray-900 text-lg">{fullName}</span>
+                  </div>
+                </div>
+              </SidebarMenuItem>
+              
+              {/* Section Title */}
+              <SidebarMenuItem>
+                <div className="px-2 py-2">
+                  <h3 className="text-[#f90404] font-medium text-sm">Explore panel</h3>
+                </div>
+              </SidebarMenuItem>
+              
+              {/* Main menu items */}
+              {sidebarMenuItems.map((item, index) => (
+                <SidebarMenuItem key={index}>
+                  <SidebarMenuButton 
+                    isActive={item.isActive}
+                    className={item.isActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}
+                    onClick={item.onClick}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   )
 }

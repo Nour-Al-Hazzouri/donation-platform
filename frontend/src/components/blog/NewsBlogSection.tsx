@@ -41,7 +41,7 @@ export default function NewsBlogSection() {
           {blogPosts.map((post) => (
             <Card 
               key={post.id}
-              className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+              className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
               onClick={() => handlePostClick(post.id)}
             >
               {/* Icon */}

@@ -87,7 +87,7 @@ const RequestCard: React.FC<{ request: RequestItem }> = ({ request }) => {
   const router = useRouter();
   return (
     <Card 
-      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-shadow duration-200 mx-1 sm:mx-2 flex flex-col bg-white cursor-pointer"
+      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-white cursor-pointer"
       onClick={() => request.isAvailable && router.push('/add-donation')}
     >
       <CardContent className="p-4 sm:p-6 flex-1 flex flex-col">
@@ -210,7 +210,7 @@ const LatestRequests: React.FC<LatestRequestsProps> = ({ className }) => {
               <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
 
-            <div className="overflow-hidden w-full max-w-6xl" style={{ height: '300px sm:h-[340px]' }}>
+            <div className="overflow-hidden w-full max-w-6xl" style={{ height: 'auto', minHeight: '300px' }}>
               <div
                 className="flex transition-transform duration-300 ease-in-out h-full"
                 style={{

@@ -115,7 +115,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
               <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
 
-            <div className="overflow-hidden w-full max-w-6xl" style={{ height: '360px' }}>
+            <div className="overflow-hidden w-full max-w-6xl" style={{ height: 'auto', minHeight: '360px' }}>
               <div
                 className="flex transition-transform duration-300 ease-in-out h-full"
                 style={{
@@ -129,7 +129,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
                     style={{ width: `${100 / visibleCards}%` }}
                   >
                     <Card 
-                      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-shadow duration-200 mx-1 sm:mx-2 flex flex-col bg-white cursor-pointer"
+                      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-white cursor-pointer"
                       onClick={() => handlePostClick(post.id)}
                     >
                       <CardContent className="p-5 sm:p-7 flex-1 flex flex-col">

@@ -67,7 +67,7 @@ const teamMembers = [
 
 const TeamCard = ({ member }: { member: typeof teamMembers[0] }) => {
   return (
-    <div className="text-center space-y-3 w-full h-full px-2 overflow-hidden">
+    <div className="text-center space-y-3 w-full h-full px-2 py-3 overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02] rounded-lg">
       {/* Profile Image - Removed grey background */}
       <div className="relative w-full h-56 sm:h-60 md:h-64 mx-auto mb-4">
         <div className="w-full h-full rounded-t-full overflow-hidden">

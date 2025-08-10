@@ -6,6 +6,7 @@ import { MainLayout } from '@/components/layouts/MainLayout'
 import UserProfileDashboard from '@/components/profile/UserProfileDashboard'
 import NotificationsDashboard from '@/components/profile/NotificationsDashboard'
 import { useAuthStore } from '@/store/authStore'
+import { SidebarProvider } from '@/components/ui/sidebar'
 
 export default function ProfilePage() {
   const { isAuthenticated } = useAuthStore()
@@ -24,11 +25,13 @@ export default function ProfilePage() {
 
   return (
     <MainLayout>
-      {activeView === 'profile' ? (
-        <UserProfileDashboard onViewChange={setActiveView} />
-      ) : (
-        <NotificationsDashboard onViewChange={setActiveView} />
-      )}
+      <SidebarProvider>
+        {activeView === 'profile' ? (
+          <UserProfileDashboard onViewChange={setActiveView} />
+        ) : (
+          <NotificationsDashboard onViewChange={setActiveView} />
+        )}
+      </SidebarProvider>
     </MainLayout>
   )
 }
