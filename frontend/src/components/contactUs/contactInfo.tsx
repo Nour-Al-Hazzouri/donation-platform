@@ -22,8 +22,8 @@ export const ContactInfo = () => {
       description: "For urgent support",
       details: "+961 1 234 567",
       link: "tel:+9611234567",
-      bgColor: "bg-gray-100",
-      iconColor: COLORS.text.primary
+      bgColor: "bg-red-500/10",
+      iconColor: "#ef4444"
     },
    {
   icon: <MapPinIcon className="h-6 w-6" />,
@@ -98,7 +98,7 @@ export const ContactInfo = () => {
 
         <div className="mt-12 text-center">
           <div 
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-red-500 text-white"
           >
             <ClockIcon className="h-5 w-5" />
             <span className="font-medium">

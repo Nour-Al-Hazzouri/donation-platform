@@ -93,7 +93,7 @@ const RequestCard: React.FC<{ request: RequestItem }> = ({ request }) => {
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
             <AvatarImage src={request.userAvatar || undefined} alt={request.userName} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs sm:text-sm">
+            <AvatarFallback className="bg-red-500 text-white text-xs sm:text-sm">
               {request.userName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -108,13 +108,13 @@ const RequestCard: React.FC<{ request: RequestItem }> = ({ request }) => {
           </h3>
           
           <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm">
-            <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+            <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
             <span>{request.location} • {request.timeAgo}</span>
           </div>
         </div>
 
         <Button 
-          className={`w-full mt-auto text-sm sm:text-base ${request.isAvailable ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
+          className={`w-full mt-auto text-sm sm:text-base ${request.isAvailable ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-secondary text-muted-foreground'}`}
           variant={request.isAvailable ? "default" : "secondary"}
           disabled={!request.isAvailable}
           onClick={() => request.isAvailable && router.push('/add-donation')}
@@ -227,7 +227,7 @@ const LatestRequests: React.FC<LatestRequestsProps> = ({ className }) => {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md ml-1 sm:ml-2 z-10 text-primary"
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md ml-1 sm:ml-2 z-10 text-red-500"
               )}
               onClick={scrollRight}
               aria-label="Next requests"
@@ -239,7 +239,7 @@ const LatestRequests: React.FC<LatestRequestsProps> = ({ className }) => {
 
         <div className="flex justify-center mt-6 sm:mt-8">
           <Button 
-            className="transition-colors duration-200 rounded-full px-6 py-1.5 sm:px-8 sm:py-2 text-xs sm:text-sm lg:text-base bg-primary text-primary-foreground"
+            className="transition-colors duration-200 rounded-full px-6 py-1.5 sm:px-8 sm:py-2 text-xs sm:text-sm lg:text-base bg-red-500 text-white hover:bg-red-600"
             onClick={() => router.push('/requests')}
           >
             View All Requests

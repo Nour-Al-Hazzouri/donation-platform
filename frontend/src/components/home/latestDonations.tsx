@@ -94,7 +94,7 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
             <AvatarImage src={donation.userAvatar || undefined} alt={donation.userName} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs sm:text-sm">
+            <AvatarFallback className="bg-red-500 text-white text-xs sm:text-sm">
               {donation.userName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -109,13 +109,13 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
           </h3>
           
           <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm">
-            <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+            <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
             <span>{donation.location} • {donation.timeAgo}</span>
           </div>
         </div>
 
         <Button 
-          className={`w-full mt-auto text-sm sm:text-base ${donation.isAvailable ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-secondary text-secondary-foreground'}`}
+          className={`w-full mt-auto text-sm sm:text-base ${donation.isAvailable ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-secondary text-secondary-foreground'}`}
           variant={donation.isAvailable ? "default" : "secondary"}
           disabled={!donation.isAvailable}
           onClick={() => donation.isAvailable && router.push('/add-request')}
@@ -201,7 +201,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
               )}
               onClick={scrollLeft}
               aria-label="Previous donations"
-              style={{ color: 'var(--primary)' }}
+              style={{ color: '#f90404' }}
             >
               <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -233,7 +233,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
               )}
               onClick={scrollRight}
               aria-label="Next donations"
-              style={{ color: 'var(--primary)' }}
+              style={{ color: '#f90404' }}
             >
               <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -242,7 +242,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
 
         <div className="flex justify-center mt-6 sm:mt-8">
           <Button 
-            className="transition-colors duration-200 rounded-full px-6 py-1.5 sm:px-8 sm:py-2 text-xs sm:text-sm lg:text-base bg-primary text-primary-foreground hover:bg-primary/90"
+            className="transition-colors duration-200 rounded-full px-6 py-1.5 sm:px-8 sm:py-2 text-xs sm:text-sm lg:text-base bg-red-500 text-white hover:bg-red-600"
             onClick={() => router.push('/donations')}
           >
             View All Donations

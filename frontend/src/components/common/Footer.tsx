@@ -5,11 +5,13 @@ import { Twitter, Instagram, Youtube } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { NAV_ITEMS } from "@/utils/constants"
+import { useTheme } from "next-themes"
 import Image from "next/image"
 import { COLORS } from "@/lib/constants"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
+  const { theme } = useTheme()
 
   return (
     <footer className="bg-background border-t border-border">
@@ -25,7 +27,7 @@ export function Footer() {
               >
                 <div className="w-36 h-10 relative -ml-6">
                   <Image 
-                    src="/logo.png" 
+                    src={theme === "dark" ? "/logo-dark-removebg-preview.png" : "/logo.png"} 
                     alt="GiveLeb Logo" 
                     fill
                     sizes="(max-width: 768px) 144px, 180px"
@@ -45,21 +47,21 @@ export function Footer() {
               <div className="flex items-center gap-3 pt-2">
                 <a 
                   href="#" 
-                  className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+                  className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"
                   aria-label="Twitter"
                 >
                   <Twitter size={18} />
                 </a>
                 <a 
                   href="#" 
-                  className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+                  className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"
                   aria-label="Instagram"
                 >
                   <Instagram size={18} />
                 </a>
                 <a 
                   href="#" 
-                  className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+                  className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"
                   aria-label="YouTube"
                 >
                   <Youtube size={18} />
@@ -76,7 +78,7 @@ export function Footer() {
                 <Link 
                   key={item.name}
                   href={item.href} 
-                  className="block text-muted-foreground hover:text-primary transition-colors"
+                  className="block text-muted-foreground hover:text-red-500 transition-colors"
                 >
                   {item.name}
                 </Link>
@@ -101,9 +103,9 @@ export function Footer() {
               <Input
                 type="email"
                 placeholder="Enter Your Email"
-                className="w-full border-input focus:border-primary focus:ring-primary"
+                className="w-full border-input focus:border-red-500 focus:ring-red-500"
               />
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 whitespace-nowrap">
+              <Button className="bg-red-500 hover:bg-red-600 text-white px-4 whitespace-nowrap">
                 Subscribe
               </Button>
             </div>

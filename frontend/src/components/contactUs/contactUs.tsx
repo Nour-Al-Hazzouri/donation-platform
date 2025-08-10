@@ -58,7 +58,7 @@ export default function ContactUs() {
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div className="space-y-2 sm:space-y-3">
                   <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium">
-                    <UserIcon className="h-4 w-4" />
+                    <UserIcon className="h-4 w-4 text-red-500" />
                     Name
                   </label>
                   <Input
@@ -69,13 +69,13 @@ export default function ContactUs() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="text-base sm:text-sm"
+                    className="text-base sm:text-sm focus-visible:ring-red-500 focus-visible:border-red-500"
                   />
                 </div>
 
                 <div className="space-y-2 sm:space-y-3">
                   <label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
-                    <MailIcon className="h-4 w-4" />
+                    <MailIcon className="h-4 w-4 text-red-500" />
                     Email
                   </label>
                   <Input
@@ -86,13 +86,13 @@ export default function ContactUs() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="text-base sm:text-sm"
+                    className="text-base sm:text-sm focus-visible:ring-red-500 focus-visible:border-red-500"
                   />
                 </div>
 
                 <div className="space-y-2 sm:space-y-3">
                   <label htmlFor="phone" className="flex items-center gap-2 text-sm font-medium">
-                    <PhoneIcon className="h-4 w-4" />
+                    <PhoneIcon className="h-4 w-4 text-red-500" />
                     Phone
                   </label>
                   <Input
@@ -102,20 +102,20 @@ export default function ContactUs() {
                     placeholder="+961 XX XXX XXX"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="text-base sm:text-sm"
+                    className="text-base sm:text-sm focus-visible:ring-red-500 focus-visible:border-red-500"
                   />
                 </div>
 
                 <div className="space-y-2 sm:space-y-3">
                   <label htmlFor="message" className="flex items-center gap-2 text-sm font-medium">
-                    <MapPinIcon className="h-4 w-4" />
+                    <MapPinIcon className="h-4 w-4 text-red-500" />
                     Message
                   </label>
                   <textarea
                     id="message"
                     name="message"
                     rows={4}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-red-500 focus-visible:ring-red-500/50 focus-visible:ring-[3px] outline-none"
                     placeholder="Your message..."
                     value={formData.message}
                     onChange={handleChange}
@@ -125,12 +125,7 @@ export default function ContactUs() {
 
                 <Button
                   type="submit"
-                  className={`
-                    w-full mt-4 sm:mt-6
-                    bg-[${COLORS.primary}] text-white border-[${COLORS.primary}]
-                    hover:bg-[${COLORS.primaryHover}] hover:text-white hover:border-[${COLORS.primaryHover}]
-                    transition-colors duration-200 rounded-full py-4 sm:py-6 text-base
-                  `}
+                  className="w-full mt-4 sm:mt-6 bg-red-500 hover:bg-red-600 text-white transition-colors duration-200 rounded-full py-4 sm:py-6 text-base"
                 >
                   Send Message
                 </Button>

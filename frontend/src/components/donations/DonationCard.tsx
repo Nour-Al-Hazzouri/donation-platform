@@ -105,7 +105,7 @@ export function DonationCard({
         </p>
         
         <Button 
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-auto"
+          className="w-full bg-red-500 hover:bg-red-600 text-white mt-auto"
           onClick={handleButtonClick}
         >
           Request Now

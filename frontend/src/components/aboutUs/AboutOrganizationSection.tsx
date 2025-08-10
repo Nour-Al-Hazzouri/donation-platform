@@ -34,10 +34,10 @@ export default function AboutOrganizationSection() {
               {organizationInfo.map((item, index) => (
                 <div key={index} className="space-y-3 sm:space-y-4">
                   <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                       <item.icon 
                         size={20} 
-                        className="text-primary-foreground" 
+                        className="text-white" 
                         strokeWidth={2}
                       />
                     </div>

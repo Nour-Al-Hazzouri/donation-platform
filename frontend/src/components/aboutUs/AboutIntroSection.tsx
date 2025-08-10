@@ -38,15 +38,15 @@ export default function AboutIntroSection({ showButton = true }: AboutIntroSecti
               <p className="text-xs sm:text-sm text-foreground font-semibold">What Makes Us Different</p>
               <ul className="mt-1 space-y-2 sm:space-y-3">
                 <li className="flex items-start gap-2 sm:gap-3">
-                  <Handshake className="w-4 h-4 sm:w-5 sm:h-5 text-foreground mt-0.5 flex-shrink-0" />
+                  <Handshake className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground text-sm sm:text-base">Direct Aid: Your donation reaches hands, not warehouses.</span>
                 </li>
                 <li className="flex items-start gap-2 sm:gap-3">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-foreground mt-0.5 flex-shrink-0" />
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground text-sm sm:text-base">Community-Powered: Every post and need is verified by locals.</span>
                 </li>
                 <li className="flex items-start gap-2 sm:gap-3">
-                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-foreground mt-0.5 flex-shrink-0" />
+                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground text-sm sm:text-base">For All Lebanese: No sides, no sects, just humanity helping humanity.</span>
                 </li>
               </ul>

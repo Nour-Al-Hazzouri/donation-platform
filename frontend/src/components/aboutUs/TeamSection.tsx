@@ -86,7 +86,7 @@ const TeamCard = ({ member }: { member: typeof teamMembers[0] }) => {
         <h3 className="text-lg sm:text-xl font-bold text-foreground truncate px-2">
           {member.name}
         </h3>
-        <p className="text-primary font-medium text-sm sm:text-base line-clamp-2 px-2">
+        <p className="text-red-500 font-medium text-sm sm:text-base line-clamp-2 px-2">
           {member.role}
         </p>
       </div>
@@ -95,21 +95,21 @@ const TeamCard = ({ member }: { member: typeof teamMembers[0] }) => {
       <div className="flex justify-center gap-3 pt-1">
         <a
           href={member.social.facebook}
-          className="text-muted-foreground hover:text-primary transition-colors"
+          className="text-muted-foreground hover:text-red-500 transition-colors"
           aria-label={`${member.name}'s Facebook`}
         >
           <Facebook size={18} />
         </a>
         <a
           href={member.social.twitter}
-          className="text-muted-foreground hover:text-primary transition-colors"
+          className="text-muted-foreground hover:text-red-500 transition-colors"
           aria-label={`${member.name}'s Twitter`}
         >
           <Twitter size={18} />
         </a>
         <a
           href={member.social.instagram}
-          className="text-muted-foreground hover:text-primary transition-colors"
+          className="text-muted-foreground hover:text-red-500 transition-colors"
           aria-label={`${member.name}'s Instagram`}
         >
           <Instagram size={18} />

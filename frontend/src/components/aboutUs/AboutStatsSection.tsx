@@ -38,7 +38,7 @@ export default function AboutStatsSection() {
               <div className="flex justify-center">
                 <stat.icon 
                   size={40} 
-                  className="text-primary"
+                  className="text-red-500"
                   strokeWidth={1.5}
                 />
               </div>

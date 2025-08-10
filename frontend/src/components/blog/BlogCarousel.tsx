@@ -112,7 +112,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
               aria-label="Previous blog posts"
               style={{ color: COLORS.primary }}
             >
-              <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
             </Button>
 
             <div className="overflow-hidden w-full max-w-6xl" style={{ height: 'auto', minHeight: '360px' }}>
@@ -135,20 +135,20 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
                       <CardContent className="p-5 sm:p-7 flex-1 flex flex-col">
                         {/* Icon */}
                         <div className="flex items-center justify-center h-32 w-full bg-muted mb-4 rounded-md">
-                          {post.id === 1 && <Heart className="w-16 h-16 text-primary" />}
-                          {post.id === 2 && <BookOpen className="w-16 h-16 text-primary" />}
-                          {post.id === 3 && <Award className="w-16 h-16 text-primary" />}
-                          {post.id === 4 && <Home className="w-16 h-16 text-primary" />}
-                          {post.id === 5 && <School className="w-16 h-16 text-primary" />}
-                          {post.id === 6 && <Droplets className="w-16 h-16 text-primary" />}
-                          {post.id === 7 && <Users className="w-16 h-16 text-primary" />}
-                          {post.id === 8 && <Globe className="w-16 h-16 text-primary" />}
-                          {post.id === 9 && <MessageCircle className="w-16 h-16 text-primary" />}
+                          {post.id === 1 && <Heart className="w-16 h-16 text-red-500" />}
+                          {post.id === 2 && <BookOpen className="w-16 h-16 text-red-500" />}
+                          {post.id === 3 && <Award className="w-16 h-16 text-red-500" />}
+                          {post.id === 4 && <Home className="w-16 h-16 text-red-500" />}
+                          {post.id === 5 && <School className="w-16 h-16 text-red-500" />}
+                          {post.id === 6 && <Droplets className="w-16 h-16 text-red-500" />}
+                          {post.id === 7 && <Users className="w-16 h-16 text-red-500" />}
+                          {post.id === 8 && <Globe className="w-16 h-16 text-red-500" />}
+                          {post.id === 9 && <MessageCircle className="w-16 h-16 text-red-500" />}
                         </div>
 
                         {/* Date */}
                         <div className="flex items-center gap-2 text-muted-foreground text-xs mb-2">
-                          <Calendar className="w-3 h-3" />
+                          <Calendar className="w-3 h-3 text-red-500" />
                           <span>{post.date}</span>
                         </div>
 
@@ -168,7 +168,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
                           className="p-0 h-auto text-primary font-semibold text-xs hover:no-underline flex items-center gap-1 group mt-auto mb-1"
                         >
                           READ MORE
-                          <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                          <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform text-red-500" />
                         </Button>
                       </CardContent>
                     </Card>
@@ -187,7 +187,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
               aria-label="Next blog posts"
               style={{ color: COLORS.primary }}
             >
-              <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
             </Button>
           </div>
         </div>
@@ -195,11 +195,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
         <div className="flex justify-center mt-6 sm:mt-8">
           <Link href="/blog">
             <Button 
-              className="transition-colors duration-200 rounded-full px-6 py-1.5 sm:px-8 sm:py-2 text-xs sm:text-sm lg:text-base"
-              style={{
-                backgroundColor: COLORS.primary,
-                color: 'white',
-              }}
+              className="bg-red-500 hover:bg-red-600 text-white transition-colors duration-200 rounded-full px-6 py-1.5 sm:px-8 sm:py-2 text-xs sm:text-sm lg:text-base"
             >
               View All Blog Posts
             </Button>

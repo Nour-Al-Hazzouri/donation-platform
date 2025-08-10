@@ -54,15 +54,15 @@ export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps)
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Hero Icon */}
         <div className="flex items-center justify-center h-64 md:h-96 w-full mb-8 rounded-2xl overflow-hidden bg-muted">
-          {post.id === 1 && <Heart className="w-32 h-32 text-primary" />}
-          {post.id === 2 && <BookOpen className="w-32 h-32 text-primary" />}
-          {post.id === 3 && <Award className="w-32 h-32 text-primary" />}
-          {post.id === 4 && <Home className="w-32 h-32 text-primary" />}
-          {post.id === 5 && <School className="w-32 h-32 text-primary" />}
-          {post.id === 6 && <Droplets className="w-32 h-32 text-primary" />}
-          {post.id === 7 && <Users className="w-32 h-32 text-primary" />}
-          {post.id === 8 && <Globe className="w-32 h-32 text-primary" />}
-          {post.id === 9 && <MessageCircle className="w-32 h-32 text-primary" />}
+          {post.id === 1 && <Heart className="w-32 h-32 text-red-500" />}
+          {post.id === 2 && <BookOpen className="w-32 h-32 text-red-500" />}
+          {post.id === 3 && <Award className="w-32 h-32 text-red-500" />}
+          {post.id === 4 && <Home className="w-32 h-32 text-red-500" />}
+          {post.id === 5 && <School className="w-32 h-32 text-red-500" />}
+          {post.id === 6 && <Droplets className="w-32 h-32 text-red-500" />}
+          {post.id === 7 && <Users className="w-32 h-32 text-red-500" />}
+          {post.id === 8 && <Globe className="w-32 h-32 text-red-500" />}
+          {post.id === 9 && <MessageCircle className="w-32 h-32 text-red-500" />}
         </div>
 
         {/* Article Content */}

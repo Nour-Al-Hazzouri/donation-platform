@@ -16,12 +16,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ModeToggle } from "./ModeToggle"
+import { useTheme } from "next-themes"
 
 export function Header() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { openModal } = useModal()
   const { user, isAuthenticated, logout } = useAuthStore()
+  const { theme } = useTheme()
   
   // Check if the current user is an admin
   const isAdmin = user?.email === 'admin@gmail.com'
@@ -33,14 +35,14 @@ export function Header() {
     const isActive = pathname === item.href
     const mobileClasses = `px-3 py-2 rounded-md text-base font-medium ${
       isActive 
-        ? `text-primary bg-secondary` 
-        : `text-muted-foreground hover:text-foreground hover:bg-secondary/50`
+        ? `text-red-500 bg-secondary` 
+        : `text-muted-foreground hover:text-red-500 hover:bg-secondary/50`
     }`
     
     const desktopClasses = `${
       isActive 
-        ? `text-primary font-medium border-b-2 border-primary pb-1` 
-        : `text-muted-foreground hover:text-foreground`
+        ? `text-red-500 font-medium border-b-2 border-red-500 pb-1` 
+        : `text-muted-foreground hover:text-red-500`
     } text-sm lg:text-base whitespace-nowrap`
 
     return (
@@ -49,7 +51,7 @@ export function Header() {
         href={item.href}
         className={isMobile ? mobileClasses : desktopClasses}
         onClick={closeMobileMenu}
-        style={isActive && !isMobile ? { borderBottomColor: 'var(--primary)' } : {}}
+        style={isActive && !isMobile ? { borderBottomColor: '#ef4444' } : {}}
       >
         {item.name}
       </Link>
@@ -67,7 +69,7 @@ export function Header() {
           >
             <div className="w-40 h-10 relative">
               <Image 
-                src="/logo.png" 
+                src={theme === "dark" ? "/logo-dark-removebg-preview.png" : "/logo.png"} 
                 alt="GiveLeb Logo" 
                 fill
                 sizes="(max-width: 768px) 160px, 200px"
@@ -101,10 +103,10 @@ export function Header() {
                     href={item.href}
                     className={`hidden lg:inline-block ${
                       pathname === item.href 
-                        ? `text-primary font-medium border-b-2 pb-1` 
-                        : `text-muted-foreground hover:text-foreground`
+                        ? `text-red-500 font-medium border-b-2 border-red-500 pb-1` 
+                        : `text-muted-foreground hover:text-red-500`
                     } text-sm lg:text-base whitespace-nowrap`}
-                    style={pathname === item.href ? { borderBottomColor: 'var(--primary)' } : {}}
+                    style={pathname === item.href ? { borderBottomColor: '#ef4444' } : {}}
                   >
                     {item.name}
                   </Link>
@@ -122,7 +124,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="bg-primary border-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground hover:border-primary/90 transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
+                    className="bg-red-500 border-red-500 text-white hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
                   >
                     <User size={16} />
                     <span>{user.name}</span>
@@ -145,13 +147,13 @@ export function Header() {
               <>
                 <Button
                   variant="outline"
-                  className="bg-primary border-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground hover:border-primary/90 transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
+                  className="bg-red-500 border-red-500 text-white hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
                   onClick={() => openModal('signIn')}
                 >
                   Sign In
                 </Button>
                 <Button 
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
+                  className="bg-red-500 text-white hover:bg-red-600 hover:text-white transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
                   onClick={() => openModal('signUp')}
                 >
                   Sign Up
@@ -177,7 +179,7 @@ export function Header() {
                   <>
                     <Link href={isAdmin ? "/admin" : "/profile"}>
                       <Button
-                        className="bg-primary text-primary-foreground w-full text-center py-2 px-4 rounded-full flex items-center justify-center gap-2"
+                        className="bg-red-500 text-white w-full text-center py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-600"
                         onClick={closeMobileMenu}
                       >
                         <User size={16} />
@@ -186,7 +188,7 @@ export function Header() {
                     </Link>
                     <Button
                       variant="outline"
-                      className="border-primary text-primary w-full text-center py-2 px-4 rounded-full border flex items-center justify-center gap-2"
+                      className="border-red-500 text-red-500 w-full text-center py-2 px-4 rounded-full border flex items-center justify-center gap-2 hover:border-red-600 hover:text-red-600"
                       onClick={() => {
                         closeMobileMenu()
                         logout()
@@ -199,7 +201,7 @@ export function Header() {
                 ) : (
                   <>
                     <Button
-                      className="bg-primary text-primary-foreground w-full text-center py-2 px-4 rounded-full"
+                      className="bg-red-500 text-white w-full text-center py-2 px-4 rounded-full hover:bg-red-600"
                       onClick={() => {
                         closeMobileMenu()
                         openModal('signIn')
@@ -209,7 +211,7 @@ export function Header() {
                     </Button>
                     <Button
                       variant="outline"
-                      className="border-primary text-primary w-full text-center py-2 px-4 rounded-full border"
+                      className="border-red-500 text-red-500 w-full text-center py-2 px-4 rounded-full border hover:border-red-600 hover:text-red-600"
                       onClick={() => {
                         closeMobileMenu()
                         openModal('signUp')

@@ -46,21 +46,21 @@ export default function NewsBlogSection() {
             >
               {/* Icon */}
               <div className="flex items-center justify-center h-64 w-full bg-muted">
-                {post.id === 1 && <Heart className="w-24 h-24 text-primary" />}
-                {post.id === 2 && <BookOpen className="w-24 h-24 text-primary" />}
-                {post.id === 3 && <Award className="w-24 h-24 text-primary" />}
-                {post.id === 4 && <Home className="w-24 h-24 text-primary" />}
-                {post.id === 5 && <School className="w-24 h-24 text-primary" />}
-                {post.id === 6 && <Droplets className="w-24 h-24 text-primary" />}
-                {post.id === 7 && <Users className="w-24 h-24 text-primary" />}
-                {post.id === 8 && <Globe className="w-24 h-24 text-primary" />}
-                {post.id === 9 && <MessageCircle className="w-24 h-24 text-primary" />}
+                {post.id === 1 && <Heart className="w-24 h-24 text-red-500" />}
+                {post.id === 2 && <BookOpen className="w-24 h-24 text-red-500" />}
+                {post.id === 3 && <Award className="w-24 h-24 text-red-500" />}
+                {post.id === 4 && <Home className="w-24 h-24 text-red-500" />}
+                {post.id === 5 && <School className="w-24 h-24 text-red-500" />}
+                {post.id === 6 && <Droplets className="w-24 h-24 text-red-500" />}
+                {post.id === 7 && <Users className="w-24 h-24 text-red-500" />}
+                {post.id === 8 && <Globe className="w-24 h-24 text-red-500" />}
+                {post.id === 9 && <MessageCircle className="w-24 h-24 text-red-500" />}
               </div>
 
               <CardContent className="p-6">
                 {/* Date */}
                 <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-4 h-4 text-red-500" />
                   <span>{post.date}</span>
                 </div>
 
@@ -79,7 +79,7 @@ export default function NewsBlogSection() {
               <CardFooter className="px-6 pb-6 pt-0">
                 <Button 
                   variant="link" 
-                  className="p-0 h-auto text-primary font-semibold text-sm hover:no-underline flex items-center gap-2 group"
+                  className="p-0 h-auto text-red-500 font-semibold text-sm hover:no-underline flex items-center gap-2 group"
                 >
                   READ MORE
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
