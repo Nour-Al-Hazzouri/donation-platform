@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { NAV_ITEMS, COLORS } from "@/lib/constants"
 import { usePathname } from "next/navigation"
-import { Menu, X } from "lucide-react"
+import { Menu, X, LayoutDashboard, FileText, Users, MapPin } from "lucide-react"
 import Image from "next/image"
 
 export function AdminHeader() {
@@ -100,7 +100,7 @@ export function AdminHeader() {
           </nav>
           <div className="hidden md:flex items-center gap-3">
             {/* Dashboard Button */}
-            <Link href="/admin">
+            <Link href="/admin/dashboard">
               <Button
                 style={{
                   backgroundColor: COLORS.primary,
@@ -117,7 +117,7 @@ export function AdminHeader() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-30 bg-white overflow-y-auto">
+        <div className="md:hidden fixed inset-0 top-16 z-50 bg-white overflow-y-auto">
           <div className="p-4">
             <nav className="flex flex-col space-y-4">
               {NAV_ITEMS.map((item) => renderNavLink(item, true))}
@@ -136,9 +136,36 @@ export function AdminHeader() {
                   </div>
                   <span className="text-base font-medium text-gray-700">Admin</span>
                 </div>
+                
+                {/* Dashboard Sidebar Links for Mobile */}
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Dashboard Menu</h3>
+                  <div className="space-y-2">
+                    <Link href="/admin" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2">
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Link>
+                    <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2">
+                      <FileText className="h-4 w-4" />
+                      <span>Manage Blogs</span>
+                    </Link>
+                    <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2">
+                      <MapPin className="h-4 w-4" />
+                      <span>Manage Locations</span>
+                    </Link>
+                    <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2">
+                      <Users className="h-4 w-4" />
+                      <span>All Users</span>
+                    </Link>
+                    <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2 pl-6">
+                      <FileText className="h-4 w-4" />
+                      <span>Verification Requests</span>
+                    </Link>
+                  </div>
+                </div>
 
                 {/* Mobile Dashboard Button */}
-                <Link href="/admin" onClick={closeMobileMenu}>
+                <Link href="/admin/dashboard" onClick={closeMobileMenu}>
                   <Button
                     style={{ backgroundColor: COLORS.primary, color: "white" }}
                     className="w-full text-center py-2 px-4 rounded-md"

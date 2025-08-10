@@ -13,10 +13,50 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboard, FileText, Users, ChevronRight, MapPin } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible" 
+import { LayoutDashboard, FileText, Users, MapPin } from "lucide-react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
+
+// Mock data for admin profile
+const ADMIN_PROFILE = {
+  name: "Admin",
+  role: "Administrator",
+  avatar: "admin.jpg",
+  avatarFallback: "A"
+}
+
+// Sidebar menu items definition
+const getSidebarMenuItems = (pathname: string) => [
+  { 
+    href: "/admin", 
+    icon: LayoutDashboard, 
+    label: "Dashboard", 
+    isActive: pathname === "/admin"
+  },
+  { 
+    href: "/admin/blogs", 
+    icon: FileText, 
+    label: "manage blogs", 
+    isActive: pathname.startsWith("/admin/blogs")
+  },
+  { 
+    href: "/admin/locations", 
+    icon: MapPin, 
+    label: "manage location", 
+    isActive: pathname.startsWith("/admin/locations")
+  },
+  { 
+    href: "/admin/users", 
+    icon: Users, 
+    label: "manage users", 
+    isActive: pathname.startsWith("/admin/users")
+  }
+]
 
 export function DashboardSidebar() {
+  const pathname = usePathname()
+  const sidebarMenuItems = getSidebarMenuItems(pathname)
+  
   return (
     <Sidebar className="w-64 border-r">
       <SidebarContent className="pt-16">
@@ -25,60 +65,32 @@ export function DashboardSidebar() {
             <SidebarMenu>
               {/* Avatar Menu Item */}
               <SidebarMenuItem>
-              <div className="flex items-center space-x-3 px-2 py-2 rounded-md hover:bg-gray-50">
-              <Avatar className="w-10 h-10">
-              <AvatarImage src="admin.jpg" alt="Admin" />
-              <AvatarFallback className="bg-yellow-400 text-white font-semibold">A</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-              <span className="font-semibold text-gray-900 text-sm">Admin</span>
-              <span className="text-xs text-gray-500">Administrator</span>
-              </div>
-              </div>
+                <div className="flex items-center space-x-3 px-2 py-2 rounded-md hover:bg-gray-50">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={ADMIN_PROFILE.avatar} alt={ADMIN_PROFILE.name} />
+                    <AvatarFallback className="bg-yellow-400 text-white font-semibold">{ADMIN_PROFILE.avatarFallback}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-900 text-sm">{ADMIN_PROFILE.name}</span>
+                    <span className="text-xs text-gray-500">{ADMIN_PROFILE.role}</span>
+                  </div>
+                </div>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton isActive className="bg-red-50 text-red-600 hover:bg-red-100">
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span>Dashboard</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-                  <FileText className="h-4 w-4" />
-                  <span>manage blogs</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-                  <MapPin className="h-4 w-4" />
-                  <span>manage location</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-                      <Users className="h-4 w-4" />
-                      <span>manage Users</span>
-                      <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton className="text-gray-500 hover:text-gray-700 hover:bg-gray-50">
-                          <span>All</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton className="text-gray-500 hover:text-gray-700 hover:bg-gray-50">
-                          <span>Verification Requests</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
+              {/* Main menu items */}
+              {sidebarMenuItems.map((item, index) => (
+                <SidebarMenuItem key={index}>
+                  <SidebarMenuButton 
+                    isActive={item.isActive}
+                    className={item.isActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}
+                    asChild
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
-              </Collapsible>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -14,7 +14,7 @@ export function AdminLayout({ children }: MainLayoutProps) {
     <div className={`min-h-screen flex flex-col bg-[${COLORS.background}]`}>
       <AdminHeader />
 
-      {/* Main content area */}
+      {/* Main content area - full width on mobile, adjusted for sidebar on md+ screens */}
       <div className="flex flex-1 w-full overflow-x-hidden">{children}</div>
 
       {/* Footer - no sidebar overlap on mobile, margin on md+ screens */}

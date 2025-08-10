@@ -21,6 +21,9 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { openModal } = useModal()
   const { user, isAuthenticated, logout } = useAuthStore()
+  
+  // Check if the current user is an admin
+  const isAdmin = user?.email === 'admin@gmail.com'
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
@@ -130,9 +133,9 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild>
-                    <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
+                    <Link href={isAdmin ? "/admin" : "/profile"} className="flex items-center gap-2 cursor-pointer">
                       <User size={16} />
-                      <span>Profile</span>
+                      <span>{isAdmin ? "Dashboard" : "Profile"}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => logout()} className="flex items-center gap-2 cursor-pointer">
@@ -181,14 +184,14 @@ export function Header() {
               <div className="pt-4 border-t border-gray-200 flex flex-col space-y-3">
                 {isAuthenticated && user ? (
                   <>
-                    <Link href="/profile">
+                    <Link href={isAdmin ? "/admin" : "/profile"}>
                       <Button
                         style={{ backgroundColor: COLORS.primary, color: 'white' }}
                         className="w-full text-center py-2 px-4 rounded-full flex items-center justify-center gap-2"
                         onClick={closeMobileMenu}
                       >
                         <User size={16} />
-                        Profile
+                        {isAdmin ? "Dashboard" : "Profile"}
                       </Button>
                     </Link>
                     <Button
