@@ -12,8 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { COLORS } from "@/lib/constants"
-import { cn } from '@/lib/utils'
+import { COLORS } from "@/utils/constants"
+import { cn } from '@/utils'
 
 const PRIORITY_OPTIONS = [
   { value: "high", label: "High" },

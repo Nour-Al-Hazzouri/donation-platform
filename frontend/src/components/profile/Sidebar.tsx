@@ -2,9 +2,9 @@
 
 import { User, Bell, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useAuthStore } from "@/lib/store/authStore"
+import { useAuthStore } from "@/store/authStore"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils"
 
 interface SidebarProps {
   activeItem: "profile" | "notifications"

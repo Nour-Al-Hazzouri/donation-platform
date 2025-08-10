@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { useAuthStore } from '@/lib/store/authStore'
-import { useDonationsStore } from '@/lib/store/donationsStore'
+import { useAuthStore } from '@/store/authStore'
+import { useDonationsStore } from '@/store/donationsStore'
 
 function getUserInitials(name: string): string {
   return name

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Twitter, Instagram, Youtube } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { NAV_ITEMS } from "@/lib/constants"
+import { NAV_ITEMS } from "@/utils/constants"
 import Image from "next/image"
 
 export function Footer() {

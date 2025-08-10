@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { MainLayout } from "@/components/layouts/MainLayout"
 import { SearchSection } from "@/components/requests/SearchSection"
 import { RequestCards } from "@/components/requests/RequestCards"
-import { useRequestsStore, initialRequestsData, type RequestData } from "@/lib/store/requestsStore"
+import { useRequestsStore, initialRequestsData, type RequestData } from "@/store/requestsStore"
 
 // Search function that filters requests based on multiple criteria
 function searchRequests(requests: RequestData[], searchTerm: string): RequestData[] {

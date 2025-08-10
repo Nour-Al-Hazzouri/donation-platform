@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff } from 'lucide-react'
-import { useModal } from '@/lib/contexts/ModalContext'
-import { useAuthStore } from '@/lib/store/authStore'
+import { useModal } from '@/contexts/ModalContext'
+import { useAuthStore } from '@/store/authStore'
 import { toast } from "@/components/ui/use-toast"
 import { useRouter } from 'next/navigation'
 

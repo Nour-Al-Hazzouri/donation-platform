@@ -5,11 +5,11 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { useDonationsStore } from '@/lib/store/donationsStore'
-import { useAuthStore } from '@/lib/store/authStore'
-import { useModal } from '@/lib/contexts/ModalContext'
+import { useDonationsStore } from '@/store/donationsStore'
+import { useAuthStore } from '@/store/authStore'
+import { useModal } from '@/contexts/ModalContext'
 import Image from 'next/image'
-import { COLORS } from '@/lib/constants'
+import { COLORS } from '@/utils/constants'
 
 export default function DonationDetailsPage() {
   const params = useParams()

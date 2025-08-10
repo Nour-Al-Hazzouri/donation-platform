@@ -5,7 +5,7 @@ import { CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { MainLayout } from '@/components/layouts/MainLayout'
 import { useEffect, useState } from 'react'
-import { useDonationsStore } from "@/lib/store/donationsStore"
+import { useDonationsStore } from "@/store/donationsStore"
 
 export default function RequestSuccessPage() {
   const searchParams = useSearchParams()

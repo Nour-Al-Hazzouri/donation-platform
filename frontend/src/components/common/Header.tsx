@@ -7,8 +7,8 @@ import { NAV_ITEMS, COLORS } from "@/lib/constants"
 import { usePathname } from "next/navigation"
 import { Menu, X, User, LogOut } from 'lucide-react'
 import Image from "next/image"
-import { useModal } from '@/lib/contexts/ModalContext'
-import { useAuthStore } from '@/lib/store/authStore'
+import { useModal } from '@/contexts/ModalContext'
+import { useAuthStore } from '@/store/authStore'
 import {
   DropdownMenu,
   DropdownMenuContent,

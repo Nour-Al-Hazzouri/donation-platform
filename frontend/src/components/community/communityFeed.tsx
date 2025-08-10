@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react'
 import { MessageCircle, ThumbsUp, ThumbsDown, Pen, Check } from 'lucide-react'
-import { useAuthStore } from '@/lib/store/authStore'
-import { useModal } from '@/lib/contexts/ModalContext'
+import { useAuthStore } from '@/store/authStore'
+import { useModal } from '@/contexts/ModalContext'
 
 interface User {
   id: string

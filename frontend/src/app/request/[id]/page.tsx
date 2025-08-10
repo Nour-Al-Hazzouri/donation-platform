@@ -8,9 +8,9 @@ import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { useDonationsStore } from "@/lib/store/donationsStore"
-import { useAuthStore } from '@/lib/store/authStore'
-import { useModal } from '@/lib/contexts/ModalContext'
+import { useDonationsStore } from "@/store/donationsStore"
+import { useAuthStore } from '@/store/authStore'
+import { useModal } from '@/contexts/ModalContext'
 
 export default function RequestPage() {
   const params = useParams()

@@ -8,9 +8,9 @@ import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { useRequestsStore, initialRequestsData } from "@/lib/store/requestsStore"
-import { useAuthStore } from '@/lib/store/authStore'
-import { useModal } from '@/lib/contexts/ModalContext'
+import { useRequestsStore, initialRequestsData } from "@/store/requestsStore"
+import { useAuthStore } from '@/store/authStore'
+import { useModal } from '@/contexts/ModalContext'
 
 const parseAmount = (value: string | number | undefined | null): number => {
   if (typeof value === 'number') {

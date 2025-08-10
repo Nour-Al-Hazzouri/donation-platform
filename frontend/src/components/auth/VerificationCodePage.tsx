@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChevronLeft } from 'lucide-react'
-import { useModal } from '@/lib/contexts/ModalContext'
+import { useModal } from '@/contexts/ModalContext'
 import { toast } from "@/components/ui/use-toast"
 
 interface VerificationCodePageProps {

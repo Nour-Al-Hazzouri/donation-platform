@@ -1,7 +1,7 @@
 import { RequestCard } from "./RequestCard"
-import { useRequestsStore, type RequestData } from "@/lib/store/requestsStore"
-import { useEffect } from "react"
-import { initialRequestsData } from "@/lib/store/requestsStore"
+import { useRequestsStore, type RequestData } from "@/store/requestsStore"
+import { useEffect, useState } from "react"
+import { initialRequestsData } from "@/store/requestsStore"
 
 interface RequestCardsProps {
   requests: RequestData[]

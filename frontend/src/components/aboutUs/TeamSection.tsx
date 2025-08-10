@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, Facebook, Twitter, Instagram } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils'
 
 // Team member data - easily editable to add/remove members
 const teamMembers = [

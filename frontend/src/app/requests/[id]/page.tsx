@@ -5,9 +5,9 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { useRequestsStore, initialRequestsData } from "@/lib/store/requestsStore"
+import { useRequestsStore, initialRequestsData } from "@/store/requestsStore"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { COLORS } from '@/lib/constants'
+import { COLORS } from '@/utils/constants'
 import Image from 'next/image'
 import { useEffect } from 'react'
 

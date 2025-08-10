@@ -5,8 +5,8 @@ import { ArrowLeft, ImageIcon, ArrowUp } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { COLORS } from '@/lib/constants'
-import { useAuthStore } from '@/lib/store/authStore'
+import { COLORS } from '@/utils/constants'
+import { useAuthStore } from '@/store/authStore'
 
 interface CommunityWritePostProps {
   onCancel: () => void;

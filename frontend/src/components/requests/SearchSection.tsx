@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useAuthStore } from '@/lib/store/authStore'
-import { useModal } from '@/lib/contexts/ModalContext'
+import { useAuthStore } from '@/store/authStore'
+import { useModal } from '@/contexts/ModalContext'
 
 interface SearchSectionProps {
   searchTerm: string

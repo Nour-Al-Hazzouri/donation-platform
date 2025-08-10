@@ -5,8 +5,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { COLORS } from '@/lib/constants'
+import { cn } from '@/utils'
+import { COLORS } from '@/utils/constants'
 
 interface DonationItem {
   id: string

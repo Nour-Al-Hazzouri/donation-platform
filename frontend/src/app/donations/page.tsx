@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { MainLayout } from "@/components/layouts/MainLayout"
 import { SearchSection } from "@/components/donations/SearchSection"
 import { DonationCards } from "@/components/donations/DonationCards"
-import { useDonationsStore, initialDonationsData, DonationData } from "@/lib/store/donationsStore"
+import { useDonationsStore, initialDonationsData, DonationData } from "@/store/donationsStore"
 
 function searchDonations(donations: DonationData[], searchTerm: string): DonationData[] {
   if (!searchTerm.trim()) return donations

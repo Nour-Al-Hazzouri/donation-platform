@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { MainLayout } from '@/components/layouts/MainLayout'
 import UserProfileDashboard from '@/components/profile/UserProfileDashboard'
 import NotificationsDashboard from '@/components/profile/NotificationsDashboard'
-import { useAuthStore } from '@/lib/store/authStore'
+import { useAuthStore } from '@/store/authStore'
 
 export default function ProfilePage() {
   const { isAuthenticated } = useAuthStore()

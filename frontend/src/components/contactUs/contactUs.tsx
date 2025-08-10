@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { COLORS } from '@/lib/constants'
+import { COLORS } from '@/utils/constants'
 import { MapPinIcon, MailIcon, PhoneIcon, UserIcon } from 'lucide-react'
 import React from 'react'
 

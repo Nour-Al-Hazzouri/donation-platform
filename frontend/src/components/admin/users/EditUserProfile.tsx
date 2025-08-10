@@ -5,8 +5,8 @@ import { ArrowLeft, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { COLORS } from "@/lib/constants";
-import { cn } from '@/lib/utils';
+import { COLORS } from "@/utils/constants";
+import { cn } from '@/utils';
 
 // Location data structure
 const locations = [

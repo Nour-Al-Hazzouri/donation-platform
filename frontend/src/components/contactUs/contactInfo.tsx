@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MailIcon, PhoneIcon, ClockIcon, MapPinIcon } from 'lucide-react'
-import { COLORS } from '@/lib/constants'
+import { COLORS } from '@/utils/constants'
 import React from 'react'
 
 export const ContactInfo = () => {
