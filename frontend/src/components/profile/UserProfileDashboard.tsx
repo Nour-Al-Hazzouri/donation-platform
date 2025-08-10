@@ -91,7 +91,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   }
 
   return (
-    <section className="bg-white min-h-screen">
+    <section className="bg-background min-h-screen">
       <div className="flex flex-col lg:flex-row max-w-7xl mx-auto">
         <ProfileSidebar 
           activeItem="profile" 
@@ -102,12 +102,12 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
 
         <div className="flex-1 p-4 md:p-6 w-full overflow-x-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-[#5a5a5a]">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground">
               Welcome, {profileData.fullName.split(' ')[0]}
             </h1>
             <Button
               onClick={handleEdit}
-              className="bg-[#f90404] hover:bg-[#d90404] text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
             >
               {isEditing ? "Save" : "Edit"}
             </Button>
@@ -116,7 +116,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
             <div className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
-                <Label className="text-[#5a5a5a] text-sm sm:text-base">Full Name</Label>
+                <Label className="text-muted-foreground text-sm sm:text-base">Full Name</Label>
                 {isEditing ? (
                   <Input
                     value={profileData.fullName}
@@ -124,12 +124,12 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                     className="w-full h-10 sm:h-12 px-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]"
                   />
                 ) : (
-                  <p className="text-[#5a5a5a] text-sm sm:text-base py-2 sm:py-3">{profileData.fullName}</p>
+                  <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">{profileData.fullName}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#5a5a5a] text-sm sm:text-base">Gender</Label>
+                <Label className="text-muted-foreground text-sm sm:text-base">Gender</Label>
                 {isEditing ? (
                   <div className="h-10 sm:h-12">
                     <Select value={profileData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
@@ -144,14 +144,14 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                     </Select>
                   </div>
                 ) : (
-                  <p className="text-[#5a5a5a] text-sm sm:text-base py-2 sm:py-3">
+                  <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">
                     {profileData.gender || "Not specified"}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#5a5a5a] text-sm sm:text-base">Phone Number</Label>
+                <Label className="text-muted-foreground text-sm sm:text-base">Phone Number</Label>
                 {isEditing ? (
                   <Input
                     value={profileData.phoneNumber}
@@ -159,7 +159,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                     className="w-full h-10 sm:h-12 px-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]"
                   />
                 ) : (
-                  <p className="text-[#5a5a5a] text-sm sm:text-base py-2 sm:py-3">
+                  <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">
                     {profileData.phoneNumber || "Not provided"}
                   </p>
                 )}
@@ -168,7 +168,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
 
             <div className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
-                <Label className="text-[#5a5a5a] text-sm sm:text-base">Email</Label>
+                <Label className="text-muted-foreground text-sm sm:text-base">Email</Label>
                 {isEditing ? (
                   <Input
                     type="email"
@@ -177,12 +177,12 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                     className="w-full h-10 sm:h-12 px-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]"
                   />
                 ) : (
-                  <p className="text-[#5a5a5a] text-sm sm:text-base py-2 sm:py-3">{profileData.email}</p>
+                  <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">{profileData.email}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#5a5a5a] text-sm sm:text-base">Governorate</Label>
+                <Label className="text-muted-foreground text-sm sm:text-base">Governorate</Label>
                 {isEditing ? (
                   <div className="h-10 sm:h-12">
                     <Select 
@@ -202,14 +202,14 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                     </Select>
                   </div>
                 ) : (
-                  <p className="text-[#5a5a5a] text-sm sm:text-base py-2 sm:py-3">
+                  <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">
                     {profileData.governorate || "Not specified"}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#5a5a5a] text-sm sm:text-base">District</Label>
+                <Label className="text-muted-foreground text-sm sm:text-base">District</Label>
                 {isEditing ? (
                   <div className="h-10 sm:h-12">
                     <Select 
@@ -230,7 +230,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                     </Select>
                   </div>
                 ) : (
-                  <p className="text-[#5a5a5a] text-sm sm:text-base py-2 sm:py-3">
+                  <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">
                     {profileData.district || "Not specified"}
                   </p>
                 )}
@@ -238,36 +238,36 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
+          <div className="bg-secondary/50 rounded-lg p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                <h3 className="text-[#5a5a5a] font-medium text-sm sm:text-base">Account Verification</h3>
+                <h3 className="text-muted-foreground font-medium text-sm sm:text-base">Account Verification</h3>
                 {user?.verified ? (
                   <div className="flex items-center gap-2">
-                    <CheckCircle size={16} className="text-green-600" />
-                    <span className="text-green-600 text-sm">Verified</span>
+                    <CheckCircle size={16} className="text-primary" />
+                    <span className="text-primary text-sm">Verified</span>
                     {user.verifiedAt && (
-                      <span className="hidden sm:inline text-xs text-gray-500 ml-2">
+                      <span className="hidden sm:inline text-xs text-muted-foreground ml-2">
                         Verified on {new Date(user.verifiedAt).toLocaleDateString()}
                       </span>
                     )}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <AlertTriangle size={16} className="text-[#f90404]" />
-                    <span className="text-[#5a5a5a] text-sm">Not Verified</span>
+                    <AlertTriangle size={16} className="text-primary" />
+                    <span className="text-muted-foreground text-sm">Not Verified</span>
                   </div>
                 )}
               </div>
               {user?.verified ? (
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={16} className="text-green-600" />
-                  <span className="text-green-600 text-sm">Verification Complete</span>
+                  <CheckCircle size={16} className="text-primary" />
+                  <span className="text-primary text-sm">Verification Complete</span>
                 </div>
               ) : (
                 <Button
                   onClick={handleVerify}
-                  className="bg-[#f90404] hover:bg-[#d90404] text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
                 >
                   Verify Account
                 </Button>

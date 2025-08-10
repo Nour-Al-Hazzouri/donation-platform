@@ -16,6 +16,7 @@ import {
 import { LayoutDashboard, FileText, Users, MapPin } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+// Theme toggle removed as per requirements
 
 // Mock data for admin profile
 const ADMIN_PROFILE = {
@@ -65,14 +66,16 @@ export function DashboardSidebar() {
             <SidebarMenu>
               {/* Avatar Menu Item */}
               <SidebarMenuItem>
-                <div className="flex items-center space-x-3 px-2 py-2 rounded-md hover:bg-gray-50">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={ADMIN_PROFILE.avatar} alt={ADMIN_PROFILE.name} />
-                    <AvatarFallback className="bg-yellow-400 text-white font-semibold">{ADMIN_PROFILE.avatarFallback}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-gray-900 text-sm">{ADMIN_PROFILE.name}</span>
-                    <span className="text-xs text-gray-500">{ADMIN_PROFILE.role}</span>
+                <div className="flex items-center justify-between px-2 py-2 rounded-md hover:bg-secondary/50">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={ADMIN_PROFILE.avatar} alt={ADMIN_PROFILE.name} />
+                      <AvatarFallback className="bg-primary text-primary-foreground font-semibold">{ADMIN_PROFILE.avatarFallback}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-foreground text-sm">{ADMIN_PROFILE.name}</span>
+                      <span className="text-xs text-muted-foreground">{ADMIN_PROFILE.role}</span>
+                    </div>
                   </div>
                 </div>
               </SidebarMenuItem>
@@ -81,7 +84,7 @@ export function DashboardSidebar() {
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton 
                     isActive={item.isActive}
-                    className={item.isActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}
+                    className={item.isActive ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"}
                     asChild
                   >
                     <Link href={item.href}>

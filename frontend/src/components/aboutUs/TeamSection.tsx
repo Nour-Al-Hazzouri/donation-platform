@@ -23,7 +23,7 @@ const teamMembers = [
     id: 2,
     name: "Mariam Kanj",
     role: "UI/UX Designer, Front-end Developer",
-    image: "/team.png",
+    image: "/team-female.svg",
     social: {
       facebook: "#",
       twitter: "#",
@@ -83,10 +83,10 @@ const TeamCard = ({ member }: { member: typeof teamMembers[0] }) => {
 
       {/* Member Info */}
       <div className="space-y-1">
-        <h3 className="text-lg sm:text-xl font-bold text-[#000000] truncate px-2">
+        <h3 className="text-lg sm:text-xl font-bold text-foreground truncate px-2">
           {member.name}
         </h3>
-        <p className="text-[#f90404] font-medium text-sm sm:text-base line-clamp-2 px-2">
+        <p className="text-primary font-medium text-sm sm:text-base line-clamp-2 px-2">
           {member.role}
         </p>
       </div>
@@ -95,21 +95,21 @@ const TeamCard = ({ member }: { member: typeof teamMembers[0] }) => {
       <div className="flex justify-center gap-3 pt-1">
         <a
           href={member.social.facebook}
-          className="text-[#5a5a5a] hover:text-[#f90404] transition-colors"
+          className="text-muted-foreground hover:text-primary transition-colors"
           aria-label={`${member.name}'s Facebook`}
         >
           <Facebook size={18} />
         </a>
         <a
           href={member.social.twitter}
-          className="text-[#5a5a5a] hover:text-[#f90404] transition-colors"
+          className="text-muted-foreground hover:text-primary transition-colors"
           aria-label={`${member.name}'s Twitter`}
         >
           <Twitter size={18} />
         </a>
         <a
           href={member.social.instagram}
-          className="text-[#5a5a5a] hover:text-[#f90404] transition-colors"
+          className="text-muted-foreground hover:text-primary transition-colors"
           aria-label={`${member.name}'s Instagram`}
         >
           <Instagram size={18} />
@@ -176,11 +176,11 @@ export default function TeamSection() {
   }, [isTransitioning])
 
   return (
-    <section className="bg-white py-12 sm:py-16 px-4 md:px-8 lg:px-16 mt-8 sm:mt-12">
+    <section className="bg-background py-12 sm:py-16 px-4 md:px-8 lg:px-16 mt-8 sm:mt-12">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#000000]">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground">
             Our Team
           </h2>
         </div>
@@ -192,16 +192,15 @@ export default function TeamSection() {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md mr-1 sm:mr-2 z-10"
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md mr-1 sm:mr-2 z-10 text-primary"
               )}
               onClick={scrollLeft}
               aria-label="Previous team members"
-              style={{ color: '#f90404' }}
             >
               <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
 
-            <div className="overflow-hidden w-full max-w-6xl" style={{ height: 'auto', minHeight: '380px' }}>
+            <div className="overflow-hidden w-full max-w-6xl h-auto min-h-[380px]">
               <div
                 className="flex transition-transform duration-300 ease-in-out h-full"
                 style={{
@@ -224,11 +223,10 @@ export default function TeamSection() {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md ml-1 sm:ml-2 z-10"
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md ml-1 sm:ml-2 z-10 text-primary"
               )}
               onClick={scrollRight}
               aria-label="Next team members"
-              style={{ color: '#f90404' }}
             >
               <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -241,7 +239,7 @@ export default function TeamSection() {
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={`w-3 h-3 rounded-full transition-colors ${
-                  index === currentIndex ? 'bg-[#f90404]' : 'bg-[#d9d9d9]'
+                  index === currentIndex ? 'bg-primary' : 'bg-muted'
                 }`}
                 aria-label={`Go to team member ${index + 1}`}
               />

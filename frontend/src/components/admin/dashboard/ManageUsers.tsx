@@ -238,24 +238,24 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b px-4 sm:px-6 py-4 rounded-t-lg">
+      <div className="bg-background border-b border-border px-4 sm:px-6 py-4 rounded-t-lg">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold text-gray-800">
+          <h2 className="text-xl font-semibold text-foreground">
             {activeTab === "All" ? "All Users" : "Verification Requests"}
           </h2>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 type="text"
                 placeholder="Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-full bg-gray-50 border-gray-200"
+                className="pl-10 w-full bg-background border-border"
               />
             </div>
             <Button 
-              className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto whitespace-nowrap"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto whitespace-nowrap"
               onClick={() => router.push('/admin/users/add')}
             >
               Add User
@@ -265,9 +265,9 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 bg-white rounded-b-lg shadow-sm overflow-hidden">
+      <div className="flex-1 bg-background rounded-b-lg shadow-sm border border-border overflow-hidden">
         {/* Table Header - Hidden on mobile */}
-        <div className="hidden md:grid md:grid-cols-4 gap-4 p-4 border-b bg-gray-50 font-medium text-gray-700">
+        <div className="hidden md:grid md:grid-cols-4 gap-4 p-4 border-b border-border bg-muted font-medium text-foreground">
           <div>Name</div>
           <div>Email</div>
           <div>Phone Number</div>
@@ -278,9 +278,9 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
         <div className="divide-y overflow-x-auto">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((user) => (
-              <div key={user.id} className="flex flex-col md:grid md:grid-cols-4 gap-3 p-4 items-start md:items-center hover:bg-gray-50">
+              <div key={user.id} className="flex flex-col md:grid md:grid-cols-4 gap-3 p-4 items-start md:items-center hover:bg-secondary/50">
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-muted overflow-hidden flex-shrink-0">
                     <Image
                       src={user.avatar || "/placeholder.svg"}
                       alt={user.name}
@@ -289,14 +289,14 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                       className="rounded-full object-cover"
                     />
                   </div>
-                  <span className="font-medium text-gray-900 truncate">{user.name}</span>
+                  <span className="font-medium text-foreground truncate">{user.name}</span>
                 </div>
-                <div className="text-gray-600 w-full md:w-auto">
-                  <span className="md:hidden font-medium text-gray-700">Email: </span>
+                <div className="text-muted-foreground w-full md:w-auto">
+                  <span className="md:hidden font-medium text-foreground">Email: </span>
                   <span className="break-all">{user.email}</span>
                 </div>
-                <div className="text-gray-600 w-full md:w-auto">
-                  <span className="md:hidden font-medium text-gray-700">Phone: </span>
+                <div className="text-muted-foreground w-full md:w-auto">
+                  <span className="md:hidden font-medium text-foreground">Phone: </span>
                   {user.phone}
                 </div>
                 <div className="flex flex-wrap justify-start md:justify-end gap-2 w-full md:w-auto mt-2 md:mt-0">
@@ -309,7 +309,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                   )}
                   <Button 
                     size="sm" 
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 w-full sm:w-auto"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 w-full sm:w-auto"
                     onClick={() => {
                       if (activeTab === "Verification") {
                         // Navigate to verification request details page
@@ -326,7 +326,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
               </div>
             ))
           ) : (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-muted-foreground">
               No users found matching your search criteria.
             </div>
           )}

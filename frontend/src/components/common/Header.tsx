@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ModeToggle } from "./ModeToggle"
 
 export function Header() {
   const pathname = usePathname()
@@ -32,14 +33,14 @@ export function Header() {
     const isActive = pathname === item.href
     const mobileClasses = `px-3 py-2 rounded-md text-base font-medium ${
       isActive 
-        ? `text-[${COLORS.primary}] bg-gray-100` 
-        : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}] hover:bg-gray-50`
+        ? `text-primary bg-secondary` 
+        : `text-muted-foreground hover:text-foreground hover:bg-secondary/50`
     }`
     
     const desktopClasses = `${
       isActive 
-        ? `text-[${COLORS.primary}] font-medium border-b-2 border-primary pb-1` 
-        : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`
+        ? `text-primary font-medium border-b-2 border-primary pb-1` 
+        : `text-muted-foreground hover:text-foreground`
     } text-sm lg:text-base whitespace-nowrap`
 
     return (
@@ -48,7 +49,7 @@ export function Header() {
         href={item.href}
         className={isMobile ? mobileClasses : desktopClasses}
         onClick={closeMobileMenu}
-        style={isActive && !isMobile ? { borderBottomColor: COLORS.primary } : {}}
+        style={isActive && !isMobile ? { borderBottomColor: 'var(--primary)' } : {}}
       >
         {item.name}
       </Link>
@@ -57,7 +58,7 @@ export function Header() {
 
   return (
     <>
-      <header className="w-full px-4 md:px-6 py-4 shadow-sm sticky top-0 bg-white z-40">
+      <header className="w-full px-4 md:px-6 py-4 shadow-sm sticky top-0 bg-background z-40">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link 
@@ -100,10 +101,10 @@ export function Header() {
                     href={item.href}
                     className={`hidden lg:inline-block ${
                       pathname === item.href 
-                        ? `text-[${COLORS.primary}] font-medium border-b-2 pb-1` 
-                        : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`
+                        ? `text-primary font-medium border-b-2 pb-1` 
+                        : `text-muted-foreground hover:text-foreground`
                     } text-sm lg:text-base whitespace-nowrap`}
-                    style={pathname === item.href ? { borderBottomColor: COLORS.primary } : {}}
+                    style={pathname === item.href ? { borderBottomColor: 'var(--primary)' } : {}}
                   >
                     {item.name}
                   </Link>
@@ -115,17 +116,13 @@ export function Header() {
 
           {/* Desktop Auth Buttons or Profile */}
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
+            <ModeToggle />
             {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    style={{
-                      backgroundColor: COLORS.primary,
-                      borderColor: COLORS.primary,
-                      color: 'white'
-                    }}
-                    className="hover:bg-primaryHover hover:text-white hover:border-primaryHover transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
+                    className="bg-primary border-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground hover:border-primary/90 transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
                   >
                     <User size={16} />
                     <span>{user.name}</span>
@@ -148,22 +145,13 @@ export function Header() {
               <>
                 <Button
                   variant="outline"
-                  style={{
-                    backgroundColor: COLORS.primary,
-                    borderColor: COLORS.primary,
-                    color: 'white'
-                  }}
-                  className="hover:bg-primaryHover hover:text-white hover:border-primaryHover transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
+                  className="bg-primary border-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground hover:border-primary/90 transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
                   onClick={() => openModal('signIn')}
                 >
                   Sign In
                 </Button>
                 <Button 
-                  style={{
-                    backgroundColor: COLORS.primary,
-                    color: 'white'
-                  }}
-                  className="hover:bg-primaryHover hover:text-white transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base"
                   onClick={() => openModal('signUp')}
                 >
                   Sign Up
@@ -176,18 +164,20 @@ export function Header() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-30 bg-white overflow-y-auto">
+        <div className="md:hidden fixed inset-0 top-16 z-30 bg-background overflow-y-auto">
           <div className="p-4">
             <nav className="flex flex-col space-y-4">
               {NAV_ITEMS.map(item => renderNavLink(item, true))}
               
-              <div className="pt-4 border-t border-gray-200 flex flex-col space-y-3">
+              <div className="pt-4 border-t border-border flex flex-col space-y-3">
+                <div className="flex justify-center mb-3">
+                  <ModeToggle />
+                </div>
                 {isAuthenticated && user ? (
                   <>
                     <Link href={isAdmin ? "/admin" : "/profile"}>
                       <Button
-                        style={{ backgroundColor: COLORS.primary, color: 'white' }}
-                        className="w-full text-center py-2 px-4 rounded-full flex items-center justify-center gap-2"
+                        className="bg-primary text-primary-foreground w-full text-center py-2 px-4 rounded-full flex items-center justify-center gap-2"
                         onClick={closeMobileMenu}
                       >
                         <User size={16} />
@@ -196,8 +186,7 @@ export function Header() {
                     </Link>
                     <Button
                       variant="outline"
-                      style={{ borderColor: COLORS.primary, color: COLORS.primary }}
-                      className="w-full text-center py-2 px-4 rounded-full border flex items-center justify-center gap-2"
+                      className="border-primary text-primary w-full text-center py-2 px-4 rounded-full border flex items-center justify-center gap-2"
                       onClick={() => {
                         closeMobileMenu()
                         logout()
@@ -210,8 +199,7 @@ export function Header() {
                 ) : (
                   <>
                     <Button
-                      style={{ backgroundColor: COLORS.primary, color: 'white' }}
-                      className="w-full text-center py-2 px-4 rounded-full"
+                      className="bg-primary text-primary-foreground w-full text-center py-2 px-4 rounded-full"
                       onClick={() => {
                         closeMobileMenu()
                         openModal('signIn')
@@ -221,8 +209,7 @@ export function Header() {
                     </Button>
                     <Button
                       variant="outline"
-                      style={{ borderColor: COLORS.primary, color: COLORS.primary }}
-                      className="w-full text-center py-2 px-4 rounded-full border"
+                      className="border-primary text-primary w-full text-center py-2 px-4 rounded-full border"
                       onClick={() => {
                         closeMobileMenu()
                         openModal('signUp')

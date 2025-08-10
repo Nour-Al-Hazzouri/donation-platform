@@ -2,7 +2,7 @@ import Image from "next/image"
 
 export default function AboutMissionSection() {
   return (
-    <section className="bg-white py-12 sm:py-14 md:py-16 px-4 xs:px-6 sm:px-8 lg:px-10 xl:px-16">
+    <section className="bg-background py-12 sm:py-14 md:py-16 px-4 xs:px-6 sm:px-8 lg:px-10 xl:px-16">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-start">
           {/* Image - Increased height slightly */}
@@ -23,13 +23,13 @@ export default function AboutMissionSection() {
           {/* Text Content */}
           <div className="order-1 lg:order-2 flex flex-col justify-between h-full">
             <div className="space-y-4 sm:space-y-5 md:space-y-6">
-              <h2 className="text-2.5xl xs:text-3xl sm:text-3.5xl md:text-4xl font-bold text-gray-900 leading-tight">
+              <h2 className="text-2.5xl xs:text-3xl sm:text-3.5xl md:text-4xl font-bold text-foreground leading-tight">
                 Make a Difference,
                 <br />
                 Support Those in Need.
               </h2>
               
-              <p className="text-gray-600 text-sm sm:text-base md:text-[1.0625rem] leading-relaxed sm:leading-loose">
+              <p className="text-muted-foreground text-sm sm:text-base md:text-[1.0625rem] leading-relaxed sm:leading-loose">
                 At GiveLeb, your generosity—whether a donation, a shared post, or an hour of your time—becomes a lifeline for families in Lebanon. Together, we transform compassion into real change, ensuring no one struggles alone. Because in our darkest moments, it's the light we create together that guides us forward. Join the movement. Be the hope.
               </p>
             </div>
@@ -37,10 +37,10 @@ export default function AboutMissionSection() {
             {/* Signature - This will now align better with the image bottom */}
             <div className="pt-3 sm:pt-4 flex items-end gap-4">
               <div className="space-y-1">
-                <p className="text-gray-600 text-sm font-medium">
+                <p className="text-muted-foreground text-sm font-medium">
                   GiveLeb
                 </p>
-                <p className="text-gray-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Team
                 </p>
               </div>

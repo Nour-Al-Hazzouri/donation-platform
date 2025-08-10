@@ -12,7 +12,7 @@ export function StatsCards() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
       {DASHBOARD_STATS.map((stat, index) => (
-        <Card key={index} className="bg-white shadow-sm hover:shadow transition-shadow duration-200">
+        <Card key={index} className="bg-background shadow-sm hover:shadow transition-shadow duration-200 border border-border">
           <CardContent className="p-6 text-center">
             <div className="text-sm font-medium text-muted-foreground mb-2">{stat.label}</div>
             <div className="text-3xl font-bold">{stat.value}</div>

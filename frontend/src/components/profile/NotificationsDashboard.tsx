@@ -66,7 +66,7 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
   }
 
   return (
-    <section className="bg-white min-h-screen">
+    <section className="bg-background min-h-screen">
       <div className="flex flex-col lg:flex-row max-w-7xl mx-auto lg:h-screen">
         <ProfileSidebar 
           activeItem="notifications" 
@@ -77,7 +77,7 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
 
         <div className="flex-1 p-4 lg:p-8 lg:overflow-y-auto lg:h-screen">
           <div className="max-w-4xl">
-            <h1 className="text-2xl lg:text-3xl font-semibold text-[#5a5a5a] mb-6">
+            <h1 className="text-2xl lg:text-3xl font-semibold text-foreground mb-6">
               Notifications
             </h1>
             
@@ -85,7 +85,7 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className="flex items-start gap-4 p-4 bg-white border border-gray-100 rounded-lg hover:shadow-sm transition-shadow"
+                  className="flex items-start gap-4 p-4 bg-card border border-border rounded-lg hover:shadow-sm transition-shadow"
                 >
                   <div className="flex-shrink-0">
                     <Avatar className="h-10 w-10 lg:h-12 lg:w-12">
@@ -96,8 +96,8 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
                           (e.currentTarget as HTMLImageElement).style.display = 'none'
                         }}
                       />
-                      <AvatarFallback className="bg-gray-200">
-                        <UserIcon size={20} className="text-gray-400" />
+                      <AvatarFallback className="bg-muted">
+                        <UserIcon size={20} className="text-muted-foreground" />
                       </AvatarFallback>
                     </Avatar>
                   </div>
@@ -110,16 +110,16 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
                           className={`text-sm lg:text-base leading-relaxed ${
                             index === 0
                               ? notification.isHighlighted
-                                ? "text-[#f90404] font-medium"
-                                : "text-[#000000] font-medium"
-                              : "text-[#5a5a5a]"
+                                ? "text-primary font-medium"
+                                : "text-foreground font-medium"
+                              : "text-muted-foreground"
                           }`}
                         >
                           {line}
                         </p>
                       ))}
                     </div>
-                    <p className="text-xs lg:text-sm text-[#9ca3af] mt-2">{notification.timestamp}</p>
+                    <p className="text-xs lg:text-sm text-muted-foreground mt-2">{notification.timestamp}</p>
                   </div>
                 </div>
               ))}
@@ -127,7 +127,7 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
 
             <div className="text-center mt-8">
               <button 
-                className="text-[#f90404] hover:text-[#d90404] font-medium text-sm lg:text-base transition-colors"
+                className="text-primary hover:text-primary/80 font-medium text-sm lg:text-base transition-colors"
                 onClick={loadMoreNotifications}
               >
                 Load more notifications

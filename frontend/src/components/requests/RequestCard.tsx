@@ -59,7 +59,7 @@ export function RequestCard({
 
   return (
     <Card 
-      className="bg-white shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.02] flex flex-col h-full"
+      className="bg-background shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.02] flex flex-col h-full"
       onClick={handleCardClick}
     >
       <CardContent className="p-6 flex flex-col flex-grow">
@@ -76,17 +76,17 @@ export function RequestCard({
                   alt="Verified"
                   width={20}
                   height={20}
-                  className="rounded-full border-2 border-white"
+                  className="rounded-full border-2 border-background"
                 />
               </div>
             )}
           </div>
-          <h3 className="font-semibold text-gray-900">
+          <h3 className="font-semibold text-foreground">
             {highlightText(name, searchTerm)}
           </h3>
         </div>
         
-        <h4 className="font-semibold text-gray-900 mb-3">
+        <h4 className="font-semibold text-foreground mb-3">
           {highlightText(title, searchTerm)}
         </h4>
         
@@ -100,13 +100,13 @@ export function RequestCard({
           </div>
         )}
         
-        <p className="text-sm text-gray-600 mb-4 line-clamp-4 flex-grow">
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-4 flex-grow">
           {highlightText(description, searchTerm)}
         </p>
         
         <Button 
           onClick={handleDonateClick}
-          className="w-full bg-red-500 hover:bg-red-600 text-white mt-auto"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-auto"
         >
           Donate Now
         </Button>

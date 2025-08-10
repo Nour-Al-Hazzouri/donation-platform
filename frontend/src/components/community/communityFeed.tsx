@@ -108,14 +108,14 @@ const PostCreator = ({ onWritePost }: PostCreatorProps) => {
 
   return (
     <div 
-      className="bg-white rounded-lg p-3 mb-3 shadow-sm border border-gray-200 mx-auto w-full max-w-4xl cursor-pointer hover:bg-gray-50"
+      className="bg-background rounded-lg p-3 mb-3 shadow-sm border border-border mx-auto w-full max-w-4xl cursor-pointer hover:bg-secondary/50"
       onClick={handleClick}
     >
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-          <Pen className="text-white w-3.5 h-3.5" />
+        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+          <Pen className="text-primary-foreground w-3.5 h-3.5" />
         </div>
-        <span className="font-medium text-sm text-black">Write a post</span>
+        <span className="font-medium text-sm text-foreground">Write a post</span>
       </div>
     </div>
   )
@@ -177,33 +177,33 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg mb-3 shadow-sm border border-gray-200 mx-auto w-full max-w-4xl">
+    <div className="bg-background rounded-lg mb-3 shadow-sm border border-border mx-auto w-full max-w-4xl">
       <div className="p-3">
         {/* User header with verification badge on top-right of avatar */}
         <div className="flex items-center gap-2 mb-2">
           <div className="relative">
-            <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-bold">
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <span className="text-primary-foreground text-xs font-bold">
                 {post.user.name.split(' ').map(n => n[0]).join('')}
               </span>
             </div>
             {post.user.verified && (
-              <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full p-0.5">
-                <Check className="w-2.5 h-2.5 text-white" />
+              <div className="absolute -top-1 -right-1 bg-primary rounded-full p-0.5">
+                <Check className="w-2.5 h-2.5 text-primary-foreground" />
               </div>
             )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1 truncate">
-              <span className="font-semibold text-sm text-black truncate">{post.user.name}</span>
+              <span className="font-semibold text-sm text-foreground truncate">{post.user.name}</span>
             </div>
-            <div className="text-[10px] text-gray-500">{formatTimeAgo(post.createdAt)}</div>
+            <div className="text-[10px] text-muted-foreground">{formatTimeAgo(post.createdAt)}</div>
           </div>
         </div>
 
         {/* Post content */}
         <div className="mb-2 whitespace-pre-line">
-          <p className="text-gray-900 text-sm mb-1 line-clamp-3 leading-snug">
+          <p className="text-foreground text-sm mb-1 line-clamp-3 leading-snug">
             {post.content}
           </p>
           {/* Display tags */}
@@ -212,7 +212,7 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
               {post.tags.map((tag, index) => (
                 <span 
                   key={index} 
-                  className="text-blue-600 text-xs bg-blue-50 px-2 py-1 rounded-full"
+                  className="text-primary text-xs bg-primary/10 px-2 py-1 rounded-full"
                 >
                   {tag}
                 </span>
@@ -233,24 +233,24 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
         )}
 
         {/* Action buttons */}
-        <div className="flex items-center gap-4 py-2 border-t border-gray-100 text-xs">
+        <div className="flex items-center gap-4 py-2 border-t border-border text-xs">
           <button 
             onClick={handleLike}
-            className={`flex items-center gap-1 px-2 py-1 rounded ${isLiked ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600'}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded ${isLiked ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-primary'}`}
           >
             <ThumbsUp className="w-3.5 h-3.5" />
             <span>{likesCount}</span>
           </button>
           <button 
             onClick={handleDislike}
-            className={`flex items-center gap-1 px-2 py-1 rounded ${isDisliked ? 'text-red-600 bg-red-50' : 'text-gray-600 hover:text-red-600'}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded ${isDisliked ? 'text-destructive bg-destructive/10' : 'text-muted-foreground hover:text-destructive'}`}
           >
             <ThumbsDown className="w-3.5 h-3.5" />
             <span>{dislikesCount}</span>
           </button>
           <button 
             onClick={toggleComments}
-            className="flex items-center gap-1 px-2 py-1 rounded text-gray-600 hover:text-blue-600"
+            className="flex items-center gap-1 px-2 py-1 rounded text-muted-foreground hover:text-primary"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             <span>{comments.length}</span>
@@ -259,24 +259,24 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
 
         {/* Comments section */}
         {showComments && (
-          <div className="mt-2 pt-2 border-t border-gray-100">
+          <div className="mt-2 pt-2 border-t border-border">
             {/* Existing comments */}
             {comments.map((comment, idx) => (
               <div key={idx} className="flex items-start gap-2 mb-2">
-                <div className="w-6 h-6 bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-[10px] font-bold">W</span>
+                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary-foreground text-[10px] font-bold">W</span>
                 </div>
                 <div className="flex-1">
-                  <div className="text-xs font-medium text-black mb-0.5">whatever</div>
-                  <div className="text-xs text-gray-700 line-clamp-2">{comment}</div>
+                  <div className="text-xs font-medium text-foreground mb-0.5">whatever</div>
+                  <div className="text-xs text-muted-foreground line-clamp-2">{comment}</div>
                 </div>
               </div>
             ))}
 
             {/* Comment input */}
             <div className="flex items-center gap-2 mt-2">
-              <div className="w-6 h-6 bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-[10px] font-bold">
+              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground text-[10px] font-bold">
                   {user?.name ? user.name.split(' ').map(n => n[0]).join('') : 'W'}
                 </span>
               </div>
@@ -287,7 +287,7 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   onKeyDown={handleCommentSubmit}
-                  className="w-full p-1.5 border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs text-gray-700 placeholder-gray-500"
+                  className="w-full p-1.5 border border-border rounded-lg outline-none focus:ring-1 focus:ring-primary focus:border-transparent text-xs text-foreground placeholder:text-muted-foreground bg-background"
                   disabled={!isAuthenticated}
                 />
               </div>

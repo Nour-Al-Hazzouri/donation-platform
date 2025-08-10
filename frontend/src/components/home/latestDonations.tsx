@@ -87,14 +87,14 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
   const router = useRouter();
   return (
     <Card 
-      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-white cursor-pointer"
+      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-background cursor-pointer"
       onClick={() => donation.isAvailable && router.push('/add-request')}
     >
       <CardContent className="p-4 sm:p-6 flex-1 flex flex-col">
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
             <AvatarImage src={donation.userAvatar || undefined} alt={donation.userName} />
-            <AvatarFallback className="bg-[#f90404] text-white text-xs sm:text-sm">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs sm:text-sm">
               {donation.userName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -109,17 +109,13 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
           </h3>
           
           <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm">
-            <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-[#f90404]" />
+            <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
             <span>{donation.location} • {donation.timeAgo}</span>
           </div>
         </div>
 
         <Button 
-          className="w-full mt-auto text-sm sm:text-base"
-          style={{
-            backgroundColor: donation.isAvailable ? COLORS.primary : '#f3f4f6',
-            color: donation.isAvailable ? 'white' : COLORS.text.secondary,
-          }}
+          className={`w-full mt-auto text-sm sm:text-base ${donation.isAvailable ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-secondary text-secondary-foreground'}`}
           variant={donation.isAvailable ? "default" : "secondary"}
           disabled={!donation.isAvailable}
           onClick={() => donation.isAvailable && router.push('/add-request')}
@@ -190,7 +186,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
     <section className={cn("py-8 sm:py-12", className)}>
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground text-center">
             Latest Donations
           </h2>
         </div>
@@ -201,11 +197,11 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md mr-1 sm:mr-2 z-10"
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md mr-1 sm:mr-2 z-10"
               )}
               onClick={scrollLeft}
               aria-label="Previous donations"
-              style={{ color: COLORS.primary }}
+              style={{ color: 'var(--primary)' }}
             >
               <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -233,11 +229,11 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md ml-1 sm:ml-2 z-10"
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md ml-1 sm:ml-2 z-10"
               )}
               onClick={scrollRight}
               aria-label="Next donations"
-              style={{ color: COLORS.primary }}
+              style={{ color: 'var(--primary)' }}
             >
               <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -246,11 +242,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
 
         <div className="flex justify-center mt-6 sm:mt-8">
           <Button 
-            className="transition-colors duration-200 rounded-full px-6 py-1.5 sm:px-8 sm:py-2 text-xs sm:text-sm lg:text-base"
-            style={{
-              backgroundColor: COLORS.primary,
-              color: 'white',
-            }}
+            className="transition-colors duration-200 rounded-full px-6 py-1.5 sm:px-8 sm:py-2 text-xs sm:text-sm lg:text-base bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={() => router.push('/donations')}
           >
             View All Donations

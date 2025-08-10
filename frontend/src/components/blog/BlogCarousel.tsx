@@ -85,7 +85,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
 
   if (selectedPost) {
     return (
-      <div className="fixed inset-0 z-50 bg-white overflow-y-auto" style={{ top: 0 }}>
+      <div className="fixed inset-0 z-50 bg-background overflow-y-auto" style={{ top: 0 }}>
         <BlogPostDetail postId={selectedPost} onClose={handleClosePost} />
       </div>
     )
@@ -95,7 +95,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
     <section className={cn("py-8 sm:py-12", className)} id="blog">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground text-center">
             Latest News and Blog
           </h2>
         </div>
@@ -106,7 +106,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md mr-1 sm:mr-2 z-10"
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md mr-1 sm:mr-2 z-10"
               )}
               onClick={scrollLeft}
               aria-label="Previous blog posts"
@@ -129,43 +129,43 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
                     style={{ width: `${100 / visibleCards}%` }}
                   >
                     <Card 
-                      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-white cursor-pointer"
+                      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-background cursor-pointer"
                       onClick={() => handlePostClick(post.id)}
                     >
                       <CardContent className="p-5 sm:p-7 flex-1 flex flex-col">
                         {/* Icon */}
-                        <div className="flex items-center justify-center h-32 w-full bg-gray-100 mb-4 rounded-md">
-                          {post.id === 1 && <Heart className="w-16 h-16 text-pink-500" />}
-                          {post.id === 2 && <BookOpen className="w-16 h-16 text-pink-500" />}
-                          {post.id === 3 && <Award className="w-16 h-16 text-pink-500" />}
-                          {post.id === 4 && <Home className="w-16 h-16 text-blue-500" />}
-                          {post.id === 5 && <School className="w-16 h-16 text-blue-500" />}
-                          {post.id === 6 && <Droplets className="w-16 h-16 text-blue-500" />}
-                          {post.id === 7 && <Users className="w-16 h-16 text-green-500" />}
-                          {post.id === 8 && <Globe className="w-16 h-16 text-green-500" />}
-                          {post.id === 9 && <MessageCircle className="w-16 h-16 text-green-500" />}
+                        <div className="flex items-center justify-center h-32 w-full bg-muted mb-4 rounded-md">
+                          {post.id === 1 && <Heart className="w-16 h-16 text-primary" />}
+                          {post.id === 2 && <BookOpen className="w-16 h-16 text-primary" />}
+                          {post.id === 3 && <Award className="w-16 h-16 text-primary" />}
+                          {post.id === 4 && <Home className="w-16 h-16 text-primary" />}
+                          {post.id === 5 && <School className="w-16 h-16 text-primary" />}
+                          {post.id === 6 && <Droplets className="w-16 h-16 text-primary" />}
+                          {post.id === 7 && <Users className="w-16 h-16 text-primary" />}
+                          {post.id === 8 && <Globe className="w-16 h-16 text-primary" />}
+                          {post.id === 9 && <MessageCircle className="w-16 h-16 text-primary" />}
                         </div>
 
                         {/* Date */}
-                        <div className="flex items-center gap-2 text-gray-500 text-xs mb-2">
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs mb-2">
                           <Calendar className="w-3 h-3" />
                           <span>{post.date}</span>
                         </div>
 
                         {/* Title and Tag */}
                         <div className="mb-2">
-                          <h3 className="text-sm font-bold text-black mb-1 line-clamp-1">{post.title}</h3>
+                          <h3 className="text-sm font-bold text-foreground mb-1 line-clamp-1">{post.title}</h3>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${post.tagColor}`}>
                             {post.tag}
                           </span>
                         </div>
 
                         {/* Description */}
-                        <p className="text-gray-600 text-xs leading-relaxed mb-4 line-clamp-2">{post.description}</p>
+                        <p className="text-muted-foreground text-xs leading-relaxed mb-4 line-clamp-2">{post.description}</p>
 
                         <Button 
                           variant="link" 
-                          className="p-0 h-auto text-[#ee201c] font-semibold text-xs hover:no-underline flex items-center gap-1 group mt-auto mb-1"
+                          className="p-0 h-auto text-primary font-semibold text-xs hover:no-underline flex items-center gap-1 group mt-auto mb-1"
                         >
                           READ MORE
                           <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
@@ -181,7 +181,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md ml-1 sm:ml-2 z-10"
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md ml-1 sm:ml-2 z-10"
               )}
               onClick={scrollRight}
               aria-label="Next blog posts"

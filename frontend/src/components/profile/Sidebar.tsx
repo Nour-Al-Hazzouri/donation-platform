@@ -15,6 +15,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
+import { ThemeToggleProvider } from "@/components/common/ThemeToggleProvider"
 
 interface SidebarProps {
   activeItem: "profile" | "notifications"
@@ -80,11 +81,11 @@ export default function ProfileSidebar({
             <SidebarMenu>
               {/* Avatar Menu Item */}
               <SidebarMenuItem>
-                <div className="flex flex-col items-center space-y-3 px-2 py-4 rounded-md hover:bg-gray-50">
+                <div className="flex flex-col items-center space-y-3 px-2 py-4 rounded-md hover:bg-secondary/50">
                   <div className="relative">
                     <Avatar className="w-20 h-20">
                       <AvatarImage src={profileImage} alt={fullName} />
-                      <AvatarFallback className="bg-black">
+                      <AvatarFallback className="bg-primary">
                         <User size={40} className="text-white" />
                       </AvatarFallback>
                     </Avatar>
@@ -97,15 +98,16 @@ export default function ProfileSidebar({
                     )}
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="font-semibold text-gray-900 text-lg">{fullName}</span>
+                    <span className="font-semibold text-foreground text-lg">{fullName}</span>
                   </div>
+                  <ThemeToggleProvider className="mt-2" />
                 </div>
               </SidebarMenuItem>
               
               {/* Section Title */}
               <SidebarMenuItem>
                 <div className="px-2 py-2">
-                  <h3 className="text-[#f90404] font-medium text-sm">Explore panel</h3>
+                  <h3 className="text-primary font-medium text-sm">Explore panel</h3>
                 </div>
               </SidebarMenuItem>
               
@@ -114,7 +116,7 @@ export default function ProfileSidebar({
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton 
                     isActive={item.isActive}
-                    className={item.isActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}
+                    className={item.isActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"}
                     onClick={item.onClick}
                   >
                     <item.icon className="h-4 w-4" />

@@ -37,13 +37,13 @@ export const ContactInfo = () => {
   ]
 
   return (
-    <div className="w-full py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: COLORS.background }}>
+    <div className="w-full py-12 px-4 sm:px-6 lg:px-8 bg-background">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4" style={{ color: '#000000' }}> {/* Changed to black */}
+          <h2 className="text-3xl font-bold mb-4 text-foreground">
             Get In Touch
           </h2>
-          <p className="text-lg max-w-2xl mx-auto" style={{ color: COLORS.text.secondary }}>
+          <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
             We're here to help you make a difference in Lebanon. Reach out through any of these channels.
           </p>
         </div>
@@ -52,10 +52,7 @@ export const ContactInfo = () => {
           {contactMethods.map((method, index) => (
             <Card 
               key={index} 
-              className="hover:shadow-lg transition-all duration-300"
-              style={{ 
-                borderColor: COLORS.border
-              }}
+              className="hover:shadow-lg transition-all duration-300 border-border"
             >
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-3">
@@ -66,8 +63,7 @@ export const ContactInfo = () => {
                     {method.icon}
                   </span>
                   <CardTitle 
-                    className="text-lg"
-                    style={{ color: COLORS.text.primary }}
+                    className="text-lg text-foreground"
                   >
                     {method.title}
                   </CardTitle>
@@ -75,18 +71,14 @@ export const ContactInfo = () => {
               </CardHeader>
               <CardContent>
                 <p 
-                  className="text-sm mb-2"
-                  style={{ color: COLORS.text.secondary }}
+                  className="text-sm mb-2 text-muted-foreground"
                 >
                   {method.description}
                 </p>
                 {method.link ? (
                   <a 
                     href={method.link} 
-                    className="text-base font-medium hover:underline transition-colors"
-                    style={{ 
-                      color: COLORS.primary,
-                    }}
+                    className="text-base font-medium hover:underline transition-colors text-primary"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -94,8 +86,7 @@ export const ContactInfo = () => {
                   </a>
                 ) : (
                   <p 
-                    className="text-base font-medium"
-                    style={{ color: COLORS.text.primary }}
+                    className="text-base font-medium text-foreground"
                   >
                     {method.details}
                   </p>
@@ -107,11 +98,7 @@ export const ContactInfo = () => {
 
         <div className="mt-12 text-center">
           <div 
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full" 
-            style={{ 
-              backgroundColor: COLORS.primaryHover,
-              color: 'white'
-            }}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground"
           >
             <ClockIcon className="h-5 w-5" />
             <span className="font-medium">

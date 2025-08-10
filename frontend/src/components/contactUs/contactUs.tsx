@@ -34,7 +34,7 @@ export default function ContactUs() {
         <div className="h-full order-2 lg:order-1">
           <Card className="h-full border-0 shadow-sm lg:shadow-none">
             <CardContent className="p-4 sm:p-6 h-full flex flex-col">
-              <div className="flex-1 rounded-lg overflow-hidden bg-gray-50">
+              <div className="flex-1 rounded-lg overflow-hidden bg-muted">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d435518.6817837845!2d35.26724929999999!3d33.854720999999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151f17215880a78f%3A0x729182bae99836b4!2sLebanon!5e0!3m2!1sen!2slb!4v1712345678901"
                   width="100%"

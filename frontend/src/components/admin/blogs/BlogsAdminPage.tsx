@@ -167,31 +167,31 @@ export function BlogsAdminPage() {
               ) : (
                 <>
                   <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900">Manage Blogs</h1>
-                    <p className="text-gray-600 mt-1">Create, edit, and manage blog posts</p>
+                    <h1 className="text-2xl font-bold text-foreground">Manage Blogs</h1>
+                    <p className="text-muted-foreground mt-1">Create, edit, and manage blog posts</p>
                   </div>
 
                   <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                     <div className="relative w-full sm:w-auto">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         type="text"
                         placeholder="Search blogs..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 w-full bg-gray-50 border-gray-200"
+                        className="pl-10 w-full bg-background border-input"
                       />
                     </div>
                     <Button 
-                      className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto whitespace-nowrap"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto whitespace-nowrap"
                       onClick={() => setIsCreating(true)}
                     >
                       Create Blog Post
                     </Button>
                   </div>
 
-                  <div className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden">
-                    <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b bg-gray-50 font-medium text-gray-700">
+                  <div className="flex-1 bg-background rounded-lg shadow-sm overflow-hidden">
+                    <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b bg-muted font-medium text-muted-foreground">
                       <div className="col-span-5">Title</div>
                       <div className="col-span-3">Date</div>
                       <div className="col-span-2">Priority</div>
@@ -201,8 +201,8 @@ export function BlogsAdminPage() {
                       <div className="divide-y">
                       {filteredBlogPosts.length > 0 ? (
                         filteredBlogPosts.map((post) => (
-                          <div key={post.id} className="md:grid md:grid-cols-12 flex flex-col gap-3 p-4 items-start md:items-center hover:bg-gray-50">
-                            <div className="md:col-span-5 font-medium text-gray-900 flex items-center gap-3 w-full">
+                          <div key={post.id} className="md:grid md:grid-cols-12 flex flex-col gap-3 p-4 items-start md:items-center hover:bg-muted">
+                            <div className="md:col-span-5 font-medium text-foreground flex items-center gap-3 w-full">
                               {post.imageUrl && (
                                 <img 
                                   src={post.imageUrl} 
@@ -212,12 +212,12 @@ export function BlogsAdminPage() {
                               )}
                               <span className="truncate max-w-full">{post.title}</span>
                             </div>
-                            <div className="md:col-span-3 text-gray-600 text-sm md:text-base w-full md:w-auto flex items-center gap-2">
-                              <span className="md:hidden font-medium text-gray-700">Date:</span>
+                            <div className="md:col-span-3 text-muted-foreground text-sm md:text-base w-full md:w-auto flex items-center gap-2">
+                              <span className="md:hidden font-medium text-muted-foreground">Date:</span>
                               {post.createdAt}
                             </div>
                             <div className="md:col-span-2 w-full md:w-auto flex items-center gap-2">
-                              <span className="md:hidden font-medium text-gray-700">Priority:</span>
+                              <span className="md:hidden font-medium text-muted-foreground">Priority:</span>
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                 post.priority === 'high' ? 'bg-red-100 text-red-800' :
                                 post.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
@@ -230,7 +230,7 @@ export function BlogsAdminPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="text-gray-600 border-gray-300 hover:bg-gray-50 flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
+                                className="text-muted-foreground border-border hover:bg-muted flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
                                 onClick={() => startEditing(post)}
                               >
                                 Edit
@@ -238,7 +238,7 @@ export function BlogsAdminPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="text-red-600 border-red-300 hover:bg-red-50 flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
+                                className="text-primary border-primary/30 hover:bg-primary/10 flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
                                 onClick={() => handleDeleteBlogPost(post.id)}
                               >
                                 Delete
@@ -247,7 +247,7 @@ export function BlogsAdminPage() {
                           </div>
                         ))
                       ) : (
-                        <div className="p-8 text-center text-gray-500">
+                        <div className="p-8 text-center text-muted-foreground">
                           No blog posts found. Create your first blog post!
                         </div>
                       )}

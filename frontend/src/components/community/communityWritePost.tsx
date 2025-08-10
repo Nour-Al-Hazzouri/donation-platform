@@ -76,7 +76,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-border px-4 py-3">
+      <div className="bg-background border-b border-border px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
@@ -84,8 +84,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
                 variant="ghost" 
                 size="icon" 
                 onClick={onCancel}
-                className="h-8 w-8 rounded-full bg-white/80 hover:bg-white/90 shadow-md"
-                style={{ color: COLORS.primary }}
+                className="h-8 w-8 rounded-full bg-background/80 hover:bg-background/90 shadow-md text-primary"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -163,11 +162,8 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
             <Button
               type="submit"
               disabled={isSubmitting || !postContent.trim()}
-              style={{
-                backgroundColor: isSubmitting || !postContent.trim() ? undefined : COLORS.primary,
-                color: 'white'
-              }}
-              className="hover:bg-primaryHover gap-2"
+              variant="default"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
             >
               <ArrowUp className="w-4 h-4" />
               Post
