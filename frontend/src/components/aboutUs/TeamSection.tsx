@@ -10,8 +10,8 @@ import { cn } from '@/utils'
 const teamMembers = [
   {
     id: 1,
-    name: "Brycen Gregory",
-    role: "Volunteer",
+    name: "Nour Al Hazzouri",
+    role: "Team Leader, Front-end Developer",
     image: "/team.png",
     social: {
       facebook: "#",
@@ -21,8 +21,8 @@ const teamMembers = [
   },
   {
     id: 2,
-    name: "Sarah Johnson",
-    role: "Community Manager",
+    name: "Mariam Kanj",
+    role: "UI/UX Designer, Front-end Developer",
     image: "/team.png",
     social: {
       facebook: "#",
@@ -32,8 +32,8 @@ const teamMembers = [
   },
   {
     id: 3,
-    name: "Ahmed Hassan",
-    role: "Operations Director",
+    name: "Ali Atat",
+    role: "Front-end Developer",
     image: "/team.png",
     social: {
       facebook: "#",
@@ -43,8 +43,8 @@ const teamMembers = [
   },
   {
     id: 4,
-    name: "Maria Rodriguez",
-    role: "Volunteer Coordinator",
+    name: "Ayman DanDan",
+    role: "Back-end Developer",
     image: "/team.png",
     social: {
       facebook: "#",
@@ -54,30 +54,8 @@ const teamMembers = [
   },
   {
     id: 5,
-    name: "David Chen",
-    role: "Technology Lead",
-    image: "/team.png",
-    social: {
-      facebook: "#",
-      twitter: "#",
-      instagram: "#"
-    }
-  },
-  {
-    id: 6,
-    name: "Fatima Al-Zahra",
-    role: "Outreach Specialist",
-    image: "/team.png",
-    social: {
-      facebook: "#",
-      twitter: "#",
-      instagram: "#"
-    }
-  },
-  {
-    id: 7,
-    name: "Michael Thompson",
-    role: "Finance Manager",
+    name: "Mouhamad Moussa",
+    role: "Back-end Developer",
     image: "/team.png",
     social: {
       facebook: "#",
@@ -89,9 +67,9 @@ const teamMembers = [
 
 const TeamCard = ({ member }: { member: typeof teamMembers[0] }) => {
   return (
-    <div className="text-center space-y-4 w-full h-full px-2">
+    <div className="text-center space-y-3 w-full h-full px-2 overflow-hidden">
       {/* Profile Image - Removed grey background */}
-      <div className="relative w-full h-64 sm:h-72 md:h-80 mx-auto mb-6">
+      <div className="relative w-full h-56 sm:h-60 md:h-64 mx-auto mb-4">
         <div className="w-full h-full rounded-t-full overflow-hidden">
           <Image
             src={member.image}
@@ -104,37 +82,37 @@ const TeamCard = ({ member }: { member: typeof teamMembers[0] }) => {
       </div>
 
       {/* Member Info */}
-      <div className="space-y-2">
-        <h3 className="text-xl font-bold text-[#000000]">
+      <div className="space-y-1">
+        <h3 className="text-lg sm:text-xl font-bold text-[#000000] truncate px-2">
           {member.name}
         </h3>
-        <p className="text-[#f90404] font-medium">
+        <p className="text-[#f90404] font-medium text-sm sm:text-base line-clamp-2 px-2">
           {member.role}
         </p>
       </div>
 
       {/* Social Links */}
-      <div className="flex justify-center gap-4 pt-2">
+      <div className="flex justify-center gap-3 pt-1">
         <a
           href={member.social.facebook}
           className="text-[#5a5a5a] hover:text-[#f90404] transition-colors"
           aria-label={`${member.name}'s Facebook`}
         >
-          <Facebook size={20} />
+          <Facebook size={18} />
         </a>
         <a
           href={member.social.twitter}
           className="text-[#5a5a5a] hover:text-[#f90404] transition-colors"
           aria-label={`${member.name}'s Twitter`}
         >
-          <Twitter size={20} />
+          <Twitter size={18} />
         </a>
         <a
           href={member.social.instagram}
           className="text-[#5a5a5a] hover:text-[#f90404] transition-colors"
           aria-label={`${member.name}'s Instagram`}
         >
-          <Instagram size={20} />
+          <Instagram size={18} />
         </a>
       </div>
     </div>
@@ -157,7 +135,9 @@ export default function TeamSection() {
         setVisibleCards(1)
       } else if (window.innerWidth < 1024) { // md
         setVisibleCards(2)
-      } else { // lg+
+      } else if (window.innerWidth < 1280) { // lg
+        setVisibleCards(2)
+      } else { // xl+
         setVisibleCards(3)
       }
     }
@@ -196,7 +176,7 @@ export default function TeamSection() {
   }, [isTransitioning])
 
   return (
-    <section className="bg-white py-16 px-4 md:px-8 lg:px-16 mt-12">
+    <section className="bg-white py-12 sm:py-16 px-4 md:px-8 lg:px-16 mt-8 sm:mt-12">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -221,7 +201,7 @@ export default function TeamSection() {
               <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
 
-            <div className="overflow-hidden w-full max-w-6xl" style={{ height: '420px' }}>
+            <div className="overflow-hidden w-full max-w-6xl" style={{ height: 'auto', minHeight: '380px' }}>
               <div
                 className="flex transition-transform duration-300 ease-in-out h-full"
                 style={{
@@ -231,7 +211,7 @@ export default function TeamSection() {
                 {extendedMembers.map((member, index) => (
                   <div
                     key={`${member.id}-${index}`}
-                    className="flex-shrink-0 px-1 sm:px-2 h-full"
+                    className="flex-shrink-0 px-1 sm:px-2 h-full flex items-start"
                     style={{ width: `${100 / visibleCards}%` }}
                   >
                     <TeamCard member={member} />
