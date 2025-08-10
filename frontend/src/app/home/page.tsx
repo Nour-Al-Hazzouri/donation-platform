@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <MainLayout>
       <Hero />
-      <AboutIntroSection />
+      <AboutIntroSection showButton={false} />
       <LatestDonations />
       <LatestRequests />
       <BlogCarousel />

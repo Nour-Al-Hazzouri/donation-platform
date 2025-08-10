@@ -25,7 +25,7 @@ export function AddRequestForm() {
   const { addRequest } = useRequestsStore()
   
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: '',
     title: '',
     description: '',
     goalAmount: '',
@@ -127,7 +127,7 @@ export function AddRequestForm() {
         <Input
           id="name"
           type="text"
-          placeholder="Steve Rogers"
+          placeholder="Enter your name"
           value={formData.name}
           onChange={(e) => handleInputChange('name', e.target.value)}
           className={`mt-2 ${errors.name ? 'border-red-500' : ''}`}
@@ -145,7 +145,7 @@ export function AddRequestForm() {
         <Input
           id="title"
           type="text"
-          placeholder="in need for..."
+          placeholder="Enter request title"
           value={formData.title}
           onChange={(e) => handleInputChange('title', e.target.value)}
           className={`mt-2 ${errors.title ? 'border-red-500' : ''}`}
@@ -162,7 +162,7 @@ export function AddRequestForm() {
         </Label>
         <Textarea
           id="description"
-          placeholder="I want..."
+          placeholder="Enter request description"
           value={formData.description}
           onChange={(e) => handleInputChange('description', e.target.value)}
           className={`mt-2 min-h-[120px] ${errors.description ? 'border-red-500' : ''}`}
@@ -180,7 +180,7 @@ export function AddRequestForm() {
         <Input
           id="goalAmount"
           type="number"
-          placeholder="ex: 10000"
+          placeholder="Enter goal amount"
           value={formData.goalAmount}
           onChange={(e) => handleInputChange('goalAmount', e.target.value)}
           className={`mt-2 ${errors.goalAmount ? 'border-red-500' : ''}`}

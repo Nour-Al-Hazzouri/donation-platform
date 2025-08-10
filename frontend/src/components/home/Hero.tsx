@@ -1,10 +1,15 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mail } from "lucide-react"
 import { COLORS } from "@/lib/constants"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 export function Hero() {
+  const router = useRouter();
+  
   return (
     <section className="container mx-auto px-4 py-8"> {/* Reduced py-12 to py-8 */}
       {/* Hero Text and Email Signup */}
@@ -107,6 +112,7 @@ export function Hero() {
               backgroundColor: COLORS.primary,
               '--tw-shadow-color': `${COLORS.primary}80`
             } as React.CSSProperties}
+            onClick={() => router.push('/add-request')}
           >
             Add Request
           </Button>
@@ -116,6 +122,7 @@ export function Hero() {
               backgroundColor: COLORS.primary,
               '--tw-shadow-color': `${COLORS.primary}80`
             } as React.CSSProperties}
+            onClick={() => router.push('/add-donation')}
           >
             Donate Now
           </Button>

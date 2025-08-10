@@ -4,12 +4,15 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { COLORS } from "@/lib/constants"
 import { Handshake, Users, Heart } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface AboutIntroSectionProps {
   showButton?: boolean;
 }
 
 export default function AboutIntroSection({ showButton = true }: AboutIntroSectionProps) {
+  const router = useRouter();
+  
   return (
     <section className="w-full bg-white pt-2 pb-6 sm:pt-3 sm:pb-8 md:pt-4 md:pb-10 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-16" id="about-us">
       <div className="max-w-7xl mx-auto">
@@ -59,6 +62,7 @@ export default function AboutIntroSection({ showButton = true }: AboutIntroSecti
                     hover:bg-[${COLORS.primaryHover}] hover:text-white hover:border-[${COLORS.primaryHover}]
                     transition-colors duration-200 rounded-full px-5 sm:px-6 text-sm sm:text-base
                   `}
+                  onClick={() => router.push('/about')}
                 >
                   Learn More
                 </Button>

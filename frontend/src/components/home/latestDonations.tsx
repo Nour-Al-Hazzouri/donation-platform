@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from 'lucide-react'
 import { cn } from '@/utils'
 import { COLORS } from '@/utils/constants'
+import { useRouter } from 'next/navigation'
 
 interface DonationItem {
   id: string
@@ -83,8 +84,12 @@ const mockDonations: DonationItem[] = [
 ]
 
 const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
+  const router = useRouter();
   return (
-    <Card className="flex-shrink-0 w-full h-full hover:shadow-lg transition-shadow duration-200 mx-1 sm:mx-2 flex flex-col bg-white">
+    <Card 
+      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-shadow duration-200 mx-1 sm:mx-2 flex flex-col bg-white cursor-pointer"
+      onClick={() => donation.isAvailable && router.push('/add-request')}
+    >
       <CardContent className="p-4 sm:p-6 flex-1 flex flex-col">
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
@@ -117,6 +122,7 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
           }}
           variant={donation.isAvailable ? "default" : "secondary"}
           disabled={!donation.isAvailable}
+          onClick={() => donation.isAvailable && router.push('/add-request')}
         >
           {donation.isAvailable ? "Request" : "Unavailable"}
         </Button>
@@ -126,6 +132,7 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
 }
 
 const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
+  const router = useRouter();
   const [currentIndex, setCurrentIndex] = React.useState(0)
   const [visibleCards, setVisibleCards] = React.useState(3)
   const [isTransitioning, setIsTransitioning] = React.useState(false)
@@ -244,6 +251,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
               backgroundColor: COLORS.primary,
               color: 'white',
             }}
+            onClick={() => router.push('/donations')}
           >
             View All Donations
           </Button>

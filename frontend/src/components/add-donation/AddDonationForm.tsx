@@ -24,7 +24,7 @@ export function AddDonationForm() {
   const { addDonation } = useDonationsStore()
   
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: '',
     title: '',
     description: '',
     donationAmount: '',
@@ -119,7 +119,7 @@ export function AddDonationForm() {
         <Input
           id="name"
           type="text"
-          placeholder="Your Name"
+          placeholder="Enter your name"
           value={formData.name}
           onChange={(e) => handleInputChange('name', e.target.value)}
           className={`mt-2 ${errors.name ? 'border-red-500' : ''}`}
@@ -136,7 +136,7 @@ export function AddDonationForm() {
         <Input
           id="title"
           type="text"
-          placeholder="What are you offering?"
+          placeholder="Enter donation title"
           value={formData.title}
           onChange={(e) => handleInputChange('title', e.target.value)}
           className={`mt-2 ${errors.title ? 'border-red-500' : ''}`}
@@ -152,7 +152,7 @@ export function AddDonationForm() {
         </Label>
         <Textarea
           id="description"
-          placeholder="Describe your donation..."
+          placeholder="Enter donation description"
           value={formData.description}
           onChange={(e) => handleInputChange('description', e.target.value)}
           className={`mt-2 min-h-[120px] ${errors.description ? 'border-red-500' : ''}`}
@@ -169,7 +169,7 @@ export function AddDonationForm() {
         <Input
           id="donationAmount"
           type="number"
-          placeholder="Amount you're donating"
+          placeholder="Enter donation amount"
           value={formData.donationAmount}
           onChange={(e) => handleInputChange('donationAmount', e.target.value)}
           className={`mt-2 ${errors.donationAmount ? 'border-red-500' : ''}`}
