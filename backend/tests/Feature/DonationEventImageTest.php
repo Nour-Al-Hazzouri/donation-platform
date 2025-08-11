@@ -36,7 +36,7 @@ class DonationEventImageTest extends TestCase
         Verification::create([
             'user_id' => $this->user->id,
             'document_type' => 'id_card',
-            'document_urls' => ['https://example.com/id.jpg'],
+            'image_urls' => ['verifications/1/test.jpg'],
             'status' => 'approved',
         ]);
 
@@ -66,7 +66,7 @@ class DonationEventImageTest extends TestCase
                 'goal_amount' => 1000,
                 'type' => 'request',
                 'location_id' => $this->location->id,
-                'images' => $images,
+                'image_urls' => $images,
             ]);
 
         $response->assertStatus(201)
@@ -113,7 +113,7 @@ class DonationEventImageTest extends TestCase
 
         $response = $this->actingAsUser()
             ->putJson("/api/donation-events/{$event->id}", [
-                'images' => $newImages,
+                'image_urls' => $newImages,
             ]);
 
         $response->assertStatus(200);
@@ -190,29 +190,10 @@ class DonationEventImageTest extends TestCase
                 'goal_amount' => 1000,
                 'type' => 'request',
                 'location_id' => $this->location->id,
-                'images' => [$invalidFile],
+                'image_urls' => [$invalidFile],
             ]);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['images.0']);
-    }
-
-    /** @test */
-    public function user_can_use_existing_image_urls()
-    {
-        $existingImageUrl = 'https://example.com/existing-image.jpg';
-
-        $response = $this->actingAsUser()
-            ->postJson('/api/donation-events', [
-                'title' => 'Test Donation Event',
-                'description' => 'This is a test event with existing image URL',
-                'goal_amount' => 1000,
-                'type' => 'request',
-                'location_id' => $this->location->id,
-                'image_urls' => [$existingImageUrl],
-            ]);
-
-        $response->assertStatus(201);
-        $this->assertContains($existingImageUrl, $response->json('data.image_urls'));
+            ->assertJsonValidationErrors(['image_urls.0']);
     }
 }

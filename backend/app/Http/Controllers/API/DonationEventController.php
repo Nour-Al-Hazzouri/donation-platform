@@ -56,18 +56,13 @@ class DonationEventController extends Controller
             // Handle file uploads if any
             $imagePaths = [];
 
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
+            if ($request->hasFile('image_urls')) {
+                foreach ($request->file('image_urls') as $image) {
                     $path = $this->imageService->uploadImage($image, 'donation_events');
                     if ($path) {
                         $imagePaths[] = $path;
                     }
                 }
-            }
-
-            // Add any existing image URLs
-            if (!empty($validated['image_urls'])) {
-                $imagePaths = array_merge($imagePaths, (array)$validated['image_urls']);
             }
 
             // Create the donation event with the image paths
@@ -122,19 +117,14 @@ class DonationEventController extends Controller
             $imagePaths = $donationEvent->image_urls ?? [];
 
             // Handle new file uploads
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
+            if ($request->hasFile('image_urls')) {
+                foreach ($request->file('image_urls') as $image) {
                     $path = $this->imageService->uploadImage($image, 'donation_events');
                     if ($path) {
                         $uploadedImagePaths[] = $path;
                     }
                 }
                 $imagePaths = array_merge($imagePaths, $uploadedImagePaths);
-            }
-
-            // Add any new image URLs
-            if (isset($validated['image_urls'])) {
-                $imagePaths = array_merge($imagePaths, (array)$validated['image_urls']);
             }
 
             // Remove images that need to be deleted

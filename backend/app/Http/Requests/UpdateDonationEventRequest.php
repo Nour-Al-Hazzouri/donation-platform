@@ -30,10 +30,8 @@ class UpdateDonationEventRequest extends FormRequest
             'status' => 'sometimes|in:active,completed,cancelled,suspended',
             'current_amount' => 'sometimes|numeric|min:0',
             'possible_amount' => 'sometimes|numeric|min:0',
-            'images' => 'sometimes|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'image_urls' => 'sometimes|array',
-            'image_urls.*' => 'string',
+            'image_urls.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'remove_image_urls' => 'sometimes|array',
             'remove_image_urls.*' => 'string',
         ];
