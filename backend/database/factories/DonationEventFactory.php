@@ -25,12 +25,23 @@ class DonationEventFactory extends Factory
             'location_id' => Location::inRandomOrder()->first()->id,
             'title' => $this->faker->sentence(),
             'description' => $this->faker->paragraphs(3, true),
-            'images' => $this->faker->optional(0.7, [])->randomElements([
-                'https://picsum.photos/800/600?random=1',
-                'https://picsum.photos/800/600?random=2',
-                'https://picsum.photos/800/600?random=3',
-                'https://picsum.photos/800/600?random=4',
-            ], $this->faker->numberBetween(1, 4)),
+            'image_urls' => function (array $attributes) {
+                if (app()->environment('testing') || !$this->faker->boolean(70)) {
+                    return [];
+                }
+
+                $imageCount = $this->faker->numberBetween(1, 4);
+                $images = [];
+
+                for ($i = 0; $i < $imageCount; $i++) {
+                    $image = \Illuminate\Http\UploadedFile::fake()->image('donation_event_' . uniqid() . '.jpg', 800, 600);
+                    $path = 'donation-events/' . uniqid() . '.jpg';
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, file_get_contents($image));
+                    $images[] = $path;
+                }
+
+                return $images;
+            },
             'type' => $this->faker->randomElement(['request', 'offer']),
             'goal_amount' => $this->faker->randomFloat(2, 1000, 100000),
             'current_amount' => fn(array $attributes) => $this->faker->randomFloat(2, 0, $attributes['goal_amount'] * 0.8),

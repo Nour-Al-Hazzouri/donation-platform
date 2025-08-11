@@ -31,12 +31,7 @@ class DonationEventSeeder extends Seeder
                 'location_id' => $locations->random()->id,
                 'title' => $this->generateEventTitle(),
                 'description' => $this->generateEventDescription(),
-                'images' => $imageCount > 0 ? array_slice([
-                    'https://picsum.photos/800/600?random=' . rand(1, 1000),
-                    'https://picsum.photos/800/600?random=' . rand(1001, 2000),
-                    'https://picsum.photos/800/600?random=' . rand(2001, 3000),
-                    'https://picsum.photos/800/600?random=' . rand(3001, 4000),
-                ], 0, $imageCount) : [],
+                'image_urls' => $this->generateEventImages($imageCount),
                 'goal_amount' => $goalAmount,
                 'current_amount' => $currentAmount,
                 'type' => $types[array_rand($types)],
@@ -130,5 +125,21 @@ class DonationEventSeeder extends Seeder
         $target = $targets[array_rand($targets)];
 
         return ucfirst("$subject $verb $action $target.");
+    }
+
+    private function generateEventImages(int $count): array
+    {
+        if (app()->environment('testing')) {
+            return [];
+        }
+
+        $images = [];
+        for ($i = 0; $i < $count; $i++) {
+            $image = \Illuminate\Http\UploadedFile::fake()->image('donation_event_' . uniqid() . '.jpg', 800, 600);
+            $path = 'donation-events/' . uniqid() . '.jpg';
+            \Illuminate\Support\Facades\Storage::disk('public')->put($path, file_get_contents($image));
+            $images[] = $path;
+        }
+        return $images;
     }
 }

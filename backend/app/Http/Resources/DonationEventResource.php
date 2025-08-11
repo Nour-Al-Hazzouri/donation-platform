@@ -23,15 +23,26 @@ class DonationEventResource extends JsonResource
             'possible_amount' => $this->possible_amount,
             'type' => $this->type,
             'status' => $this->status,
-            'user_id' => $this->user_id,
+            'image_urls' => $this->image_urls ?? [],
+            'image_full_urls' => $this->image_full_urls ?? [],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+
+        // Add user relationship if loaded
         if ($this->relationLoaded('user') && $this->user) {
-            $data['user'] = new UserResource($this->user);
+            $data['user'] = [
+                'id' => $this->user->id,
+                'username' => $this->user->username,
+                'first_name' => $this->user->first_name,
+                'last_name' => $this->user->last_name,
+                'avatar' => $this->user->profile_photo_url ?? null,
+            ];
         } elseif ($this->user_id) {
             $data['user_id'] = $this->user_id;
         }
+
+        // Add location relationship if loaded
         if ($this->relationLoaded('location') && $this->location) {
             $data['location'] = [
                 'id' => $this->location->id,
@@ -41,7 +52,7 @@ class DonationEventResource extends JsonResource
         } elseif ($this->location_id) {
             $data['location_id'] = $this->location_id;
         }
-        $data['images'] = $this->images;
+
         return $data;
     }
 }

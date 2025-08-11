@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->foreignId('location_id')->constrained('locations');
             $table->string('title');
             $table->text('description');
-            $table->json('images')->nullable();
+            $table->json('image_urls')->nullable();
             $table->decimal('goal_amount', 10, 2);
             $table->decimal('current_amount', 10, 2)->default(0);
             $table->decimal('possible_amount', 10, 2)->default(0);

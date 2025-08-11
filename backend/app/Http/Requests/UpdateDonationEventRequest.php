@@ -26,12 +26,16 @@ class UpdateDonationEventRequest extends FormRequest
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
             'goal_amount' => 'sometimes|numeric|min:0',
-            'images' => 'nullable|array',
-            'images.*' => 'string',
             'type' => 'sometimes|in:request,offer',
             'status' => 'sometimes|in:active,completed,cancelled,suspended',
             'current_amount' => 'sometimes|numeric|min:0',
             'possible_amount' => 'sometimes|numeric|min:0',
+            'images' => 'sometimes|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'image_urls' => 'sometimes|array',
+            'image_urls.*' => 'string',
+            'remove_image_urls' => 'sometimes|array',
+            'remove_image_urls.*' => 'string',
         ];
     }
 }

@@ -27,8 +27,10 @@ class StoreDonationEventRequest extends FormRequest
             'goal_amount' => 'required|numeric|min:0',
             'type' => 'required|in:request,offer',
             'location_id' => 'required|exists:locations,id',
-            'images' => 'nullable|array',
-            'images.*' => 'string',
+            'images' => 'sometimes|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'image_urls' => 'sometimes|array',
+            'image_urls.*' => 'string',
         ];
     }
 }
