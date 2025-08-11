@@ -199,14 +199,14 @@ export default function RequestPage() {
           </Button>
 
           {/* Notice */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-6 p-4 bg-muted rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+              <div className="w-4 h-4 bg-green-500 dark:bg-green-700 rounded-full flex items-center justify-center">
                 <span className="text-white text-xs">✓</span>
               </div>
-              <span className="text-sm font-medium text-gray-900">Secure Request</span>
+              <span className="text-sm font-medium text-foreground">Secure Request</span>
             </div>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-muted-foreground">
               Your request information will be processed securely and confidentially.
             </p>
           </div>

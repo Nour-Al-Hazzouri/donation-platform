@@ -26,8 +26,8 @@ export default function RequestSuccessPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-background">
         <div className="text-center">
           {/* Success Icon */}
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
+            <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
           </div>
 
           {/* Success Message */}

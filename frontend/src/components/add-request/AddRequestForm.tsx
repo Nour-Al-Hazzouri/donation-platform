@@ -118,6 +118,7 @@ export function AddRequestForm() {
   }
 
   return (
+    <div className="bg-background">
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name Field */}
       <div>
@@ -130,7 +131,7 @@ export function AddRequestForm() {
           placeholder="Enter your name"
           value={formData.name}
           onChange={(e) => handleInputChange('name', e.target.value)}
-          className={`mt-2 ${errors.name ? 'border-red-500' : ''}`}
+          className={`mt-2 bg-background dark:bg-background dark:text-foreground border-input dark:border-border ${errors.name ? 'border-red-500' : ''}`}
         />
         {errors.name && (
           <p className="mt-1 text-sm text-red-500">{errors.name}</p>
@@ -148,7 +149,7 @@ export function AddRequestForm() {
           placeholder="Enter request title"
           value={formData.title}
           onChange={(e) => handleInputChange('title', e.target.value)}
-          className={`mt-2 ${errors.title ? 'border-red-500' : ''}`}
+          className={`mt-2 bg-background dark:bg-background dark:text-foreground border-input dark:border-border ${errors.title ? 'border-red-500' : ''}`}
         />
         {errors.title && (
           <p className="mt-1 text-sm text-red-500">{errors.title}</p>
@@ -165,7 +166,7 @@ export function AddRequestForm() {
           placeholder="Enter request description"
           value={formData.description}
           onChange={(e) => handleInputChange('description', e.target.value)}
-          className={`mt-2 min-h-[120px] ${errors.description ? 'border-red-500' : ''}`}
+          className={`mt-2 min-h-[120px] bg-background dark:bg-background dark:text-foreground border-input dark:border-border resize-none ${errors.description ? 'border-red-500' : ''}`}
         />
         {errors.description && (
           <p className="mt-1 text-sm text-red-500">{errors.description}</p>
@@ -183,7 +184,7 @@ export function AddRequestForm() {
           placeholder="Enter goal amount"
           value={formData.goalAmount}
           onChange={(e) => handleInputChange('goalAmount', e.target.value)}
-          className={`mt-2 ${errors.goalAmount ? 'border-red-500' : ''}`}
+          className={`mt-2 bg-background dark:bg-background dark:text-foreground border-input dark:border-border ${errors.goalAmount ? 'border-red-500' : ''}`}
         />
         {errors.goalAmount && (
           <p className="mt-1 text-sm text-red-500">{errors.goalAmount}</p>
@@ -199,14 +200,14 @@ export function AddRequestForm() {
           <label htmlFor="image-upload">
             <Button
               type="button"
-              className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2"
+              className="bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 text-white dark:text-white flex items-center gap-2 transition-colors"
               onClick={() => document.getElementById('image-upload')?.click()}
             >
               <Upload className="h-4 w-4" />
               Upload Image
             </Button>
           </label>
-          <span className="text-muted-foreground text-sm">
+          <span className="text-muted-foreground dark:text-muted-foreground text-sm">
             {formData.image ? formData.image.name : 'No file chosen'}
           </span>
           <input
@@ -224,7 +225,7 @@ export function AddRequestForm() {
             <img 
               src={URL.createObjectURL(formData.image)} 
               alt="Preview" 
-              className="w-full max-w-md h-32 object-cover rounded-md border"
+              className="w-full max-w-md h-32 object-cover rounded-md border border-border dark:border-border"
             />
           </div>
         )}
@@ -235,11 +236,12 @@ export function AddRequestForm() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg"
+          className="w-full bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 text-white dark:text-white py-3 text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Creating Request...' : 'Create Request'}
         </Button>
       </div>
     </form>
+    </div>
   )
 }

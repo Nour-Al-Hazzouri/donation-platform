@@ -39,17 +39,17 @@ export function SearchSection({
 
   return (
     <div className="text-center mb-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Latest Request</h1>
+      <h1 className="text-3xl font-bold text-foreground mb-6">Latest Request</h1>
       
       {/* Search Bar */}
       <form onSubmit={handleSubmit} className="flex justify-center items-center max-w-md mx-auto mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input 
             placeholder="Search Requests..." 
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 pr-4 py-2 border-gray-300 focus:border-red-500 focus:ring-red-500"
+            className="pl-10 pr-4 py-2 border-border focus:border-primary focus:ring-primary"
           />
         </div>
         <Button 
@@ -63,7 +63,7 @@ export function SearchSection({
       {/* Search Results Info */}
       {searchTerm && (
         <div className="mb-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {resultsCount > 0 
               ? `Found ${resultsCount} result${resultsCount !== 1 ? 's' : ''} for "${searchTerm}"`
               : `No results found for "${searchTerm}"`

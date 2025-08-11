@@ -12,8 +12,8 @@ export function RequestCards({ requests, searchTerm }: RequestCardsProps) {
   if (requests.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-500 text-lg mb-4">No requests found</div>
-        <p className="text-gray-400">
+        <div className="text-foreground text-lg mb-4">No requests found</div>
+        <p className="text-muted-foreground">
           {searchTerm 
             ? `Try adjusting your search term "${searchTerm}" or browse all requests.`
             : "There are no donation requests available at the moment."
