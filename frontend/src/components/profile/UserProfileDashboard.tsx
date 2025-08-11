@@ -87,9 +87,9 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   }
 
   return (
-    <section className="bg-background min-h-screen w-full lg:-ml-20">
+    <section className="bg-background min-h-screen w-full">
       <div className="flex flex-col lg:flex-row w-full h-full">
-        <div className="w-full lg:w-56 xl:w-60 shrink-0">
+        <div className="w-full lg:w-64 shrink-0 md:fixed md:left-0 md:top-0 md:bottom-0 md:pt-16 md:z-10">
           <ProfileSidebar 
             activeItem="profile" 
             fullName={profileData.fullName} 
@@ -98,7 +98,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
           />
         </div>
 
-        <div className="flex-1 p-4 sm:p-5 w-full overflow-x-hidden">
+        <div className="flex-1 p-4 sm:p-5 max-w-full overflow-x-hidden md:ml-64">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground">
               Welcome, {profileData.fullName.split(' ')[0]}
@@ -131,7 +131,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                 {isEditing ? (
                   <div className="h-10 sm:h-12 w-full">
                     <Select value={profileData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
-                      <SelectTrigger className="w-full h-full px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                      <SelectTrigger className="w-full h-full px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-w-[200px]">
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
                       <SelectContent>

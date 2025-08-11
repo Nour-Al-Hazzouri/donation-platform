@@ -8,13 +8,18 @@ import { NAV_ITEMS } from "@/utils/constants"
 import { useTheme } from "next-themes"
 import Image from "next/image"
 import { COLORS } from "@/lib/constants"
+import { cn } from "@/utils"
 
-export function Footer() {
+interface FooterProps {
+  className?: string
+}
+
+export function Footer({ className }: FooterProps = {}) {
   const currentYear = new Date().getFullYear()
   const { theme } = useTheme()
 
   return (
-    <footer className="bg-background border-t border-border">
+    <footer className={cn("bg-background border-t border-border", className)}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
           
