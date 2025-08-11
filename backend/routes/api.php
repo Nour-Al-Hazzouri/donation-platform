@@ -9,6 +9,7 @@ use App\Http\Controllers\API\VerificationController;
 use App\Http\Controllers\API\CommunityPostController;
 use App\Http\Controllers\API\CommentController;
 use App\Http\Controllers\API\DonationEventController;
+use App\Http\Controllers\API\DonationTransactionController;
 use App\Http\Controllers\API\VoteController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -127,8 +128,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [DonationEventController::class, 'store']);
         Route::put('/{donationEvent}', [DonationEventController::class, 'update']);
         Route::delete('/{donationEvent}', [DonationEventController::class, 'destroy']);
+        
+        // Transactions for a specific donation event
+        Route::get('/{donationEvent}/transactions', [DonationTransactionController::class, 'index']);
+        Route::post('/{donationEvent}/transactions', [DonationTransactionController::class, 'store']);
     }); 
 
+    // General donation transactions routes
+    Route::prefix('donation-transactions')->group(function () {
+        Route::get('/', [DonationTransactionController::class, 'index']);
+        Route::get('/{transaction}', [DonationTransactionController::class, 'show']);
+        Route::put('/{transaction}/status', [DonationTransactionController::class, 'updateStatus']);
+    });
 });
 
 

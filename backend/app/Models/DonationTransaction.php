@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 class DonationTransaction extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'user_id',
         'event_id',
@@ -15,6 +17,16 @@ class DonationTransaction extends Model
         'status',
         'transaction_at'
     ];
+    
+    /**
+     * Get a human-readable description of the transaction
+     */
+    public function getDescriptionAttribute(): string
+    {
+        return $this->transaction_type === 'contribution'
+            ? 'Contribution to ' . $this->event->title
+            : 'Claim from ' . $this->event->title;
+    }
 
     protected $casts = [
         'amount' => 'decimal:2',

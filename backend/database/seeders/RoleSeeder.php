@@ -45,6 +45,15 @@ class RoleSeeder extends Seeder
             'delete donation_events',
             'delete own donation_events',
             'manage donation_events',
+            // Donation Transaction permissions
+            'view donation_transactions',
+            'create donation_transactions',
+            'view own donation_transactions',
+            'edit donation_transactions',
+            'edit own donation_transactions',
+            'delete donation_transactions',
+            'delete own donation_transactions',
+            'manage donation_transactions',
             // Post permissions
             'view posts',
             'create posts',
@@ -81,10 +90,17 @@ class RoleSeeder extends Seeder
         // Define user permissions (base level)
         $userPermissions = [
             'view locations',
+            // Donation Event permissions
             'view donation_events',
             'create donation_events',
             'edit own donation_events',
             'delete own donation_events',
+            // Donation Transaction permissions
+            'view donation_transactions',
+            'view own donation_transactions',
+            'create donation_transactions',
+            'edit own donation_transactions',
+            'delete own donation_transactions',
             'view posts',
             'create posts',
             'edit own posts',
@@ -130,7 +146,16 @@ class RoleSeeder extends Seeder
             'edit own announcements',
             'delete own announcements',
             'edit announcements',
-            'delete announcements'
+            'delete announcements',
+            // Donation Transaction permissions
+            'view donation_transactions',
+            'view own donation_transactions',
+            'create donation_transactions',
+            'edit own donation_transactions',
+            'delete own donation_transactions',
+            'edit donation_transactions',
+            'delete donation_transactions',
+            'manage donation_transactions'
         ];
 
         // Combine moderator and admin permissions
