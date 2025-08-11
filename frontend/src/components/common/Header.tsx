@@ -97,21 +97,13 @@ export function Header() {
             href="/" 
             className="flex items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
           >
-            <div className="w-40 h-10 relative">
+            <div className="w-60 h-15 relative">
               <Image 
-                src="/logo.png" 
+                src="/logoooo-removebg-preview.png" 
                 alt="GiveLeb Logo" 
                 fill
                 sizes="(max-width: 768px) 160px, 200px"
-                className="object-contain dark:hidden"
-                priority
-              />
-              <Image 
-                src="/logo-dark.png" 
-                alt="GiveLeb Logo" 
-                fill
-                sizes="(max-width: 768px) 160px, 200px"
-                className="object-contain hidden dark:block"
+                className="object-contain"
                 priority
               />
             </div>

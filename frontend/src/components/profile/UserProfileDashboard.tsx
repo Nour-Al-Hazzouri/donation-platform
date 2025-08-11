@@ -90,12 +90,14 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     <section className="bg-background min-h-screen w-full">
       <div className="flex flex-col lg:flex-row w-full h-full">
         <div className="w-full lg:w-64 shrink-0 md:fixed md:left-0 md:top-0 md:bottom-0 md:pt-16 md:z-10">
-          <ProfileSidebar 
-            activeItem="profile" 
-            fullName={profileData.fullName} 
-            profileImage={user?.profileImage}
-            onViewChange={onViewChange}
-          />
+          <div className="hidden md:block">
+            <ProfileSidebar 
+              activeItem="profile" 
+              fullName={profileData.fullName} 
+              profileImage={user?.profileImage}
+              onViewChange={onViewChange}
+            />
+          </div>
         </div>
 
         <div className="flex-1 p-4 sm:p-5 max-w-full overflow-x-hidden md:ml-64">

@@ -30,21 +30,13 @@ export function Footer({ className }: FooterProps = {}) {
                 href="/" 
                 className="transition-transform duration-200 hover:scale-105 active:scale-95"
               >
-                <div className="w-36 h-10 relative -ml-6">
+                <div className="w-54 h-15 relative -ml-6">
                   <Image 
-                    src="/logo.png" 
+                    src="/logoooo-removebg-preview.png" 
                     alt="GiveLeb Logo" 
                     fill
                     sizes="(max-width: 768px) 144px, 180px"
-                    className="object-contain dark:hidden"
-                    priority
-                  />
-                  <Image 
-                    src="/logo-dark-removebg-preview.png" 
-                    alt="GiveLeb Logo" 
-                    fill
-                    sizes="(max-width: 768px) 144px, 180px"
-                    className="object-contain hidden dark:block"
+                    className="object-contain"
                     priority
                   />
                 </div>

@@ -69,12 +69,14 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
     <section className="bg-background min-h-screen">
       <div className="flex flex-col lg:flex-row w-full h-full">
         <div className="w-full lg:w-64 shrink-0 md:fixed md:left-0 md:top-0 md:bottom-0 md:pt-16 md:z-10">
-          <ProfileSidebar 
-            activeItem="notifications" 
-            fullName={user?.name || "Guest"} 
-            profileImage={user?.profileImage}
-            onViewChange={onViewChange}
-          />
+          <div className="hidden md:block">
+            <ProfileSidebar 
+              activeItem="notifications" 
+              fullName={user?.name || "Guest"} 
+              profileImage={user?.profileImage}
+              onViewChange={onViewChange}
+            />
+          </div>
         </div>
 
         <div className="flex-1 p-4 lg:p-8 lg:overflow-y-auto md:ml-64">

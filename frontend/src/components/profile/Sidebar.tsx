@@ -30,6 +30,7 @@ export default function ProfileSidebar({
   profileImage,
   onViewChange
 }: SidebarProps) {
+  // Check if screen is mobile for styling purposes only
   const [isMobile, setIsMobile] = useState(false)
   const { theme } = useTheme()
   const { logout, user } = useAuthStore()
@@ -80,10 +81,6 @@ export default function ProfileSidebar({
   ]
 
   const sidebarMenuItems = getSidebarMenuItems()
-  
-  if (isMobile) {
-    return null
-  }
   
   return (
     <Sidebar className="w-64 border-r hidden md:block bg-background h-screen fixed">
