@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { User, Bell, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/authStore"
@@ -15,7 +16,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
-import { ThemeToggleProvider } from "@/components/common/ThemeToggleProvider"
 
 interface SidebarProps {
   activeItem: "profile" | "notifications"
@@ -30,6 +30,17 @@ export default function ProfileSidebar({
   profileImage,
   onViewChange
 }: SidebarProps) {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
   const { logout, user } = useAuthStore()
   const router = useRouter()
 
@@ -73,8 +84,13 @@ export default function ProfileSidebar({
 
   const sidebarMenuItems = getSidebarMenuItems()
   
+  // Don't render the sidebar on mobile screens
+  if (isMobile) {
+    return null
+  }
+  
   return (
-    <Sidebar className="w-64 border-r">
+    <Sidebar className="w-64 border-r hidden md:block">
       <SidebarContent className="pt-16">
         <SidebarGroup>
           <SidebarGroupContent>

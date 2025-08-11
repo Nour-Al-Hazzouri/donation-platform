@@ -17,6 +17,14 @@ export default function ProfilePage() {
     if (!isAuthenticated) {
       router.push('/')
     }
+    
+    // Check if there's a view preference in sessionStorage
+    const storedView = sessionStorage.getItem('profileView')
+    if (storedView === 'notifications') {
+      setActiveView('notifications')
+      // Clear the stored view to avoid persisting across page refreshes
+      sessionStorage.removeItem('profileView')
+    }
   }, [isAuthenticated, router])
 
   if (!isAuthenticated) {

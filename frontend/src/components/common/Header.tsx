@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { NAV_ITEMS, COLORS } from "@/lib/constants"
-import { usePathname } from "next/navigation"
-import { Menu, X, User, LogOut } from 'lucide-react'
+import { usePathname, useRouter } from "next/navigation"
+import { Menu, X, User, LogOut, Bell } from 'lucide-react'
 import Image from "next/image"
 import { useModal } from '@/contexts/ModalContext'
 import { useAuthStore } from '@/store/authStore'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,16 +21,47 @@ import { useTheme } from "next-themes"
 
 export function Header() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { openModal } = useModal()
   const { user, isAuthenticated, logout } = useAuthStore()
   const { theme } = useTheme()
+  const [isMobile, setIsMobile] = useState(false)
   
   // Check if the current user is an admin
   const isAdmin = user?.email === 'admin@gmail.com'
 
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
+  
+  const handleProfileNavigation = () => {
+    closeMobileMenu()
+    router.push('/profile')
+  }
+  
+  const handleNotificationsNavigation = () => {
+    closeMobileMenu()
+    router.push('/profile')
+    // We need to pass a parameter to indicate we want to show notifications
+    // This will be handled by the profile page
+    sessionStorage.setItem('profileView', 'notifications')
+  }
+  
+  const handleLogout = () => {
+    closeMobileMenu()
+    logout()
+    router.push('/')
+  }
 
   const renderNavLink = (item: typeof NAV_ITEMS[0], isMobile = false) => {
     const isActive = pathname === item.href
@@ -186,6 +218,62 @@ export function Header() {
                 </div>
                 {isAuthenticated && user ? (
                   <>
+                    {/* User info section for mobile */}
+                    {isMobile && (
+                      <div className="flex flex-col items-center space-y-3 p-4 mb-4 bg-secondary/20 rounded-lg">
+                        <div className="relative">
+                          <Avatar className="w-16 h-16">
+                            <AvatarImage src={user.profileImage} alt={user.name} />
+                            <AvatarFallback className="bg-primary">
+                              <User size={32} className="text-white" />
+                            </AvatarFallback>
+                          </Avatar>
+                          {user?.verified && (
+                            <img
+                              src="/verification.png"
+                              alt="Verified"
+                              className="absolute top-1 right-1 w-4 h-4"
+                            />
+                          )}
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <span className="font-semibold text-foreground">{user.name}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Profile sidebar menu items for mobile */}
+                    {isMobile && (
+                      <div className="space-y-3 mb-4">
+                        <h3 className="text-primary font-medium text-sm px-2">Profile Menu</h3>
+                        
+                        <Button
+                          className="bg-red-50 text-red-600 w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2 hover:bg-red-100"
+                          onClick={handleProfileNavigation}
+                        >
+                          <User size={16} />
+                          Profile
+                        </Button>
+                        
+                        <Button
+                          className="text-muted-foreground w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2 hover:text-foreground hover:bg-secondary/50"
+                          onClick={handleNotificationsNavigation}
+                        >
+                          <Bell size={16} />
+                          Notifications
+                        </Button>
+                        
+                        <Button
+                          className="bg-red-500 text-white w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2 hover:bg-red-600"
+                          onClick={handleLogout}
+                        >
+                          <LogOut size={16} />
+                          Log out
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {/* Regular mobile menu buttons */}
                     <Link href={isAdmin ? "/admin" : "/profile"}>
                       <Button
                         className="bg-red-500 text-white w-full text-center py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-red-600"
