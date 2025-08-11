@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreDonationEventRequest;
 use App\Http\Requests\UpdateDonationEventRequest;
@@ -29,19 +30,83 @@ class DonationEventController extends Controller
     {
         $this->imageService = $imageService;
     }
+
     /**
      * Display a listing of Donation Events.
+     * 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $donationEvents = DonationEvent::with('user', 'location')->latest()->get();
+        $donationEvents = DonationEvent::with('user', 'location')
+        ->latest()
+        ->get();
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
-        ], 200);
+        ], Response::HTTP_OK);
     }
 
-    /* store donation */
+    /**
+     * Display a listing of active Donation Requests.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function requestsIndex()
+    {
+        $donationEvents = DonationEvent::with('user', 'location')
+        ->where('status', 'active')
+        ->where('type', 'request')
+        ->latest()
+        ->get();
+        return response()->json([
+            'data' => DonationEventResource::collection($donationEvents),
+            'message' => 'Donation events retrieved successfully.',
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Display a listing of active Donation Offers.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function offersIndex()
+    {
+        $donationEvents = DonationEvent::with('user', 'location')
+        ->where('status', 'active')
+        ->where('type', 'offer')
+        ->latest()
+        ->get();
+        return response()->json([
+            'data' => DonationEventResource::collection($donationEvents),
+            'message' => 'Donation events retrieved successfully.',
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Display a listing of Donation Events for a specific user.
+     * 
+     * @param User $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function userIndex(User $user)
+    {
+        $donationEvents = DonationEvent::with('user', 'location')
+        ->where('user_id', $user->id)
+        ->latest()
+        ->get();
+        return response()->json([
+            'data' => DonationEventResource::collection($donationEvents),
+            'message' => 'Donation events retrieved successfully.',
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Store a newly created Donation Event in storage.
+     * 
+     * @param StoreDonationEventRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreDonationEventRequest $request)
     {
         $this->authorize('create', DonationEvent::class);
@@ -94,6 +159,9 @@ class DonationEventController extends Controller
 
     /**
      * Display the specified Donation Event.
+     * 
+     * @param DonationEvent $donationEvent
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(DonationEvent $donationEvent)
     {
@@ -105,7 +173,13 @@ class DonationEventController extends Controller
         ], 200);
     }
 
-    /* update donation */
+    /**
+     * Update the specified Donation Event in storage.
+     * 
+     * @param UpdateDonationEventRequest $request
+     * @param DonationEvent $donationEvent
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(UpdateDonationEventRequest $request, DonationEvent $donationEvent)
     {
         $this->authorize('update', $donationEvent);
@@ -167,8 +241,12 @@ class DonationEventController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
     /**
      * Remove the specified donation event.
+     * 
+     * @param DonationEvent $donationEvent
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(DonationEvent $donationEvent)
     {
