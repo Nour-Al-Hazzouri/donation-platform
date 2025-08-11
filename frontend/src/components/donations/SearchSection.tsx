@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuthStore } from '@/store/authStore'
 import { useModal } from '@/contexts/ModalContext'
-import { HowDonationHelps } from './HowDonationHelps'
 
 interface SearchSectionProps {
   searchTerm: string
@@ -83,8 +82,6 @@ export function SearchSection({
           </p>
         </div>
       )}
-      
-      <HowDonationHelps />
     </div>
   )
 }

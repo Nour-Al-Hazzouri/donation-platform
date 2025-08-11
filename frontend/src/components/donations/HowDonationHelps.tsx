@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Heart, Shield, Clock } from 'lucide-react';
+import { Heart, Shield, Clock } from 'lucide-react';
 
 export function HowDonationHelps() {
   return (
@@ -25,10 +25,7 @@ export function HowDonationHelps() {
               <p className="text-sm text-muted-foreground">
                 100% of your donation goes directly to those in need, with no administrative fees or overhead costs.
               </p>
-              <div className="mt-2 flex items-center text-xs text-primary group-hover:text-primary/80 transition-colors">
-                <span className="font-medium">Learn more</span>
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </div>
+
             </div>
           </div>
         </div>
@@ -44,10 +41,7 @@ export function HowDonationHelps() {
               <p className="text-sm text-muted-foreground">
                 Our team provides 24/7 assistance and regular updates on how your donation is making a difference.
               </p>
-              <div className="mt-2 flex items-center text-xs text-primary group-hover:text-primary/80 transition-colors">
-                <span className="font-medium">Learn more</span>
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </div>
+
             </div>
           </div>
         </div>
@@ -63,10 +57,7 @@ export function HowDonationHelps() {
               <p className="text-sm text-muted-foreground">
                 All transactions are encrypted and secure, ensuring your personal information remains protected.
               </p>
-              <div className="mt-2 flex items-center text-xs text-primary group-hover:text-primary/80 transition-colors">
-                <span className="font-medium">Learn more</span>
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </div>
+
             </div>
           </div>
         </div>
