@@ -12,7 +12,7 @@ class DonationTransactionResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         $data = [
             'id' => $this->id,
@@ -26,21 +26,26 @@ class DonationTransactionResource extends JsonResource
 
         // Include user relationship if loaded
         if ($this->relationLoaded('user') && $this->user) {
-            $data['user'] = new UserResource($this->user);
+            $data['user'] = [
+                'id' => $this->user->id,
+                'username' => $this->user->username,
+                'first_name' => $this->user->first_name,
+                'last_name' => $this->user->last_name,
+                'avatar' => $this->user->profile_photo_url ?? null,
+            ];
         } elseif ($this->user_id) {
             $data['user_id'] = $this->user_id;
         }
 
         // Include event relationship if loaded
         if ($this->relationLoaded('event') && $this->event) {
-            $data['event'] = new DonationEventResource($this->event);
+            $data['event'] = [
+                'id' => $this->event->id,
+                'title' => $this->event->title,
+                'type' => $this->event->type,
+            ];
         } elseif ($this->event_id) {
             $data['event_id'] = $this->event_id;
-        }
-
-        // Include moderation reports if loaded
-        if ($this->relationLoaded('moderationReports')) {
-            $data['moderation_reports'] = ModerationReportResource::collection($this->whenLoaded('moderationReports'));
         }
 
         return $data;

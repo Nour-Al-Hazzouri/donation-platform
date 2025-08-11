@@ -3,15 +3,19 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTransactionStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
-        return true; // Authorization is handled in the controller
+        // Authorization is handled in the controller
+        return true;
     }
 
     /**
@@ -25,8 +29,35 @@ class UpdateTransactionStatusRequest extends FormRequest
             'status' => [
                 'required',
                 'string',
-                'in:approved,declined',
+                Rule::in(['approved', 'declined', 'pending']),
             ],
         ];
+    }
+    
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'status.required' => 'The status field is required.',
+            'status.in' => 'The selected status is invalid. Must be one of: approved, declined, pending.',
+        ];
+    }
+    
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('status')) {
+            $this->merge([
+                'status' => strtolower($this->status),
+            ]);
+        }
     }
 }
