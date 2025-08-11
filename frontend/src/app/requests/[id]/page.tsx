@@ -144,9 +144,7 @@ export default function RequestDetailsPage() {
                   <p className="text-xs sm:text-sm text-muted-foreground">{requestDetails.location} • {requestDetails.dateCreated}</p>
                 </div>
               </div>
-              <Button variant="destructive" size="sm" className="self-end sm:self-auto">
-                Report
-              </Button>
+             
             </div>
 
             {/* Request Title */}

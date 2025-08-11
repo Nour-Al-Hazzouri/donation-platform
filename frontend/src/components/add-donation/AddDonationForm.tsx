@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload } from 'lucide-react'
 import { Button } from "@/components/ui/button"
@@ -24,7 +24,7 @@ export function AddDonationForm() {
   const { addDonation } = useDonationsStore()
   
   const [formData, setFormData] = useState({
-    name: '',
+    name: user?.name || '',
     title: '',
     description: '',
     donationAmount: '',
@@ -32,6 +32,13 @@ export function AddDonationForm() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Update the name field if user changes
+  useEffect(() => {
+    if (user?.name) {
+      setFormData(prev => ({ ...prev, name: user.name }))
+    }
+  }, [user?.name])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -124,6 +131,7 @@ export function AddDonationForm() {
           value={formData.name}
           onChange={(e) => handleInputChange('name', e.target.value)}
           className={`mt-2 ${errors.name ? 'border-red-500' : ''}`}
+          disabled={!!user?.name} // Disable if user is logged in
         />
         {errors.name && (
           <p className="mt-1 text-sm text-red-500">{errors.name}</p>

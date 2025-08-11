@@ -102,9 +102,7 @@ export default function DonationDetailsPage() {
                   <p className="text-xs sm:text-sm text-muted-foreground">Lebanon • {new Date().toLocaleDateString()}</p>
                 </div>
               </div>
-              <Button variant="destructive" size="sm" className="self-end sm:self-auto">
-                Report
-              </Button>
+             
             </div>
 
             {/* Donation Title */}
