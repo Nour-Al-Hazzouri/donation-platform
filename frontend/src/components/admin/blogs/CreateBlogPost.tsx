@@ -282,7 +282,7 @@ export function CreateBlogPost({
             <Button
               type="submit"
               disabled={!isFormValid || isSubmitting}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-8 w-full sm:w-auto order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 w-full sm:w-auto order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Processing..." : mode === "create" ? "Create" : "Update"}
             </Button>

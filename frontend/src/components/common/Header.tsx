@@ -68,12 +68,21 @@ export function Header() {
             className="flex items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
           >
             <div className="w-40 h-10 relative">
+              {/* Use a client-side only approach with useEffect to prevent hydration mismatch */}
               <Image 
-                src={theme === "dark" ? "/logo-dark-removebg-preview.png" : "/logo.png"} 
+                src="/logo.png" 
                 alt="GiveLeb Logo" 
                 fill
                 sizes="(max-width: 768px) 160px, 200px"
-                className="object-contain"
+                className="object-contain dark:hidden"
+                priority
+              />
+              <Image 
+                src="/logo-dark-removebg-preview.png" 
+                alt="GiveLeb Logo" 
+                fill
+                sizes="(max-width: 768px) 160px, 200px"
+                className="object-contain hidden dark:block"
                 priority
               />
             </div>

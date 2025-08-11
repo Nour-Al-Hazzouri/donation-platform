@@ -51,12 +51,21 @@ export function AdminHeader() {
             className="flex items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
           >
             <div className="w-40 h-10 relative">
+              {/* Use CSS classes for theme switching to prevent hydration mismatch */}
               <Image
                 src="/logo.png"
                 alt="GiveLeb Logo"
                 fill
                 sizes="(max-width: 768px) 160px, 200px"
-                className="object-contain"
+                className="object-contain dark:hidden"
+                priority
+              />
+              <Image
+                src="/logo-dark-removebg-preview.png"
+                alt="GiveLeb Logo"
+                fill
+                sizes="(max-width: 768px) 160px, 200px"
+                className="object-contain hidden dark:block"
                 priority
               />
             </div>
@@ -104,7 +113,7 @@ export function AdminHeader() {
             {/* Dashboard Button */}
             <Link href="/admin/dashboard">
               <Button
-                className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200 rounded-md px-4 py-2 text-sm font-medium"
+                className="bg-red-500 text-white hover:bg-red-600 transition-colors duration-200 rounded-md px-4 py-2 text-sm font-medium"
               >
                 Dashboard
               </Button>
@@ -170,7 +179,7 @@ export function AdminHeader() {
                 {/* Mobile Dashboard Button */}
                 <Link href="/admin/dashboard" onClick={closeMobileMenu}>
                   <Button
-                    className="w-full text-center py-2 px-4 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+                    className="w-full text-center py-2 px-4 rounded-md bg-red-500 text-white hover:bg-red-600"
                   >
                     Dashboard
                   </Button>

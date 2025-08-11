@@ -255,7 +255,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
               />
             </div>
             <Button 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto whitespace-nowrap"
+              className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto whitespace-nowrap"
               onClick={() => router.push('/admin/users/add')}
             >
               Add User
@@ -309,7 +309,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                   )}
                   <Button 
                     size="sm" 
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 w-full sm:w-auto"
+                    className="bg-red-500 hover:bg-red-600 text-white px-4 w-full sm:w-auto"
                     onClick={() => {
                       if (activeTab === "Verification") {
                         // Navigate to verification request details page

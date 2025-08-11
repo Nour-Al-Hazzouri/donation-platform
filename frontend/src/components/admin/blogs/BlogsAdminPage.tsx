@@ -183,7 +183,7 @@ export function BlogsAdminPage() {
                       />
                     </div>
                     <Button 
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto whitespace-nowrap"
+                      className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto whitespace-nowrap"
                       onClick={() => setIsCreating(true)}
                     >
                       Create Blog Post
@@ -230,7 +230,7 @@ export function BlogsAdminPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="text-muted-foreground border-border hover:bg-muted flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
+                                className="bg-red-500 hover:bg-red-600 text-white flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
                                 onClick={() => startEditing(post)}
                               >
                                 Edit
@@ -238,7 +238,7 @@ export function BlogsAdminPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="text-primary border-primary/30 hover:bg-primary/10 flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
+                                className="bg-red-500 hover:bg-red-600 text-white flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
                                 onClick={() => handleDeleteBlogPost(post.id)}
                               >
                                 Delete

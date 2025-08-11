@@ -70,7 +70,7 @@ export function DashboardSidebar() {
                   <div className="flex items-center space-x-3">
                     <Avatar className="w-10 h-10">
                       <AvatarImage src={ADMIN_PROFILE.avatar} alt={ADMIN_PROFILE.name} />
-                      <AvatarFallback className="bg-primary text-primary-foreground font-semibold">{ADMIN_PROFILE.avatarFallback}</AvatarFallback>
+                      <AvatarFallback className="bg-red-500 text-white font-semibold">{ADMIN_PROFILE.avatarFallback}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
                       <span className="font-semibold text-foreground text-sm">{ADMIN_PROFILE.name}</span>
@@ -84,7 +84,7 @@ export function DashboardSidebar() {
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton 
                     isActive={item.isActive}
-                    className={item.isActive ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"}
+                    className={item.isActive ? "bg-red-500/10 text-red-500 hover:bg-red-500/20" : "text-muted-foreground hover:text-red-500 hover:bg-secondary/50"}
                     asChild
                   >
                     <Link href={item.href}>

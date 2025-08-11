@@ -192,14 +192,14 @@ export function LocationsAdminPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleEdit(location.id)}
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground flex-1"
+                                className="bg-red-500 hover:bg-red-600 text-white flex-1"
                               >
                                 Edit
                               </Button>
                               <Button
                                 size="sm"
                                 onClick={() => handleDelete(location.id)}
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground flex-1"
+                                className="bg-red-500 hover:bg-red-600 text-white flex-1"
                               >
                                 Delete
                               </Button>
@@ -214,14 +214,14 @@ export function LocationsAdminPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleEdit(location.id)}
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground px-2"
+                                className="bg-red-500 hover:bg-red-600 text-white px-2"
                               >
                                 Edit
                               </Button>
                               <Button
                                 size="sm"
                                 onClick={() => handleDelete(location.id)}
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground px-2"
+                                className="bg-red-500 hover:bg-red-600 text-white px-2"
                               >
                                 Delete
                               </Button>
@@ -297,7 +297,7 @@ export function LocationsAdminPage() {
                         disabled={!isFormValid}
                         onClick={handleAdd}
                         variant="default"
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 lg:px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-red-500 hover:bg-red-600 text-white px-4 lg:px-8 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Add
                       </Button>

@@ -27,11 +27,19 @@ export function Footer() {
               >
                 <div className="w-36 h-10 relative -ml-6">
                   <Image 
-                    src={theme === "dark" ? "/logo-dark-removebg-preview.png" : "/logo.png"} 
+                    src="/logo.png" 
                     alt="GiveLeb Logo" 
                     fill
                     sizes="(max-width: 768px) 144px, 180px"
-                    className="object-contain"
+                    className="object-contain dark:hidden"
+                    priority
+                  />
+                  <Image 
+                    src="/logo-dark-removebg-preview.png" 
+                    alt="GiveLeb Logo" 
+                    fill
+                    sizes="(max-width: 768px) 144px, 180px"
+                    className="object-contain hidden dark:block"
                     priority
                   />
                 </div>
