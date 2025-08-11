@@ -19,10 +19,19 @@ class AnnouncementResource extends JsonResource
             'title' => $this->title,
             'content' => $this->content,
             'priority' => $this->priority,
-            'images' => $this->images,
+            'image_urls' => $this->image_urls ?? [],
+            'image_full_urls' => $this->image_full_urls ?? [],
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
-            'user' => new UserResource($this->whenLoaded('user')),
+            'user' => $this->whenLoaded('user', function () {
+                return [
+                    'id' => $this->user->id,
+                    'username' => $this->user->username,
+                    'first_name' => $this->user->first_name,
+                    'last_name' => $this->user->last_name,
+                    'avatar' => $this->user->profile_photo_url ?? null,
+                ];
+            }),
         ];
     }
 }

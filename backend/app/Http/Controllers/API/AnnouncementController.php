@@ -5,14 +5,30 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AnnouncementResource;
 use App\Models\Announcement;
+use App\Services\ImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class AnnouncementController extends Controller
 {
     use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+    /**
+     * @var ImageService
+     */
+    protected $imageService;
+
+    /**
+     * @param ImageService $imageService
+     */
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
 
     /**
      * Display a listing of the announcements.
@@ -44,18 +60,61 @@ class AnnouncementController extends Controller
             'content' => 'required|string',
             'priority' => 'sometimes|string|in:' . implode(',', Announcement::getPriorities()),
             'images' => 'sometimes|array',
-            'images.*' => 'url'
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'image_urls' => 'sometimes|array',
+            'image_urls.*' => 'string',
         ]);
 
         // Set default priority if not provided
         $validated['priority'] = $validated['priority'] ?? Announcement::PRIORITY_MEDIUM;
 
-        $announcement = Auth::user()->announcements()->create($validated);
+        try {
+            // Handle file uploads if any
+            $imagePaths = [];
+            
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $this->imageService->uploadImage($image, 'announcements');
+                    if ($path) {
+                        $imagePaths[] = $path;
+                    }
+                }
+            }
 
-        return response()->json([
-            'data' => new AnnouncementResource($announcement->load('user')),
-            'message' => 'Announcement created successfully',
-        ], Response::HTTP_CREATED);
+            // Add any existing image URLs
+            if (!empty($validated['image_urls'])) {
+                $imagePaths = array_merge($imagePaths, (array)$validated['image_urls']);
+            }
+
+            // Create the announcement with the image paths
+            $announcement = Auth::user()->announcements()->create([
+                'title' => $validated['title'],
+                'content' => $validated['content'],
+                'priority' => $validated['priority'],
+                'image_urls' => $imagePaths,
+            ]);
+
+            return response()->json([
+                'data' => new AnnouncementResource($announcement->load('user')),
+                'message' => 'Announcement created successfully',
+            ], Response::HTTP_CREATED);
+
+        } catch (\Exception $e) {
+            Log::error('Error creating announcement: ' . $e->getMessage());
+            
+            // Clean up any uploaded files if there was an error
+            if (!empty($imagePaths)) {
+                foreach ($imagePaths as $path) {
+                    $this->imageService->deleteImage($path);
+                }
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create announcement',
+                'error' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -88,15 +147,77 @@ class AnnouncementController extends Controller
             'content' => 'sometimes|string',
             'priority' => 'sometimes|string|in:' . implode(',', Announcement::getPriorities()),
             'images' => 'sometimes|array',
-            'images.*' => 'url'
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'image_urls' => 'sometimes|array',
+            'image_urls.*' => 'string',
+            'remove_image_urls' => 'sometimes|array',
+            'remove_image_urls.*' => 'string',
         ]);
 
-        $announcement->update($validated);
+        try {
+            $imagePaths = $announcement->image_urls ?? [];
+            $uploadedImagePaths = [];
 
-        return response()->json([
-            'data' => new AnnouncementResource($announcement->load('user')),
-            'message' => 'Announcement updated successfully',
-        ], Response::HTTP_OK);
+            // Handle new file uploads
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $this->imageService->uploadImage($image, 'announcements');
+                    if ($path) {
+                        $uploadedImagePaths[] = $path;
+                    }
+                }
+                $imagePaths = array_merge($imagePaths, $uploadedImagePaths);
+            }
+
+            // Add any new image URLs
+            if (isset($validated['image_urls'])) {
+                $imagePaths = array_merge($imagePaths, (array)$validated['image_urls']);
+            }
+
+            // Remove images that need to be deleted
+            if (!empty($validated['remove_image_urls'])) {
+                foreach ($validated['remove_image_urls'] as $imageToRemove) {
+                    // Only delete the image if it exists in the current image paths
+                    if (($key = array_search($imageToRemove, $imagePaths)) !== false) {
+                        unset($imagePaths[$key]);
+                        // Delete the actual file from storage
+                        $this->imageService->deleteImage($imageToRemove);
+                    }
+                }
+                // Re-index the array to avoid JSON encoding issues
+                $imagePaths = array_values($imagePaths);
+            }
+
+            // Update the announcement with the new data
+            $announcement->update([
+                'title' => $validated['title'] ?? $announcement->title,
+                'content' => $validated['content'] ?? $announcement->content,
+                'priority' => $validated['priority'] ?? $announcement->priority,
+                'image_urls' => $imagePaths,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => new AnnouncementResource($announcement->load('user')),
+                'message' => 'Announcement updated successfully',
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating announcement: ' . $e->getMessage());
+            
+            // Clean up any newly uploaded files if there was an error
+            if (!empty($uploadedImagePaths)) {
+                foreach ($uploadedImagePaths as $path) {
+                    $this->imageService->deleteImage($path);
+                }
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update announcement',
+                'error' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -109,10 +230,32 @@ class AnnouncementController extends Controller
     {
         $this->authorize('delete', $announcement);
 
-        $announcement->delete();
+        try {
+            // Delete all associated images
+            if (!empty($announcement->image_urls)) {
+                foreach ($announcement->image_urls as $imagePath) {
+                    if (!$this->imageService->deleteImage($imagePath)) {
+                        Log::warning('Failed to delete image during announcement deletion: ' . $imagePath);
+                    }
+                }
+            }
 
-        return response()->json([
-            'message' => 'Announcement deleted successfully',
-        ], Response::HTTP_OK);
+            // Delete the announcement
+            $announcement->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Announcement deleted successfully',
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            Log::error('Error deleting announcement: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete announcement',
+                'error' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

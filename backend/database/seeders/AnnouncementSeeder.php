@@ -24,6 +24,7 @@ class AnnouncementSeeder extends Seeder
                 'title' => $this->generateAnnouncementTitle(),
                 'content' => $this->generateAnnouncementContent(),
                 'priority' => $priorities[array_rand($priorities)],
+                'image_urls' => $this->generateAnnouncementImages(rand(0, 4)),
             ]);
         }
     }
@@ -65,5 +66,21 @@ class AnnouncementSeeder extends Seeder
 
         $selectedContents = (array) array_rand(array_flip($contents), $paragraphCount);
         return implode("\n\n", $selectedContents);
+    }
+
+    private function generateAnnouncementImages(int $count): array
+    {
+        if (app()->environment('testing')) {
+            return [];
+        }
+
+        $images = [];
+        for ($i = 0; $i < $count; $i++) {
+            $image = \Illuminate\Http\UploadedFile::fake()->image('announcement_' . uniqid() . '.jpg', 800, 600);
+            $path = 'announcements/' . uniqid() . '.jpg';
+            \Illuminate\Support\Facades\Storage::disk('public')->put($path, file_get_contents($image));
+            $images[] = $path;
+        }
+        return $images;
     }
 }
