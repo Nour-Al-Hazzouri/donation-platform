@@ -121,7 +121,7 @@ export function AddRequestForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name Field */}
       <div>
-        <Label htmlFor="name" className="text-base font-medium text-gray-900">
+        <Label htmlFor="name" className="text-base font-medium text-foreground">
           Name
         </Label>
         <Input
@@ -139,7 +139,7 @@ export function AddRequestForm() {
 
       {/* Title Field */}
       <div>
-        <Label htmlFor="title" className="text-base font-medium text-gray-900">
+        <Label htmlFor="title" className="text-base font-medium text-foreground">
           Title <span className="text-red-500">*</span>
         </Label>
         <Input
@@ -157,7 +157,7 @@ export function AddRequestForm() {
 
       {/* Description Field */}
       <div>
-        <Label htmlFor="description" className="text-base font-medium text-gray-900">
+        <Label htmlFor="description" className="text-base font-medium text-foreground">
           Description <span className="text-red-500">*</span>
         </Label>
         <Textarea
@@ -174,7 +174,7 @@ export function AddRequestForm() {
 
       {/* Goal Amount Field */}
       <div>
-        <Label htmlFor="goalAmount" className="text-base font-medium text-gray-900">
+        <Label htmlFor="goalAmount" className="text-base font-medium text-foreground">
           Goal Amount <span className="text-red-500">*</span>
         </Label>
         <Input
@@ -192,7 +192,7 @@ export function AddRequestForm() {
 
       {/* Image Upload */}
       <div>
-        <Label className="text-base font-medium text-gray-900 mb-3 block">
+        <Label className="text-base font-medium text-foreground mb-3 block">
           Upload Image
         </Label>
         <div className="flex items-center space-x-4">
@@ -206,7 +206,7 @@ export function AddRequestForm() {
               Upload Image
             </Button>
           </label>
-          <span className="text-gray-500 text-sm">
+          <span className="text-muted-foreground text-sm">
             {formData.image ? formData.image.name : 'No file chosen'}
           </span>
           <input

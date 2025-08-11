@@ -24,12 +24,12 @@ export default function DonationDetailsPage() {
   
   if (!donation) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <MainLayout>
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">Donation Not Found</h1>
-              <p className="text-gray-600 mb-6">The donation you're looking for doesn't exist.</p>
+              <h1 className="text-2xl font-bold text-foreground mb-4">Donation Not Found</h1>
+              <p className="text-muted-foreground mb-6">The donation you're looking for doesn't exist.</p>
               <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white">
                 Back to Donations
               </Button>
@@ -49,7 +49,7 @@ export default function DonationDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <MainLayout>
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
           {/* Back Button - Updated to match carousel style */}
@@ -69,11 +69,11 @@ export default function DonationDetailsPage() {
 
           {/* Page Title */}
           <div className="text-center mb-6 md:mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Donation Details</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Donation Details</h1>
           </div>
 
           {/* Donation Details Card */}
-          <div className="bg-white rounded-lg shadow-sm border p-4 md:p-8">
+          <div className="bg-card rounded-lg shadow-sm border p-4 md:p-8">
             {/* User Profile Section */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center">
@@ -96,9 +96,9 @@ export default function DonationDetailsPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-1 md:gap-2 mb-1">
-                    <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900">{donation.name}</h2>
+                    <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">{donation.name}</h2>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-600">Lebanon • {new Date().toLocaleDateString()}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Lebanon • {new Date().toLocaleDateString()}</p>
                 </div>
               </div>
               <Button variant="destructive" size="sm" className="self-end sm:self-auto">
@@ -108,7 +108,7 @@ export default function DonationDetailsPage() {
 
             {/* Donation Title */}
             <div className="mb-4 md:mb-6">
-              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1 md:mb-2">{donation.title}</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 md:mb-2">{donation.title}</h3>
             </div>
 
             {/* Donation Image */}
@@ -127,8 +127,8 @@ export default function DonationDetailsPage() {
 
             {/* Full Description */}
             <div className="mb-6 md:mb-8">
-              <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-2 md:mb-3">About this donation</h4>
-              <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line">
+              <h4 className="text-base md:text-lg font-semibold text-foreground mb-2 md:mb-3">About this donation</h4>
+              <p className="text-sm sm:text-base text-card-foreground leading-relaxed whitespace-pre-line">
                 {donation.description}
               </p>
             </div>
@@ -145,20 +145,20 @@ export default function DonationDetailsPage() {
           </div>
 
           {/* Additional Info Section */}
-          <div className="mt-6 md:mt-8 bg-white rounded-lg shadow-sm border p-4 md:p-6">
-            <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">How to request this donation</h4>
+          <div className="mt-6 md:mt-8 bg-card rounded-lg shadow-sm border p-4 md:p-6">
+            <h4 className="text-base md:text-lg font-semibold text-foreground mb-3 md:mb-4">How to request this donation</h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
               <div className="text-center p-3 md:p-4 bg-red-50 rounded-lg">
                 <div className="text-xl sm:text-2xl font-bold text-red-500 mb-1 md:mb-2">100%</div>
-                <p className="text-xs sm:text-sm text-gray-600">of donations go directly to those in need</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">of donations go directly to those in need</p>
               </div>
               <div className="text-center p-3 md:p-4 bg-blue-50 rounded-lg">
                 <div className="text-xl sm:text-2xl font-bold text-blue-500 mb-1 md:mb-2">24/7</div>
-                <p className="text-xs sm:text-sm text-gray-600">Support and updates on progress</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Support and updates on progress</p>
               </div>
               <div className="text-center p-3 md:p-4 bg-green-50 rounded-lg">
                 <div className="text-xl sm:text-2xl font-bold text-green-500 mb-1 md:mb-2">Secure</div>
-                <p className="text-xs sm:text-sm text-gray-600">Safe and encrypted transactions</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Safe and encrypted transactions</p>
               </div>
             </div>
           </div>

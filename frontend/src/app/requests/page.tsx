@@ -91,7 +91,7 @@ export default function RequestsPage() {
     <MainLayout>
       {/* Success Message */}
       {showSuccessMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mx-4 mt-4">
+        <div className="bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 px-4 py-3 rounded mx-4 mt-4">
           <div className="flex">
             <div className="py-1">
               <svg className="fill-current h-6 w-6 text-green-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -107,7 +107,7 @@ export default function RequestsPage() {
       )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
         <SearchSection 
           searchTerm={searchTerm}
           onSearchChange={handleSearchChange}
@@ -120,7 +120,7 @@ export default function RequestsPage() {
           <div className="flex justify-center mb-6">
             <button 
               onClick={clearSearch}
-              className="text-sm text-gray-500 hover:text-gray-700 underline"
+              className="text-sm text-muted-foreground hover:text-foreground underline"
             >
               Clear search and show all requests
             </button>

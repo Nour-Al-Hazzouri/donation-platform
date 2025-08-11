@@ -102,7 +102,8 @@ export function AddDonationForm() {
       
       addDonation(newDonation)
       
-      router.push('/donations?success=donation-created')
+      // Redirect to the success page with the donation ID
+      router.push(`/donation/success?id=${newDonation.id}`)
     } catch (error) {
       console.error('Error submitting donation:', error)
     } finally {
@@ -113,7 +114,7 @@ export function AddDonationForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <Label htmlFor="name" className="text-base font-medium text-gray-900">
+        <Label htmlFor="name" className="text-base font-medium text-foreground">
           Name
         </Label>
         <Input
@@ -130,7 +131,7 @@ export function AddDonationForm() {
       </div>
 
       <div>
-        <Label htmlFor="title" className="text-base font-medium text-gray-900">
+        <Label htmlFor="title" className="text-base font-medium text-foreground">
           Title <span className="text-red-500">*</span>
         </Label>
         <Input
@@ -147,7 +148,7 @@ export function AddDonationForm() {
       </div>
 
       <div>
-        <Label htmlFor="description" className="text-base font-medium text-gray-900">
+        <Label htmlFor="description" className="text-base font-medium text-foreground">
           Description <span className="text-red-500">*</span>
         </Label>
         <Textarea
@@ -163,7 +164,7 @@ export function AddDonationForm() {
       </div>
 
       <div>
-        <Label htmlFor="donationAmount" className="text-base font-medium text-gray-900">
+        <Label htmlFor="donationAmount" className="text-base font-medium text-foreground">
           Donation Amount <span className="text-red-500">*</span>
         </Label>
         <Input
@@ -180,7 +181,7 @@ export function AddDonationForm() {
       </div>
 
       <div>
-        <Label className="text-base font-medium text-gray-900 mb-3 block">
+        <Label className="text-base font-medium text-foreground mb-3 block">
           Upload Image
         </Label>
         <div className="flex items-center space-x-4">
@@ -194,7 +195,7 @@ export function AddDonationForm() {
               Upload Image
             </Button>
           </label>
-          <span className="text-gray-500 text-sm">
+          <span className="text-muted-foreground text-sm">
             {formData.image ? formData.image.name : 'No file chosen'}
           </span>
           <input

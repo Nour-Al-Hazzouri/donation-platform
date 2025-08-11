@@ -31,10 +31,10 @@ export default function RequestPage() {
   if (!donation) {
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Donation Not Found</h1>
-            <p className="text-gray-600 mb-6">The donation you're trying to request doesn't exist.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-4">Donation Not Found</h1>
+            <p className="text-muted-foreground mb-6">The donation you're trying to request doesn't exist.</p>
             <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white">
               Back to Donations
             </Button>
@@ -94,7 +94,7 @@ export default function RequestPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
         {/* Back Button */}
         <div className="mb-6">
           <Button 
@@ -107,35 +107,35 @@ export default function RequestPage() {
         </div>
 
         {/* Donation Info Section */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Donation Info</h2>
+        <div className="bg-card rounded-lg shadow-sm border p-6 mb-8">
+          <h2 className="text-xl font-bold text-foreground mb-4">Donation Info</h2>
           
           <div className="space-y-2 mb-6">
-            <p className="text-gray-700">
+            <p className="text-card-foreground">
               <span className="font-medium">Donation title:</span> {donation.title}
             </p>
-            <p className="text-gray-700">
+            <p className="text-card-foreground">
               <span className="font-medium">Donation amount:</span> ${donationAmount.toLocaleString()}
             </p>
           </div>
 
           <div className="border-t pt-4">
-            <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-            <p className="text-sm text-gray-600">{donation.description}</p>
+            <h3 className="font-semibold text-foreground mb-2">Description</h3>
+            <p className="text-sm text-muted-foreground">{donation.description}</p>
           </div>
         </div>
 
         {/* Request Section */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Request Amount</h2>
+        <div className="bg-card rounded-lg shadow-sm border p-6">
+          <h2 className="text-xl font-bold text-foreground mb-6">Request Amount</h2>
           
           {/* Slider */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
-              <Label className="text-sm font-medium text-gray-700">
+              <Label className="text-sm font-medium text-foreground">
                 Amount: ${finalAmount.toLocaleString()}
               </Label>
-              <span className="text-sm text-gray-500">Max: ${remainingAmount.toLocaleString()}</span>
+              <span className="text-sm text-muted-foreground">Max: ${remainingAmount.toLocaleString()}</span>
             </div>
             
             <Slider
@@ -147,7 +147,7 @@ export default function RequestPage() {
               className="w-full"
             />
             
-            <div className="flex justify-between text-xs text-gray-500 mt-2">
+            <div className="flex justify-between text-xs text-muted-foreground mt-2">
               <span>$1</span>
               <span>${remainingAmount.toLocaleString()}</span>
             </div>
@@ -155,7 +155,7 @@ export default function RequestPage() {
 
           {/* Custom Amount Input */}
           <div className="mb-8">
-            <Label htmlFor="custom-amount" className="text-sm font-medium text-gray-700 mb-2 block">
+            <Label htmlFor="custom-amount" className="text-sm font-medium text-foreground mb-2 block">
               Or enter a custom amount
             </Label>
             <Input
