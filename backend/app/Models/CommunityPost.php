@@ -7,21 +7,34 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Services\ImageService;
 
 class CommunityPost extends Model
 {
     use HasFactory;
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
         'user_id',
         'event_id',
         'content',
-        'images',
+        'image_urls',
         'tags'
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
-        'images' => 'array',
+        'image_urls' => 'array',
         'tags' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -29,8 +42,26 @@ class CommunityPost extends Model
      *
      * @var array
      */
-    protected $appends = [];
-    
+    protected $appends = ['image_full_urls'];
+
+    /**
+     * Get the full URLs for the post images.
+     *
+     * @return array
+     */
+    public function getImageFullUrlsAttribute(): array
+    {
+        if (empty($this->image_urls)) {
+            return [];
+        }
+
+        return array_map(function ($imagePath) {
+            return app(ImageService::class)->getImageUrl($imagePath, true);
+        }, $this->image_urls);
+    }
+
+
+
     // Relationships
     public function user(): BelongsTo
     {
@@ -51,7 +82,7 @@ class CommunityPost extends Model
     {
         return $this->hasMany(Vote::class, 'post_id');
     }
-    
+
     /**
      * Get the upvotes count for the post.
      *
@@ -68,7 +99,7 @@ class CommunityPost extends Model
         }
         return $this->upvotes_count;
     }
-    
+
     /**
      * Get the downvotes count for the post.
      *
@@ -85,7 +116,7 @@ class CommunityPost extends Model
         }
         return $this->downvotes_count;
     }
-    
+
     /**
      * Get the total votes (upvotes - downvotes) for the post.
      *
@@ -95,7 +126,7 @@ class CommunityPost extends Model
     {
         return $this->upvotes_count - $this->downvotes_count;
     }
-    
+
     /**
      * Get the current user's vote on the post.
      *

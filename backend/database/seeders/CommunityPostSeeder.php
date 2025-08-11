@@ -31,12 +31,7 @@ class CommunityPostSeeder extends Seeder
                 'user_id' => $users->random()->id,
                 'event_id' => $events->random()->id,
                 'content' => $this->generatePostContent(),
-                'images' => $imageCount > 0 ? array_slice([
-                    'https://picsum.photos/800/600?random=' . rand(1, 1000),
-                    'https://picsum.photos/800/600?random=' . rand(1001, 2000),
-                    'https://picsum.photos/800/600?random=' . rand(2001, 3000),
-                    'https://picsum.photos/800/600?random=' . rand(3001, 4000),
-                ], 0, $imageCount) : [],
+                'image_urls' => $this->generatePostImages($imageCount),
                 'tags' => $tagCount > 0 ? array_rand(array_flip($tags), $tagCount) : [],
             ]);
 
@@ -67,5 +62,21 @@ class CommunityPostSeeder extends Seeder
         // Randomly select 1-3 content pieces and combine them
         $selectedContents = (array) array_rand(array_flip($contents), rand(1, 3));
         return implode("\n\n", $selectedContents);
+    }
+
+    private function generatePostImages(int $count): array
+    {
+        if (app()->environment('testing')) {
+            return [];
+        }
+
+        $images = [];
+        for ($i = 0; $i < $count; $i++) {
+            $image = \Illuminate\Http\UploadedFile::fake()->image('post_' . uniqid() . '.jpg', 800, 600);
+            $path = 'community/posts/' . uniqid() . '.jpg';
+            \Illuminate\Support\Facades\Storage::disk('public')->put($path, file_get_contents($image));
+            $images[] = $path;
+        }
+        return $images;
     }
 }

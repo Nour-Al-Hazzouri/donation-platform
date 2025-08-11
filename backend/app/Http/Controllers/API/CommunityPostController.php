@@ -3,17 +3,27 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCommunityPostRequest;
+use App\Http\Requests\UpdateCommunityPostRequest;
 use App\Http\Resources\CommunityPostResource;
 use App\Models\CommunityPost;
 use App\Models\DonationEvent;
+use App\Services\ImageService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class CommunityPostController extends Controller
 {
     use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+    private $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
 
     /**
      * Display a listing of the community posts.
@@ -23,16 +33,16 @@ class CommunityPostController extends Controller
     public function index(): JsonResponse
     {
         $posts = CommunityPost::with([
-                'user', 
-                'event', 
-                'comments',
-                'votes'
-            ])
+            'user',
+            'event',
+            'comments',
+            'votes'
+        ])
             ->withCount([
-                'votes as upvotes_count' => function($query) {
+                'votes as upvotes_count' => function ($query) {
                     $query->where('type', 'upvote');
                 },
-                'votes as downvotes_count' => function($query) {
+                'votes as downvotes_count' => function ($query) {
                     $query->where('type', 'downvote');
                 }
             ])
@@ -67,34 +77,63 @@ class CommunityPostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    /**
+     * Store a newly created community post in storage.
+     *
+     * @param  \App\Http\Requests\StoreCommunityPostRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StoreCommunityPostRequest $request): JsonResponse
     {
         $this->authorize('create', CommunityPost::class);
 
-        $validated = $request->validate([
-            'content' => 'required|string',
-            'event_id' => 'required|exists:donation_events,id',
-            'images' => 'sometimes|array',
-            'images.*' => 'url',
-            'tags' => 'sometimes|array',
-            'tags.*' => 'string|max:50'
-        ]);
+        $validated = $request->validated();
+        $uploadedImages = [];
 
-        $event = DonationEvent::findOrFail($validated['event_id']);
-        if (!$event) {
+        try {
+            // Handle image uploads if present
+            if ($request->hasFile('image_urls')) {
+                foreach ($request->file('image_urls') as $image) {
+                    \Log::info('uploading post image', [$image]);
+                    $path = $this->imageService->uploadImage(
+                        $image,
+                        'community/posts',
+                        true, // isPublic
+                        1200, // maxWidth
+                        85    // quality
+                    );
+
+                    if ($path) {
+                        $uploadedImages[] = $path;
+                    } else {
+                        Log::error('Failed to upload image: ' . $image->getClientOriginalName());
+                        throw new \Exception('Failed to process one or more images');
+                    }
+                }
+                $validated['image_urls'] = $uploadedImages;
+            }
+            \Log::info('validated', $validated);
+
+            $post = Auth::user()->communityPosts()->create($validated);
+
+            return response()->json([
+                'success' => true,
+                'data' => new CommunityPostResource($post->load(['user', 'event'])),
+                'message' => 'Community post created successfully',
+            ], Response::HTTP_CREATED);
+
+        } catch (\Exception $e) {
+            // Clean up any uploaded images if there was an error
+            foreach ($uploadedImages as $imagePath) {
+                $this->imageService->deleteImage($imagePath);
+            }
+
+            Log::error('Error creating post: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Event not found',
-            ], Response::HTTP_BAD_REQUEST);
+                'message' => 'Failed to create post: ' . $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $post = Auth::user()->communityPosts()->create($validated);
-
-        return response()->json([
-            'success' => true,
-            'data' => new CommunityPostResource($post->load(['user', 'event'])),
-            'message' => 'Community post created successfully',
-        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -117,29 +156,87 @@ class CommunityPostController extends Controller
     /**
      * Update the specified community post in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\UpdateCommunityPostRequest  $request
      * @param  \App\Models\CommunityPost  $communityPost
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, CommunityPost $communityPost): JsonResponse
+    public function update(UpdateCommunityPostRequest $request, CommunityPost $communityPost): JsonResponse
     {
         $this->authorize('update', $communityPost);
 
-        $validated = $request->validate([
-            'content' => 'sometimes|string',
-            'images' => 'sometimes|array',
-            'images.*' => 'url',
-            'tags' => 'sometimes|array',
-            'tags.*' => 'string|max:50'
-        ]);
+        $validated = $request->validated();
+        $uploadedImages = [];
+        $currentImages = $communityPost->image_urls ?? [];
 
-        $communityPost->update($validated);
+        try {
+            // Handle new image uploads
+            if ($request->hasFile('image_urls')) {
+                foreach ($request->file('image_urls') as $image) {
+                    \Log::info('uploading post image to update', [$image]);
+                    $path = $this->imageService->uploadImage(
+                        $image,
+                        'community/posts',
+                        true, // isPublic
+                        1200, // maxWidth
+                        85    // quality
+                    );
 
-        return response()->json([
-            'success' => true,
-            'data' => new CommunityPostResource($communityPost->load(['user', 'event'])),
-            'message' => 'Community post updated successfully',
-        ], Response::HTTP_OK);
+                    if ($path) {
+                        $uploadedImages[] = $path;
+                    } else {
+                        Log::error('Failed to upload image: ' . $image->getClientOriginalName());
+                        throw new \Exception('Failed to process one or more images');
+                    }
+                }
+
+                // Merge new images with existing ones if there are any
+                $validated['image_urls'] = array_merge($currentImages, $uploadedImages);
+            }
+
+            // Handle image removals if requested
+            if ($request->has('remove_image_urls') && is_array($request->remove_image_urls)) {
+                $imagesToRemove = $request->remove_image_urls;
+
+                // Filter out any images that don't belong to this post
+                $imagesToRemove = array_intersect($imagesToRemove, $currentImages);
+
+                foreach ($imagesToRemove as $imageToRemove) {
+                    if (!$this->imageService->deleteImage($imageToRemove)) {
+                        Log::warning('Failed to delete image: ' . $imageToRemove);
+                    }
+
+                    // Remove from current images array
+                    $key = array_search($imageToRemove, $currentImages);
+                    if ($key !== false) {
+                        unset($currentImages[$key]);
+                    }
+                }
+
+                // Update the validated images array with remaining images
+                $validated['image_urls'] = array_values($currentImages);
+            }
+
+            $communityPost->update($validated);
+            $communityPost->refresh();
+
+            return response()->json([
+                'success' => true,
+                'data' => new CommunityPostResource($communityPost->load(['user', 'event'])),
+                'message' => 'Community post updated successfully',
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            // Clean up any uploaded images if there was an error
+            foreach ($uploadedImages as $imagePath) {
+                $this->imageService->deleteImage($imagePath);
+            }
+
+            Log::error('Error updating post: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update post: ' . $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -152,11 +249,30 @@ class CommunityPostController extends Controller
     {
         $this->authorize('delete', $communityPost);
 
-        $communityPost->delete();
+        try {
+            // Delete all associated images
+            if (!empty($communityPost->image_urls)) {
+                foreach ($communityPost->image_urls as $imagePath) {
+                    if (!$this->imageService->deleteImage($imagePath)) {
+                        Log::warning('Failed to delete image during post deletion: ' . $imagePath);
+                    }
+                }
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Community post deleted successfully',
-        ], Response::HTTP_OK);
+            // Delete the post
+            $communityPost->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Community post deleted successfully',
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            Log::error('Error deleting post: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete post: ' . $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
