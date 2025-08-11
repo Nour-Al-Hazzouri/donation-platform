@@ -10,12 +10,18 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Spatie\Permission\Models\Role;
-
+use App\Services\ImageService;
 
 class UserController extends Controller
 {
     use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+    private $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
 
     /**
      * Display a listing of the resource.
@@ -82,7 +88,37 @@ class UserController extends Controller
     {
         $this->authorize('edit users', $user);
 
-        $user->update($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('avatar_url')) {
+            \Log::info('avatar_url', $request->file('avatar_url'));
+            // Delete old avatar if it exists
+            if ($user->avatar_url) {
+                $this->imageService->deleteImage($user->avatar_url);
+            }
+
+            // Upload new avatar
+            $avatarPath = $this->imageService->uploadImage(
+                $request->file('avatar_url'),
+                'avatars',
+                true, // isPublic
+                500,  // maxWidth
+                90    // quality
+            );
+
+            $validated['avatar_url'] = $avatarPath;
+        }
+
+        if ($request->has('delete_avatar') && $request->delete_avatar) {
+            // Delete old avatar if it exists
+            if ($user->avatar_url) {
+                $this->imageService->deleteImage($user->avatar_url);
+            }
+            $validated['avatar_url'] = null;
+        }
+
+        $user->update($validated);
+        $user->refresh();
 
         return response()->json([
             'data' => new UserResource($user),
@@ -99,6 +135,11 @@ class UserController extends Controller
     public function destroy(User $user): JsonResponse
     {
         $this->authorize('delete users', $user);
+
+        // Delete user avatar if it exists
+        if ($user->avatar_url) {
+            $this->imageService->deleteImage($user->avatar_url);
+        }
 
         $user->delete();
 
@@ -130,7 +171,37 @@ class UserController extends Controller
     public function updateProfile(UpdateUserRequest $request): JsonResponse
     {
         $user = $request->user();
-        $user->update($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('avatar_url')) {
+            // Delete old avatar if it exists
+            if ($user->avatar_url) {
+                $this->imageService->deleteImage($user->avatar_url);
+            }
+
+            // Upload new avatar
+            $avatarPath = $this->imageService->uploadImage(
+                $request->file('avatar_url'),
+                'avatars',
+                true, // isPublic
+                500,  // maxWidth
+                90    // quality
+            );
+
+            $validated['avatar_url'] = $avatarPath;
+        }
+
+        // Handle avatar deletion
+        if ($request->has('delete_avatar') && $request->delete_avatar) {
+            // Delete old avatar if it exists
+            if ($user->avatar_url) {
+                $this->imageService->deleteImage($user->avatar_url);
+            }
+            $validated['avatar_url'] = null;
+        }
+
+        $user->update($validated);
+        $user->refresh();
 
         return response()->json([
             'data' => new UserResource($user->load('location')),

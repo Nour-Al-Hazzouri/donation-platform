@@ -17,19 +17,21 @@ class CommunityPostResource extends JsonResource
         return [
             'id' => $this->id,
             'content' => $this->content,
-            'images' => $this->images ?? [],
+            'image_urls' => $this->image_urls,
+            'image_full_urls' => $this->image_full_urls,
             'tags' => $this->tags ?? [],
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
             'votes' => $this->when($this->relationLoaded('votes'), function () {
                 $upvotes = $this->votes->where('type', 'upvote')->count();
                 $downvotes = $this->votes->where('type', 'downvote')->count();
-                
+                $total = $upvotes - $downvotes;
+                $userVote = $this->votes->firstWhere('user_id', auth()->id())?->type;
                 return [
                     'upvotes' => $upvotes,
                     'downvotes' => $downvotes,
-                    'total' => $upvotes - $downvotes,
-                    'user_vote' => $this->votes->firstWhere('user_id', auth()->id())?->type
+                    'total' => $total,
+                    'user_vote' => $userVote
                 ];
             }),
             'user' => $this->whenLoaded('user', function () {

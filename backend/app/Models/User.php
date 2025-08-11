@@ -9,6 +9,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Services\ImageService;
 
 class User extends Authenticatable
 {
@@ -32,6 +33,27 @@ class User extends Authenticatable
         'is_verified',
         'role'
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = ['avatar_url_full'];
+
+    /**
+     * Get the full URL for the user's avatar.
+     *
+     * @return string|null
+     */
+    public function getAvatarUrlFullAttribute(): ?string
+    {
+        if (!$this->avatar_url) {
+            return null;
+        }
+
+        return app(ImageService::class)->getImageUrl($this->avatar_url);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -95,7 +117,7 @@ class User extends Authenticatable
         return $this->hasMany(Vote::class, 'user_id');
     }
 
-    public function verificationRequests(): HasMany
+    public function verifications(): HasMany
     {
         return $this->hasMany(Verification::class, 'user_id');
     }

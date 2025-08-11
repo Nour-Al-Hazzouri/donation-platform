@@ -9,6 +9,7 @@ use App\Models\Verification;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -38,7 +39,7 @@ class DonationEventTest extends TestCase
         Verification::create([
             'user_id' => $this->user->id,
             'document_type' => 'id_card',
-            'document_urls' => ['https://example.com/id.jpg'],
+            'image_urls' => ['verifications/1/test.jpg'],
             'status' => 'approved',
         ]);
 
@@ -139,11 +140,10 @@ class DonationEventTest extends TestCase
             'goal_amount' => 1000,
             'type' => 'request',
             'location_id' => $location->id,
-            'images' => ['https://example.com/image.jpg']
         ];
 
         $response = $this->postJson('/api/donation-events', $donationEventData);
-        
+
         // Should be forbidden due to missing verification
         $response->assertStatus(403);
     }
@@ -160,7 +160,6 @@ class DonationEventTest extends TestCase
             'goal_amount' => 2000.00,
             'type' => 'request',
             'status' => 'active',
-            'images' => ['https://example.com/image1.jpg']
         ];
 
         $response = $this->postJson('/api/donation-events', $donationEventData);
@@ -239,7 +238,7 @@ class DonationEventTest extends TestCase
         Verification::create([
             'user_id' => $otherUser->id,
             'document_type' => 'id_card',
-            'document_urls' => ['https://example.com/other_id.jpg'],
+            'image_urls' => ['verifications/1/test.jpg'],
             'status' => 'approved',
         ]);
 
@@ -302,7 +301,7 @@ class DonationEventTest extends TestCase
         Verification::create([
             'user_id' => $otherUser->id,
             'document_type' => 'id_card',
-            'document_urls' => ['https://example.com/other_id.jpg'],
+            'image_urls' => ['verifications/1/test.jpg'],
             'status' => 'approved',
         ]);
 

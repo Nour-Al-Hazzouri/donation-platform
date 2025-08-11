@@ -37,7 +37,7 @@ class CommunityPostTest extends TestCase
         $this->event = DonationEvent::factory()->create([
             'title' => 'Test Event',
             'description' => 'Test event description',
-            'images' => [],
+            'image_urls' => [],
             'goal_amount' => 1000,
             'current_amount' => 100,
             'possible_amount' => 500,
@@ -56,7 +56,7 @@ class CommunityPostTest extends TestCase
         $response = $this->postJson('/api/community-posts', [
             'content' => 'Test post content',
             'event_id' => $this->event->id,
-            'images' => [],
+            'image_urls' => [],
             'tags' => ['test', 'post']
         ]);
 
@@ -85,7 +85,7 @@ class CommunityPostTest extends TestCase
         $response = $this->postJson('/api/community-posts', [
             'content' => 'Test post content',
             'event_id' => 999, // Non-existent event
-            'images' => [],
+            'image_urls' => [],
             'tags' => ['test']
         ]);
 

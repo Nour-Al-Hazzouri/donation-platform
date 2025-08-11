@@ -37,7 +37,7 @@ class VoteTest extends TestCase
             'user_id' => $this->admin->id,
             'event_id' => DonationEvent::factory()->create()->id,
             'content' => 'Test post content',
-            'images' => [],
+            'image_urls' => [],
             'tags' => ['test', 'php']
         ]);
     }

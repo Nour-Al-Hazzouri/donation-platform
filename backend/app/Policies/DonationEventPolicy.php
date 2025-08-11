@@ -22,7 +22,7 @@ class DonationEventPolicy
     public function create(User $user)
     {
         // User must have at least one approved verification request
-        return $user->verificationRequests()->where('status', 'approved')->exists();
+        return $user->verifications()->where('status', 'approved')->exists();
     }
 
     /**
@@ -31,7 +31,7 @@ class DonationEventPolicy
     public function update(User $user, DonationEvent $donationEvent)
     {
         // User must own the event or be admin, and must have an approved verification request
-        $isVerified = $user->verificationRequests()->where('status', 'approved')->exists();
+        $isVerified = $user->verifications()->where('status', 'approved')->exists();
         $isVerifiedOwner = $user->id === $donationEvent->user_id && $isVerified;
         return $isVerifiedOwner || $user->hasRole('admin');
     }
@@ -42,7 +42,7 @@ class DonationEventPolicy
     public function delete(User $user, DonationEvent $donationEvent)
     {
         // User must own the event or be admin, and must have an approved verification request
-        $isVerified = $user->verificationRequests()->where('status', 'approved')->exists();
+        $isVerified = $user->verifications()->where('status', 'approved')->exists();
         $isVerifiedOwner = $user->id === $donationEvent->user_id && $isVerified;
         return $isVerifiedOwner || $user->hasRole('admin');
     }

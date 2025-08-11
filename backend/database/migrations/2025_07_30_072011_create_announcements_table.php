@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('content');
             $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
-            $table->json('images')->nullable();
+            $table->json('image_urls')->nullable();
             $table->timestamps();
 
             // Add index for faster lookups

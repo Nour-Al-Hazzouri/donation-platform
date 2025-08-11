@@ -29,9 +29,19 @@ class UserFactory extends Factory
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->phoneNumber(),
-            'avatar_url' => 'https://ui-avatars.com/api/?name=' . urlencode(fake()->name() . ' ' . fake()->lastName()) . '&background=random',
+            'avatar_url' => function () {
+                if (app()->environment('testing')) {
+                    return null;
+                }
+
+                // For non-testing environments, generate a real image
+                $image = \Illuminate\Http\UploadedFile::fake()->image('avatar.jpg');
+                $path = 'avatars/' . uniqid() . '.jpg';
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, file_get_contents($image));
+                return $path;
+            },
             'password' => static::$password ??= Hash::make('password'),
-            'is_verified' => fake()->boolean(80), // 80% chance of being verified
+            'is_verified' => false, // 80% chance of being verified
             'role' => 'user', // Default role, can be overridden
             'email_verified_at' => now(),
             'remember_token' => Str::random(10),
@@ -44,7 +54,7 @@ class UserFactory extends Factory
      */
     public function admin(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'role' => 'admin',
         ]);
     }
@@ -54,7 +64,7 @@ class UserFactory extends Factory
      */
     public function moderator(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'role' => 'moderator',
         ]);
     }
@@ -64,7 +74,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

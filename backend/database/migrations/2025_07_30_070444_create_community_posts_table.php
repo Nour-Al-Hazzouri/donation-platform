@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('event_id')->constrained('donation_events');
             $table->text('content');
-            $table->json('images')->nullable();
+            $table->json('image_urls')->nullable();
             $table->json('tags')->nullable();
             $table->timestamps();
 

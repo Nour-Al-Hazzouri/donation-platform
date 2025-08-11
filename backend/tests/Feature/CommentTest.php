@@ -37,7 +37,7 @@ class CommentTest extends TestCase
         $this->event = DonationEvent::factory()->create([
             'title' => 'Test Event',
             'description' => 'Test event description',
-            'images' => [],
+            'image_urls' => [],
             'goal_amount' => 1000,
             'current_amount' => 100,
             'possible_amount' => 500,
