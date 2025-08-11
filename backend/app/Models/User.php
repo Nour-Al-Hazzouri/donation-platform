@@ -117,7 +117,7 @@ class User extends Authenticatable
         return $this->hasMany(Vote::class, 'user_id');
     }
 
-    public function verificationRequests(): HasMany
+    public function verifications(): HasMany
     {
         return $this->hasMany(Verification::class, 'user_id');
     }

@@ -171,8 +171,8 @@ class VerificationController extends Controller
     {
         try {
             // Ensure the user is authenticated
-            $userId = auth()->id();
-            if (!$userId) {
+            $user = auth()->user();
+            if (!$user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized. Please log in to submit a verification request.',
@@ -180,7 +180,7 @@ class VerificationController extends Controller
             }
 
             // Check if user already has a pending verification
-            $existingVerification = Verification::where('user_id', $userId)
+            $existingVerification = Verification::where('user_id', $user->id)
                 ->where('status', 'pending')
                 ->first();
 
@@ -209,7 +209,7 @@ class VerificationController extends Controller
                 if ($file->isValid()) {
                     $path = $this->imageService->uploadImage(
                         $file,
-                        'verifications/' . $userId,
+                        'verifications/' . $user->id,
                         false, // Store as private
                         2000,  // Max width for images
                         90     // Quality
@@ -229,8 +229,7 @@ class VerificationController extends Controller
             }
 
             // Create the verification record
-            $verification = Verification::create([
-                'user_id' => $userId,
+            $verification = $user->verifications()->create([
                 'document_type' => $validated['document_type'],
                 'image_urls' => $documentPaths,
                 'status' => 'pending',
