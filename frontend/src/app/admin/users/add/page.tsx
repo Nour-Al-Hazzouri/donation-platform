@@ -42,7 +42,7 @@ function AddUserContent() {
   
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full overflow-x-hidden">
+      <div className="flex min-h-screen w-full overflow-x-hidden bg-background">
         {/* Desktop sidebar - only visible on md screens and up */}
         <div className="hidden md:block w-64 flex-shrink-0">
           <DashboardSidebar />

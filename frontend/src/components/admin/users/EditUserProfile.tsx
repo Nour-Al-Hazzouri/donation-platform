@@ -189,7 +189,7 @@ export default function EditUserProfile({
     formData.personalDetails.address.governorate;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
         <Button
@@ -197,17 +197,16 @@ export default function EditUserProfile({
           size="icon"
           onClick={handleBack}
           className={cn(
-            "mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md z-10"
+            "mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background hover:bg-secondary shadow-md z-10 text-red-500"
           )}
           aria-label="Go back"
-          style={{ color: COLORS.primary }}
         >
           <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
         {/* Personal Details Section */}
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-8">
+        <div className="bg-background rounded-lg shadow-sm border border-border p-8">
+          <h2 className="text-2xl font-semibold text-foreground mb-8">
             {mode === "edit" ? "Edit User" : "Add New User"}
           </h2>
 
@@ -218,8 +217,7 @@ export default function EditUserProfile({
               <div className="flex justify-center lg:justify-start">
                 <label htmlFor="profile-image">
                   <div 
-                    className="text-white px-6 py-3 rounded-md cursor-pointer flex items-center gap-2 transition-colors hover:bg-[#f90404]"
-                    style={{ backgroundColor: COLORS.primaryHover }}
+                    className="bg-red-500 text-white px-6 py-3 rounded-md cursor-pointer flex items-center gap-2 transition-colors hover:bg-red-600"
                   >
                     <Upload className="w-5 h-5" />
                     Upload Image
@@ -240,23 +238,23 @@ export default function EditUserProfile({
               {/* Personal Information Form */}
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Name</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Name</label>
                   <Input
                     type="text"
                     value={formData.personalDetails.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
-                    className="w-full border-gray-300 focus:border-red-500 focus:ring-red-500"
+                    className="w-full border-border focus:border-red-500 focus:ring-red-500 bg-background"
                     placeholder="Enter name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Gender</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Gender</label>
                   <Select
                     value={formData.personalDetails.gender}
                     onValueChange={(value) => handleInputChange("gender", value)}
                   >
-                    <SelectTrigger className="w-full border-gray-300 focus:border-red-500 focus:ring-red-500">
+                    <SelectTrigger className="w-full border-border focus:border-red-500 focus:ring-red-500 bg-background">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
@@ -270,23 +268,23 @@ export default function EditUserProfile({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Phone Number</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Phone Number</label>
                   <Input
                     type="tel"
                     value={formData.personalDetails.phoneNumber}
                     onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                    className="w-full border-gray-300 focus:border-red-500 focus:ring-red-500"
+                    className="w-full border-border focus:border-red-500 focus:ring-red-500 bg-background"
                     placeholder="Enter phone number"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Email</label>
                   <Input
                     type="email"
                     value={formData.personalDetails.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="w-full border-gray-300 focus:border-red-500 focus:ring-red-500"
+                    className="w-full border-border focus:border-red-500 focus:ring-red-500 bg-background"
                     placeholder="Enter email"
                   />
                 </div>
@@ -296,16 +294,16 @@ export default function EditUserProfile({
             {/* Right Column - Address */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-black mb-6">Address</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-6">Address</h3>
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">Governorate</label>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">Governorate</label>
                     <Select
                       value={formData.personalDetails.address.governorate}
                       onValueChange={(value) => handleAddressChange("governorate", value)}
                     >
-                      <SelectTrigger className="w-full border-gray-300 focus:border-red-500 focus:ring-red-500">
+                      <SelectTrigger className="w-full border-border focus:border-red-500 focus:ring-red-500 bg-background">
                         <SelectValue placeholder="Select governorate" />
                       </SelectTrigger>
                       <SelectContent>
@@ -319,13 +317,13 @@ export default function EditUserProfile({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">District</label>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">District</label>
                     <Select
                       value={formData.personalDetails.address.district}
                       onValueChange={(value) => handleAddressChange("district", value)}
                       disabled={!formData.personalDetails.address.governorate}
                     >
-                      <SelectTrigger className="w-full border-gray-300 focus:border-red-500 focus:ring-red-500">
+                      <SelectTrigger className="w-full border-border focus:border-red-500 focus:ring-red-500 bg-background">
                         <SelectValue 
                           placeholder={
                             formData.personalDetails.address.governorate 
@@ -349,15 +347,14 @@ export default function EditUserProfile({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-4 mt-12 pt-8 border-t border-gray-200">
-            <Button onClick={handleCancel} variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50">
+          <div className="flex justify-end gap-4 mt-12 pt-8 border-t border-border">
+            <Button onClick={handleCancel} variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-500/10">
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               disabled={!isFormValid}
-              className="text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#f90404]"
-              style={{ backgroundColor: COLORS.primaryHover }}
+              className="bg-red-500 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-600"
             >
               {mode === "edit" ? "Update" : "Add"}
             </Button>

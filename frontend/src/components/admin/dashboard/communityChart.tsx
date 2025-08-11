@@ -32,7 +32,7 @@ export function CommunityChart() {
             <div className="text-4xl font-bold">{COMMUNITY_GROWTH.totalMembers}</div>
             <div className="text-sm text-muted-foreground">Total Members</div>
           </div>
-          <div className="text-sm font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+          <div className="text-sm font-medium text-red-500 bg-red-500/10 px-2.5 py-1 rounded-full">
             {COMMUNITY_GROWTH.growthRate} {COMMUNITY_GROWTH.growthPeriod}
           </div>
         </div>
@@ -42,13 +42,13 @@ export function CommunityChart() {
           <svg className="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.1" />
+                <stop offset="0%" stopColor="#ef4444" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#ef4444" stopOpacity="0.1" />
               </linearGradient>
             </defs>
             <path
               d={COMMUNITY_GROWTH.chartPath}
-              stroke="hsl(var(--primary))"
+              stroke="#ef4444"
               strokeWidth="3"
               fill="none"
             />
@@ -61,14 +61,14 @@ export function CommunityChart() {
               cx={COMMUNITY_GROWTH.dataPoint.x} 
               cy={COMMUNITY_GROWTH.dataPoint.y} 
               r="4" 
-              fill="hsl(var(--primary))" 
+              fill="#ef4444" 
             />
             <line 
               x1={COMMUNITY_GROWTH.dataPoint.x} 
               y1={COMMUNITY_GROWTH.dataPoint.y} 
               x2={COMMUNITY_GROWTH.dataPoint.x} 
               y2="180" 
-              stroke="hsl(var(--primary))" 
+              stroke="#ef4444" 
               strokeWidth="2" 
               strokeDasharray="2" 
             />
@@ -80,7 +80,7 @@ export function CommunityChart() {
           {COMMUNITY_GROWTH.months.map((month, index) => (
             <span 
               key={index} 
-              className={month.isHighlighted ? "bg-primary/10 text-primary px-2 py-0.5 rounded-md font-medium" : ""}
+              className={month.isHighlighted ? "bg-red-500/10 text-red-500 px-2 py-0.5 rounded-md font-medium" : ""}
             >
               {month.name}
             </span>

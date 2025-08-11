@@ -38,34 +38,34 @@ export function SearchSection({
   }
 
   return (
-    <div className="space-y-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Latest Donations</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">Browse available medication donations or add your own to help those in need</p>
-      </div>
+    <div className="text-center mb-8">
+      <h1 className="text-3xl font-bold text-foreground mb-2">Latest Donations</h1>
+      <p className="text-muted-foreground max-w-2xl mx-auto mb-6">Browse available medication donations or add your own to help those in need</p>
       
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-        <form onSubmit={handleSubmit} className="flex w-full max-w-md">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input 
-              placeholder="Search Donations..." 
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 pr-4 py-2 border-border focus:border-primary focus:ring-primary"
-            />
-          </div>
-          <Button 
-            type="submit"
-            className="ml-3 bg-primary hover:bg-primary/90 text-primary-foreground px-6"
-          >
-            Search
-          </Button>
-        </form>
-
+      {/* Search Bar */}
+      <form onSubmit={handleSubmit} className="flex justify-center items-center max-w-md mx-auto mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input 
+            placeholder="Search Donations..." 
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-10 pr-4 py-2 border-border focus:border-primary focus:ring-primary"
+          />
+        </div>
+        <Button 
+          type="submit"
+          className="ml-3 bg-red-500 hover:bg-red-600 text-white px-6"
+        >
+          Search
+        </Button>
+      </form>
+      
+      {/* Add Donation Button */}
+      <div className="flex justify-end mb-8">
         <Button 
           onClick={handleAddDonation}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
+          className="bg-red-500 hover:bg-red-600 text-white"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Donation

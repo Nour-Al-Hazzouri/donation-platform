@@ -101,7 +101,7 @@ export function UserProfileDetails({
         {/* Back Button */}
         <button
           onClick={handleBack}
-          className="mb-6 w-10 h-10 bg-primary hover:bg-primary/90 rounded-full flex items-center justify-center text-primary-foreground transition-colors"
+          className="mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -153,7 +153,7 @@ export function UserProfileDetails({
             {/* Right Column - Address */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-primary mb-6">Address</h3>
+                <h3 className="text-xl font-semibold text-red-500 mb-6">Address</h3>
 
                 <div className="space-y-4">
                   <div>
@@ -180,7 +180,7 @@ export function UserProfileDetails({
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </Button>
-            <Button onClick={handleEdit} className="bg-primary hover:bg-primary/90 text-primary-foreground px-8">
+            <Button onClick={handleEdit} className="bg-red-500 hover:bg-red-600 text-white px-8">
               Edit
             </Button>
           </div>

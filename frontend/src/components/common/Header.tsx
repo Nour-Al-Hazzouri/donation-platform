@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { NAV_ITEMS, COLORS } from "@/utils/constants"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Menu, X, User, LogOut, Bell } from 'lucide-react'
+import { Menu, X, User, LogOut, Bell, LayoutDashboard, FileText, Users, MapPin } from 'lucide-react'
 import Image from "next/image"
 import { useModal } from '@/contexts/ModalContext'
 import { useAuthStore } from '@/store/authStore'
@@ -243,35 +243,75 @@ export function Header() {
                     
                     {/* Profile sidebar menu items for mobile */}
                     <div className="space-y-3 mb-4">
-                      <h3 className="text-primary font-medium text-sm px-2">Profile Menu</h3>
+                      {isAdmin ? (
+                        <>
+                          <h3 className="text-primary font-medium text-sm px-2">Admin Dashboard</h3>
+                          <div className="space-y-2">
+                            <Link href="/admin" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                              <LayoutDashboard className="h-4 w-4" />
+                              <span>Dashboard</span>
+                            </Link>
+                            <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                              <FileText className="h-4 w-4" />
+                              <span>Manage Blogs</span>
+                            </Link>
+                            <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                              <MapPin className="h-4 w-4" />
+                              <span>Manage Locations</span>
+                            </Link>
+                            <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                              <Users className="h-4 w-4" />
+                              <span>All Users</span>
+                            </Link>
+                            <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2 pl-6">
+                              <FileText className="h-4 w-4" />
+                              <span>Verification Requests</span>
+                            </Link>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-primary font-medium text-sm px-2">Profile Menu</h3>
+                          
+                          <Button
+                            variant="ghost"
+                            className={cn(
+                              "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
+                              pathname === '/profile' && (!searchParams || searchParams.get('view') === 'profile')
+                                ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
+                                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                            )}
+                            onClick={handleProfileNavigation}
+                          >
+                            <User size={16} />
+                            Profile
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            className={cn(
+                              "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
+                              searchParams && searchParams.get('view') === 'notifications'
+                                ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
+                                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                            )}
+                            onClick={handleNotificationsNavigation}
+                          >
+                            <Bell size={16} />
+                            Notifications
+                          </Button>
+                        </>
+                      )}
                       
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
-                          pathname === '/profile' && (!searchParams || searchParams.get('view') === 'profile')
-                            ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
-                            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                        )}
-                        onClick={handleProfileNavigation}
-                      >
-                        <User size={16} />
-                        Profile
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
-                          searchParams && searchParams.get('view') === 'notifications'
-                            ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
-                            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                        )}
-                        onClick={handleNotificationsNavigation}
-                      >
-                        <Bell size={16} />
-                        Notifications
-                      </Button>
+                      {isAdmin && (
+                        <Link href="/admin/dashboard" onClick={closeMobileMenu} className="block mb-3">
+                          <Button
+                            className="w-full text-center py-2 px-4 rounded-md bg-red-500 text-white hover:bg-red-600"
+                          >
+                            Dashboard
+                          </Button>
+                        </Link>
+                      )}
                       
                       <Button
                         variant="ghost"

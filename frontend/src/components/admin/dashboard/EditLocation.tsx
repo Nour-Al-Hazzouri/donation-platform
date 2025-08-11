@@ -113,15 +113,15 @@ export default function EditLocation({
       <div className="max-w-4xl mx-auto">
         {/* Back Button - Updated to match carousel left indicator */}
         <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleBack}
-          className={cn(
-            "mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md z-10",
-            "transition-all duration-200 hover:scale-105 text-primary"
-          )}
-          aria-label="Go back"
-        >
+            variant="ghost"
+            size="icon"
+            onClick={handleBack}
+            className={cn(
+              "mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md z-10",
+              "transition-all duration-200 hover:scale-105 text-red-500"
+            )}
+            aria-label="Go back"
+          >
           <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
@@ -176,7 +176,7 @@ export default function EditLocation({
               type="button"
               variant="ghost"
               onClick={handleCancel}
-              className="text-primary hover:text-primary/80 hover:bg-primary/10"
+              className="text-red-500 hover:text-red-500/80 hover:bg-red-500/10"
             >
               Cancel
             </Button>
@@ -184,7 +184,7 @@ export default function EditLocation({
               type="button"
               disabled={!isFormValid || !hasChanges}
               onClick={handleSave}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-red-500 hover:bg-red-600 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Edit
             </Button>

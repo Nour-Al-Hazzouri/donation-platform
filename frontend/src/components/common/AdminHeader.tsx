@@ -20,13 +20,13 @@ export function AdminHeader() {
     const mobileClasses = `px-3 py-2 rounded-md text-base font-medium ${
       isActive
         ? `text-primary bg-secondary`
-        : `text-muted-foreground hover:text-foreground hover:bg-secondary/50`
+        : `text-muted-foreground hover:text-red-500 hover:bg-secondary/50`
     }`
 
     const desktopClasses = `${
       isActive
         ? `text-primary font-medium border-b-2 border-primary pb-1`
-        : `text-muted-foreground hover:text-foreground`
+        : `text-muted-foreground hover:text-red-500 hover:border-b-2 hover:border-red-500 hover:pb-1 transition-all duration-200`
     } text-sm lg:text-base whitespace-nowrap`
 
     return (
@@ -87,7 +87,7 @@ export function AdminHeader() {
                     className={`hidden lg:inline-block ${
                       pathname === item.href
                         ? `text-primary font-medium border-b-2 border-primary pb-1`
-                        : `text-muted-foreground hover:text-foreground`
+                        : `text-muted-foreground hover:text-red-500 hover:border-b-2 hover:border-red-500 hover:pb-1 transition-all duration-200`
                     } text-sm lg:text-base whitespace-nowrap`}
                   >
                     {item.name}
@@ -144,23 +144,23 @@ export function AdminHeader() {
                 <div className="mb-4">
                   <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Dashboard Menu</h3>
                   <div className="space-y-2">
-                    <Link href="/admin" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                    <Link href="/admin" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                       <LayoutDashboard className="h-4 w-4" />
                       <span>Dashboard</span>
                     </Link>
-                    <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                    <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                       <FileText className="h-4 w-4" />
                       <span>Manage Blogs</span>
                     </Link>
-                    <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                    <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                       <MapPin className="h-4 w-4" />
                       <span>Manage Locations</span>
                     </Link>
-                    <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                    <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                       <Users className="h-4 w-4" />
                       <span>All Users</span>
                     </Link>
-                    <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-primary py-2 pl-6">
+                    <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2 pl-6">
                       <FileText className="h-4 w-4" />
                       <span>Verification Requests</span>
                     </Link>
