@@ -190,15 +190,15 @@ export default function DonatePage() {
               <span className="text-sm text-muted-foreground">Max: ${remainingAmountNeeded.toLocaleString()}</span>
             </div>
             
-            <Slider
-              value={donationAmount}
-              onValueChange={handleSliderChange}
-              max={remainingAmountNeeded > 0 ? remainingAmountNeeded : 1}
-              min={1}
-              step={1}
-              className="w-full [&>[role=slider]]:bg-red-500 [&>span]:bg-red-500"
-              disabled={remainingAmountNeeded <= 0}
-            />
+        <Slider
+            value={donationAmount}
+          onValueChange={handleSliderChange}
+          max={remainingAmountNeeded > 0 ? remainingAmountNeeded : 1}
+          min={1}
+          step={1}
+          disabled={remainingAmountNeeded <= 0}
+        />
+
             
             <div className="flex justify-between text-xs text-muted-foreground mt-2">
               <span>$1</span>
