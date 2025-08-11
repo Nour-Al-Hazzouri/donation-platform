@@ -41,7 +41,7 @@ class UserFactory extends Factory
                 return $path;
             },
             'password' => static::$password ??= Hash::make('password'),
-            'is_verified' => fake()->boolean(80), // 80% chance of being verified
+            'is_verified' => false, // 80% chance of being verified
             'role' => 'user', // Default role, can be overridden
             'email_verified_at' => now(),
             'remember_token' => Str::random(10),
@@ -54,7 +54,7 @@ class UserFactory extends Factory
      */
     public function admin(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'role' => 'admin',
         ]);
     }
@@ -64,7 +64,7 @@ class UserFactory extends Factory
      */
     public function moderator(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'role' => 'moderator',
         ]);
     }
@@ -74,7 +74,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

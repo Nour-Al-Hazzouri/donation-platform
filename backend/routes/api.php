@@ -75,6 +75,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // View specific verification request (users can view their own, admins can view any)
         Route::get('/{verification}', [VerificationController::class, 'show']);
 
+        // Delete verification request (users can delete their own pending requests, admins can delete any)
+        Route::delete('/{verification}', [VerificationController::class, 'destroy']);
+
         // Admin only routes
         Route::middleware(['role:admin'])->group(function () {
             // List all verification requests
