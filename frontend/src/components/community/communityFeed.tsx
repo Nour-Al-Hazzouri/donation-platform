@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { MessageCircle, ThumbsUp, ThumbsDown, Pen, Check } from 'lucide-react'
+import { MessageCircle, ThumbsUp, ThumbsDown, Pen } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useModal } from '@/contexts/ModalContext'
+import Image from 'next/image'
 
 interface User {
   id: string
@@ -179,7 +180,7 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
   return (
     <div className="bg-background rounded-lg mb-3 shadow-sm border border-border mx-auto w-full max-w-4xl">
       <div className="p-3">
-        {/* User header with verification badge on top-right of avatar */}
+        {/* User header with verification badge */}
         <div className="flex items-center gap-2 mb-2">
           <div className="relative">
             <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
@@ -188,8 +189,14 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
               </span>
             </div>
             {post.user.verified && (
-              <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-0.5">
-                <Check className="w-2.5 h-2.5 text-white" />
+              <div className="absolute -top-1 -right-1">
+                <Image 
+                  src="/verification.png" 
+                  alt="Verified" 
+                  width={16} 
+                  height={16}
+                  className="w-4 h-4"
+                />
               </div>
             )}
           </div>
