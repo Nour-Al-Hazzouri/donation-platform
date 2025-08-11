@@ -258,14 +258,10 @@ export function Header() {
                         className={cn(
                           "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
                           pathname === '/profile' && (!searchParams || searchParams.get('view') === 'profile')
-                            ? 'bg-accent text-accent-foreground hover:bg-accent/80'
+                            ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
                             : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                         )}
                         onClick={handleProfileNavigation}
-                        style={{
-                          backgroundColor: COLORS.primary,
-                          color: "#fff",
-                        }}
                       >
                         <User size={16} />
                         Profile
@@ -276,7 +272,7 @@ export function Header() {
                         className={cn(
                           "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
                           searchParams && searchParams.get('view') === 'notifications'
-                            ? 'bg-accent text-accent-foreground hover:bg-accent/80'
+                            ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
                             : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                         )}
                         onClick={handleNotificationsNavigation}

@@ -22,6 +22,8 @@ export default function ProfilePage() {
     const view = searchParams.get('view')
     if (view === 'notifications') {
       setActiveView('notifications')
+    } else if (view === 'profile') {
+      setActiveView('profile')
     }
   }, [isAuthenticated, router, searchParams])
 
