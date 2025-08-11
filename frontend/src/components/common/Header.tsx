@@ -60,6 +60,13 @@ export function Header() {
     router.push('/')
   }
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }
+
   const renderNavLink = (item: typeof NAV_ITEMS[0], isMobile = false) => {
     const isActive = pathname === item.href
     const mobileClasses = cn(
@@ -76,12 +83,22 @@ export function Header() {
         : "text-muted-foreground hover:text-red-500 hover:border-b-2 hover:border-red-500 hover:pb-1 transition-all duration-200"
     )
 
+    const handleClick = (e: React.MouseEvent) => {
+      e.preventDefault()
+      closeMobileMenu()
+      if (pathname === item.href) {
+        scrollToTop()
+      } else {
+        router.push(item.href)
+      }
+    }
+
     return (
       <Link
         key={item.name}
         href={item.href}
         className={isMobile ? mobileClasses : desktopClasses}
-        onClick={closeMobileMenu}
+        onClick={handleClick}
       >
         {item.name}
       </Link>
@@ -96,6 +113,12 @@ export function Header() {
           <Link 
             href="/" 
             className="flex items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
+            onClick={(e) => {
+              if (pathname === '/') {
+                e.preventDefault()
+                scrollToTop()
+              }
+            }}
           >
             <div className="w-60 h-15 relative">
               <Image 
@@ -137,6 +160,12 @@ export function Header() {
                         ? "text-red-500 font-medium border-b-2 border-red-500 pb-1" 
                         : "text-muted-foreground hover:text-red-500 hover:border-b-2 hover:border-red-500 hover:pb-1 transition-all duration-200"
                     )}
+                    onClick={(e) => {
+                      if (pathname === item.href) {
+                        e.preventDefault()
+                        scrollToTop()
+                      }
+                    }}
                   >
                     {item.name}
                   </Link>
