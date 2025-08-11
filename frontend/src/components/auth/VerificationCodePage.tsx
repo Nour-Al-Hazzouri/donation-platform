@@ -144,14 +144,14 @@ export default function VerificationCodePage({ onBack, onSuccess, userEmail }: V
         <Button
           onClick={handleConfirm}
           disabled={!isCodeComplete || isLoading}
-          className="flex-1 h-10 sm:h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-primary-foreground font-semibold rounded-lg transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "Verifying..." : "Confirm"}
         </Button>
         <Button
           onClick={handleCancel}
           variant="outline"
-          className="flex-1 h-10 sm:h-12 bg-background border-2 border-foreground text-foreground hover:bg-secondary/50 font-semibold rounded-lg transition-all duration-300 ease-in-out"
+          className="flex-1 h-10 sm:h-12 bg-background border-2 border-[#f90404] text-[#f90404] hover:bg-[#f90404]/10 font-semibold rounded-lg transition-all duration-300 ease-in-out"
           disabled={isLoading}
         >
           Cancel

@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
                 {/* Continue Button */}
                 <Button
                   type="submit"
-                  className="w-full h-10 sm:h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all duration-300 ease-in-out mt-6 sm:mt-8"
+                  className="w-full h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-primary-foreground font-semibold rounded-lg transition-all duration-300 ease-in-out mt-6 sm:mt-8"
                   disabled={isLoading}
                 >
                   {isLoading ? "Sending..." : "Continue"}

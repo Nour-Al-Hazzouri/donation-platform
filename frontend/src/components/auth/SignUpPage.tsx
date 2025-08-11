@@ -225,7 +225,7 @@ export default function SignUpPage() {
               id="terms"
               checked={formData.agreeToTerms}
               onCheckedChange={handleCheckboxChange}
-              className="border-primary/80 data-[state=checked]:bg-primary"
+              className="border-[#f90404] data-[state=checked]:bg-[#f90404]"
             />
             <Label 
               htmlFor="terms" 
@@ -239,7 +239,7 @@ export default function SignUpPage() {
           <Button
             type="submit"
             disabled={!formData.agreeToTerms || isLoading}
-            className="w-full h-8 sm:h-9 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-0.5"
+            className="w-full h-8 sm:h-9 bg-[#f90404] hover:bg-[#d90404] text-primary-foreground font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-0.5"
           >
             {isLoading ? "Creating account..." : "Sign up"}
           </Button>
