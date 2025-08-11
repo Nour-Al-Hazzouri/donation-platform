@@ -29,7 +29,17 @@ class UserFactory extends Factory
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->phoneNumber(),
-            'avatar_url' => 'https://ui-avatars.com/api/?name=' . urlencode(fake()->name() . ' ' . fake()->lastName()) . '&background=random',
+            'avatar_url' => function () {
+                if (app()->environment('testing')) {
+                    return null;
+                }
+
+                // For non-testing environments, generate a real image
+                $image = \Illuminate\Http\UploadedFile::fake()->image('avatar.jpg');
+                $path = 'avatars/' . uniqid() . '.jpg';
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path, file_get_contents($image));
+                return $path;
+            },
             'password' => static::$password ??= Hash::make('password'),
             'is_verified' => fake()->boolean(80), // 80% chance of being verified
             'role' => 'user', // Default role, can be overridden
