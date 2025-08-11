@@ -3,57 +3,75 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\DonationTransaction;
-use App\Models\DonationEvent;
-use App\Http\Resources\DonationTransactionResource;
 use App\Http\Requests\StoreDonationTransactionRequest;
 use App\Http\Requests\UpdateTransactionStatusRequest;
+use App\Http\Resources\DonationTransactionResource;
+use App\Models\DonationEvent;
+use App\Models\DonationTransaction;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
 class DonationTransactionController extends Controller
 {
-    use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
+     *
+     * @param  \App\Models\DonationEvent|null  $donationEvent
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(DonationEvent $donationEvent = null)
     {
-        $this->authorize('viewAny', DonationTransaction::class);
-        $transactions = DonationTransaction::with(['user', 'event'])
-            ->where('user_id', auth()->id())
-            ->orWhereHas('event', function($query) {
-                $query->where('user_id', auth()->id());
-            })
-            ->latest()
-            ->paginate(10);
+        $query = DonationTransaction::with(['user', 'event']);
+        
+        // If an event is provided, filter transactions for that event
+        if (!empty($donationEvent)) {
+            $this->authorize('viewAny', [DonationTransaction::class, $donationEvent]);
+            $query->where('event_id', $donationEvent->id);
+        } else {
+            $this->authorize('viewAny', DonationTransaction::class);
+            // For the general transactions list, only show user's transactions
+            // or transactions for events they own
+            $query->where(function($q) {
+                $q->where('user_id', auth()->id())
+                  ->orWhereHas('event', function($query) {
+                      $query->where('user_id', auth()->id());
+                  });
+            });
+        }
+        
+        $transactions = $query->latest()->paginate(10);
 
-        return DonationTransactionResource::collection($transactions);
+        return response()->json([
+            'data' => DonationTransactionResource::collection($transactions),
+            'message' => 'Donation transactions retrieved successfully.',
+        ], Response::HTTP_OK);
     }
 
     /**
      * Store a newly created resource in storage.
+     *
+     * @param  StoreDonationTransactionRequest  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StoreDonationTransactionRequest $request)
+    public function store(StoreDonationTransactionRequest $request, DonationEvent $donationEvent)
     {
+        $this->authorize('create', [DonationTransaction::class, $donationEvent]);
+        
         try {
-            // Check if user is authorized to create a transaction
-            $this->authorize('create', DonationTransaction::class);
-            
-            return DB::transaction(function () use ($request) {
-                $event = DonationEvent::findOrFail($request->event_id);
+            return DB::transaction(function () use ($request, $donationEvent) {
                 $user = $request->user();
                 
-                // Get the transaction type from the request (set in the validation)
+                // Get the transaction type from the request (set in validation)
                 $transactionType = $request->getTransactionType();
                 
                 // Create the transaction with pending status
-                // The observer will handle setting the status to pending
                 $transaction = new DonationTransaction([
                     'user_id' => $user->id,
-                    'event_id' => $event->id,
+                    'event_id' => $donationEvent->id,
                     'transaction_type' => $transactionType,
                     'amount' => $request->amount,
                     'status' => 'pending',
@@ -63,61 +81,63 @@ class DonationTransactionController extends Controller
                 // Save the transaction
                 $transaction->save();
 
-                // Return the created transaction with related data
-                return new DonationTransactionResource($transaction->load('user', 'event'));
+                return response()->json([
+                    'data' => new DonationTransactionResource($transaction->load('user', 'event')),
+                    'message' => 'Donation transaction created successfully.',
+                ], Response::HTTP_CREATED);
             });
-        }
-        catch (\Illuminate\Auth\Access\AuthorizationException $e) {
-            Log::error('Transaction failed: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Error creating donation transaction: ' . $e->getMessage());
+            
             return response()->json([
-                'message' => 'Transaction failed',
-                'error' => $e->getMessage()
-            ], 403);
-        } 
-        catch (\Exception $e) {
-            Log::error('Transaction failed: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Transaction failed',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Failed to create donation transaction',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * Display the specified resource.
+     *
+     * @param  DonationTransaction  $transaction
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(string $id)
+    public function show(DonationTransaction $transaction)
     {
-        $transaction = DonationTransaction::with(['user', 'event'])->findOrFail($id);
-        
-        // Check if the user is authorized to view this transaction
         $this->authorize('view', $transaction);
         
-        return new DonationTransactionResource($transaction);
+        return response()->json([
+            'data' => new DonationTransactionResource($transaction->load('user', 'event')),
+            'message' => 'Donation transaction retrieved successfully.',
+        ], Response::HTTP_OK);
     }
 
     /**
-     * Update the status of a transaction
+     * Update the status of a transaction.
      *
-     * @param UpdateTransactionStatusRequest $request
-     * @param string $id
-     * @return \Illuminate\Http\Response
+     * @param  UpdateTransactionStatusRequest  $request
+     * @param  DonationTransaction  $transaction
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function updateStatus(UpdateTransactionStatusRequest $request, string $id)
+    public function updateStatus(UpdateTransactionStatusRequest $request, DonationTransaction $transaction)
     {
-        $transaction = DonationTransaction::findOrFail($id);
+        $this->authorize('updateStatus', $transaction);
         
-        // Check if user is authorized to update the transaction status
-        $this->authorize('update', $transaction);
-        
-        // Update the transaction status
-        $transaction->status = $request->status;
-        
-        $transaction->save();
-        
-        return response()->json([
-            'message' => 'Transaction status updated successfully',
-            'data' => new DonationTransactionResource($transaction->load('user', 'event'))
-        ]);
+        try {
+            $transaction->status = $request->status;
+            $transaction->save();
+            
+            return response()->json([
+                'data' => new DonationTransactionResource($transaction->load('user', 'event')),
+                'message' => 'Transaction status updated successfully.',
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('Error updating transaction status: ' . $e->getMessage());
+            
+            return response()->json([
+                'message' => 'Failed to update transaction status',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

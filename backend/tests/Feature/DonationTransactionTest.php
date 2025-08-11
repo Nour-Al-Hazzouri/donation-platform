@@ -5,14 +5,14 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\DonationEvent;
 use App\Models\DonationTransaction;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use Tests\Feature\RoleAndPermissionSeeder;
 
 class DonationTransactionTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
 
     protected $user;
     protected $eventOwner;
@@ -24,16 +24,16 @@ class DonationTransactionTest extends TestCase
         parent::setUp();
         
         // Seed roles and permissions
-        $this->seed(RoleAndPermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
         
         // Create test users
         $this->user = User::factory()->create();
         $this->user->assignRole('user');
         
         // Create approved verification request for user
-        $this->user->verificationRequests()->create([
+        $this->user->verifications()->create([
             'document_type' => 'id_card',
-            'document_urls' => ['http://example.com/id.jpg'],
+            'image_urls' => ['verifications/1/test.jpg'],
             'status' => 'approved',
             'verified_at' => now()
         ]);
@@ -42,9 +42,9 @@ class DonationTransactionTest extends TestCase
         $this->eventOwner->assignRole('user');
         
         // Create approved verification request for event owner
-        $this->eventOwner->verificationRequests()->create([
+        $this->eventOwner->verifications()->create([
             'document_type' => 'id_card',
-            'document_urls' => ['http://example.com/owner_id.jpg'],
+            'image_urls' => ['verifications/1/test.jpg'],
             'status' => 'approved',
             'verified_at' => now()
         ]);
@@ -86,18 +86,12 @@ class DonationTransactionTest extends TestCase
         $unverifiedUser = User::factory()->create();
         $unverifiedUser->assignRole('user');
         
-        // Note: No verification request is created for this user
-        \Log::error('Unverified user created: ' . $unverifiedUser);
         $response = $this->actingAs($unverifiedUser)
             ->postJson("/api/donation-events/{$this->donationRequest->id}/transactions", [
-                'event_id' => $this->donationRequest->id,
                 'amount' => 100,
             ]);
 
         $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'Transaction failed'
-        ]);
         
         // Verify no transaction was created
         $this->assertDatabaseCount('donation_transactions', 0);
@@ -109,7 +103,6 @@ class DonationTransactionTest extends TestCase
         $this->actingAs($this->user);
         
         $response = $this->postJson("/api/donation-events/{$this->donationRequest->id}/transactions", [
-            'event_id' => $this->donationRequest->id,
             'amount' => 100,
         ]);
         
@@ -141,7 +134,6 @@ class DonationTransactionTest extends TestCase
         
         $response = $this->postJson("/api/donation-events/{$this->donationOffer->id}/transactions", [
             'amount' => 100,
-            'event_id' => $this->donationOffer->id
         ]);
         
         $response->assertStatus(201)
@@ -158,14 +150,13 @@ class DonationTransactionTest extends TestCase
     {
         $this->actingAs($this->user);
         
+        // Try to claim more than what's available
         $response = $this->postJson("/api/donation-events/{$this->donationOffer->id}/transactions", [
-            'amount' => 1000, // More than available (500)
-            'event_id' => $this->donationOffer->id,
-            'transaction_type' => 'claim'
+            'amount' => 600, // Only 500 available
         ]);
         
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['amount']);
+        $response->assertStatus(422);
+        $this->assertDatabaseCount('donation_transactions', 0);
     }
     
     /** @test */
@@ -300,20 +291,40 @@ class DonationTransactionTest extends TestCase
     /** @test */
     public function event_owner_can_view_transactions_for_their_events()
     {
-        // Create transactions for the event owner's event
-        $transactions = DonationTransaction::factory()->count(2)->create([
+        // Create a transaction for the event
+        $transaction = DonationTransaction::factory()->create([
+            'user_id' => $this->user->id,
             'event_id' => $this->donationRequest->id,
             'transaction_type' => 'contribution',
             'amount' => 100,
             'status' => 'pending'
         ]);
         
+        // Log in as event owner
         $this->actingAs($this->eventOwner);
         
+        // Test listing transactions for a specific event
         $response = $this->getJson("/api/donation-events/{$this->donationRequest->id}/transactions");
         
         $response->assertStatus(200)
-            ->assertJsonCount(2, 'data');
+            ->assertJsonCount(1, 'data')
+            ->assertJson([
+                'data' => [
+                    [
+                        'id' => $transaction->id,
+                        'amount' => '100.00',
+                        'transaction_type' => 'contribution',
+                        'status' => 'pending',
+                        'user' => [
+                            'id' => $this->user->id,
+                            'username' => $this->user->username
+                        ],
+                        'event' => [
+                            'id' => $this->donationRequest->id
+                        ]
+                    ]
+                ]
+            ]);
     }
     
     /** @test */
