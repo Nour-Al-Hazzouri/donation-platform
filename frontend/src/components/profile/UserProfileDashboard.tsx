@@ -15,7 +15,6 @@ interface UserProfileDashboardProps {
   onViewChange?: (view: 'profile' | 'notifications') => void
 }
 
-// Location data structure matching your backend
 const locations = [
   { governorate: 'Beirut', district: 'Achrafieh' },
   { governorate: 'Beirut', district: 'Hamra' },
@@ -38,7 +37,6 @@ const locations = [
   { governorate: 'Baalbek-Hermel', district: 'Hermel' },
 ]
 
-// Get unique governorates
 const governorates = [...new Set(locations.map(loc => loc.governorate))]
 
 export default function UserProfileDashboard({ onViewChange }: UserProfileDashboardProps) {
@@ -54,7 +52,6 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     district: user?.district || "",
   })
 
-  // Get districts for the selected governorate
   const getDistricts = () => {
     if (!profileData.governorate) return []
     return locations
@@ -64,7 +61,6 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => {
-      // If governorate changes, reset district
       if (field === 'governorate') {
         return {
           ...prev,
@@ -91,49 +87,51 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   }
 
   return (
-    <section className="bg-background min-h-screen">
-      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto">
-        <ProfileSidebar 
-          activeItem="profile" 
-          fullName={profileData.fullName} 
-          profileImage={user?.profileImage}
-          onViewChange={onViewChange}
-        />
+    <section className="bg-background min-h-screen w-full lg:-ml-20">
+      <div className="flex flex-col lg:flex-row w-full h-full">
+        <div className="w-full lg:w-56 xl:w-60 shrink-0">
+          <ProfileSidebar 
+            activeItem="profile" 
+            fullName={profileData.fullName} 
+            profileImage={user?.profileImage}
+            onViewChange={onViewChange}
+          />
+        </div>
 
-        <div className="flex-1 p-4 md:p-6 w-full overflow-x-hidden">
+        <div className="flex-1 p-4 sm:p-5 w-full overflow-x-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground">
               Welcome, {profileData.fullName.split(' ')[0]}
             </h1>
             <Button
               onClick={handleEdit}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
+              className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto"
             >
               {isEditing ? "Save" : "Edit"}
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
-            <div className="space-y-4 sm:space-y-6">
-              <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 w-full">
+            <div className="space-y-4 w-full">
+              <div className="space-y-2 w-full">
                 <Label className="text-muted-foreground text-sm sm:text-base">Full Name</Label>
                 {isEditing ? (
                   <Input
                     value={profileData.fullName}
                     onChange={(e) => handleInputChange("fullName", e.target.value)}
-                    className="w-full h-10 sm:h-12 px-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]"
+                    className="w-full h-10 sm:h-12 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   />
                 ) : (
                   <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">{profileData.fullName}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 w-full">
                 <Label className="text-muted-foreground text-sm sm:text-base">Gender</Label>
                 {isEditing ? (
-                  <div className="h-10 sm:h-12">
+                  <div className="h-10 sm:h-12 w-full">
                     <Select value={profileData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
-                      <SelectTrigger className="w-full h-full px-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]">
+                      <SelectTrigger className="w-full h-full px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
                       <SelectContent>
@@ -150,13 +148,13 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 w-full">
                 <Label className="text-muted-foreground text-sm sm:text-base">Phone Number</Label>
                 {isEditing ? (
                   <Input
                     value={profileData.phoneNumber}
                     onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                    className="w-full h-10 sm:h-12 px-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]"
+                    className="w-full h-10 sm:h-12 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   />
                 ) : (
                   <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">
@@ -166,30 +164,30 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
               </div>
             </div>
 
-            <div className="space-y-4 sm:space-y-6">
-              <div className="space-y-2">
+            <div className="space-y-4 w-full">
+              <div className="space-y-2 w-full">
                 <Label className="text-muted-foreground text-sm sm:text-base">Email</Label>
                 {isEditing ? (
                   <Input
                     type="email"
                     value={profileData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="w-full h-10 sm:h-12 px-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]"
+                    className="w-full h-10 sm:h-12 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   />
                 ) : (
                   <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">{profileData.email}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 w-full">
                 <Label className="text-muted-foreground text-sm sm:text-base">Governorate</Label>
                 {isEditing ? (
-                  <div className="h-10 sm:h-12">
+                  <div className="h-10 sm:h-12 w-full">
                     <Select 
                       value={profileData.governorate} 
                       onValueChange={(value) => handleInputChange("governorate", value)}
                     >
-                      <SelectTrigger className="w-full h-full px-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]">
+                      <SelectTrigger className="w-full h-full px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
                         <SelectValue placeholder="Select governorate" />
                       </SelectTrigger>
                       <SelectContent>
@@ -208,16 +206,16 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 w-full">
                 <Label className="text-muted-foreground text-sm sm:text-base">District</Label>
                 {isEditing ? (
-                  <div className="h-10 sm:h-12">
+                  <div className="h-10 sm:h-12 w-full">
                     <Select 
                       value={profileData.district} 
                       onValueChange={(value) => handleInputChange("district", value)}
                       disabled={!profileData.governorate}
                     >
-                      <SelectTrigger className="w-full h-full px-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f90404] focus:border-[#f90404]">
+                      <SelectTrigger className="w-full h-full px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
                         <SelectValue placeholder={profileData.governorate ? "Select district" : "First select governorate"} />
                       </SelectTrigger>
                       <SelectContent>
@@ -238,9 +236,9 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
             </div>
           </div>
 
-          <div className="bg-secondary/50 rounded-lg p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <div className="bg-secondary/50 rounded-lg p-4 sm:p-6 w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                 <h3 className="text-muted-foreground font-medium text-sm sm:text-base">Account Verification</h3>
                 {user?.verified ? (
                   <div className="flex items-center gap-2">
@@ -254,7 +252,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <AlertTriangle size={16} className="text-primary" />
+                    <AlertTriangle size={16} className="text-yellow-500" />
                     <span className="text-muted-foreground text-sm">Not Verified</span>
                   </div>
                 )}
@@ -267,7 +265,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
               ) : (
                 <Button
                   onClick={handleVerify}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto"
                 >
                   Verify Account
                 </Button>

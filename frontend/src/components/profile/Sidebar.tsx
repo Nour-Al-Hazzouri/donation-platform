@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
 import { User, Bell, LogOut } from "lucide-react"
@@ -15,7 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import Link from "next/link"
+import { useTheme } from "next-themes"
 
 interface SidebarProps {
   activeItem: "profile" | "notifications"
@@ -31,6 +31,9 @@ export default function ProfileSidebar({
   onViewChange
 }: SidebarProps) {
   const [isMobile, setIsMobile] = useState(false)
+  const { theme } = useTheme()
+  const { logout, user } = useAuthStore()
+  const router = useRouter()
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -41,8 +44,6 @@ export default function ProfileSidebar({
     window.addEventListener('resize', checkScreenSize)
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
-  const { logout, user } = useAuthStore()
-  const router = useRouter()
 
   const handleLogout = () => {
     logout()
@@ -57,24 +58,20 @@ export default function ProfileSidebar({
     }
   }
 
-  // Define sidebar menu items
   const getSidebarMenuItems = () => [
     { 
-      href: "#", 
       icon: User, 
       label: "Profile", 
       isActive: activeItem === "profile",
       onClick: () => handleNavigation('profile')
     },
     { 
-      href: "#", 
       icon: Bell, 
       label: "Notifications", 
       isActive: activeItem === "notifications",
       onClick: () => handleNavigation('notifications')
     },
     { 
-      href: "#", 
       icon: LogOut, 
       label: "Log out", 
       isActive: false, 
@@ -84,30 +81,29 @@ export default function ProfileSidebar({
 
   const sidebarMenuItems = getSidebarMenuItems()
   
-  // Don't render the sidebar on mobile screens
   if (isMobile) {
     return null
   }
   
   return (
-    <Sidebar className="w-64 border-r hidden md:block">
+    <Sidebar className="w-64 border-r hidden md:block bg-background">
       <SidebarContent className="pt-16">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Avatar Menu Item */}
+              {/* User Info */}
               <SidebarMenuItem>
                 <div className="flex flex-col items-center space-y-3 px-2 py-4 rounded-md hover:bg-secondary/50">
                   <div className="relative">
                     <Avatar className="w-20 h-20">
                       <AvatarImage src={profileImage} alt={fullName} />
                       <AvatarFallback className="bg-primary">
-                        <User size={40} className="text-white" />
+                        <User size={40} className="text-primary-foreground" />
                       </AvatarFallback>
                     </Avatar>
                     {user?.verified && (
                       <img
-                        src="/verification.png"
+                        src={theme === 'dark' ? "/verification-dark.png" : "/verification.png"}
                         alt="Verified"
                         className="absolute top-1 right-1 w-5 h-5"
                       />
@@ -126,16 +122,16 @@ export default function ProfileSidebar({
                 </div>
               </SidebarMenuItem>
               
-              {/* Main menu items */}
+              {/* Menu Items */}
               {sidebarMenuItems.map((item, index) => (
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton 
-                    isActive={item.isActive}
-                    className={item.label === "Log out" 
-                      ? "bg-red-500 text-white hover:bg-red-600" 
-                      : (item.isActive 
-                          ? "bg-red-50 text-red-600 hover:bg-red-100" 
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/50")}
+                    className={cn(
+                      item.isActive 
+                        ? "bg-red-500 text-white hover:bg-red-600" // Active = Red
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
+                      "transition-colors duration-200"
+                    )}
                     onClick={item.onClick}
                   >
                     <item.icon className="h-4 w-4" />

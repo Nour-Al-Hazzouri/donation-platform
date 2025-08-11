@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { MainLayout } from '@/components/layouts/MainLayout'
 import UserProfileDashboard from '@/components/profile/UserProfileDashboard'
 import NotificationsDashboard from '@/components/profile/NotificationsDashboard'
@@ -11,6 +11,7 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 export default function ProfilePage() {
   const { isAuthenticated } = useAuthStore()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [activeView, setActiveView] = useState<'profile' | 'notifications'>('profile')
 
   useEffect(() => {
@@ -18,14 +19,11 @@ export default function ProfilePage() {
       router.push('/')
     }
     
-    // Check if there's a view preference in sessionStorage
-    const storedView = sessionStorage.getItem('profileView')
-    if (storedView === 'notifications') {
+    const view = searchParams.get('view')
+    if (view === 'notifications') {
       setActiveView('notifications')
-      // Clear the stored view to avoid persisting across page refreshes
-      sessionStorage.removeItem('profileView')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, router, searchParams])
 
   if (!isAuthenticated) {
     return null
