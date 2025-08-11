@@ -6,6 +6,7 @@ use App\Models\Announcement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -46,18 +47,13 @@ class AnnouncementTest extends TestCase
                         'title',
                         'content',
                         'priority',
-                        'images',
+                        'image_urls',
                         'created_at',
                         'user' => [
                             'id',
                             'first_name',
                             'last_name',
                             'username',
-                            'email',
-                            'phone',
-                            'email_verified_at',
-                            'created_at',
-                            'updated_at'
                         ]
                     ]
                 ],
@@ -88,6 +84,7 @@ class AnnouncementTest extends TestCase
                     'id' => $announcement->id,
                     'title' => $announcement->title,
                     'content' => $announcement->content,
+                    'image_urls' => $announcement->image_urls,
                 ],
                 'message' => 'Announcement retrieved successfully'
             ]);
@@ -136,14 +133,16 @@ class AnnouncementTest extends TestCase
         // Authenticate the admin
         Sanctum::actingAs($admin);
 
+        $images = [
+            UploadedFile::fake()->image('image1.jpg'),
+            UploadedFile::fake()->image('image2.jpg'),
+        ];
+
         $announcementData = [
             'title' => 'Test Announcement',
             'content' => 'This is a test announcement',
             'priority' => 'high',
-            'images' => [
-                'https://example.com/image1.jpg',
-                'https://example.com/image2.jpg'
-            ]
+            'image_urls' => $images
         ];
 
         $response = $this->postJson('/api/announcements', $announcementData);
@@ -158,12 +157,7 @@ class AnnouncementTest extends TestCase
                         'id' => $admin->id,
                         'first_name' => $admin->first_name,
                         'last_name' => $admin->last_name,
-                        'username' => $admin->username,
-                        'email' => $admin->email,
-                        'phone' => $admin->phone,
-                        'email_verified_at' => $admin->email_verified_at?->toJson(),
-                        'created_at' => $admin->created_at->toJson(),
-                        'updated_at' => $admin->updated_at->toJson(),
+                        'username' => $admin->username
                     ]
                 ],
                 'message' => 'Announcement created successfully'
@@ -224,11 +218,6 @@ class AnnouncementTest extends TestCase
                         'first_name' => $announcement->user->first_name,
                         'last_name' => $announcement->user->last_name,
                         'username' => $announcement->user->username,
-                        'email' => $announcement->user->email,
-                        'phone' => $announcement->user->phone,
-                        'email_verified_at' => $announcement->user->email_verified_at?->toJson(),
-                        'created_at' => $announcement->user->created_at->toJson(),
-                        'updated_at' => $announcement->user->updated_at->toJson(),
                     ]
                 ],
                 'message' => 'Announcement updated successfully'

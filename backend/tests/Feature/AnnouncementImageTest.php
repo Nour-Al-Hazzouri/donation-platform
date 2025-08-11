@@ -65,7 +65,7 @@ class AnnouncementImageTest extends TestCase
                 'title' => 'Test Announcement',
                 'content' => 'This is a test announcement with images',
                 'priority' => 'high',
-                'images' => $images,
+                'image_urls' => $images,
             ]);
 
         $response->assertStatus(201)
@@ -110,7 +110,7 @@ class AnnouncementImageTest extends TestCase
 
         $response = $this->actingAsAdmin()
             ->putJson("/api/announcements/{$announcement->id}", [
-                'images' => $newImages,
+                'image_urls' => $newImages,
             ]);
 
         $response->assertStatus(200);
@@ -183,11 +183,11 @@ class AnnouncementImageTest extends TestCase
                 'title' => 'Test Announcement',
                 'content' => 'This is a test announcement with invalid image',
                 'priority' => 'high',
-                'images' => [$invalidFile],
+                'image_urls' => [$invalidFile],
             ]);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['images.0']);
+            ->assertJsonValidationErrors(['image_urls.0']);
     }
 
     /** @test */
@@ -202,7 +202,7 @@ class AnnouncementImageTest extends TestCase
                 'title' => 'Test Announcement',
                 'content' => 'This is a test announcement with images',
                 'priority' => 'high',
-                'images' => $images,
+                'image_urls' => $images,
             ]);
 
         $response->assertStatus(403);

@@ -59,31 +59,24 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'priority' => 'sometimes|string|in:' . implode(',', Announcement::getPriorities()),
-            'images' => 'sometimes|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'image_urls' => 'sometimes|array',
-            'image_urls.*' => 'string',
+            'image_urls.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
         ]);
 
         // Set default priority if not provided
-        $validated['priority'] = $validated['priority'] ?? Announcement::PRIORITY_MEDIUM;
+        $validated['priority'] ??= Announcement::PRIORITY_MEDIUM;
 
         try {
             // Handle file uploads if any
             $imagePaths = [];
-            
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
+
+            if ($request->hasFile('image_urls')) {
+                foreach ($request->file('image_urls') as $image) {
                     $path = $this->imageService->uploadImage($image, 'announcements');
                     if ($path) {
                         $imagePaths[] = $path;
                     }
                 }
-            }
-
-            // Add any existing image URLs
-            if (!empty($validated['image_urls'])) {
-                $imagePaths = array_merge($imagePaths, (array)$validated['image_urls']);
             }
 
             // Create the announcement with the image paths
@@ -101,14 +94,14 @@ class AnnouncementController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error creating announcement: ' . $e->getMessage());
-            
+
             // Clean up any uploaded files if there was an error
             if (!empty($imagePaths)) {
                 foreach ($imagePaths as $path) {
                     $this->imageService->deleteImage($path);
                 }
             }
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create announcement',
@@ -146,10 +139,8 @@ class AnnouncementController extends Controller
             'title' => 'sometimes|string|max:255',
             'content' => 'sometimes|string',
             'priority' => 'sometimes|string|in:' . implode(',', Announcement::getPriorities()),
-            'images' => 'sometimes|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'image_urls' => 'sometimes|array',
-            'image_urls.*' => 'string',
+            'image_urls.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'remove_image_urls' => 'sometimes|array',
             'remove_image_urls.*' => 'string',
         ]);
@@ -159,19 +150,14 @@ class AnnouncementController extends Controller
             $uploadedImagePaths = [];
 
             // Handle new file uploads
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
+            if ($request->hasFile('image_urls')) {
+                foreach ($request->file('image_urls') as $image) {
                     $path = $this->imageService->uploadImage($image, 'announcements');
                     if ($path) {
                         $uploadedImagePaths[] = $path;
                     }
                 }
                 $imagePaths = array_merge($imagePaths, $uploadedImagePaths);
-            }
-
-            // Add any new image URLs
-            if (isset($validated['image_urls'])) {
-                $imagePaths = array_merge($imagePaths, (array)$validated['image_urls']);
             }
 
             // Remove images that need to be deleted
@@ -204,14 +190,14 @@ class AnnouncementController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error updating announcement: ' . $e->getMessage());
-            
+
             // Clean up any newly uploaded files if there was an error
             if (!empty($uploadedImagePaths)) {
                 foreach ($uploadedImagePaths as $path) {
                     $this->imageService->deleteImage($path);
                 }
             }
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update announcement',
@@ -250,7 +236,7 @@ class AnnouncementController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error deleting announcement: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete announcement',
