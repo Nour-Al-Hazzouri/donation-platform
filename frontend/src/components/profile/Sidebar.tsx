@@ -100,7 +100,6 @@ export default function ProfileSidebar({
                   <div className="flex flex-col items-center">
                     <span className="font-semibold text-foreground text-lg">{fullName}</span>
                   </div>
-                  <ThemeToggleProvider className="mt-2" />
                 </div>
               </SidebarMenuItem>
               
@@ -116,7 +115,11 @@ export default function ProfileSidebar({
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton 
                     isActive={item.isActive}
-                    className={item.isActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"}
+                    className={item.label === "Log out" 
+                      ? "bg-red-500 text-white hover:bg-red-600" 
+                      : (item.isActive 
+                          ? "bg-red-50 text-red-600 hover:bg-red-100" 
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/50")}
                     onClick={item.onClick}
                   >
                     <item.icon className="h-4 w-4" />

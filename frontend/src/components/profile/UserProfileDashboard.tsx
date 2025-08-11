@@ -107,7 +107,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
             </h1>
             <Button
               onClick={handleEdit}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
+              className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
             >
               {isEditing ? "Save" : "Edit"}
             </Button>
@@ -267,7 +267,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
               ) : (
                 <Button
                   onClick={handleVerify}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-fit"
                 >
                   Verify Account
                 </Button>

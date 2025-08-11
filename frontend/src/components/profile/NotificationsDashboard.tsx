@@ -127,7 +127,7 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
 
             <div className="text-center mt-8">
               <button 
-                className="text-primary hover:text-primary/80 font-medium text-sm lg:text-base transition-colors"
+                className="bg-red-500 hover:bg-red-600 text-white font-medium text-sm lg:text-base transition-colors px-4 py-2 rounded-lg"
                 onClick={loadMoreNotifications}
               >
                 Load more notifications
