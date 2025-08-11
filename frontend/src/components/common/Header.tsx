@@ -65,15 +65,15 @@ export function Header() {
     const mobileClasses = cn(
       "px-3 py-2 rounded-md text-base font-medium",
       isActive 
-        ? "text-primary bg-accent" 
-        : "text-muted-foreground hover:text-primary hover:bg-accent/50"
+        ? "text-red-500 bg-accent" 
+        : "text-muted-foreground hover:text-red-500 hover:bg-accent/50"
     )
     
     const desktopClasses = cn(
       "text-sm lg:text-base whitespace-nowrap",
       isActive 
-        ? "text-primary font-medium border-b-2 border-primary pb-1" 
-        : "text-muted-foreground hover:text-primary"
+        ? "text-red-500 font-medium border-b-2 border-red-500 pb-1" 
+        : "text-muted-foreground hover:text-red-500 hover:border-b-2 hover:border-red-500 hover:pb-1 transition-all duration-200"
     )
 
     return (
@@ -134,8 +134,8 @@ export function Header() {
                     className={cn(
                       "hidden lg:inline-block text-sm lg:text-base whitespace-nowrap",
                       pathname === item.href 
-                        ? "text-primary font-medium border-b-2 border-primary pb-1" 
-                        : "text-muted-foreground hover:text-primary"
+                        ? "text-red-500 font-medium border-b-2 border-red-500 pb-1" 
+                        : "text-muted-foreground hover:text-red-500 hover:border-b-2 hover:border-red-500 hover:pb-1 transition-all duration-200"
                     )}
                   >
                     {item.name}

@@ -10,6 +10,7 @@ import { MainLayout } from '@/components/layouts/MainLayout'
 import { COLORS } from '@/utils/constants'
 import Image from 'next/image'
 import { useEffect } from 'react'
+import { HowDonationHelps } from '@/components/donations/HowDonationHelps'
 
 // More robust helper to parse amounts, handling various types and ensuring a number is returned
 const parseAmount = (value: string | number | undefined | null): number => {
@@ -210,23 +211,9 @@ export default function RequestDetailsPage() {
             </div>
           </div>
 
-          {/* Additional Info Section */}
-          <div className="mt-6 md:mt-8 bg-card rounded-lg shadow-sm border p-4 md:p-6">
-            <h4 className="text-base md:text-lg font-semibold text-foreground mb-3 md:mb-4">How your donation helps</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-              <div className="text-center p-3 md:p-4 bg-red-50 dark:bg-red-950/30 rounded-lg">
-                <div className="text-xl sm:text-2xl font-bold text-red-500 dark:text-red-400 mb-1 md:mb-2">100%</div>
-                <p className="text-xs sm:text-sm text-muted-foreground">of donations go directly to the cause</p>
-              </div>
-              <div className="text-center p-3 md:p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-                <div className="text-xl sm:text-2xl font-bold text-blue-500 dark:text-blue-400 mb-1 md:mb-2">24/7</div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Support and updates on progress</p>
-              </div>
-              <div className="text-center p-3 md:p-4 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                <div className="text-xl sm:text-2xl font-bold text-green-500 dark:text-green-400 mb-1 md:mb-2">Secure</div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Safe and encrypted transactions</p>
-              </div>
-            </div>
+          {/* How Donation Helps Section */}
+          <div className="mt-6 md:mt-8">
+            <HowDonationHelps />
           </div>
         </main>
       </MainLayout>

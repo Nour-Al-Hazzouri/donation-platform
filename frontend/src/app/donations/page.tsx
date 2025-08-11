@@ -78,7 +78,7 @@ export default function DonationsPage() {
           <div className="flex justify-center mb-6">
             <button 
               onClick={clearSearch}
-              className="text-sm text-gray-500 hover:text-gray-700 underline"
+              className="text-sm text-muted-foreground hover:text-foreground underline"
             >
               Clear search and show all donations
             </button>

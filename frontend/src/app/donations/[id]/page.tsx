@@ -10,6 +10,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useModal } from '@/contexts/ModalContext'
 import Image from 'next/image'
 import { COLORS } from '@/utils/constants'
+import { HowToRequest } from '@/components/requests/HowToRequest'
 
 export default function DonationDetailsPage() {
   const params = useParams()
@@ -144,23 +145,9 @@ export default function DonationDetailsPage() {
             </div>
           </div>
 
-          {/* Additional Info Section */}
-          <div className="mt-6 md:mt-8 bg-card rounded-lg shadow-sm border p-4 md:p-6">
-            <h4 className="text-base md:text-lg font-semibold text-foreground mb-3 md:mb-4">How to request this donation</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-              <div className="text-center p-3 md:p-4 bg-red-50 rounded-lg">
-                <div className="text-xl sm:text-2xl font-bold text-red-500 mb-1 md:mb-2">100%</div>
-                <p className="text-xs sm:text-sm text-muted-foreground">of donations go directly to those in need</p>
-              </div>
-              <div className="text-center p-3 md:p-4 bg-blue-50 rounded-lg">
-                <div className="text-xl sm:text-2xl font-bold text-blue-500 mb-1 md:mb-2">24/7</div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Support and updates on progress</p>
-              </div>
-              <div className="text-center p-3 md:p-4 bg-green-50 rounded-lg">
-                <div className="text-xl sm:text-2xl font-bold text-green-500 mb-1 md:mb-2">Secure</div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Safe and encrypted transactions</p>
-              </div>
-            </div>
+          {/* How to Request Section */}
+          <div className="mt-6 md:mt-8">
+            <HowToRequest />
           </div>
         </main>
       </MainLayout>

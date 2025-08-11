@@ -197,11 +197,10 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md mr-1 sm:mr-2 z-10"
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md mr-1 sm:mr-2 z-10 text-red-500 hover:text-red-600"
               )}
               onClick={scrollLeft}
               aria-label="Previous donations"
-              style={{ color: '#f90404' }}
             >
               <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -229,11 +228,10 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md ml-1 sm:ml-2 z-10"
+                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md ml-1 sm:ml-2 z-10 text-red-500 hover:text-red-600"
               )}
               onClick={scrollRight}
               aria-label="Next donations"
-              style={{ color: '#f90404' }}
             >
               <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>

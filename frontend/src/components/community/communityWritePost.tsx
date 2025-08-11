@@ -84,7 +84,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
                 variant="ghost" 
                 size="icon" 
                 onClick={onCancel}
-                className="h-8 w-8 rounded-full bg-background/80 hover:bg-background/90 shadow-md text-primary"
+                className="h-8 w-8 rounded-full bg-background/80 hover:bg-background/90 shadow-md text-red-500"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -163,7 +163,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
               type="submit"
               disabled={isSubmitting || !postContent.trim()}
               variant="default"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+              className="bg-red-500 hover:bg-red-600 text-white gap-2"
             >
               <ArrowUp className="w-4 h-4" />
               Post

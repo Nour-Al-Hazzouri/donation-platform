@@ -112,8 +112,8 @@ const PostCreator = ({ onWritePost }: PostCreatorProps) => {
       onClick={handleClick}
     >
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-          <Pen className="text-primary-foreground w-3.5 h-3.5" />
+        <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+          <Pen className="text-white w-3.5 h-3.5" />
         </div>
         <span className="font-medium text-sm text-foreground">Write a post</span>
       </div>
@@ -182,14 +182,14 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
         {/* User header with verification badge on top-right of avatar */}
         <div className="flex items-center gap-2 mb-2">
           <div className="relative">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-primary-foreground text-xs font-bold">
+            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs font-bold">
                 {post.user.name.split(' ').map(n => n[0]).join('')}
               </span>
             </div>
             {post.user.verified && (
-              <div className="absolute -top-1 -right-1 bg-primary rounded-full p-0.5">
-                <Check className="w-2.5 h-2.5 text-primary-foreground" />
+              <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-0.5">
+                <Check className="w-2.5 h-2.5 text-white" />
               </div>
             )}
           </div>
