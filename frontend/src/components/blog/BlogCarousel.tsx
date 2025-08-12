@@ -103,16 +103,11 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
         <div className="relative">
           <div className="flex items-center justify-center">
             <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md mr-1 sm:mr-2 z-10"
-              )}
               onClick={scrollLeft}
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
               aria-label="Previous blog posts"
-              style={{ color: COLORS.primary }}
             >
-              <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+              <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
 
             <div className="overflow-hidden w-full max-w-6xl" style={{ height: 'auto', minHeight: '360px' }}>
@@ -178,16 +173,11 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
             </div>
 
             <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md ml-1 sm:ml-2 z-10"
-              )}
               onClick={scrollRight}
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
               aria-label="Next blog posts"
-              style={{ color: COLORS.primary }}
             >
-              <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+              <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
         </div>

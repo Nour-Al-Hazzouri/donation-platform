@@ -81,10 +81,8 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
               <Button 
-                variant="ghost" 
-                size="icon" 
                 onClick={onCancel}
-                className="h-8 w-8 rounded-full bg-background/80 hover:bg-background/90 shadow-md text-red-500"
+                className="h-8 w-8 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-md transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>

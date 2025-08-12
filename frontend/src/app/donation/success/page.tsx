@@ -73,12 +73,10 @@ export default function DonationSuccessPage() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              variant="outline"
-              className="flex items-center gap-2"
+              className="h-8 w-8 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-md transition-colors"
               onClick={() => router.push('/donations')}
             >
               <ArrowLeft className="h-4 w-4" />
-              View All Donations
             </Button>
             <Button
               className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white"

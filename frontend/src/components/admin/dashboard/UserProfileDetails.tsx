@@ -99,12 +99,12 @@ export function UserProfileDetails({
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
-        <button
+        <Button
           onClick={handleBack}
-          className="mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+          className="mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-        </button>
+        </Button>
 
         {/* Personal Details Section */}
         <div className="bg-background rounded-lg shadow-sm border border-border p-8">

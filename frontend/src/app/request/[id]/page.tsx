@@ -98,9 +98,8 @@ export default function RequestPage() {
         {/* Back Button */}
         <div className="mb-6">
           <Button 
-            variant="ghost" 
             onClick={() => router.back()}
-            className="flex items-center text-white hover:text-white p-2 bg-red-500 hover:bg-red-600 rounded-full w-10 h-10"
+            className="w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>

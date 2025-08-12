@@ -111,15 +111,10 @@ export default function EditLocation({
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Back Button - Updated to match carousel left indicator */}
+        {/* Back Button */}
         <Button
-            variant="ghost"
-            size="icon"
             onClick={handleBack}
-            className={cn(
-              "mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md z-10",
-              "transition-all duration-200 hover:scale-105 text-red-500"
-            )}
+            className="mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-md transition-colors z-10"
             aria-label="Go back"
           >
           <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />

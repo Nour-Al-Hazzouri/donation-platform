@@ -32,9 +32,7 @@ export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps)
             <div className="flex items-center gap-4">
               <Button
                 onClick={onClose}
-                variant="destructive"
-                size="icon"
-                className="rounded-full shadow-lg hover:scale-105 transition-transform"
+                className="w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>

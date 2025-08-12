@@ -151,13 +151,8 @@ export function CreateBlogPost({
       <div className="max-w-4xl mx-auto">
         {onBack && (
           <Button
-            variant="ghost"
-            size="icon"
             onClick={handleBack}
-            className={cn(
-              "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md mb-4 sm:mb-6 z-10"
-            )}
-            style={{ color: COLORS.primary }}
+            className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-md transition-colors mb-4 sm:mb-6 z-10"
             aria-label="Go back"
           >
             <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />

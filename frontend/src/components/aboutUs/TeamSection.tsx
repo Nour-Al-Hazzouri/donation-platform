@@ -189,12 +189,8 @@ export default function TeamSection() {
         <div className="relative">
           <div className="flex items-center justify-center">
             <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md mr-1 sm:mr-2 z-10 text-primary"
-              )}
               onClick={scrollLeft}
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
               aria-label="Previous team members"
             >
               <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -220,12 +216,8 @@ export default function TeamSection() {
             </div>
 
             <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-background/80 hover:bg-background/90 shadow-md ml-1 sm:ml-2 z-10 text-primary"
-              )}
               onClick={scrollRight}
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
               aria-label="Next team members"
             >
               <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
