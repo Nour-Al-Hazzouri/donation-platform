@@ -60,16 +60,6 @@ class NotificationTypeSeeder extends Seeder
                 'description' => 'New comment on your post',
                 'template' => '{user_name} commented on your post',
             ],
-            [
-                'name' => 'comment_replied',
-                'description' => 'Someone replied to your comment',
-                'template' => '{user_name} replied to your comment',
-            ],
-            [
-                'name' => 'comment_deleted',
-                'description' => 'Comment was deleted',
-                'template' => 'A comment on your post was deleted',
-            ],
             
             // Vote/Reaction related
             [
