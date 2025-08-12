@@ -9,6 +9,7 @@ use App\Http\Resources\CommunityPostResource;
 use App\Models\CommunityPost;
 use App\Models\DonationEvent;
 use App\Services\ImageService;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -18,11 +19,19 @@ class CommunityPostController extends Controller
 {
     use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
+    /**
+     * @var ImageService
+     */
     private $imageService;
+    /**
+     * @var NotificationService
+     */
+    private $notificationService;
 
-    public function __construct(ImageService $imageService)
+    public function __construct(ImageService $imageService, NotificationService $notificationService)
     {
         $this->imageService = $imageService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -74,12 +83,6 @@ class CommunityPostController extends Controller
     /**
      * Store a newly created community post in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    /**
-     * Store a newly created community post in storage.
-     *
      * @param  \App\Http\Requests\StoreCommunityPostRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -94,7 +97,6 @@ class CommunityPostController extends Controller
             // Handle image uploads if present
             if ($request->hasFile('image_urls')) {
                 foreach ($request->file('image_urls') as $image) {
-                    \Log::info('uploading post image', [$image]);
                     $path = $this->imageService->uploadImage(
                         $image,
                         'community/posts',
@@ -112,9 +114,21 @@ class CommunityPostController extends Controller
                 }
                 $validated['image_urls'] = $uploadedImages;
             }
-            \Log::info('validated', $validated);
 
-            $post = Auth::user()->communityPosts()->create($validated);
+            $user = Auth::user();
+            $post = $user->communityPosts()->create($validated);
+
+
+            $this->notificationService->sendNewPost(
+                $user,
+                $user->username,
+                $post->event->title,
+                [
+                    'user_id' => $user->id,
+                    'post_id' => $post->id,
+                    'event_id' => $post->event_id,
+                ]
+            );
 
             return response()->json([
                 'success' => true,
@@ -172,7 +186,6 @@ class CommunityPostController extends Controller
             // Handle new image uploads
             if ($request->hasFile('image_urls')) {
                 foreach ($request->file('image_urls') as $image) {
-                    \Log::info('uploading post image to update', [$image]);
                     $path = $this->imageService->uploadImage(
                         $image,
                         'community/posts',
@@ -258,6 +271,16 @@ class CommunityPostController extends Controller
                     }
                 }
             }
+
+            $this->notificationService->sendPostDeleted(
+                $communityPost->user,
+                $communityPost->event->title,
+                [
+                    'user_id' => $communityPost->user->id,
+                    'post_id' => $communityPost->id,
+                    'event_id' => $communityPost->event_id,
+                ]
+            );
 
             // Delete the post
             $communityPost->delete();
