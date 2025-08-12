@@ -9,7 +9,7 @@ export function AddRequestContent() {
   const router = useRouter()
 
   return (
-    <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
       {/* Back Button */}
       <div className="mb-6">
         <Button 
@@ -23,7 +23,7 @@ export function AddRequestContent() {
 
       {/* Page Title */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Add Request</h1>
+        <h1 className="text-3xl font-bold text-foreground">Add Request</h1>
       </div>
 
       {/* Form */}

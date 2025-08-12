@@ -8,9 +8,9 @@ import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { useRequestsStore, initialRequestsData } from "@/lib/store/requestsStore"
-import { useAuthStore } from '@/lib/store/authStore'
-import { useModal } from '@/lib/contexts/ModalContext'
+import { useRequestsStore, initialRequestsData } from "@/store/requestsStore"
+import { useAuthStore } from '@/store/authStore'
+import { useModal } from '@/contexts/ModalContext'
 
 const parseAmount = (value: string | number | undefined | null): number => {
   if (typeof value === 'number') {
@@ -67,11 +67,11 @@ export default function DonatePage() {
   if (!request) {
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Request Not Found</h1>
-            <p className="text-gray-600 mb-6">The request you're trying to donate to doesn't exist.</p>
-            <Button onClick={() => router.push('/')} className="bg-red-500 hover:bg-red-600 text-white">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Request Not Found</h1>
+            <p className="text-muted-foreground mb-6">The request you're trying to donate to doesn't exist.</p>
+            <Button onClick={() => router.push('/')} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               Back to Requests
             </Button>
           </div>
@@ -142,7 +142,7 @@ export default function DonatePage() {
 
   return (
     <MainLayout>
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
         {/* Back Button */}
         <div className="mb-6">
           <Button 
@@ -155,52 +155,52 @@ export default function DonatePage() {
         </div>
 
         {/* Request Info Section */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Request Info</h2>
+        <div className="bg-card rounded-lg shadow-sm border p-6 mb-8">
+          <h2 className="text-xl font-bold text-card-foreground mb-4">Request Info</h2>
           
           <div className="space-y-2 mb-6">
-            <p className="text-gray-700">
+            <p className="text-card-foreground">
               <span className="font-medium">Request amount:</span> ${requestGoalAmount.toLocaleString()}
             </p>
-            <p className="text-gray-700">
+            <p className="text-card-foreground">
               <span className="font-medium">Current amount:</span> ${requestCurrentAmount.toLocaleString()}
             </p>
-            <p className="text-gray-700">
+            <p className="text-card-foreground">
               <span className="font-medium">Remaining needed:</span> ${remainingAmountNeeded.toLocaleString()}
             </p>
           </div>
 
           {/* Request Title */}
           <div className="border-t pt-4">
-            <h3 className="font-semibold text-gray-900 mb-2">{request.title}</h3>
-            <p className="text-sm text-gray-600 line-clamp-2">{request.description}</p>
+            <h3 className="font-semibold text-card-foreground mb-2">{request.title}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
           </div>
         </div>
 
         {/* Donation Section */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Donate the amount you want</h2>
+        <div className="bg-card rounded-lg shadow-sm border p-6">
+          <h2 className="text-xl font-bold text-card-foreground mb-6">Donate the amount you want</h2>
           
           {/* Slider */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
-              <Label className="text-sm font-medium text-gray-700">
+              <Label className="text-sm font-medium text-card-foreground">
                 Amount: ${displayAmount.toLocaleString()}
               </Label>
-              <span className="text-sm text-gray-500">Max: ${remainingAmountNeeded.toLocaleString()}</span>
+              <span className="text-sm text-muted-foreground">Max: ${remainingAmountNeeded.toLocaleString()}</span>
             </div>
             
-            <Slider
-              value={donationAmount}
-              onValueChange={handleSliderChange}
-              max={remainingAmountNeeded > 0 ? remainingAmountNeeded : 1}
-              min={1}
-              step={1}
-              className="w-full"
-              disabled={remainingAmountNeeded <= 0}
-            />
+        <Slider
+            value={donationAmount}
+          onValueChange={handleSliderChange}
+          max={remainingAmountNeeded > 0 ? remainingAmountNeeded : 1}
+          min={1}
+          step={1}
+          disabled={remainingAmountNeeded <= 0}
+        />
+
             
-            <div className="flex justify-between text-xs text-gray-500 mt-2">
+            <div className="flex justify-between text-xs text-muted-foreground mt-2">
               <span>$1</span>
               <span>${remainingAmountNeeded.toLocaleString()}</span>
             </div>
@@ -208,7 +208,7 @@ export default function DonatePage() {
 
           {/* Custom Amount Input */}
           <div className="mb-8">
-            <Label htmlFor="custom-amount" className="text-sm font-medium text-gray-700 mb-2 block">
+            <Label htmlFor="custom-amount" className="text-sm font-medium text-card-foreground mb-2 block">
               Or enter a custom amount
             </Label>
             <Input
@@ -246,7 +246,7 @@ export default function DonatePage() {
 
           {/* Donation Error Message */}
           {donationError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded relative mb-4" role="alert">
               <span className="block sm:inline">{donationError}</span>
             </div>
           )}
@@ -261,14 +261,14 @@ export default function DonatePage() {
           </Button>
 
           {/* Security Notice */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-6 p-4 bg-muted rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+              <div className="w-4 h-4 bg-green-500 dark:bg-green-700 rounded-full flex items-center justify-center">
                 <span className="text-white text-xs">✓</span>
               </div>
-              <span className="text-sm font-medium text-gray-900">Secure Donation</span>
+              <span className="text-sm font-medium text-foreground">Secure Donation</span>
             </div>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-muted-foreground">
               Your donation is secure and encrypted. 100% of your donation goes directly to the cause.
             </p>
           </div>

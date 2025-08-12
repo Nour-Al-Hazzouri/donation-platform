@@ -1,6 +1,6 @@
 import { CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useModal } from "@/lib/contexts/ModalContext"
+import { useModal } from "@/contexts/ModalContext"
 
 export default function PasswordResetSuccess() {
   const { openModal, closeModal } = useModal()

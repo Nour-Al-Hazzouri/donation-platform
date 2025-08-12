@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { useAuthStore } from '@/lib/store/authStore'
-import { useRequestsStore } from '@/lib/store/requestsStore'
+import { useAuthStore } from '@/store/authStore'
+import { useRequestsStore } from '@/store/requestsStore'
 
 // Helper function to get user initials
 function getUserInitials(name: string): string {
@@ -33,6 +33,12 @@ export function AddRequestForm() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (user?.name) {
+      setFormData(prev => ({ ...prev, name: user.name }))
+    }
+  }, [user])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -118,128 +124,131 @@ export function AddRequestForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name Field */}
-      <div>
-        <Label htmlFor="name" className="text-base font-medium text-gray-900">
-          Name
-        </Label>
-        <Input
-          id="name"
-          type="text"
-          placeholder="Steve Rogers"
-          value={formData.name}
-          onChange={(e) => handleInputChange('name', e.target.value)}
-          className={`mt-2 ${errors.name ? 'border-red-500' : ''}`}
-        />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-        )}
-      </div>
-
-      {/* Title Field */}
-      <div>
-        <Label htmlFor="title" className="text-base font-medium text-gray-900">
-          Title <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          id="title"
-          type="text"
-          placeholder="in need for..."
-          value={formData.title}
-          onChange={(e) => handleInputChange('title', e.target.value)}
-          className={`mt-2 ${errors.title ? 'border-red-500' : ''}`}
-        />
-        {errors.title && (
-          <p className="mt-1 text-sm text-red-500">{errors.title}</p>
-        )}
-      </div>
-
-      {/* Description Field */}
-      <div>
-        <Label htmlFor="description" className="text-base font-medium text-gray-900">
-          Description <span className="text-red-500">*</span>
-        </Label>
-        <Textarea
-          id="description"
-          placeholder="I want..."
-          value={formData.description}
-          onChange={(e) => handleInputChange('description', e.target.value)}
-          className={`mt-2 min-h-[120px] ${errors.description ? 'border-red-500' : ''}`}
-        />
-        {errors.description && (
-          <p className="mt-1 text-sm text-red-500">{errors.description}</p>
-        )}
-      </div>
-
-      {/* Goal Amount Field */}
-      <div>
-        <Label htmlFor="goalAmount" className="text-base font-medium text-gray-900">
-          Goal Amount <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          id="goalAmount"
-          type="number"
-          placeholder="ex: 10000"
-          value={formData.goalAmount}
-          onChange={(e) => handleInputChange('goalAmount', e.target.value)}
-          className={`mt-2 ${errors.goalAmount ? 'border-red-500' : ''}`}
-        />
-        {errors.goalAmount && (
-          <p className="mt-1 text-sm text-red-500">{errors.goalAmount}</p>
-        )}
-      </div>
-
-      {/* Image Upload */}
-      <div>
-        <Label className="text-base font-medium text-gray-900 mb-3 block">
-          Upload Image
-        </Label>
-        <div className="flex items-center space-x-4">
-          <label htmlFor="image-upload">
-            <Button
-              type="button"
-              className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2"
-              onClick={() => document.getElementById('image-upload')?.click()}
-            >
-              <Upload className="h-4 w-4" />
-              Upload Image
-            </Button>
-          </label>
-          <span className="text-gray-500 text-sm">
-            {formData.image ? formData.image.name : 'No file chosen'}
-          </span>
-          <input
-            id="image-upload"
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
+    <div className="bg-background">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Name Field */}
+        <div>
+          <Label htmlFor="name" className="text-base font-medium text-foreground">
+            Name
+          </Label>
+          <Input
+            id="name"
+            type="text"
+            placeholder="Enter your name"
+            value={formData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+            className={`mt-2 bg-background dark:bg-background dark:text-foreground border-input dark:border-border ${errors.name ? 'border-red-500' : ''}`}
+            readOnly={!!user?.name}
           />
+          {errors.name && (
+            <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+          )}
         </div>
-        
-        {/* Image Preview */}
-        {formData.image && (
-          <div className="mt-4">
-            <img 
-              src={URL.createObjectURL(formData.image)} 
-              alt="Preview" 
-              className="w-full max-w-md h-32 object-cover rounded-md border"
+
+        {/* Title Field */}
+        <div>
+          <Label htmlFor="title" className="text-base font-medium text-foreground">
+            Title <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="title"
+            type="text"
+            placeholder="Enter request title"
+            value={formData.title}
+            onChange={(e) => handleInputChange('title', e.target.value)}
+            className={`mt-2 bg-background dark:bg-background dark:text-foreground border-input dark:border-border ${errors.title ? 'border-red-500' : ''}`}
+          />
+          {errors.title && (
+            <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+          )}
+        </div>
+
+        {/* Description Field */}
+        <div>
+          <Label htmlFor="description" className="text-base font-medium text-foreground">
+            Description <span className="text-red-500">*</span>
+          </Label>
+          <Textarea
+            id="description"
+            placeholder="Enter request description"
+            value={formData.description}
+            onChange={(e) => handleInputChange('description', e.target.value)}
+            className={`mt-2 min-h-[120px] bg-background dark:bg-background dark:text-foreground border-input dark:border-border resize-none ${errors.description ? 'border-red-500' : ''}`}
+          />
+          {errors.description && (
+            <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+          )}
+        </div>
+
+        {/* Goal Amount Field */}
+        <div>
+          <Label htmlFor="goalAmount" className="text-base font-medium text-foreground">
+            Goal Amount <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="goalAmount"
+            type="number"
+            placeholder="Enter goal amount"
+            value={formData.goalAmount}
+            onChange={(e) => handleInputChange('goalAmount', e.target.value)}
+            className={`mt-2 bg-background dark:bg-background dark:text-foreground border-input dark:border-border ${errors.goalAmount ? 'border-red-500' : ''}`}
+          />
+          {errors.goalAmount && (
+            <p className="mt-1 text-sm text-red-500">{errors.goalAmount}</p>
+          )}
+        </div>
+
+        {/* Image Upload */}
+        <div>
+          <Label className="text-base font-medium text-foreground mb-3 block">
+            Upload Image
+          </Label>
+          <div className="flex items-center space-x-4">
+            <label htmlFor="image-upload">
+              <Button
+                type="button"
+                className="bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 text-white dark:text-white flex items-center gap-2 transition-colors"
+                onClick={() => document.getElementById('image-upload')?.click()}
+              >
+                <Upload className="h-4 w-4" />
+                Upload Image
+              </Button>
+            </label>
+            <span className="text-muted-foreground dark:text-muted-foreground text-sm">
+              {formData.image ? formData.image.name : 'No file chosen'}
+            </span>
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
             />
           </div>
-        )}
-      </div>
+          
+          {/* Image Preview */}
+          {formData.image && (
+            <div className="mt-4">
+              <img 
+                src={URL.createObjectURL(formData.image)} 
+                alt="Preview" 
+                className="w-full max-w-md h-32 object-cover rounded-md border border-border dark:border-border"
+              />
+            </div>
+          )}
+        </div>
 
-      {/* Submit Button */}
-      <div className="pt-6">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg"
-        >
-          {isSubmitting ? 'Creating Request...' : 'Create Request'}
-        </Button>
-      </div>
-    </form>
+        {/* Submit Button */}
+        <div className="pt-6">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 text-white dark:text-white py-3 text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? 'Creating Request...' : 'Create Request'}
+          </Button>
+        </div>
+      </form>
+    </div>
   )
 }

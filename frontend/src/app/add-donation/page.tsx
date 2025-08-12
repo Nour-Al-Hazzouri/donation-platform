@@ -2,8 +2,8 @@
 
 import { MainLayout } from "@/components/layouts/MainLayout"
 import { AddDonationContent } from '@/components/add-donation/AddDonationContent'
-import { useAuthStore } from '@/lib/store/authStore'
-import { useModal } from '@/lib/contexts/ModalContext'
+import { useAuthStore } from '@/store/authStore'
+import { useModal } from '@/contexts/ModalContext'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 

@@ -1,10 +1,15 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mail } from "lucide-react"
 import { COLORS } from "@/lib/constants"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 export function Hero() {
+  const router = useRouter();
+  
   return (
     <section className="container mx-auto px-4 py-8"> {/* Reduced py-12 to py-8 */}
       {/* Hero Text and Email Signup */}
@@ -31,17 +36,16 @@ export function Hero() {
             <Input
               type="email"
               placeholder="Enter email address"
-              className="pl-10 py-3 rounded-full border border-input focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 w-full shadow-sm hover:shadow-md transition-all duration-300"
+              className="pl-10 py-3 rounded-full border border-input focus:border-red-500 focus-visible:ring-2 focus-visible:ring-red-500/30 w-full shadow-sm hover:shadow-md transition-all duration-300"
               style={{
-                boxShadow: `0 0 0 1px ${COLORS.primary}20`
+                boxShadow: `0 0 0 1px #f9040420`
               }}
             />
           </div>
           <Button 
-            className="bg-primary hover:bg-primaryHover text-white rounded-full px-8 py-3 w-full sm:w-auto shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+            className="bg-red-500 hover:bg-red-600 text-white rounded-full px-8 py-3 w-full sm:w-auto shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
             style={{
-              backgroundColor: COLORS.primary,
-              '--tw-shadow-color': `${COLORS.primary}80`,
+              '--tw-shadow-color': `#f9040480`,
               '--tw-shadow': 'var(--tw-shadow-colored)'
             } as React.CSSProperties}
           >
@@ -102,20 +106,20 @@ export function Hero() {
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <Button 
-            className="bg-primary hover:bg-primaryHover text-white rounded-full px-8 py-3 w-full sm:w-auto shadow-md hover:shadow-lg transition-all duration-300"
+            className="bg-red-500 hover:bg-red-600 text-white rounded-full px-8 py-3 w-full sm:w-auto shadow-md hover:shadow-lg transition-all duration-300"
             style={{
-              backgroundColor: COLORS.primary,
-              '--tw-shadow-color': `${COLORS.primary}80`
+              '--tw-shadow-color': `#f9040480`
             } as React.CSSProperties}
+            onClick={() => router.push('/add-request')}
           >
             Add Request
           </Button>
           <Button 
-            className="bg-primary hover:bg-primaryHover text-white rounded-full px-8 py-3 w-full sm:w-auto shadow-md hover:shadow-lg transition-all duration-300"
+            className="bg-red-500 hover:bg-red-600 text-white rounded-full px-8 py-3 w-full sm:w-auto shadow-md hover:shadow-lg transition-all duration-300"
             style={{
-              backgroundColor: COLORS.primary,
-              '--tw-shadow-color': `${COLORS.primary}80`
+              '--tw-shadow-color': `#f9040480`
             } as React.CSSProperties}
+            onClick={() => router.push('/add-donation')}
           >
             Donate Now
           </Button>

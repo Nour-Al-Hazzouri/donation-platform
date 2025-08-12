@@ -5,11 +5,12 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { useRequestsStore, initialRequestsData } from "@/lib/store/requestsStore"
+import { useRequestsStore, initialRequestsData } from "@/store/requestsStore"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { COLORS } from '@/lib/constants'
+import { COLORS } from '@/utils/constants'
 import Image from 'next/image'
 import { useEffect } from 'react'
+import { HowDonationHelps } from '@/components/donations/HowDonationHelps'
 
 // More robust helper to parse amounts, handling various types and ensuring a number is returned
 const parseAmount = (value: string | number | undefined | null): number => {
@@ -37,12 +38,12 @@ export default function RequestDetailsPage() {
 
   if (!request) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <MainLayout>
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">Request Not Found</h1>
-              <p className="text-gray-600 mb-6">The request you're looking for doesn't exist.</p>
+              <h1 className="text-2xl font-bold text-foreground mb-4">Request Not Found</h1>
+              <p className="text-muted-foreground mb-6">The request you're looking for doesn't exist.</p>
               <Button onClick={() => router.push('/')} className="bg-red-500 hover:bg-red-600 text-white">
                 Back to Requests
               </Button>
@@ -93,29 +94,26 @@ export default function RequestDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <MainLayout>
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-          {/* Updated Back Button to match Community page */}
+          {/* Standardized Back Button */}
           <div className="mb-4 md:mb-6">
             <Button 
-              variant="ghost"
-              size="icon"
               onClick={() => router.back()}
-              className="h-8 w-8 rounded-full bg-white/80 hover:bg-white/90 shadow-md"
-              style={{ color: COLORS.primary }}
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-md transition-colors"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
 
           {/* Page Title */}
           <div className="text-center mb-6 md:mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Request Details</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Request Details</h1>
           </div>
 
           {/* Request Details Card */}
-          <div className="bg-white rounded-lg shadow-sm border p-4 md:p-8">
+          <div className="bg-card rounded-lg shadow-sm border p-4 md:p-8">
             {/* User Profile Section */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center">
@@ -131,48 +129,46 @@ export default function RequestDetailsPage() {
                         alt="Verified"
                         width={16}
                         height={16}
-                        className="rounded-full border-2 border-white"
+                        className="rounded-full border-2 border-background"
                       />
                     </div>
                   )}
                 </div>
                 <div>
                   <div className="flex items-center gap-1 md:gap-2 mb-1">
-                    <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900">{request.name}</h2>
+                    <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">{request.name}</h2>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-600">{requestDetails.location} • {requestDetails.dateCreated}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{requestDetails.location} • {requestDetails.dateCreated}</p>
                 </div>
               </div>
-              <Button variant="destructive" size="sm" className="self-end sm:self-auto">
-                Report
-              </Button>
+             
             </div>
 
             {/* Request Title */}
             <div className="mb-4 md:mb-6">
-              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1 md:mb-2">{request.title}</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 md:mb-2">{request.title}</h3>
             </div>
 
             {/* Progress Section */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs sm:text-sm font-medium text-gray-700">Progress</span>
-                <span className="text-xs sm:text-sm text-gray-500">{Math.round(progressPercentage)}%</span>
+                <span className="text-xs sm:text-sm font-medium text-card-foreground">Progress</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{Math.round(progressPercentage)}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 mb-3 sm:mb-4">
+              <div className="w-full bg-muted rounded-full h-2 sm:h-3 mb-3 sm:mb-4">
                 <div 
                   className="bg-red-500 h-2 sm:h-3 rounded-full transition-all duration-300" 
                   style={{ width: `${Math.min(progressPercentage, 100)}%` }}
                 ></div>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
-                <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
-                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-500">{requestDetails.currency}{requestDetails.currentAmount}</p>
-                  <p className="text-xs sm:text-sm text-gray-600">Raised so far</p>
+                <div className="bg-muted rounded-lg p-2 sm:p-4">
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-500 dark:text-red-400">{requestDetails.currency}{requestDetails.currentAmount}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Raised so far</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
-                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{requestDetails.currency}{requestDetails.requestAmount}</p>
-                  <p className="text-xs sm:text-sm text-gray-600">Goal amount</p>
+                <div className="bg-muted rounded-lg p-2 sm:p-4">
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">{requestDetails.currency}{requestDetails.requestAmount}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Goal amount</p>
                 </div>
               </div>
             </div>
@@ -193,8 +189,8 @@ export default function RequestDetailsPage() {
 
             {/* Full Description */}
             <div className="mb-6 md:mb-8">
-              <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-2 md:mb-3">About this request</h4>
-              <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line">
+              <h4 className="text-base md:text-lg font-semibold text-foreground mb-2 md:mb-3">About this request</h4>
+              <p className="text-sm sm:text-base text-card-foreground leading-relaxed whitespace-pre-line">
                 {requestDetails.fullDescription}
               </p>
             </div>
@@ -210,23 +206,9 @@ export default function RequestDetailsPage() {
             </div>
           </div>
 
-          {/* Additional Info Section */}
-          <div className="mt-6 md:mt-8 bg-white rounded-lg shadow-sm border p-4 md:p-6">
-            <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">How your donation helps</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-              <div className="text-center p-3 md:p-4 bg-red-50 rounded-lg">
-                <div className="text-xl sm:text-2xl font-bold text-red-500 mb-1 md:mb-2">100%</div>
-                <p className="text-xs sm:text-sm text-gray-600">of donations go directly to the cause</p>
-              </div>
-              <div className="text-center p-3 md:p-4 bg-blue-50 rounded-lg">
-                <div className="text-xl sm:text-2xl font-bold text-blue-500 mb-1 md:mb-2">24/7</div>
-                <p className="text-xs sm:text-sm text-gray-600">Support and updates on progress</p>
-              </div>
-              <div className="text-center p-3 md:p-4 bg-green-50 rounded-lg">
-                <div className="text-xl sm:text-2xl font-bold text-green-500 mb-1 md:mb-2">Secure</div>
-                <p className="text-xs sm:text-sm text-gray-600">Safe and encrypted transactions</p>
-              </div>
-            </div>
+          {/* How Donation Helps Section */}
+          <div className="mt-6 md:mt-8">
+            <HowDonationHelps />
           </div>
         </main>
       </MainLayout>

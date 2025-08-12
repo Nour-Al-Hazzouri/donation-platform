@@ -21,7 +21,7 @@ const COMMUNITY_GROWTH = {
 
 export function CommunityChart() {
   return (
-    <Card className="bg-white w-full shadow-sm hover:shadow transition-shadow duration-200">
+    <Card className="bg-background w-full shadow-sm hover:shadow transition-shadow duration-200 border border-border">
       <CardHeader className="pb-2">
         <CardTitle className="text-xl font-semibold">Community Growth</CardTitle>
       </CardHeader>
@@ -32,7 +32,7 @@ export function CommunityChart() {
             <div className="text-4xl font-bold">{COMMUNITY_GROWTH.totalMembers}</div>
             <div className="text-sm text-muted-foreground">Total Members</div>
           </div>
-          <div className="text-sm font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
+          <div className="text-sm font-medium text-red-500 bg-red-500/10 px-2.5 py-1 rounded-full">
             {COMMUNITY_GROWTH.growthRate} {COMMUNITY_GROWTH.growthPeriod}
           </div>
         </div>
@@ -80,7 +80,7 @@ export function CommunityChart() {
           {COMMUNITY_GROWTH.months.map((month, index) => (
             <span 
               key={index} 
-              className={month.isHighlighted ? "bg-red-100 text-red-600 px-2 py-0.5 rounded-md font-medium" : ""}
+              className={month.isHighlighted ? "bg-red-500/10 text-red-500 px-2 py-0.5 rounded-md font-medium" : ""}
             >
               {month.name}
             </span>

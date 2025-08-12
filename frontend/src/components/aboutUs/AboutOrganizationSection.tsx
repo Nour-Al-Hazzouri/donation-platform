@@ -21,12 +21,12 @@ export default function AboutOrganizationSection() {
   ]
 
   return (
-    <section className="bg-white py-12 sm:py-16 px-4 xs:px-6 sm:px-8 lg:px-12 xl:px-16">
+    <section className="bg-background py-12 sm:py-16 px-4 xs:px-6 sm:px-8 lg:px-12 xl:px-16">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-center">
           {/* Text Content - Order changes on lg screens */}
           <div className="order-2 lg:order-1 space-y-6 sm:space-y-8">
-            <h2 className="text-3xl xs:text-3.5xl sm:text-4xl md:text-4.5xl font-bold text-gray-900 leading-tight">
+            <h2 className="text-3xl xs:text-3.5xl sm:text-4xl md:text-4.5xl font-bold text-foreground leading-tight">
               About our Organization
             </h2>
             
@@ -34,18 +34,18 @@ export default function AboutOrganizationSection() {
               {organizationInfo.map((item, index) => (
                 <div key={index} className="space-y-3 sm:space-y-4">
                   <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#f90404] rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                       <item.icon 
                         size={20} 
                         className="text-white" 
                         strokeWidth={2}
                       />
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
+                    <h3 className="text-xl sm:text-2xl font-bold text-foreground">
                       {item.title}
                     </h3>
                   </div>
-                  <p className="text-gray-600 text-sm sm:text-base md:text-[1.0625rem] leading-relaxed ml-14 sm:ml-16">
+                  <p className="text-muted-foreground text-sm sm:text-base md:text-[1.0625rem] leading-relaxed ml-14 sm:ml-16">
                     {item.description}
                   </p>
                 </div>

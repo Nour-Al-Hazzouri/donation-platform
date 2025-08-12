@@ -109,36 +109,30 @@ export default function EditLocation({
   const hasChanges = selectedGovernorate !== initialData.governorate || selectedDistrict !== initialData.district
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Back Button - Updated to match carousel left indicator */}
+        {/* Back Button */}
         <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleBack}
-          className={cn(
-            "mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white/80 hover:bg-white/90 shadow-md z-10",
-            "transition-all duration-200 hover:scale-105"
-          )}
-          aria-label="Go back"
-          style={{ color: COLORS.primary }}
-        >
+            onClick={handleBack}
+            className="mb-6 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-md transition-colors z-10"
+            aria-label="Go back"
+          >
           <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
         {/* Page Title */}
-        <h1 className="text-2xl font-semibold text-gray-900 mb-8">Edit Location</h1>
+        <h1 className="text-2xl font-semibold text-foreground mb-8">Edit Location</h1>
 
         {/* Edit Form */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-background rounded-lg shadow-sm border border-border p-6">
           <div className="space-y-6">
             {/* Governorate Field */}
             <div>
-              <label htmlFor="governorate" className="block text-lg font-medium text-gray-900 mb-2">
+              <label htmlFor="governorate" className="block text-lg font-medium text-foreground mb-2">
                 Governorate:
               </label>
               <Select value={selectedGovernorate} onValueChange={handleGovernorateChange}>
-                <SelectTrigger className="w-full max-w-xs border-gray-300 focus:border-[#f90404] focus:ring-[#f90404]">
+                <SelectTrigger className="w-full max-w-xs border-border focus:border-primary focus:ring-primary">
                   <SelectValue placeholder="Select Governorate" />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,11 +147,11 @@ export default function EditLocation({
 
             {/* District Field */}
             <div>
-              <label htmlFor="district" className="block text-lg font-medium text-gray-900 mb-2">
+              <label htmlFor="district" className="block text-lg font-medium text-foreground mb-2">
                 District
               </label>
               <Select value={selectedDistrict} onValueChange={handleDistrictChange} disabled={!selectedGovernorate}>
-                <SelectTrigger className="w-full max-w-xs border-gray-300 focus:border-[#f90404] focus:ring-[#f90404] disabled:opacity-50">
+                <SelectTrigger className="w-full max-w-xs border-border focus:border-primary focus:ring-primary disabled:opacity-50">
                   <SelectValue placeholder="Select District" />
                 </SelectTrigger>
                 <SelectContent>
@@ -172,12 +166,12 @@ export default function EditLocation({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-4 pt-6">
+          <div className="flex justify-end gap-4 pt-6 border-t border-border mt-6">
             <Button
               type="button"
               variant="ghost"
               onClick={handleCancel}
-              className="text-[#f90404] hover:text-[#d90404] hover:bg-[#d90404]/10"
+              className="text-red-500 hover:text-red-500/80 hover:bg-red-500/10"
             >
               Cancel
             </Button>
@@ -185,7 +179,7 @@ export default function EditLocation({
               type="button"
               disabled={!isFormValid || !hasChanges}
               onClick={handleSave}
-              className="bg-[#f90404] hover:bg-[#d90404] text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-red-500 hover:bg-red-600 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Edit
             </Button>

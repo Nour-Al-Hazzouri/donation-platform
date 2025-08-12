@@ -96,26 +96,26 @@ export function UserProfileDetails({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
-        <button
+        <Button
           onClick={handleBack}
-          className="mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-black transition-colors"
+          className="mb-6 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-        </button>
+        </Button>
 
         {/* Personal Details Section */}
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-8">Personal Details</h2>
+        <div className="bg-background rounded-lg shadow-sm border border-border p-8">
+          <h2 className="text-2xl font-semibold text-foreground mb-8">Personal Details</h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Left Column - Profile Image and Basic Info */}
             <div className="space-y-8">
               {/* Profile Image */}
               <div className="flex justify-center lg:justify-start">
-                <div className="w-64 h-64 rounded-2xl overflow-hidden bg-gray-100">
+                <div className="w-64 h-64 rounded-2xl overflow-hidden bg-muted">
                   <Image
                     src={userData.personalDetails.profileImage || "/placeholder.svg"}
                     alt={`${userData.personalDetails.name}'s profile`}
@@ -129,23 +129,23 @@ export function UserProfileDetails({
               {/* Personal Information */}
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Name</label>
-                  <p className="text-lg text-gray-900 font-medium">{userData.personalDetails.name}</p>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Name</label>
+                  <p className="text-lg text-foreground font-medium">{userData.personalDetails.name}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Gender</label>
-                  <p className="text-lg text-gray-900">{userData.personalDetails.gender}</p>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Gender</label>
+                  <p className="text-lg text-foreground">{userData.personalDetails.gender}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Phone Number</label>
-                  <p className="text-lg text-gray-900">{userData.personalDetails.phoneNumber}</p>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Phone Number</label>
+                  <p className="text-lg text-foreground">{userData.personalDetails.phoneNumber}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Email</label>
-                  <p className="text-lg text-gray-900">{userData.personalDetails.email}</p>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Email</label>
+                  <p className="text-lg text-foreground">{userData.personalDetails.email}</p>
                 </div>
               </div>
             </div>
@@ -153,17 +153,17 @@ export function UserProfileDetails({
             {/* Right Column - Address */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-blue-500 mb-6">Address</h3>
+                <h3 className="text-xl font-semibold text-red-500 mb-6">Address</h3>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">district</label>
-                    <p className="text-lg text-gray-900">{userData.personalDetails.address.district}</p>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">district</label>
+                    <p className="text-lg text-foreground">{userData.personalDetails.address.district}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">governorate</label>
-                    <p className="text-lg text-gray-900">{userData.personalDetails.address.governorate}</p>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">governorate</label>
+                    <p className="text-lg text-foreground">{userData.personalDetails.address.governorate}</p>
                   </div>
                 </div>
               </div>
@@ -171,16 +171,16 @@ export function UserProfileDetails({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-4 mt-12 pt-8 border-t border-gray-200">
+          <div className="flex justify-end gap-4 mt-12 pt-8 border-t border-border">
             <Button
               onClick={handleDelete}
               disabled={isDeleting}
               variant="ghost"
-              className="text-red-500 hover:text-red-600 hover:bg-red-50 disabled:opacity-50"
+              className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 disabled:opacity-50"
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </Button>
-            <Button onClick={handleEdit} className="bg-green-500 hover:bg-green-600 text-white px-8">
+            <Button onClick={handleEdit} className="bg-red-500 hover:bg-red-600 text-white px-8">
               Edit
             </Button>
           </div>

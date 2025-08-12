@@ -11,7 +11,7 @@ interface MainLayoutProps {
 
 export function AdminLayout({ children }: MainLayoutProps) {
   return (
-    <div className={`min-h-screen flex flex-col bg-[${COLORS.background}]`}>
+    <div className="min-h-screen flex flex-col bg-background">
       <AdminHeader />
 
       {/* Main content area - full width on mobile, adjusted for sidebar on md+ screens */}

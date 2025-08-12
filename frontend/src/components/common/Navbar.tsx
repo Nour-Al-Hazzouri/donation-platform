@@ -4,8 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
-import { NAV_ITEMS, COLORS } from '@/lib/constants'
-import { useModal } from '@/lib/contexts/ModalContext'
+import { NAV_ITEMS, COLORS } from '@/utils/constants'
+import { useModal } from '@/contexts/ModalContext'
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)

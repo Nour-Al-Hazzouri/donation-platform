@@ -1,53 +1,6 @@
-'use client'
+// Re-export from the new location
+export { AuthModals, default } from '@/components/modals/AuthModals';
 
-import { useModal, type ModalType } from '@/lib/contexts/ModalContext'
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import SignInPage from '@/components/auth/SignInPage'
-import SignUpPage from '@/components/auth/SignUpPage'
-import ForgotPasswordPage from '@/components/auth/ForgotPasswordPage'
-import VerificationCodePage from '@/components/auth/VerificationCodePage'
-import NewPasswordForm from '@/components/auth/NewPasswordForm'
-import PasswordResetSuccess from '@/components/auth/PasswordResetSuccess'
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-
-export function AuthModals() {
-  const { modalType, previousModalType, isTransitioning, transitionDirection, closeModal } = useModal()
-  const [modalSize, setModalSize] = useState('md')
-  
-  // Determine if a modal should be shown (either current or previous during transition)
-  const shouldShowModal = (type: ModalType) => {
-    if (type === null) return false
-    return modalType === type || (isTransitioning && previousModalType === type)
-  }
-  
-  // Update modal size based on screen width
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setModalSize('sm')
-      } else if (window.innerWidth < 1024) {
-        setModalSize('md')
-      } else {
-        setModalSize('lg')
-      }
-    }
-    
-    // Set initial size
-    handleResize()
-    
-    // Add event listener
-    window.addEventListener('resize', handleResize)
-    
-    // Clean up
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  return (
-    <>
-      {/* Sign In Modal */}
-      <Dialog open={shouldShowModal('signIn')} onOpenChange={(open) => !open && closeModal()} defaultOpen={false}>
-        <DialogContent className={`p-0 border-none bg-transparent shadow-none transition-all duration-300 ${modalSize === 'sm' ? 'max-w-[90%]' : modalSize === 'md' ? 'max-w-md' : 'max-w-lg'}`}>
           <DialogTitle className="sr-only">Sign In</DialogTitle>
           <DialogDescription className="sr-only">
             Sign in to your account

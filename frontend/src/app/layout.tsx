@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ModalProvider } from "@/lib/contexts/ModalContext";
-import { AuthModals } from "@/components/common/AuthModals";
+import { ModalProvider } from "@/contexts/ModalContext";
+import { AuthModals } from "@/components/modals/AuthModals";
 import { Toaster } from "@/components/ui/toaster";
-
+import { ThemeProvider } from "@/components/theme-provider";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -26,15 +26,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ModalProvider>
-          {children}
-          <AuthModals />
-          <Toaster />
-        </ModalProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ModalProvider>
+            {children}
+            <AuthModals />
+            <Toaster />
+          </ModalProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

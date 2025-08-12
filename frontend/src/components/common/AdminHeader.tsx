@@ -2,10 +2,11 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { NAV_ITEMS, COLORS } from "@/lib/constants"
+import { NAV_ITEMS } from "@/lib/constants"
 import { usePathname } from "next/navigation"
 import { Menu, X, LayoutDashboard, FileText, Users, MapPin } from "lucide-react"
 import Image from "next/image"
+import { ThemeToggleProvider } from "./ThemeToggleProvider"
 
 export function AdminHeader() {
   const pathname = usePathname()
@@ -18,14 +19,14 @@ export function AdminHeader() {
     const isActive = pathname === item.href
     const mobileClasses = `px-3 py-2 rounded-md text-base font-medium ${
       isActive
-        ? `text-[${COLORS.primary}] bg-gray-100`
-        : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}] hover:bg-gray-50`
+        ? `text-primary bg-secondary`
+        : `text-muted-foreground hover:text-red-500 hover:bg-secondary/50`
     }`
 
     const desktopClasses = `${
       isActive
-        ? `text-[${COLORS.primary}] font-medium border-b-2 border-primary pb-1`
-        : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`
+        ? `text-primary font-medium border-b-2 border-primary pb-1`
+        : `text-muted-foreground hover:text-red-500 hover:border-b-2 hover:border-red-500 hover:pb-1 transition-all duration-200`
     } text-sm lg:text-base whitespace-nowrap`
 
     return (
@@ -34,7 +35,6 @@ export function AdminHeader() {
         href={item.href}
         className={isMobile ? mobileClasses : desktopClasses}
         onClick={closeMobileMenu}
-        style={isActive && !isMobile ? { borderBottomColor: COLORS.primary } : {}}
       >
         {item.name}
       </Link>
@@ -43,16 +43,16 @@ export function AdminHeader() {
 
   return (
     <>
-      <header className="w-full px-4 md:px-6 py-4 shadow-sm sticky top-0 bg-white z-40">
+      <header className="w-full px-4 md:px-6 py-2 shadow-sm sticky top-0 bg-background z-40">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
             className="flex items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
           >
-            <div className="w-40 h-10 relative">
+            <div className="w-60 h-15 relative">
               <Image
-                src="/logo.png"
+                src="/logoooo-removebg-preview.png"
                 alt="GiveLeb Logo"
                 fill
                 sizes="(max-width: 768px) 160px, 200px"
@@ -86,10 +86,9 @@ export function AdminHeader() {
                     href={item.href}
                     className={`hidden lg:inline-block ${
                       pathname === item.href
-                        ? `text-[${COLORS.primary}] font-medium border-b-2 pb-1`
-                        : `text-[${COLORS.text.secondary}] hover:text-[${COLORS.text.primary}]`
+                        ? `text-primary font-medium border-b-2 border-primary pb-1`
+                        : `text-muted-foreground hover:text-red-500 hover:border-b-2 hover:border-red-500 hover:pb-1 transition-all duration-200`
                     } text-sm lg:text-base whitespace-nowrap`}
-                    style={pathname === item.href ? { borderBottomColor: COLORS.primary } : {}}
                   >
                     {item.name}
                   </Link>
@@ -99,14 +98,13 @@ export function AdminHeader() {
             })}
           </nav>
           <div className="hidden md:flex items-center gap-3">
+            {/* Theme Toggle */}
+            <ThemeToggleProvider />
+            
             {/* Dashboard Button */}
             <Link href="/admin/dashboard">
               <Button
-                style={{
-                  backgroundColor: COLORS.primary,
-                  color: "white",
-                }}
-                className="hover:bg-red-600 transition-colors duration-200 rounded-md px-4 py-2 text-sm font-medium"
+                className="bg-red-500 text-white hover:bg-red-600 transition-colors duration-200 rounded-md px-4 py-2 text-sm font-medium"
               >
                 Dashboard
               </Button>
@@ -117,47 +115,52 @@ export function AdminHeader() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-50 bg-white overflow-y-auto">
+        <div className="md:hidden fixed inset-0 top-16 z-50 bg-background overflow-y-auto">
           <div className="p-4">
             <nav className="flex flex-col space-y-4">
               {NAV_ITEMS.map((item) => renderNavLink(item, true))}
 
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-border">
                 {/* Mobile Admin Profile */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full overflow-hidden">
-                    <Image
-                      src="/placeholder.svg?height=40&width=40"
-                      alt="Admin Profile"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden">
+                      <Image
+                        src="/placeholder.svg?height=40&width=40"
+                        alt="Admin Profile"
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                      />
+                    </div>
+                    <span className="text-base font-medium text-foreground">Admin</span>
                   </div>
-                  <span className="text-base font-medium text-gray-700">Admin</span>
+                  
+                  {/* Theme Toggle in Mobile Menu */}
+                  <ThemeToggleProvider />
                 </div>
                 
                 {/* Dashboard Sidebar Links for Mobile */}
                 <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Dashboard Menu</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Dashboard Menu</h3>
                   <div className="space-y-2">
-                    <Link href="/admin" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2">
+                    <Link href="/admin" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                       <LayoutDashboard className="h-4 w-4" />
                       <span>Dashboard</span>
                     </Link>
-                    <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2">
+                    <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                       <FileText className="h-4 w-4" />
                       <span>Manage Blogs</span>
                     </Link>
-                    <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2">
+                    <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                       <MapPin className="h-4 w-4" />
                       <span>Manage Locations</span>
                     </Link>
-                    <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2">
+                    <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                       <Users className="h-4 w-4" />
                       <span>All Users</span>
                     </Link>
-                    <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-gray-700 hover:text-red-600 py-2 pl-6">
+                    <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2 pl-6">
                       <FileText className="h-4 w-4" />
                       <span>Verification Requests</span>
                     </Link>
@@ -167,8 +170,7 @@ export function AdminHeader() {
                 {/* Mobile Dashboard Button */}
                 <Link href="/admin/dashboard" onClick={closeMobileMenu}>
                   <Button
-                    style={{ backgroundColor: COLORS.primary, color: "white" }}
-                    className="w-full text-center py-2 px-4 rounded-md"
+                    className="w-full text-center py-2 px-4 rounded-md bg-red-500 text-white hover:bg-red-600"
                   >
                     Dashboard
                   </Button>

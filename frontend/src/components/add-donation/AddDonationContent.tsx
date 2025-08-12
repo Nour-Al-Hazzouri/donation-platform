@@ -9,7 +9,7 @@ export function AddDonationContent() {
   const router = useRouter()
 
   return (
-    <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
       <div className="mb-6">
         <Button 
           variant="ghost" 
@@ -21,7 +21,7 @@ export function AddDonationContent() {
       </div>
 
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Add Donation</h1>
+        <h1 className="text-3xl font-bold text-foreground">Add Donation</h1>
       </div>
 
       <AddDonationForm />

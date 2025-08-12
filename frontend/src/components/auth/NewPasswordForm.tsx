@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff, ChevronLeft } from "lucide-react"
-import { useModal } from "@/lib/contexts/ModalContext"
+import { useModal } from "@/contexts/ModalContext"
 
 export default function NewPasswordForm() {
   const [showPassword, setShowPassword] = useState(false)

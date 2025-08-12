@@ -5,8 +5,8 @@ import { ArrowLeft, ImageIcon, ArrowUp } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { COLORS } from '@/lib/constants'
-import { useAuthStore } from '@/lib/store/authStore'
+import { COLORS } from '@/utils/constants'
+import { useAuthStore } from '@/store/authStore'
 
 interface CommunityWritePostProps {
   onCancel: () => void;
@@ -76,16 +76,13 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-border px-4 py-3">
+      <div className="bg-background border-b border-border px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
               <Button 
-                variant="ghost" 
-                size="icon" 
                 onClick={onCancel}
-                className="h-8 w-8 rounded-full bg-white/80 hover:bg-white/90 shadow-md"
-                style={{ color: COLORS.primary }}
+                className="h-8 w-8 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-md transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -163,11 +160,8 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
             <Button
               type="submit"
               disabled={isSubmitting || !postContent.trim()}
-              style={{
-                backgroundColor: isSubmitting || !postContent.trim() ? undefined : COLORS.primary,
-                color: 'white'
-              }}
-              className="hover:bg-primaryHover gap-2"
+              variant="default"
+              className="bg-red-500 hover:bg-red-600 text-white gap-2"
             >
               <ArrowUp className="w-4 h-4" />
               Post

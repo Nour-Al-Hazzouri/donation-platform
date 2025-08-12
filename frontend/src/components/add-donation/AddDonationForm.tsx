@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { useAuthStore } from '@/lib/store/authStore'
-import { useDonationsStore } from '@/lib/store/donationsStore'
+import { useAuthStore } from '@/store/authStore'
+import { useDonationsStore } from '@/store/donationsStore'
 
 function getUserInitials(name: string): string {
   return name
@@ -32,6 +32,13 @@ export function AddDonationForm() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Update the name field if user changes
+  useEffect(() => {
+    if (user?.name) {
+      setFormData(prev => ({ ...prev, name: user.name }))
+    }
+  }, [user?.name])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -102,7 +109,8 @@ export function AddDonationForm() {
       
       addDonation(newDonation)
       
-      router.push('/donations?success=donation-created')
+      // Redirect to the success page with the donation ID
+      router.push(`/donation/success?id=${newDonation.id}`)
     } catch (error) {
       console.error('Error submitting donation:', error)
     } finally {
@@ -113,16 +121,17 @@ export function AddDonationForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <Label htmlFor="name" className="text-base font-medium text-gray-900">
+        <Label htmlFor="name" className="text-base font-medium text-foreground">
           Name
         </Label>
         <Input
           id="name"
           type="text"
-          placeholder="Your Name"
+          placeholder="Enter your name"
           value={formData.name}
           onChange={(e) => handleInputChange('name', e.target.value)}
           className={`mt-2 ${errors.name ? 'border-red-500' : ''}`}
+          disabled={!!user?.name} // Disable if user is logged in
         />
         {errors.name && (
           <p className="mt-1 text-sm text-red-500">{errors.name}</p>
@@ -130,13 +139,13 @@ export function AddDonationForm() {
       </div>
 
       <div>
-        <Label htmlFor="title" className="text-base font-medium text-gray-900">
+        <Label htmlFor="title" className="text-base font-medium text-foreground">
           Title <span className="text-red-500">*</span>
         </Label>
         <Input
           id="title"
           type="text"
-          placeholder="What are you offering?"
+          placeholder="Enter donation title"
           value={formData.title}
           onChange={(e) => handleInputChange('title', e.target.value)}
           className={`mt-2 ${errors.title ? 'border-red-500' : ''}`}
@@ -147,12 +156,12 @@ export function AddDonationForm() {
       </div>
 
       <div>
-        <Label htmlFor="description" className="text-base font-medium text-gray-900">
+        <Label htmlFor="description" className="text-base font-medium text-foreground">
           Description <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="description"
-          placeholder="Describe your donation..."
+          placeholder="Enter donation description"
           value={formData.description}
           onChange={(e) => handleInputChange('description', e.target.value)}
           className={`mt-2 min-h-[120px] ${errors.description ? 'border-red-500' : ''}`}
@@ -163,13 +172,13 @@ export function AddDonationForm() {
       </div>
 
       <div>
-        <Label htmlFor="donationAmount" className="text-base font-medium text-gray-900">
+        <Label htmlFor="donationAmount" className="text-base font-medium text-foreground">
           Donation Amount <span className="text-red-500">*</span>
         </Label>
         <Input
           id="donationAmount"
           type="number"
-          placeholder="Amount you're donating"
+          placeholder="Enter donation amount"
           value={formData.donationAmount}
           onChange={(e) => handleInputChange('donationAmount', e.target.value)}
           className={`mt-2 ${errors.donationAmount ? 'border-red-500' : ''}`}
@@ -180,7 +189,7 @@ export function AddDonationForm() {
       </div>
 
       <div>
-        <Label className="text-base font-medium text-gray-900 mb-3 block">
+        <Label className="text-base font-medium text-foreground mb-3 block">
           Upload Image
         </Label>
         <div className="flex items-center space-x-4">
@@ -194,7 +203,7 @@ export function AddDonationForm() {
               Upload Image
             </Button>
           </label>
-          <span className="text-gray-500 text-sm">
+          <span className="text-muted-foreground text-sm">
             {formData.image ? formData.image.name : 'No file chosen'}
           </span>
           <input
