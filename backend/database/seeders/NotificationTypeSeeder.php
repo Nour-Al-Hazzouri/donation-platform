@@ -51,7 +51,7 @@ class NotificationTypeSeeder extends Seeder
             [
                 'name' => 'post_deleted',
                 'description' => 'Community post was deleted',
-                'template' => 'A post you followed in {event_title} was deleted',
+                'template' => '{event_title} was deleted',
             ],
             
             // Comment related
