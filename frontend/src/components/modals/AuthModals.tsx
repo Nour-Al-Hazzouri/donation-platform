@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 export function AuthModals() {
-  const { modalType, previousModalType, isTransitioning, transitionDirection, closeModal } = useModal()
+  const { modalType, previousModalType, isTransitioning, transitionDirection, closeModal, modalParams } = useModal()
   const [modalSize, setModalSize] = useState('md')
   
   // Determine if a modal should be shown (either current or previous during transition)
@@ -157,7 +157,7 @@ export function AuthModals() {
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="relative z-50 isolate"
               >
-                <NewPasswordForm />
+                <NewPasswordForm email={modalParams.email} code={modalParams.code} />
               </motion.div>
             )}
           </AnimatePresence>

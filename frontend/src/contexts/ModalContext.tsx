@@ -13,8 +13,9 @@ type ModalContextType = {
   previousModalType: ModalType
   isTransitioning: boolean
   transitionDirection: 'in' | 'out' | null
-  openModal: (type: ModalType) => void
+  openModal: (type: ModalType, params?: Record<string, any>) => void
   closeModal: () => void
+  modalParams: Record<string, any>
 }
 
 // Create the context with default values
@@ -24,7 +25,8 @@ const ModalContext = createContext<ModalContextType>({
   isTransitioning: false,
   transitionDirection: null,
   openModal: () => {},
-  closeModal: () => {}
+  closeModal: () => {},
+  modalParams: {}
 })
 
 // Create a provider component
@@ -33,9 +35,10 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const [previousModalType, setPreviousModalType] = useState<ModalType>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [transitionDirection, setTransitionDirection] = useState<'in' | 'out' | null>(null)
+  const [modalParams, setModalParams] = useState<Record<string, any>>({})
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const openModal = (type: ModalType) => {
+  const openModal = (type: ModalType, params: Record<string, any> = {}) => {
     // If there's already a modal open, transition between them
     if (modalType) {
       // Don't do anything if trying to open the same modal
@@ -50,6 +53,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
       setIsTransitioning(true)
       setTransitionDirection('out')
       setPreviousModalType(modalType)
+      setModalParams(params)
       
       // After a short delay, change the modal type and transition in
       transitionTimeoutRef.current = setTimeout(() => {
@@ -67,6 +71,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
       setModalType(type)
       setIsTransitioning(true)
       setTransitionDirection('in')
+      setModalParams(params)
       
       // Complete the transition
       transitionTimeoutRef.current = setTimeout(() => {
@@ -105,7 +110,8 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         isTransitioning,
         transitionDirection,
         openModal,
-        closeModal
+        closeModal,
+        modalParams
       }}
     >
       {children}

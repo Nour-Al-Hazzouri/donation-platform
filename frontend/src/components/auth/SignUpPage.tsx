@@ -16,12 +16,13 @@ export default function SignUpPage() {
   const { openModal, closeModal } = useModal()
   const { login } = useAuthStore()
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     username: '',
-    phoneNumber: '',
+    phone: '',
     email: '',
     password: '',
+    password_confirmation: '',
     agreeToTerms: false
   })
 
@@ -47,10 +48,19 @@ export default function SignUpPage() {
     e.preventDefault()
     
     // Validate form data
-    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName || !formData.username) {
+    if (!formData.email || !formData.password || !formData.first_name || !formData.last_name || !formData.username) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    if (formData.password !== formData.password_confirmation) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
         variant: "destructive",
       })
       return
@@ -68,19 +78,18 @@ export default function SignUpPage() {
     setIsLoading(true)
     
     try {
-      // Simulate API call with a delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Mock successful registration
-      const mockUser = {
-        id: '123',
-        name: `${formData.firstName} ${formData.lastName}`,
+      // Use the authStore register method which will call the API through our service
+      await useAuthStore.getState().register({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        username: formData.username,
         email: formData.email,
-        verified: false
-      }
+        phone: formData.phone || undefined,
+        password: formData.password,
+        password_confirmation: formData.password_confirmation
+      })
       
-      // Login the user
-      login(mockUser)
+      // The login is handled inside the register function in authStore
       
       // Close the modal
       closeModal()
@@ -90,11 +99,11 @@ export default function SignUpPage() {
         title: "Success",
         description: "Your account has been created successfully!",
       })
-    } catch (error) {
+    } catch (error: any) {
       // Show error toast
       toast({
         title: "Error",
-        description: "Failed to create account. Please try again.",
+        description: error.message || "Failed to create account. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -115,15 +124,15 @@ export default function SignUpPage() {
         <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
           {/* First Name Field */}
           <div className="space-y-1">
-            <Label htmlFor="firstName" className="text-foreground font-medium text-sm">
+            <Label htmlFor="first_name" className="text-foreground font-medium text-sm">
               First Name
             </Label>
             <Input
-              id="firstName"
+              id="first_name"
               type="text"
               placeholder="Enter your first name"
-              value={formData.firstName}
-              onChange={(e) => handleInputChange('firstName', e.target.value)}
+              value={formData.first_name}
+              onChange={(e) => handleInputChange('first_name', e.target.value)}
               className="w-full h-8 sm:h-9 px-3 bg-muted border-0 rounded-lg text-foreground placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary focus:ring-offset-0 transition-all duration-300"
               required
             />
@@ -131,15 +140,15 @@ export default function SignUpPage() {
 
           {/* Last Name Field */}
           <div className="space-y-1">
-            <Label htmlFor="lastName" className="text-foreground font-medium text-sm">
+            <Label htmlFor="last_name" className="text-foreground font-medium text-sm">
               Last Name
             </Label>
             <Input
-              id="lastName"
+              id="last_name"
               type="text"
               placeholder="Enter your last name"
-              value={formData.lastName}
-              onChange={(e) => handleInputChange('lastName', e.target.value)}
+              value={formData.last_name}
+              onChange={(e) => handleInputChange('last_name', e.target.value)}
               className="w-full h-8 sm:h-9 px-3 bg-muted border-0 rounded-lg text-foreground placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary focus:ring-offset-0 transition-all duration-300"
               required
             />
@@ -163,17 +172,16 @@ export default function SignUpPage() {
 
           {/* Phone Number Field */}
           <div className="space-y-1">
-            <Label htmlFor="phoneNumber" className="text-foreground font-medium text-sm">
+            <Label htmlFor="phone" className="text-foreground font-medium text-sm">
               Phone Number
             </Label>
             <Input
-              id="phoneNumber"
+              id="phone"
               type="tel"
               placeholder="Enter your phone number"
-              value={formData.phoneNumber}
-              onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+              value={formData.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
               className="w-full h-8 sm:h-9 px-3 bg-muted border-0 rounded-lg text-foreground placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary focus:ring-offset-0 transition-all duration-300"
-              required
             />
           </div>
 
@@ -205,6 +213,32 @@ export default function SignUpPage() {
                 placeholder="••••••••••"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
+                className="w-full h-8 sm:h-9 px-3 pr-10 bg-muted border-0 rounded-lg text-foreground placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary focus:ring-offset-0 transition-all duration-300"
+                required
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary/80 hover:text-primary transition-all duration-300"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm Password Field */}
+          <div className="space-y-1">
+            <Label htmlFor="password_confirmation" className="text-foreground font-medium text-sm">
+              Confirm Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="password_confirmation"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••••"
+                value={formData.password_confirmation}
+                onChange={(e) => handleInputChange('password_confirmation', e.target.value)}
                 className="w-full h-8 sm:h-9 px-3 pr-10 bg-muted border-0 rounded-lg text-foreground placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary focus:ring-offset-0 transition-all duration-300"
                 required
               />
