@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Enums\NotificationTypeEnum;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreDonationEventRequest;
 use App\Http\Requests\UpdateDonationEventRequest;
@@ -26,9 +28,19 @@ class DonationEventController extends Controller
     /**
      * @param ImageService $imageService
      */
-    public function __construct(ImageService $imageService)
+    /**
+     * @var NotificationService
+     */
+    protected $notificationService;
+
+    /**
+     * @param ImageService $imageService
+     * @param NotificationService $notificationService
+     */
+    public function __construct(ImageService $imageService, NotificationService $notificationService)
     {
         $this->imageService = $imageService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -279,5 +291,86 @@ class DonationEventController extends Controller
                 'error' => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Activate a suspended donation event.
+     *
+     * @param DonationEvent $donationEvent
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function activate(DonationEvent $donationEvent)
+    {
+        $this->authorize('update', $donationEvent);
+
+        if ($donationEvent->status !== 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only suspended donation events can be activated.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $donationEvent->status = 'active';
+        $donationEvent->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Donation event activated successfully.',
+            'data' => new DonationEventResource($donationEvent->load('user', 'location')),
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Cancel an active donation event.
+     *
+     * @param DonationEvent $donationEvent
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cancel(DonationEvent $donationEvent)
+    {
+        $this->authorize('update', $donationEvent);
+
+        if ($donationEvent->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only active donation events can be cancelled.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $donationEvent->status = 'cancelled';
+        $donationEvent->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Donation event cancelled successfully.',
+            'data' => new DonationEventResource($donationEvent->load('user', 'location')),
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Suspend an active donation event.
+     *
+     * @param DonationEvent $donationEvent
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function suspend(DonationEvent $donationEvent)
+    {
+        $this->authorize('update', $donationEvent);
+
+        if ($donationEvent->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only active donation events can be suspended.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $donationEvent->status = 'suspended';
+        $donationEvent->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Donation event suspended successfully.',
+            'data' => new DonationEventResource($donationEvent->load('user', 'location')),
+        ], Response::HTTP_OK);
     }
 }
