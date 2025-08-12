@@ -6,6 +6,7 @@ use App\Enums\NotificationTypeEnum;
 use App\Models\Notification;
 use App\Models\NotificationType;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -360,6 +361,17 @@ class NotificationService
         );
     }
 
+    public function broadcastCustomNotification(
+        Collection $users = User::all(),
+        string $title,
+        string $message,
+        ?array $data = null
+    ) {
+        foreach ($users as $user) {
+            $this->sendCustomNotification($user, $title, $message, $data);
+        }
+    }
+
     /**
      * Helper method for event created status notification
      */
@@ -371,8 +383,8 @@ class NotificationService
         ?array $data = null
     ): ?Notification {
         $typeName = $isSuccess ?
-            NotificationTypeEnum::EVENT_CREATED_SUCCESS :
-            NotificationTypeEnum::EVENT_CREATED_FAILED;
+        NotificationTypeEnum::EVENT_CREATED_SUCCESS :
+        NotificationTypeEnum::EVENT_CREATED_FAILED;
 
         $title = $isSuccess ? 'Event Created Successfully' : 'Event Creation Failed';
 
@@ -408,6 +420,17 @@ class NotificationService
                 'announcement_title' => $announcementTitle
             ])
         );
+    }
+
+    public function broadcastNewAnnouncement(
+        string $announcementTitle,
+        ?array $data = null
+    ) {
+        $users = User::all();
+
+        foreach ($users as $user) {
+            $this->sendNewAnnouncement($user, $announcementTitle, $data);
+        }
     }
 
     /**
