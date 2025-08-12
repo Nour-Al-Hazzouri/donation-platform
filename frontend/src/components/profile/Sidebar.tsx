@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState, useEffect } from "react"
 import { User, Bell, LogOut } from "lucide-react"
@@ -125,7 +125,7 @@ export default function ProfileSidebar({
                   <SidebarMenuButton 
                     className={cn(
                       item.isActive 
-                        ? "bg-red-500 text-white hover:bg-red-600" // Active = Red
+                        ? "bg-red-500 text-white hover:bg-red-500 hover:text-white" // Active = Red
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
                       "transition-colors duration-200"
                     )}

@@ -230,7 +230,7 @@ export function BlogsAdminPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="bg-red-500 hover:bg-red-600 text-white flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
+                                className="bg-red-500 hover:bg-red-500 text-white hover:text-white flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
                                 onClick={() => startEditing(post)}
                               >
                                 Edit
@@ -238,7 +238,7 @@ export function BlogsAdminPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="bg-red-500 hover:bg-red-600 text-white flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
+                                className="bg-red-500 hover:bg-red-500 text-white hover:text-white flex-1 md:flex-auto min-w-[70px] whitespace-nowrap"
                                 onClick={() => handleDeleteBlogPost(post.id)}
                               >
                                 Delete
