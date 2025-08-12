@@ -90,26 +90,29 @@ class DonationTransactionController extends Controller
                 // Save the transaction
                 $transaction->save();
 
+                $donationEvent->load('user');
                 if ($transactionType === 'contribution') {
                     $this->notificationService->sendTransactionContribution(
-                        $user,
-                        $user->username,
+                        $donationEvent->user,
+                        $donationEvent->user->username,
                         $request->amount,
                         $donationEvent->title,
                         [
                             'event_id' => $donationEvent->id,
-                            'user_id' => $donationEvent->user_id,
+                            'transaction_id' => $transaction->id,
+                            'user_id' => $user->id,
                         ]
                     );
                 } else if ($transactionType === 'claim') {
                     $this->notificationService->sendTransactionClaim(
-                        $user,
-                        $user->username,
+                        $donationEvent->user,
+                        $donationEvent->user->username,
                         $request->amount,
                         $donationEvent->title,
                         [
                             'event_id' => $donationEvent->id,
-                            'user_id' => $donationEvent->user_id,
+                            'transaction_id' => $transaction->id,
+                            'user_id' => $user->id,
                         ]
                     );
                 }
@@ -168,6 +171,7 @@ class DonationTransactionController extends Controller
                     null,
                     [
                         'event_id' => $transaction->event_id,
+                        'transaction_id' => $transaction->id,
                         'user_id' => $transaction->user_id,
                     ]
                 );
@@ -179,6 +183,7 @@ class DonationTransactionController extends Controller
                     $request->reason,
                     [
                         'event_id' => $transaction->event_id,
+                        'transaction_id' => $transaction->id,
                         'user_id' => $transaction->user_id,
                     ]
                 );
