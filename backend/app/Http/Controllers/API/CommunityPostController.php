@@ -118,21 +118,21 @@ class CommunityPostController extends Controller
             $user = Auth::user();
             $post = $user->communityPosts()->create($validated);
 
-
+            $loadedPost = $post->load(['user', 'event']);
             $this->notificationService->sendNewPost(
                 $user,
                 $user->username,
-                $post->event->title,
+                $loadedPost->event->title,
                 [
                     'user_id' => $user->id,
                     'post_id' => $post->id,
-                    'event_id' => $post->event_id,
+                    'event_id' => $loadedPost->event_id,
                 ]
             );
 
             return response()->json([
                 'success' => true,
-                'data' => new CommunityPostResource($post->load(['user', 'event'])),
+                'data' => new CommunityPostResource($loadedPost),
                 'message' => 'Community post created successfully',
             ], Response::HTTP_CREATED);
 
@@ -271,14 +271,15 @@ class CommunityPostController extends Controller
                     }
                 }
             }
+            $loadedPost = $communityPost->load(['user', 'event']);
 
             $this->notificationService->sendPostDeleted(
-                $communityPost->user,
-                $communityPost->event->title,
+                $loadedPost->user,
+                $loadedPost->event->title,
                 [
-                    'user_id' => $communityPost->user->id,
-                    'post_id' => $communityPost->id,
-                    'event_id' => $communityPost->event_id,
+                    'user_id' => $loadedPost->user->id,
+                    'post_id' => $loadedPost->id,
+                    'event_id' => $loadedPost->event_id,
                 ]
             );
 
