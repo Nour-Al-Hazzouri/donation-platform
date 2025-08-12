@@ -51,8 +51,8 @@ class DonationEventController extends Controller
     public function index()
     {
         $donationEvents = DonationEvent::with('user', 'location')
-        ->latest()
-        ->get();
+            ->latest()
+            ->get();
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
@@ -67,10 +67,10 @@ class DonationEventController extends Controller
     public function requestsIndex()
     {
         $donationEvents = DonationEvent::with('user', 'location')
-        ->where('status', 'active')
-        ->where('type', 'request')
-        ->latest()
-        ->get();
+            ->where('status', 'active')
+            ->where('type', 'request')
+            ->latest()
+            ->get();
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
@@ -85,10 +85,10 @@ class DonationEventController extends Controller
     public function offersIndex()
     {
         $donationEvents = DonationEvent::with('user', 'location')
-        ->where('status', 'active')
-        ->where('type', 'offer')
-        ->latest()
-        ->get();
+            ->where('status', 'active')
+            ->where('type', 'offer')
+            ->latest()
+            ->get();
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
@@ -104,9 +104,9 @@ class DonationEventController extends Controller
     public function userIndex(User $user)
     {
         $donationEvents = DonationEvent::with('user', 'location')
-        ->where('user_id', $user->id)
-        ->latest()
-        ->get();
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
