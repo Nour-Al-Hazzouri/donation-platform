@@ -4,7 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Models\DonationTransaction;
+use App\Models\DonationEvent;
 use App\Observers\DonationTransactionObserver;
+use App\Observers\DonationEventObserver;
+use App\Services\NotificationService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +16,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(NotificationService::class, function () {
+            return new NotificationService();
+        });
     }
 
     /**
@@ -22,5 +27,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         DonationTransaction::observe(DonationTransactionObserver::class);
+        DonationEvent::observe(DonationEventObserver::class);
     }
 }
