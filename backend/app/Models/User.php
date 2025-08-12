@@ -142,6 +142,16 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class, 'user_id');
     }
 
+    public function unreadNotifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id')->whereNull('read_at');
+    }
+
+    public function readNotifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id')->whereNotNull('read_at');
+    }
+
     public function announcements(): HasMany
     {
         return $this->hasMany(Announcement::class, 'user_id');

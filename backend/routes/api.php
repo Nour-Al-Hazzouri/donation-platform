@@ -11,6 +11,7 @@ use App\Http\Controllers\API\CommentController;
 use App\Http\Controllers\API\DonationEventController;
 use App\Http\Controllers\API\DonationTransactionController;
 use App\Http\Controllers\API\VoteController;
+use App\Http\Controllers\API\NotificationController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -145,6 +146,33 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [DonationTransactionController::class, 'index']);
         Route::get('/{transaction}', [DonationTransactionController::class, 'show']);
         Route::put('/{transaction}/status', [DonationTransactionController::class, 'updateStatus']);
+    });
+
+    // Notifications
+    Route::prefix('notifications')->group(function () {
+        // List notifications with optional filters
+        Route::get('/', [NotificationController::class, 'index']);
+        
+        // Get notification types
+        Route::get('/types', [NotificationController::class, 'types']);
+        
+        // Get unread count
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+        
+        // Mark notification as read
+        Route::put('/{notification}/read', [NotificationController::class, 'markAsRead']);
+        
+        // Mark all notifications as read
+        Route::put('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        
+        // Delete a notification
+        Route::delete('/{notification}', [NotificationController::class, 'destroy']);
+        
+        // Delete all notifications for the authenticated user
+        Route::delete('/', [NotificationController::class, 'destroyAll']);
+        
+        // Delete all unread notifications for the authenticated user
+        Route::delete('/unread', [NotificationController::class, 'destroyUnread']);
     });
 });
 

@@ -425,4 +425,75 @@ class NotificationService
             ])
         );
     }
+
+    /**
+     * Get paginated notifications for a user with optional filters
+     */
+    public function getUserNotifications(
+        User $user,
+        ?string $type = null,
+        bool $unreadOnly = false,
+        int $perPage = 15
+    ) {
+        $query = $user->notifications()
+            ->with(['type', 'relatedUser'])
+            ->latest();
+
+        if ($type) {
+            $query->whereHas('type', function ($q) use ($type) {
+                $q->where('name', $type);
+            });
+        }
+
+        if ($unreadOnly) {
+            $query->whereNull('read_at');
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * Mark a notification as read
+     */
+    public function markAsRead(Notification $notification): Notification
+    {
+        if (is_null($notification->read_at)) {
+            $notification->update(['read_at' => now()]);
+            $notification->refresh();
+        }
+        
+        return $notification;
+    }
+
+    /**
+     * Delete a specific notification
+     */
+    public function deleteNotification(Notification $notification): bool
+    {
+        return (bool) $notification->delete();
+    }
+
+    /**
+     * Delete all notifications for a user
+     */
+    public function deleteAllNotifications(User $user): int
+    {
+        return $user->notifications()->delete();
+    }
+
+    /**
+     * Delete all unread notifications for a user
+     */
+    public function deleteUnreadNotifications(User $user): int
+    {
+        return $user->unreadNotifications()->delete();
+    }
+
+    /**
+     * Get all notification types
+     */
+    public function getAllNotificationTypes()
+    {
+        return NotificationType::all();
+    }
 }

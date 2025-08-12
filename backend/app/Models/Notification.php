@@ -33,4 +33,14 @@ class Notification extends Model
     {
         return $this->belongsTo(NotificationType::class, 'type_id');
     }
+
+    public function relatedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'data->user_id');
+    }
+
+    public function markAsRead()
+    {
+        $this->update(['read_at' => now()]);
+    }
 }
