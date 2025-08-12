@@ -117,6 +117,13 @@ class NotificationTypeSeeder extends Seeder
                 'description' => 'Announcement updated',
                 'template' => 'Announcement updated: {announcement_title}',
             ],
+
+            // Other
+            [
+                'name' => 'other',
+                'description' => 'Other notification',
+                'template' => '{message}',
+            ],
         ];
 
         foreach ($notificationTypes as $type) {
