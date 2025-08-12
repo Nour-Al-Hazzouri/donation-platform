@@ -93,7 +93,7 @@ class DonationTransactionController extends Controller
                 if ($transactionType === 'contribution') {
                     $this->notificationService->sendTransactionContribution(
                         $user,
-                        $user->name,
+                        $user->username,
                         $request->amount,
                         $donationEvent->title,
                         [
@@ -104,7 +104,7 @@ class DonationTransactionController extends Controller
                 } else if ($transactionType === 'claim') {
                     $this->notificationService->sendTransactionClaim(
                         $user,
-                        $user->name,
+                        $user->username,
                         $request->amount,
                         $donationEvent->title,
                         [
