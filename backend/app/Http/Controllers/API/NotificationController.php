@@ -46,14 +46,14 @@ class NotificationController extends Controller
             'unread_only' => 'sometimes|boolean',
         ]);
 
-        $notifications = $this->notificationService->getUserNotifications(
+        $notification_query = $this->notificationService->getUserNotifications(
             user: Auth::user(),
             type: $validated['type'] ?? null,
             unreadOnly: $validated['unread_only'] ?? false,
             perPage: $validated['per_page'] ?? 15
         );
 
-        return NotificationResource::collection($notifications);
+        return NotificationResource::collection($notification_query->paginate($validated['per_page'] ?? 15));
     }
 
     /**
@@ -66,7 +66,7 @@ class NotificationController extends Controller
     {
         $this->authorize('update', $notification);
 
-        if (is_null($notification->read_at)) {
+        if ($notification->read_at === null) {
             $notification = $this->notificationService->markAsRead($notification);
             return response()->json([
                 'message' => 'Notification marked as read',
@@ -167,6 +167,26 @@ class NotificationController extends Controller
             Log::error('Error deleting unread notifications: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to delete unread notifications',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Remove all read notifications for the authenticated user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroyRead(): JsonResponse
+    {
+        try {
+            $count = $this->notificationService->deleteReadNotifications(Auth::user());
+            return response()->json([
+                'message' => "{$count} read notifications deleted successfully",
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting read notifications: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to delete read notifications',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

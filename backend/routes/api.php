@@ -165,14 +165,17 @@ Route::middleware('auth:sanctum')->group(function () {
         // Mark all notifications as read
         Route::put('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
         
-        // Delete a notification
+        // Delete all unread notifications for the authenticated user
+        Route::delete('/unread', [NotificationController::class, 'destroyUnread']);
+        
+        // Delete all read notifications for the authenticated user
+        Route::delete('/read', [NotificationController::class, 'destroyRead']);
+        
+        // Delete a specific notification
         Route::delete('/{notification}', [NotificationController::class, 'destroy']);
         
         // Delete all notifications for the authenticated user
         Route::delete('/', [NotificationController::class, 'destroyAll']);
-        
-        // Delete all unread notifications for the authenticated user
-        Route::delete('/unread', [NotificationController::class, 'destroyUnread']);
     });
 });
 

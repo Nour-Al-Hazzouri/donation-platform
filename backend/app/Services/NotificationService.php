@@ -48,9 +48,11 @@ class NotificationService
     /**
      * Mark all notifications as read for a user
      */
-    public function markAllAsRead(User $user): bool
+    public function markAllAsRead(User $user): int
     {
-        return $user->unreadNotifications()->update(['read_at' => now()]) > 0;
+        $count = $user->unreadNotifications()->count();
+        $user->unreadNotifications()->update(['read_at' => now()]);
+        return $count;
     }
 
     /**
@@ -66,13 +68,13 @@ class NotificationService
         try {
             return DB::transaction(function () use ($user, $typeId, $title, $message, $data) {
                 $notificationType = NotificationType::findOrFail($typeId);
-                
+
                 // If no message is provided, use the template
                 $finalMessage = $message ?? $this->compileMessage(
                     $notificationType->template,
                     $data ?? []
                 );
-                
+
                 $notification = $user->notifications()->create([
                     'type_id' => $typeId,
                     'title' => $title,
@@ -183,20 +185,20 @@ class NotificationService
         ?string $reason = null,
         ?array $data = null
     ): ?Notification {
-        $typeName = $isApproved ? 
-            NotificationTypeEnum::TRANSACTION_APPROVED : 
+        $typeName = $isApproved ?
+            NotificationTypeEnum::TRANSACTION_APPROVED :
             NotificationTypeEnum::TRANSACTION_REJECTED;
-            
+
         $title = $isApproved ? 'Transaction Approved' : 'Transaction Rejected';
-        
+
         $notificationData = array_merge($data ?? [], [
             'event_title' => $eventTitle
         ]);
-        
+
         if (!$isApproved && $reason) {
             $notificationData['reason'] = $reason;
         }
-        
+
         return $this->createNotificationByType(
             typeName: $typeName,
             user: $user,
@@ -321,17 +323,17 @@ class NotificationService
         ?string $reason = null,
         ?array $data = null
     ): ?Notification {
-        $typeName = $isApproved ? 
-            NotificationTypeEnum::VERIFICATION_APPROVED : 
+        $typeName = $isApproved ?
+            NotificationTypeEnum::VERIFICATION_APPROVED :
             NotificationTypeEnum::VERIFICATION_REJECTED;
-            
+
         $title = $isApproved ? 'Verification Approved' : 'Verification Rejected';
-        
+
         $notificationData = $data ?? [];
         if (!$isApproved && $reason) {
             $notificationData['reason'] = $reason;
         }
-        
+
         return $this->createNotificationByType(
             typeName: $typeName,
             user: $user,
@@ -368,20 +370,20 @@ class NotificationService
         ?string $reason = null,
         ?array $data = null
     ): ?Notification {
-        $typeName = $isSuccess ? 
-            NotificationTypeEnum::EVENT_CREATED_SUCCESS : 
+        $typeName = $isSuccess ?
+            NotificationTypeEnum::EVENT_CREATED_SUCCESS :
             NotificationTypeEnum::EVENT_CREATED_FAILED;
-            
+
         $title = $isSuccess ? 'Event Created Successfully' : 'Event Creation Failed';
-        
+
         $notificationData = array_merge($data ?? [], [
             'event_title' => $eventTitle
         ]);
-        
+
         if (!$isSuccess && $reason) {
             $notificationData['reason'] = $reason;
         }
-        
+
         return $this->createNotificationByType(
             typeName: $typeName,
             user: $user,
@@ -436,7 +438,7 @@ class NotificationService
         int $perPage = 15
     ) {
         $query = $user->notifications()
-            ->with(['type', 'relatedUser'])
+            ->with(['type', 'user', 'relatedUser'])
             ->latest();
 
         if ($type) {
@@ -449,7 +451,7 @@ class NotificationService
             $query->whereNull('read_at');
         }
 
-        return $query->paginate($perPage);
+        return $query;
     }
 
     /**
@@ -457,11 +459,11 @@ class NotificationService
      */
     public function markAsRead(Notification $notification): Notification
     {
-        if (is_null($notification->read_at)) {
+        if ($notification->read_at === null) {
             $notification->update(['read_at' => now()]);
             $notification->refresh();
         }
-        
+
         return $notification;
     }
 
@@ -478,7 +480,9 @@ class NotificationService
      */
     public function deleteAllNotifications(User $user): int
     {
-        return $user->notifications()->delete();
+        $count = $user->notifications()->count();
+        $user->notifications()->delete();
+        return $count;
     }
 
     /**
@@ -486,7 +490,19 @@ class NotificationService
      */
     public function deleteUnreadNotifications(User $user): int
     {
-        return $user->unreadNotifications()->delete();
+        $count = $user->unreadNotifications()->count();
+        $user->unreadNotifications()->delete();
+        return $count;
+    }
+
+    /**
+     * Delete all read notifications for a user
+     */
+    public function deleteReadNotifications(User $user): int
+    {
+        $count = $user->readNotifications()->count();
+        $user->readNotifications()->delete();
+        return $count;
     }
 
     /**
