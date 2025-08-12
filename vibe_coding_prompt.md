@@ -91,47 +91,220 @@ frontend/
 **Note**: These interfaces define how the frontend will consume data from the backend API. The actual backend implementation is handled by a separate team.
 
 ```typescript
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  verified: boolean;
-  role: 'user' | 'moderator' | 'admin';
-  createdAt: string;
-  updatedAt: string;
+// Location Interface
+interface Location {
+  id: number;
+  governorate: string;
+  district: string;
+  created_at: string;
+  updated_at: string;
 }
 
+// User Interface
+interface User {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  avatar_url?: string;
+  location_id?: number;
+  is_verified: boolean;
+  role: string;
+  created_at: string;
+  updated_at: string;
+  location?: Location;
+}
+
+// Authentication Response
+interface AuthResponse {
+  message: string;
+  user: User;
+  access_token: string;
+  token_type: string;
+}
+
+// Verification Interface
+interface Verification {
+  id: number;
+  user_id: number;
+  document_type: 'id_card' | 'passport' | 'driver_license';
+  document_url?: string;
+  status: 'pending' | 'approved' | 'declined';
+  notes?: string;
+  verifier_id?: number;
+  verified_at?: string;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  verifier?: User;
+}
+
+// Notification Type Interface
+interface NotificationType {
+  id: number;
+  name: string;
+  description: string;
+}
+
+// Announcement Interface
+interface Announcement {
+  id: number;
+  admin_id: number;
+  title: string;
+  content: string;
+  priority: 'low' | 'medium' | 'high';
+  images?: string;
+  created_at: string;
+  updated_at: string;
+  admin?: User;
+}
+
+// Request Interface (Donation Request)
 interface DonationRequest {
-  id: string;
+  id: number;
+  user_id: number;
   title: string;
   description: string;
-  targetAmount: number;
-  currentAmount: number;
-  category: string[];
-  priority: 'urgent' | 'medium' | 'low';
-  createdBy: string;
-  createdAt: string;
-  images: string[];
-  verified: boolean;
-  location?: string;
-  contactInfo?: string;
+  goal_amount: number;
+  current_amount: number;
+  possible_amount: number;
+  type: 'request' | 'offer';
+  status: 'active' | 'completed' | 'cancelled' | 'suspended';
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  events?: DonationEvent[];
+  transactions?: DonationTransaction[];
+  posts?: CommunityPost[];
 }
 
+// Donation Event Interface
+interface DonationEvent {
+  id: number;
+  request_id: number;
+  user_id: number;
+  location_id?: number;
+  title: string;
+  description: string;
+  decimal: number;
+  current_amount: number;
+  possible_amount: number;
+  type: 'request' | 'offer';
+  status: 'active' | 'completed' | 'cancelled' | 'suspended';
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  location?: Location;
+  request?: DonationRequest;
+  transactions?: DonationTransaction[];
+  posts?: CommunityPost[];
+}
+
+// Donation Transaction Interface
+interface DonationTransaction {
+  id: number;
+  user_id: number;
+  event_id?: number;
+  transaction_type: 'contribution' | 'claim';
+  amount: number;
+  status: 'pending' | 'approved' | 'declined';
+  transaction_at: string;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  event?: DonationEvent;
+}
+
+// Vote Interface
 interface Vote {
-  id: string;
-  userId: string;
-  donationId: string;
+  id: number;
+  user_id: number;
+  post_id: number;
   type: 'upvote' | 'downvote';
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  post?: CommunityPost;
 }
 
+// Comment Interface
 interface Comment {
-  id: string;
+  id: number;
+  user_id: number;
+  post_id: number;
   content: string;
-  userId: string;
-  donationId: string;
-  createdAt: string;
-  updatedAt?: string;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  post?: CommunityPost;
+}
+
+// Community Post Interface
+interface CommunityPost {
+  id: number;
+  event_id?: number;
+  content?: string;
+  images?: string;
+  tags?: string;
+  created_at: string;
+  updated_at: string;
+  event?: DonationEvent;
+  votes?: Vote[];
+  comments?: Comment[];
+}
+
+// Moderation Report Interface
+interface ModerationReport {
+  id: number;
+  reporter_id: number;
+  reportable_id: number;
+  reportable_type: 'verification' | 'event' | 'comment' | 'post';
+  reason: string;
+  status: 'pending' | 'resolved';
+  reason_notes?: string;
+  resolved_by?: number;
+  resolved_at?: string;
+  created_at: string;
+  updated_at: string;
+  reporter?: User;
+  resolver?: User;
+}
+
+// Notification Interface
+interface Notification {
+  id: number;
+  type_id: number;
+  read_at?: string;
+  created_at: string;
+  updated_at: string;
+  data?: string;
+  type?: NotificationType;
+}
+
+// API Response Wrappers
+interface PaginatedResponse<T> {
+  data: T[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number;
+  to: number;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+interface ApiError {
+  message: string;
+  errors?: Record<string, string[]>;
+  status?: number;
 }
 ```
 
@@ -144,22 +317,14 @@ interface Comment {
 - **Authentication**: Send Bearer token in Authorization header for protected routes
 - **Request Format**: Send JSON payloads for POST/PUT requests
 - **Response Format**: Expect JSON responses from all API endpoints
-
-#### Mock Data Testing Strategy
-**Important**: Since frontend development may complete before backend APIs are ready, implement a seamless mock-to-production API transition strategy.
-
-- **Mock Service**: Use MockFast.io (https://mockfast.io/) for unlimited free mock API endpoints
-- **Environment-Based Switching**: Use environment variables to toggle between mock and production APIs
-- **Data Consistency**: Ensure mock data structure matches the defined TypeScript interfaces exactly
-- **Realistic Mock Data**: Create realistic Lebanese donation platform data for thorough testing
-- **Easy Migration**: Design API calls to easily switch from mock endpoints to production endpoints
+- **API Documentation**: Reference the provided API documentation for exact endpoint specifications and request/response formats
 
 #### API Integration Requirements
 - **Error Handling**: Implement robust error handling for API responses using React Query error boundaries
 - **Loading States**: Always implement loading states for API calls to improve UX
 - **Optimistic Updates**: Use React Query's optimistic updates where appropriate for better user experience
 - **Retry Logic**: Implement appropriate retry logic for failed API calls
-- **Mock Testing**: Test all API scenarios with mock data before backend integration
+- **Authentication Flow**: Follow the documented authentication endpoints for login, register, logout, and password reset
 
 ## Frontend-Specific Requirements
 
@@ -172,25 +337,34 @@ interface Comment {
 - **Protected Routes**: Implement middleware for frontend route protection
 - **Token Management**: Handle token storage, refresh, and expiration
 - **Persistent Login**: Manage user sessions and persistent authentication state
+- **API Integration**: Use documented authentication endpoints (`/auth/login`, `/auth/register`, `/auth/logout`, `/auth/forgot-password`, `/auth/reset-password`)
 
 ### Donation Management (Frontend Features)
-- **UI Components**: Create, display, and interact with donation requests
+- **UI Components**: Create, display, and interact with donation requests and events
 - **Image Handling**: Frontend image upload with preview, validation, and optimization
 - **Search & Filter**: Implement client-side and API-integrated search and filtering
-- **Voting Interface**: Interactive upvote/downvote buttons with optimistic updates
-- **Comments UI**: Threaded commenting interface with real-time updates
+- **Transaction Interface**: Display donation transactions with status tracking
+- **Event Management**: Interface for creating and managing donation events
 
 ### User Profiles (Frontend Interface)
 - **Profile Display**: Render user information, verification badges, donation history
 - **Profile Forms**: Editable profile forms with validation and state management
-- **Verification Interface**: File upload interface for ID/Passport verification
+- **Verification Interface**: File upload interface for ID/Passport verification with document type selection
 - **Settings UI**: Frontend interface for user privacy and notification settings
+- **Location Management**: Interface for selecting governorate and district
 
 ### Admin/Moderation (Frontend Dashboard)
 - **Moderation Interface**: Dashboard for reviewing and moderating content
 - **User Management UI**: Admin interface for user actions and management
-- **Reporting Interface**: Forms and interfaces for handling user reports
-- **Analytics Dashboard**: Frontend visualization of analytics data
+- **Reporting Interface**: Forms and interfaces for handling moderation reports
+- **Verification Management**: Interface for reviewing and approving user verifications
+- **Announcement Management**: Create and manage platform announcements
+
+### Community Features (Frontend Interface)
+- **Post Management**: Create, display, and interact with community posts
+- **Voting Interface**: Interactive upvote/downvote buttons with optimistic updates
+- **Comments UI**: Threaded commenting interface with real-time updates
+- **Tag System**: Interface for adding and filtering by tags
 
 ## UI/UX Requirements
 
@@ -232,8 +406,6 @@ interface Comment {
 ```bash
 # API Configuration (Backend Integration)
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
-NEXT_PUBLIC_MOCK_API_BASE_URL=https://api.mockfast.io/your-project-id
-NEXT_PUBLIC_USE_MOCK_API=true  # Toggle between mock and production APIs
 NEXT_PUBLIC_APP_NAME="Lebanon Donations"
 
 # Frontend Feature Flags
@@ -273,7 +445,7 @@ NEXT_PUBLIC_TURBOPACK=true  # Enable Next.js 15 Turbopack
 ### Frontend Testing Strategy
 - **Component Testing**: Test React components and their interactions
 - **Form Testing**: Validate form behavior, validation, and submission
-- **API Integration Testing**: Mock API responses and test error handling
+- **API Integration Testing**: Test API integration with proper error handling
 - **User Interaction Testing**: Test user flows and interface interactions
 - **Accessibility Testing**: Ensure components meet accessibility standards
 
@@ -281,7 +453,7 @@ NEXT_PUBLIC_TURBOPACK=true  # Enable Next.js 15 Turbopack
 
 ### Lebanon-Specific Features
 - **Currency**: Lebanese Pound (LBP) and USD support
-- **Location**: Implement Lebanon-specific location features
+- **Location**: Implement Lebanon-specific location features with governorate/district selection
 - **Cultural Sensitivity**: Consider local customs and sensitivities
 - **Language**: Prepare for Arabic RTL support (future)
 
@@ -310,17 +482,15 @@ This prevents code collisions, unnecessary complexity, and ensures components re
 
 ### When Working with Backend APIs:
 1. Use React Query for all API calls to the Laravel backend
-2. **Mock-First Development**: Start with MockFast.io endpoints that match production API structure
-3. **Environment Switching**: Use `NEXT_PUBLIC_USE_MOCK_API` to toggle between mock and production APIs
-4. Implement comprehensive error boundaries with React 19's enhanced error handling
-5. Handle loading states gracefully with React 19's improved Suspense
-6. Use useOptimistic for optimistic updates and better UX
-7. Use React 19 Actions for server-side form submissions when appropriate
-8. Follow the defined data interfaces for API responses
-9. **API Abstraction**: Create API service layers that work seamlessly with both mock and production endpoints
-10. **Mock Data Quality**: Ensure mock data represents realistic Lebanese donation scenarios
-11. Never assume backend implementation details - focus on API contracts
-12. Leverage React 19's concurrent features for non-blocking API calls
+2. **API Documentation Reference**: Always refer to the provided API documentation for exact endpoint specifications, request formats, and response structures
+3. Implement comprehensive error boundaries with React 19's enhanced error handling
+4. Handle loading states gracefully with React 19's improved Suspense
+5. Use useOptimistic for optimistic updates and better UX
+6. Use React 19 Actions for server-side form submissions when appropriate
+7. Follow the documented authentication flow and token management
+8. **Mock Data**: Use component-level mock constants for development and testing
+9. Never assume backend implementation details - follow API documentation contracts
+10. Leverage React 19's concurrent features for non-blocking API calls
 
 ### When Writing Code:
 1. Prioritize type safety and clear interfaces
@@ -449,45 +619,29 @@ export const useUiStore = create<UiState>((set, get) => ({
 - Include both state and actions in the same store
 - Use `set` for state updates and `get` for accessing current state
 - Follow immutable update patterns
+
+### Quality Assurance Checklist
 - [ ] Code compiles without TypeScript errors
 - [ ] Components render correctly on mobile and desktop
 - [ ] Forms include proper validation and error handling
-- [ ] API integration handles error scenarios gracefully
-- [ ] **Mock API testing completed** with realistic Lebanese donation data
-- [ ] **API switching mechanism** works seamlessly between mock and production
+- [ ] API integration follows documented endpoints and formats
+- [ ] Error scenarios are handled gracefully
 - [ ] Accessibility requirements are met
 - [ ] Frontend performance is optimized
 - [ ] Code follows frontend project conventions
 - [ ] No hardcoded backend logic or assumptions
 
-## Mock Data Development Guidelines
-
-### Mock Data Best Practices
-1. **Realistic Lebanese Context**: Create mock donation requests with real Lebanese locations, currency (LBP/USD), and culturally appropriate scenarios
-2. **Complete Data Sets**: Include all required fields as defined in TypeScript interfaces
-3. **Edge Cases**: Mock various scenarios including successful/failed donations, different user verification states, etc.
-4. **Consistent Structure**: Ensure mock API responses exactly match the expected production API structure
-5. **Dynamic Responses**: Use MockFast.io features to simulate different response states (loading, success, error)
+## API Integration Guidelines
 
 ### API Service Architecture
-Create API service files that abstract the endpoint switching logic:
+Create API service files that follow the documented endpoints:
 
 ```typescript
-// lib/api.ts - Complete API Service Architecture
+// lib/api.ts - API Service Architecture
 import axios, { AxiosResponse } from 'axios';
-import { User, DonationRequest, Vote, Comment } from '@/types';
+import { User, AuthResponse, DonationRequest, DonationEvent, Location, Verification } from '@/types';
 
-// Dynamic API base URL configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true' 
-  ? process.env.NEXT_PUBLIC_MOCK_API_BASE_URL
-  : process.env.NEXT_PUBLIC_API_BASE_URL;
-
-// Generic API response wrapper
-interface ApiResponse<T> {
-  data: T;
-  message?: string;
-  status: number;
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
 
 // Authentication token management
 const getAuthHeaders = () => {
@@ -495,172 +649,87 @@ const getAuthHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Complete API service implementation
+// API service implementation following documented endpoints
 export const apiService = {
-  // Authentication endpoints
+  // Authentication endpoints - follow API documentation
   auth: {
-    login: async (credentials: { email: string; password: string }) => {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
-      return response.data;
-    },
-    register: async (userData: { name: string; email: string; password: string }) => {
+    register: async (userData: {
+      first_name: string;
+      last_name: string;
+      username: string;
+      email: string;
+      phone?: string;
+      password: string;
+      password_confirmation: string;
+      location_id?: number;
+    }): Promise<AuthResponse> => {
       const response = await axios.post(`${API_BASE_URL}/auth/register`, userData);
       return response.data;
     },
+
+    login: async (credentials: { 
+      email: string; 
+      password: string; 
+    }): Promise<AuthResponse> => {
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
+      return response.data;
+    },
+
     logout: async () => {
       const response = await axios.post(`${API_BASE_URL}/auth/logout`, {}, {
         headers: getAuthHeaders()
       });
       return response.data;
     },
-    refreshToken: async () => {
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
-        headers: getAuthHeaders()
-      });
+
+    forgotPassword: async (email: string) => {
+      const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email });
+      return response.data;
+    },
+
+    resetPassword: async (data: {
+      code: string;
+      email: string;
+      password: string;
+      password_confirmation: string;
+    }) => {
+      const response = await axios.post(`${API_BASE_URL}/auth/reset-password`, data);
       return response.data;
     }
   },
 
-  // User management endpoints
+  // User endpoints
   users: {
-    getProfile: async () => {
-      const response = await axios.get(`${API_BASE_URL}/users/profile`, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    updateProfile: async (userData: Partial<User>) => {
-      const response = await axios.put(`${API_BASE_URL}/users/profile`, userData, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    uploadVerification: async (files: FormData) => {
-      const response = await axios.post(`${API_BASE_URL}/users/verify`, files, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
-      });
-      return response.data;
-    }
-  },
-
-  // Donation management endpoints
-  donations: {
-    getAll: async (params?: { page?: number; category?: string; priority?: string }) => {
-      const response = await axios.get(`${API_BASE_URL}/donations`, { params });
-      return response.data;
-    },
-    getById: async (id: string) => {
-      const response = await axios.get(`${API_BASE_URL}/donations/${id}`);
-      return response.data;
-    },
-    create: async (donationData: Omit<DonationRequest, 'id' | 'createdAt' | 'currentAmount' | 'verified' | 'createdBy'>) => {
-      const response = await axios.post(`${API_BASE_URL}/donations`, donationData, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    update: async (id: string, donationData: Partial<DonationRequest>) => {
-      const response = await axios.put(`${API_BASE_URL}/donations/${id}`, donationData, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    delete: async (id: string) => {
-      const response = await axios.delete(`${API_BASE_URL}/donations/${id}`, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    uploadImages: async (id: string, images: FormData) => {
-      const response = await axios.post(`${API_BASE_URL}/donations/${id}/images`, images, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
-      });
-      return response.data;
-    }
-  },
-
-  // Voting system endpoints
-  votes: {
-    create: async (voteData: { donationId: string; type: 'upvote' | 'downvote' }) => {
-      const response = await axios.post(`${API_BASE_URL}/votes`, voteData, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    update: async (voteId: string, type: 'upvote' | 'downvote') => {
-      const response = await axios.put(`${API_BASE_URL}/votes/${voteId}`, { type }, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    delete: async (voteId: string) => {
-      const response = await axios.delete(`${API_BASE_URL}/votes/${voteId}`, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    getByDonation: async (donationId: string) => {
-      const response = await axios.get(`${API_BASE_URL}/donations/${donationId}/votes`);
-      return response.data;
-    }
-  },
-
-  // Comments system endpoints
-  comments: {
-    getByDonation: async (donationId: string) => {
-      const response = await axios.get(`${API_BASE_URL}/donations/${donationId}/comments`);
-      return response.data;
-    },
-    create: async (commentData: { donationId: string; content: string }) => {
-      const response = await axios.post(`${API_BASE_URL}/comments`, commentData, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    update: async (commentId: string, content: string) => {
-      const response = await axios.put(`${API_BASE_URL}/comments/${commentId}`, { content }, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    },
-    delete: async (commentId: string) => {
-      const response = await axios.delete(`${API_BASE_URL}/comments/${commentId}`, {
+    getCurrentUser: async (): Promise<User> => {
+      const response = await axios.get(`${API_BASE_URL}/me`, {
         headers: getAuthHeaders()
       });
       return response.data;
     }
   },
 
-  // Admin/Moderation endpoints
-  admin: {
-    getDashboardStats: async () => {
-      const response = await axios.get(`${API_BASE_URL}/admin/dashboard`, {
+  // Location endpoints
+  locations: {
+    getAll: async (): Promise<Location[]> => {
+      const response = await axios.get(`${API_BASE_URL}/locations`);
+      return response.data;
+    }
+  },
+
+  // Verification endpoints
+  verifications: {
+    submit: async (data: {
+      document_type: 'id_card' | 'passport' | 'driver_license';
+      document_url: string;
+    }): Promise<Verification> => {
+      const response = await axios.post(`${API_BASE_URL}/verifications`, data, {
         headers: getAuthHeaders()
       });
-      return response.data;
-    },
-    moderateDonation: async (donationId: string, action: 'approve' | 'reject', reason?: string) => {
-      const response = await axios.post(`${API_BASE_URL}/admin/donations/${donationId}/moderate`, 
-        { action, reason }, 
-        { headers: getAuthHeaders() }
-      );
-      return response.data;
-    },
-    getUsers: async (params?: { page?: number; role?: string }) => {
-      const response = await axios.get(`${API_BASE_URL}/admin/users`, { 
-        params,
-        headers: getAuthHeaders() 
-      });
-      return response.data;
-    },
-    updateUserRole: async (userId: string, role: 'user' | 'moderator' | 'admin') => {
-      const response = await axios.put(`${API_BASE_URL}/admin/users/${userId}/role`, 
-        { role }, 
-        { headers: getAuthHeaders() }
-      );
       return response.data;
     }
   }
+
+  // Additional endpoints will be added as documented
 };
 
 // Error interceptor for consistent error handling
@@ -677,4 +746,4 @@ axios.interceptors.response.use(
 );
 ```
 
-Remember: This prompt is exclusively for frontend development of a donation platform for Lebanon. The backend API is handled by a separate team. Focus on creating an excellent user experience while maintaining clean integration points with the backend API. Every component should be built with care, considering the real-world impact and the users who will depend on this platform.
+Remember: This prompt is exclusively for frontend development of a donation platform for Lebanon. The backend API is handled by a separate team following the provided API documentation. Focus on creating an excellent user experience while maintaining clean integration points with the documented backend API endpoints. Every component should be built with care, considering the real-world impact and the users who will depend on this platform.
