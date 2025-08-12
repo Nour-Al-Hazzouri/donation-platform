@@ -84,7 +84,7 @@ export default function ProfileSidebar({
   
   return (
     <Sidebar className="w-64 border-r hidden md:block bg-background h-screen fixed">
-      <SidebarContent className="pt-16">
+      <SidebarContent className="pt-12">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

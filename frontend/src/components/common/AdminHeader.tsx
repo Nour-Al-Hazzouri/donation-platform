@@ -43,7 +43,7 @@ export function AdminHeader() {
 
   return (
     <>
-      <header className="w-full px-4 md:px-6 py-4 shadow-sm sticky top-0 bg-background z-40">
+      <header className="w-full px-4 md:px-6 py-2 shadow-sm sticky top-0 bg-background z-40">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link

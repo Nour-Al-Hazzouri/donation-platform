@@ -165,8 +165,8 @@ export default function VerificationRequestDetailsPage({ params }: { params: Pro
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-8 w-full">
             {/* Personal Details Section */}
-            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 h-full">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Personal Details</h2>
+            <div className="bg-background rounded-lg shadow-sm p-4 sm:p-6 h-full border border-border">
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4 sm:mb-6">Personal Details</h2>
               
               <div className="space-y-4 sm:space-y-6 h-full">
                 {/* Profile Image */}
@@ -186,42 +186,42 @@ export default function VerificationRequestDetailsPage({ params }: { params: Pro
                 {/* Personal Information */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-500">Full Name</p>
-                    <p className="font-medium text-gray-900">{userData.personalDetails.name}</p>
+                    <p className="text-sm text-muted-foreground">Full Name</p>
+                    <p className="font-medium text-foreground">{userData.personalDetails.name}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-500">Gender</p>
-                    <p className="font-medium text-gray-900">{userData.personalDetails.gender}</p>
+                    <p className="text-sm text-muted-foreground">Gender</p>
+                    <p className="font-medium text-foreground">{userData.personalDetails.gender}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-500">Phone Number</p>
-                    <p className="font-medium text-gray-900">{userData.personalDetails.phoneNumber}</p>
+                    <p className="text-sm text-muted-foreground">Phone Number</p>
+                    <p className="font-medium text-foreground">{userData.personalDetails.phoneNumber}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-500">Email</p>
-                    <p className="font-medium text-gray-900 break-all">{userData.personalDetails.email}</p>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="font-medium text-foreground break-all">{userData.personalDetails.email}</p>
                   </div>
                 </div>
 
                 {/* Address Information */}
                 <div className="pt-2 sm:pt-4">
-                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Address</h3>
+                  <h3 className="text-base sm:text-lg font-medium text-foreground mb-3 sm:mb-4">Address</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">District</p>
-                      <p className="font-medium text-gray-900">{userData.personalDetails.address.district}</p>
+                      <p className="text-sm text-muted-foreground">District</p>
+                      <p className="font-medium text-foreground">{userData.personalDetails.address.district}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">Street</p>
-                      <p className="font-medium text-gray-900">{userData.personalDetails.address.street}</p>
+                      <p className="text-sm text-muted-foreground">Street</p>
+                      <p className="font-medium text-foreground">{userData.personalDetails.address.street}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">Governorate</p>
-                      <p className="font-medium text-gray-900">{userData.personalDetails.address.governorate}</p>
+                      <p className="text-sm text-muted-foreground">Governorate</p>
+                      <p className="font-medium text-foreground">{userData.personalDetails.address.governorate}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">City</p>
-                      <p className="font-medium text-gray-900">{userData.personalDetails.address.city}</p>
+                      <p className="text-sm text-muted-foreground">City</p>
+                      <p className="font-medium text-foreground">{userData.personalDetails.address.city}</p>
                     </div>
                   </div>
                 </div>
@@ -229,13 +229,13 @@ export default function VerificationRequestDetailsPage({ params }: { params: Pro
             </div>
 
             {/* ID Card Section */}
-            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 h-full">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">ID Card</h2>
+            <div className="bg-background rounded-lg shadow-sm p-4 sm:p-6 h-full border border-border">
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4 sm:mb-6">ID Card</h2>
               
               <div className="space-y-4 sm:space-y-6">
                 {/* ID Card Image */}
                 <div className="flex justify-center">
-                  <div className="w-full max-w-md rounded-lg overflow-hidden bg-gray-100 shadow-md">
+                  <div className="w-full max-w-md rounded-lg overflow-hidden bg-muted shadow-md">
                     <Image
                       src={userData.submittedDocuments.idCard.image}
                       alt="ID Card"
@@ -249,42 +249,42 @@ export default function VerificationRequestDetailsPage({ params }: { params: Pro
                 {/* ID Card Details */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-500">ID Type</p>
-                    <p className="font-medium text-gray-900">{userData.submittedDocuments.idCard.type}</p>
+                    <p className="text-sm text-muted-foreground">ID Type</p>
+                    <p className="font-medium text-foreground">{userData.submittedDocuments.idCard.type}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-500">Additional Info</p>
-                    <p className="font-medium text-gray-900">{userData.submittedDocuments.idCard.additionalInfo}</p>
+                    <p className="text-sm text-muted-foreground">Additional Info</p>
+                    <p className="font-medium text-foreground">{userData.submittedDocuments.idCard.additionalInfo}</p>
                   </div>
                 </div>
 
                 {/* ID Card Fields */}
                 <div className="pt-2 sm:pt-4">
-                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">ID Card Fields</h3>
+                  <h3 className="text-base sm:text-lg font-medium text-foreground mb-3 sm:mb-4">ID Card Fields</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">Name on ID</p>
-                      <p className="font-medium text-gray-900">{userData.submittedDocuments.idCard.fields.name}</p>
+                      <p className="text-sm text-muted-foreground">Name on ID</p>
+                      <p className="font-medium text-foreground">{userData.submittedDocuments.idCard.fields.name}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">ID Number</p>
-                      <p className="font-medium text-gray-900">{userData.submittedDocuments.idCard.fields.idNumber}</p>
+                      <p className="text-sm text-muted-foreground">ID Number</p>
+                      <p className="font-medium text-foreground">{userData.submittedDocuments.idCard.fields.idNumber}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">Date of Birth</p>
-                      <p className="font-medium text-gray-900">{userData.submittedDocuments.idCard.fields.dateOfBirth}</p>
+                      <p className="text-sm text-muted-foreground">Date of Birth</p>
+                      <p className="font-medium text-foreground">{userData.submittedDocuments.idCard.fields.dateOfBirth}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500">Expiration Date</p>
-                      <p className="font-medium text-gray-900">{userData.submittedDocuments.idCard.fields.expirationDate}</p>
+                      <p className="text-sm text-muted-foreground">Expiration Date</p>
+                      <p className="font-medium text-foreground">{userData.submittedDocuments.idCard.fields.expirationDate}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Barcode */}
                 <div className="pt-2 sm:pt-4">
-                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Barcode</h3>
-                  <div className="bg-gray-100 p-3 sm:p-4 rounded-md font-mono text-sm overflow-x-auto">
+                  <h3 className="text-base sm:text-lg font-medium text-foreground mb-3 sm:mb-4">Barcode</h3>
+                  <div className="bg-muted p-3 sm:p-4 rounded-md font-mono text-sm overflow-x-auto text-foreground">
                     <p>{userData.submittedDocuments.idCard.barcode}</p>
                   </div>
                 </div>
@@ -293,17 +293,17 @@ export default function VerificationRequestDetailsPage({ params }: { params: Pro
           </div>
 
           {/* Notes and Actions */}
-          <div className="mt-6 sm:mt-8 bg-white rounded-lg shadow-sm p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Review and Decision</h2>
+          <div className="mt-6 sm:mt-8 bg-background rounded-lg shadow-sm p-4 sm:p-6 border border-border">
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4 sm:mb-6">Review and Decision</h2>
             
             <div className="space-y-4 sm:space-y-6">
               {/* Notes Textarea */}
               <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Notes</label>
+                <label htmlFor="notes" className="block text-sm font-medium text-foreground mb-1 sm:mb-2">Notes</label>
                 <textarea
                   id="notes"
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 text-sm sm:text-base"
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 text-sm sm:text-base text-foreground"
                   placeholder="Add any notes about this verification request..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
