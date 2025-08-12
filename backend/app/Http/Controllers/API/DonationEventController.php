@@ -28,19 +28,9 @@ class DonationEventController extends Controller
     /**
      * @param ImageService $imageService
      */
-    /**
-     * @var NotificationService
-     */
-    protected $notificationService;
-
-    /**
-     * @param ImageService $imageService
-     * @param NotificationService $notificationService
-     */
-    public function __construct(ImageService $imageService, NotificationService $notificationService)
+    public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
-        $this->notificationService = $notificationService;
     }
 
     /**
