@@ -139,6 +139,11 @@ Route::middleware('auth:sanctum')->group(function () {
         // Transactions for a specific donation event
         Route::get('/{donationEvent}/transactions', [DonationTransactionController::class, 'index']);
         Route::post('/{donationEvent}/transactions', [DonationTransactionController::class, 'store']);
+        
+        // Status management routes for donation events
+        Route::post('/{donationEvent}/activate', [DonationEventController::class, 'activate']);
+        Route::post('/{donationEvent}/cancel', [DonationEventController::class, 'cancel']);
+        Route::post('/{donationEvent}/suspend', [DonationEventController::class, 'suspend']);
     }); 
 
     // General donation transactions routes
