@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\Verification;
+use App\Models\NotificationType;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,6 +40,11 @@ class VerificationTest extends TestCase
 
         // Fake the private storage for verification documents
         Storage::fake('private');
+    }
+
+    protected function getNotificationTypeId(string $typeName): int
+    {
+        return NotificationType::where('name', $typeName)->value('id');
     }
 
     protected function actingAsUser()
@@ -100,6 +106,18 @@ class VerificationTest extends TestCase
         foreach ($verification->image_urls as $imagePath) {
             $this->assertTrue(Storage::disk('private')->exists($imagePath));
         }
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('verification_request_sent'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->user->id)
+            ->where('type_id', $this->getNotificationTypeId('verification_request_sent'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->user->id, $notification->data['user_id']);
     }
 
     /** @test */
@@ -170,12 +188,22 @@ class VerificationTest extends TestCase
                 'message',
                 'data' => [
                     '*' => [
-                        'id', 'user_id', 'status', 'document_type',
-                        'image_full_urls', 'created_at', 'user'
+                        'id',
+                        'user_id',
+                        'status',
+                        'document_type',
+                        'image_full_urls',
+                        'created_at',
+                        'user'
                     ]
                 ],
                 'pagination' => [
-                    'total', 'per_page', 'current_page', 'last_page', 'from', 'to'
+                    'total',
+                    'per_page',
+                    'current_page',
+                    'last_page',
+                    'from',
+                    'to'
                 ]
             ]);
     }
@@ -202,6 +230,18 @@ class VerificationTest extends TestCase
         ]);
 
         $this->assertTrue($verification->fresh()->user->is_verified);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('verification_approved'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->user->id)
+            ->where('type_id', $this->getNotificationTypeId('verification_approved'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->admin->id, $notification->data['user_id']);
     }
 
     /** @test */
@@ -227,6 +267,18 @@ class VerificationTest extends TestCase
         ]);
 
         $this->assertFalse($verification->fresh()->user->is_verified);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('verification_rejected'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->user->id)
+            ->where('type_id', $this->getNotificationTypeId('verification_rejected'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->admin->id, $notification->data['user_id']);
     }
 
     /** @test */
