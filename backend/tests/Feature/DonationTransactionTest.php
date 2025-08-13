@@ -234,20 +234,20 @@ class DonationTransactionTest extends TestCase
         // Verify event amounts were updated
         $this->assertEquals(100, $this->donationRequest->fresh()->current_amount);
 
-        // $this->assertDatabaseHas('notifications', [
-        //     'user_id' => $this->eventOwner->id,
-        //     'type_id' => $this->getNotificationTypeId('transaction_approved'),
-        // ]);
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('transaction_approved'),
+        ]);
 
-        // // Verify the notification data contains the expected fields
-        // $notification = \App\Models\Notification::where('user_id', $this->eventOwner->id)
-        //     ->where('type_id', $this->getNotificationTypeId('transaction_approved'))
-        //     ->first();
+        // Verify the notification data contains the expected fields
+        $notification = \App\Models\Notification::where('user_id', $this->user->id)
+            ->where('type_id', $this->getNotificationTypeId('transaction_approved'))
+            ->first();
 
-        // $this->assertNotNull($notification);
-        // $this->assertEquals($this->eventOwner->id, $notification->data['user_id']);
-        // $this->assertEquals($this->donationRequest->id, $notification->data['event_id']);
-        // $this->assertEquals($response->json('data.id'), $notification->data['transaction_id']);
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->user->id, $notification->data['user_id']);
+        $this->assertEquals($this->donationRequest->id, $notification->data['event_id']);
+        $this->assertEquals($response->json('data.id'), $notification->data['transaction_id']);
     }
 
     /** @test */
@@ -273,6 +273,11 @@ class DonationTransactionTest extends TestCase
 
         // Verify status wasn't changed
         $this->assertEquals('pending', $transaction->fresh()->status);
+
+        $this->assertDatabaseMissing('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('transaction_approved'),
+        ]);
     }
 
     /** @test */
@@ -404,8 +409,8 @@ class DonationTransactionTest extends TestCase
 
         // Approve the contribution
         $this->putJson("/api/donation-transactions/{$contribution->id}/status", [
-            'status' => 'approved'
-        ]);
+                'status' => 'approved'
+            ]);
 
         $this->assertEquals(100, $this->donationRequest->fresh()->current_amount);
 
@@ -456,5 +461,75 @@ class DonationTransactionTest extends TestCase
         ]);
 
         $this->assertEquals(0, $this->donationRequest->fresh()->current_amount);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('transaction_rejected'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->user->id)
+            ->where('type_id', $this->getNotificationTypeId('transaction_rejected'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->user->id, $notification->data['user_id']);
+        $this->assertEquals($this->donationRequest->id, $notification->data['event_id']);
+        $this->assertEquals($response->json('data.id'), $notification->data['transaction_id']);
+    }
+
+    /** @test */
+    public function event_status_updates_to_completed_when_goal_reached()
+    {
+        // Set the current amount to be just below the goal
+        $this->donationRequest->update([
+            'current_amount' => 900,
+            'goal_amount' => 1000,
+            'status' => 'active'
+        ]);
+
+        // Create a transaction that will reach the goal when approved
+        $transaction = DonationTransaction::factory()->create([
+            'user_id' => $this->user->id,
+            'event_id' => $this->donationRequest->id,
+            'transaction_type' => 'contribution',
+            'amount' => 100,
+            'status' => 'pending'
+        ]);
+
+        // Approve the transaction
+        $response = $this->actingAs($this->eventOwner, 'sanctum')
+            ->putJson("/api/donation-transactions/{$transaction->id}/status", [
+                'status' => 'approved'
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'status' => 'approved'
+                ]
+            ]);
+
+        // Refresh the event from database
+        $this->donationRequest->refresh();
+
+        // Assert the event status is now completed
+        $this->assertEquals('completed', $this->donationRequest->status);
+        $this->assertEquals(1000, $this->donationRequest->current_amount);
+
+        // Assert notification was created
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->eventOwner->id,
+            'type_id' => $this->getNotificationTypeId('donation_goal_reached'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->eventOwner->id)
+            ->where('type_id', $this->getNotificationTypeId('donation_goal_reached'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->eventOwner->id, $notification->data['user_id']);
+        $this->assertEquals($this->donationRequest->title, $notification->data['event_title']);
+        $this->assertEquals(1000, $notification->data['goal_amount']);
+        $this->assertEquals(1000, $notification->data['current_amount']);
     }
 }
