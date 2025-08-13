@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\DonationEvent;
 use App\Models\DonationTransaction;
+use App\Models\NotificationType;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -71,6 +72,11 @@ class DonationTransactionTest extends TestCase
         ]);
     }
 
+    protected function getNotificationTypeId(string $typeName): int
+    {
+        return NotificationType::where('name', $typeName)->value('id');
+    }
+
     /** @test */
     public function unauthenticated_user_cannot_create_transaction()
     {
@@ -127,6 +133,21 @@ class DonationTransactionTest extends TestCase
             'amount' => 100,
             'status' => 'pending'
         ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->eventOwner->id,
+            'type_id' => $this->getNotificationTypeId('transaction_contribution'),
+        ]);
+
+        // Verify the notification data contains the expected fields
+        $notification = \App\Models\Notification::where('user_id', $this->eventOwner->id)
+            ->where('type_id', $this->getNotificationTypeId('transaction_contribution'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->user->id, $notification->data['user_id']);
+        $this->assertEquals($this->donationRequest->id, $notification->data['event_id']);
+        $this->assertEquals($response->json('data.id'), $notification->data['transaction_id']);
     }
 
     /** @test */
@@ -145,6 +166,29 @@ class DonationTransactionTest extends TestCase
                     'status' => 'pending'
                 ]
             ]);
+
+            $this->assertDatabaseHas('donation_transactions', [
+                'user_id' => $this->user->id,
+                'event_id' => $this->donationOffer->id,
+                'transaction_type' => 'claim',
+                'amount' => 100,
+                'status' => 'pending'
+            ]);
+
+            $this->assertDatabaseHas('notifications', [
+                'user_id' => $this->eventOwner->id,
+                'type_id' => $this->getNotificationTypeId('transaction_claim'),
+            ]);
+
+            // Verify the notification data contains the expected fields
+            $notification = \App\Models\Notification::where('user_id', $this->eventOwner->id)
+                ->where('type_id', $this->getNotificationTypeId('transaction_claim'))
+                ->first();
+
+            $this->assertNotNull($notification);
+            $this->assertEquals($this->user->id, $notification->data['user_id']);
+            $this->assertEquals($this->donationOffer->id, $notification->data['event_id']);
+            $this->assertEquals($response->json('data.id'), $notification->data['transaction_id']);
     }
 
     /** @test */
@@ -189,6 +233,21 @@ class DonationTransactionTest extends TestCase
 
         // Verify event amounts were updated
         $this->assertEquals(100, $this->donationRequest->fresh()->current_amount);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->eventOwner->id,
+            'type_id' => $this->getNotificationTypeId('transaction_approved'),
+        ]);
+
+        // Verify the notification data contains the expected fields
+        $notification = \App\Models\Notification::where('user_id', $this->eventOwner->id)
+            ->where('type_id', $this->getNotificationTypeId('transaction_approved'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->eventOwner->id, $notification->data['user_id']);
+        $this->assertEquals($this->donationRequest->id, $notification->data['event_id']);
+        $this->assertEquals($response->json('data.id'), $notification->data['transaction_id']);
     }
 
     /** @test */
