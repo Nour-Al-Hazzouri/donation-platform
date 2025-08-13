@@ -6,17 +6,36 @@ use App\Http\Controllers\Controller;
 use App\Models\Verification;
 use App\Models\User;
 use App\Services\ImageService;
+use App\Services\NotificationService;
 use App\Http\Resources\VerificationResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Http\UploadedFile;
 
 class VerificationController extends Controller
 {
+    /**
+     * @var NotificationService
+     */
+    private NotificationService $notificationService;
+
+    /**
+     * @var ImageService
+     */
+    private ImageService $imageService;
+
+    /**
+     * Summary of __construct
+     * @param \App\Services\NotificationService $notificationService
+     * @param \App\Services\ImageService $imageService
+     */
+    public function __construct(NotificationService $notificationService, ImageService $imageService)
+    {
+        $this->notificationService = $notificationService;
+        $this->imageService = $imageService;
+    }
     /**
      * Display a listing of all verification requests.
      *
@@ -146,27 +165,6 @@ class VerificationController extends Controller
         }
     }
 
-    /**
-     * Store a newly created verification request in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    /**
-     * @var ImageService
-     */
-    protected $imageService;
-
-    /**
-     * Create a new controller instance.
-     *
-     * @param ImageService $imageService
-     */
-    public function __construct(ImageService $imageService)
-    {
-        $this->imageService = $imageService;
-    }
-
     public function store(Request $request): JsonResponse
     {
         try {
@@ -237,6 +235,13 @@ class VerificationController extends Controller
 
             // Load relationships for the response
             $verification->load(['user']);
+
+            $this->notificationService->sendVerificationRequestSent(
+                $user,
+                [
+                    'user_id' => $user->id,
+                ]
+            );
 
             return response()->json([
                 'success' => true,
@@ -325,6 +330,28 @@ class VerificationController extends Controller
 
                 // Reload the verification with relationships
                 $verification->load(['user']);
+
+                if ($status === 'approved') {
+                    $this->notificationService->sendVerificationStatus(
+                        $verification->user,
+                        true,
+                        $validated['notes'] ?? null,
+                        [
+                            'user_id' => Auth::user()->id,
+                            'verification_id' => $verification->id,
+                        ]
+                    );
+                } else if ($status === 'rejected') {
+                    $this->notificationService->sendVerificationStatus(
+                        $verification->user,
+                        false,
+                        $validated['notes'] ?? null,
+                        [
+                            'user_id' => Auth::user()->id,
+                            'verification_id' => $verification->id,
+                        ]
+                    );
+                }
 
                 return response()->json([
                     'success' => true,

@@ -31,6 +31,7 @@ class UpdateTransactionStatusRequest extends FormRequest
                 'string',
                 Rule::in(['approved', 'declined', 'pending']),
             ],
+            'reason' => 'string|nullable',
         ];
     }
     
@@ -44,6 +45,8 @@ class UpdateTransactionStatusRequest extends FormRequest
         return [
             'status.required' => 'The status field is required.',
             'status.in' => 'The selected status is invalid. Must be one of: approved, declined, pending.',
+            'reason.string' => 'The reason must be a string.',
+            'reason.nullable' => 'The reason field is optional.',
         ];
     }
     

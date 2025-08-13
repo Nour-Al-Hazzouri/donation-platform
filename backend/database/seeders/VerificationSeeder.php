@@ -29,12 +29,7 @@ class VerificationSeeder extends Seeder
                 'user_id' => $user->id,
                 'verifier_id' => $status !== 'pending' ? $verifiers->random()->id : null,
                 'document_type' => $this->getRandomDocumentType(),
-                'document_urls' => $imageCount > 0 ? array_slice([
-                    'https://picsum.photos/800/600?random=' . rand(1, 1000),
-                    'https://picsum.photos/800/600?random=' . rand(1001, 2000),
-                    'https://picsum.photos/800/600?random=' . rand(2001, 3000),
-                    'https://picsum.photos/800/600?random=' . rand(3001, 4000),
-                ], 0, $imageCount) : [],
+                'image_urls' => $this->generateVerificationImages($imageCount),
                 'status' => $status,
                 'notes' => $status !== 'pending' ? $this->getVerificationNotes($status) : null,
                 'verified_at' => $status !== 'pending' ? now()->subDays(rand(1, 60)) : null,
@@ -92,5 +87,17 @@ class VerificationSeeder extends Seeder
         }
 
         return $phrases[array_rand($phrases)];
+    }
+
+    private function generateVerificationImages(int $count): array
+    {
+        $images = [];
+        for ($i = 0; $i < $count; $i++) {
+            $image = \Illuminate\Http\UploadedFile::fake()->image('verification_' . uniqid() . '.jpg', 800, 600);
+            $path = 'verifications/' . uniqid() . '.jpg';
+            \Illuminate\Support\Facades\Storage::disk('private')->put($path, file_get_contents($image));
+            $images[] = $path;
+        }
+        return $images;
     }
 }
