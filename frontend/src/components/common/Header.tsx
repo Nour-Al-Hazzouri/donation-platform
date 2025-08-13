@@ -107,7 +107,7 @@ export function Header() {
 
   return (
     <>
-      <header className="w-full px-4 md:px-6 py-2 shadow-sm sticky top-0 bg-background z-40">
+      <header className="w-full px-3 md:px-4 py-1 shadow-sm sticky top-0 bg-background z-40 border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link 
@@ -284,7 +284,20 @@ export function Header() {
                         <>
                           <h3 className="text-primary font-medium text-sm px-2">Admin Dashboard</h3>
                           <div className="space-y-2">
-                            <Link href="/admin" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                            <Button
+                              variant="ghost"
+                              className={cn(
+                                "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
+                                pathname === '/profile' && (!searchParams || searchParams.get('view') === 'profile')
+                                  ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
+                                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                              )}
+                              onClick={handleProfileNavigation}
+                            >
+                              <User size={16} />
+                              User Profile
+                            </Button>
+                            <Link href="/admin/dashboard" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                               <LayoutDashboard className="h-4 w-4" />
                               <span>Dashboard</span>
                             </Link>
@@ -340,15 +353,7 @@ export function Header() {
                         </>
                       )}
                       
-                      {isAdmin && (
-                        <Link href="/admin/dashboard" onClick={closeMobileMenu} className="block mb-3">
-                          <Button
-                            className="w-full text-center py-2 px-4 rounded-md bg-red-500 text-white hover:bg-red-600"
-                          >
-                            Dashboard
-                          </Button>
-                        </Link>
-                      )}
+
                       
                       <Button
                         variant="ghost"
