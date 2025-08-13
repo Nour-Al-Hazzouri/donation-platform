@@ -337,7 +337,7 @@ class VerificationController extends Controller
                         true,
                         $validated['notes'] ?? null,
                         [
-                            'user_id' => $verification->user->id,
+                            'user_id' => Auth::user()->id,
                             'verification_id' => $verification->id,
                         ]
                     );
@@ -347,7 +347,7 @@ class VerificationController extends Controller
                         false,
                         $validated['notes'] ?? null,
                         [
-                            'user_id' => $verification->user->id,
+                            'user_id' => Auth::user()->id,
                             'verification_id' => $verification->id,
                         ]
                     );
