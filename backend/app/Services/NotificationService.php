@@ -362,11 +362,14 @@ class NotificationService
     }
 
     public function broadcastCustomNotification(
-        Collection $users = User::all(),
+        ?Collection $users,
         string $title,
         string $message,
         ?array $data = null
     ) {
+        if (!$users) {
+            $users = User::all();
+        }
         foreach ($users as $user) {
             $this->sendCustomNotification($user, $title, $message, $data);
         }
