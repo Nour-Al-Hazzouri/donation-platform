@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, PersistOptions } from 'zustand/middleware'
 import { authService } from '@/lib/api/auth'
+import Cookies from 'js-cookie';
 
 type User = {
   id: number;
@@ -68,33 +69,40 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
       
-      login: async (email: string, password: string) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await authService.login({ email, password });
-          
-          // Transform the API response to match our User type
-          const user: User = {
-            ...response.user,
-            token: response.access_token,
-            isAdmin: response.isAdmin,
-            balance: 10000, // For backward compatibility
-          };
-          
-          set({ 
-            user,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-        } catch (error: any) {
-          console.error('Login error:', error);
-          set({ 
-            isLoading: false, 
-            error: error.response?.data?.message || 'Failed to login. Please check your credentials.'
-          });
-          throw error;
-        }
-      },
+
+login: async (email: string, password: string) => {
+  set({ isLoading: true, error: null });
+  try {
+    const response = await authService.login({ email, password });
+
+    const user: User = {
+      ...response.user,
+      token: response.access_token,
+      isAdmin: response.isAdmin,
+      balance: 10000,
+    };
+
+    // Save user in Zustand
+    set({
+      user,
+      isAuthenticated: true,
+      isLoading: false,
+    });
+
+    // Save user in cookie for server-side middleware
+    Cookies.set('auth-storage', JSON.stringify({ state: { user } }), {
+      path: '/',
+      expires: 7, // expires in 7 days
+    });
+
+  } catch (error: any) {
+    set({
+      isLoading: false,
+      error: error.response?.data?.message || 'Failed to login. Please check your credentials.',
+    });
+    throw error;
+  }
+},
       
       register: async (userData) => {
         set({ isLoading: true, error: null });

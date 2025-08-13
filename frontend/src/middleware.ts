@@ -1,29 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Define protected routes that require authentication
-const protectedRoutes = [
-  '/dashboard',
-];
-
-// Define routes that require admin privileges
-const adminRoutes = [
-  '/admin',
-];
-
-// Define routes that should be accessible only to non-authenticated users
-const authRoutes = [
-  '/login',
-  '/register',
-];
+const protectedRoutes = ['/dashboard'];
+const adminRoutes = ['/admin'];
+const authRoutes = ['/login', '/register'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
-  // Check if the user has an authentication token
+
+  // Read cookie
   const authStorage = request.cookies.get('auth-storage')?.value;
   let isAuthenticated = false;
   let isAdmin = false;
-  
+
   if (authStorage) {
     try {
       const parsedStorage = JSON.parse(authStorage);
@@ -43,13 +31,12 @@ export function middleware(request: NextRequest) {
   if (!isAuthenticated && protectedRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.redirect(new URL('/', request.url));
   }
-  
+
   // Redirect non-admin users away from admin routes
   if (adminRoutes.some(route => pathname.startsWith(route))) {
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL('/', request.url));
     }
-    
     if (!isAdmin) {
       return NextResponse.redirect(new URL('/profile', request.url));
     }
