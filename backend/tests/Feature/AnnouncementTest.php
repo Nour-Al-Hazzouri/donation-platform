@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Announcement;
 use App\Models\User;
+use App\Models\NotificationType;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,6 +24,11 @@ class AnnouncementTest extends TestCase
         // Run the RoleSeeder to set up permissions
         $this->seed(RoleSeeder::class);
         $this->seed(NotificationTypeSeeder::class);
+    }
+
+    protected function getNotificationTypeId(string $name): int
+    {
+        return NotificationType::where('name', $name)->value('id');
     }
 
     /** @test */
@@ -133,6 +139,9 @@ class AnnouncementTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
+        $randomUser = User::factory()->create();
+        $randomUser->assignRole('user');
+
         // Authenticate the admin
         Sanctum::actingAs($admin);
 
@@ -170,6 +179,16 @@ class AnnouncementTest extends TestCase
             'title' => 'Test Announcement',
             'content' => 'This is a test announcement',
             'user_id' => $admin->id
+        ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $admin->id,
+            'type_id' => $this->getNotificationTypeId('new_announcement'),
+        ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $randomUser->id,
+            'type_id' => $this->getNotificationTypeId('new_announcement'),
         ]);
     }
 
@@ -225,6 +244,11 @@ class AnnouncementTest extends TestCase
                 ],
                 'message' => 'Announcement updated successfully'
             ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $admin->id,
+            'type_id' => $this->getNotificationTypeId('announcement_updated'),
+        ]);
     }
 
     /** @test */
@@ -248,6 +272,11 @@ class AnnouncementTest extends TestCase
 
         $response = $this->putJson("/api/announcements/{$announcement->id}", $updateData);
         $response->assertStatus(403);
+
+        $this->assertDatabaseMissing('notifications', [
+            'user_id' => $moderator->id,
+            'type_id' => $this->getNotificationTypeId('announcement_updated'),
+        ]);
     }
 
     /** @test */
@@ -275,6 +304,11 @@ class AnnouncementTest extends TestCase
 
         $response = $this->putJson("/api/announcements/{$announcement->id}", $updateData);
         $response->assertStatus(200);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $user->id,
+            'type_id' => $this->getNotificationTypeId('announcement_updated'),
+        ]);
     }
 
     /** @test */
