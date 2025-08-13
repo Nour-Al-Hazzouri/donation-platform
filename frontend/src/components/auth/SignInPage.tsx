@@ -25,41 +25,52 @@ export default function SignInPage() {
   }
 
 
-const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
-  setIsLoading(true)
-
-  setTimeout(() => {
-    if (email && password) {
-      const mockUser = {
-        id: '1',
-        name: email.split('@')[0],
-        email,
-        verified: false,
-      }
-
-      login(mockUser)
-
-      if (email === 'admin@gmail.com' && password === 'admin123') {
-        closeModal()
-        router.push('/admin')
-      } else {
-        closeModal()
-        toast({
-          title: "Logged in successfully",
-          description: `Welcome back, ${mockUser.name}!`,
-        })
-      }
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Please enter valid credentials",
-        variant: "destructive",
-      })
+  
+  if (!email || !password) {
+    toast({
+      title: "Login failed",
+      description: "Please enter valid credentials",
+      variant: "destructive",
+    })
+    return
+  }
+  
+  try {
+    setIsLoading(true)
+    // Use the login method from useAuthStore
+    await login(email, password)
+    
+    closeModal()
+    
+    // Get the current user
+    const user = useAuthStore.getState().user
+    
+    // Check if there's a redirect URL in localStorage
+    const redirectUrl = localStorage.getItem('redirectAfterAuth')
+    
+    // If there is a redirect URL, navigate to it and remove it from localStorage
+    if (redirectUrl) {
+      localStorage.removeItem('redirectAfterAuth')
+      router.push(redirectUrl)
     }
-
+    
+    // For now, we'll just show a welcome message
+    // Admin role check will be implemented when the backend provides role information
+    toast({
+      title: "Logged in successfully",
+      description: `Welcome back, ${user?.first_name || 'User'}!`,
+    })
+  } catch (error: any) {
+    toast({
+      title: "Login failed",
+      description: error.message || "An error occurred during login",
+      variant: "destructive",
+    })
+  } finally {
     setIsLoading(false)
-  }, 1000)
+  }
 }
   const handleGoogleSignIn = () => {
     // Handle Google sign in logic here

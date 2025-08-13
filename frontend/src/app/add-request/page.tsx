@@ -15,11 +15,12 @@ export default function AddRequestPage() {
   useEffect(() => {
     // Check authentication when component mounts
     if (!isAuthenticated) {
-      // Redirect to home and open sign in modal
-      router.push('/')
+      // Store current URL for redirection after authentication
+      localStorage.setItem('redirectAfterAuth', window.location.pathname)
+      // Open sign-in modal instead of redirecting
       openModal('signIn')
     }
-  }, [isAuthenticated, openModal, router])
+  }, [isAuthenticated, openModal])
 
   // If not authenticated, don't render the page content
   if (!isAuthenticated) {

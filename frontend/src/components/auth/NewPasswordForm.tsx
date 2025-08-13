@@ -6,8 +6,14 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff, ChevronLeft } from "lucide-react"
 import { useModal } from "@/contexts/ModalContext"
+import { useAuthStore } from "@/store/authStore"
 
-export default function NewPasswordForm() {
+interface NewPasswordFormProps {
+  email: string;
+  code: string;
+}
+
+export default function NewPasswordForm({ email, code }: NewPasswordFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [password, setPassword] = useState('')
@@ -15,7 +21,9 @@ export default function NewPasswordForm() {
   const [passwordError, setPasswordError] = useState('')
   const { openModal, closeModal } = useModal()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Reset error state
@@ -32,11 +40,26 @@ export default function NewPasswordForm() {
       return
     }
     
-    // In a real app, we would send the new password to the backend
-    console.log('Setting new password:', password)
+    setIsLoading(true)
     
-    // Show success modal
-    openModal('passwordResetSuccess')
+    try {
+      // Call the resetPassword method from authStore
+      await useAuthStore.getState().resetPassword({
+        email,
+        code,
+        password,
+        password_confirmation: confirmPassword
+      })
+      
+      console.log('Password reset successful')
+      
+      // Show success modal
+      openModal('passwordResetSuccess')
+    } catch (error: any) {
+      setPasswordError(error.message || 'Failed to reset password. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleBack = () => {
@@ -131,11 +154,12 @@ export default function NewPasswordForm() {
           
           <div className="flex justify-start">
             <Button
-              type="submit"
-              className="w-full h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300"
-            >
-              Set New Password
-            </Button>
+            type="submit"
+            className="w-full h-10 sm:h-12 bg-[#f90404] hover:bg-[#d90404] text-white font-semibold rounded-lg transition-all duration-300"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Setting New Password...' : 'Set New Password'}
+          </Button>
           </div>
         </form>
       </div>

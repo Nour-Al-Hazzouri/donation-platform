@@ -190,7 +190,7 @@ export function Header() {
                     className="hover:bg-[#d90404] transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
                   >
                     <User size={16} />
-                    <span>{user.name}</span>
+                    <span>{user.first_name} {user.last_name}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-background">
@@ -252,12 +252,12 @@ export function Header() {
                     <div className="flex flex-col items-center space-y-3 p-4 mb-4 bg-secondary/20 rounded-lg">
                       <div className="relative">
                         <Avatar className="w-16 h-16">
-                          <AvatarImage src={user.profileImage} alt={user.name} />
+                          <AvatarImage src={(user.avatar_url || user.avatar_url_full) ?? undefined} alt={`${user.first_name} ${user.last_name}`} />
                           <AvatarFallback className="bg-primary">
                             <User size={32} className="text-primary-foreground" />
                           </AvatarFallback>
                         </Avatar>
-                        {user?.verified && (
+                        {user?.email_verified_at && (
                           <img
                             src={theme === 'dark' ? "/verification-dark.png" : "/verification.png"}
                             alt="Verified"
@@ -266,7 +266,7 @@ export function Header() {
                         )}
                       </div>
                       <div className="flex flex-col items-center">
-                        <span className="font-semibold text-foreground">{user.name}</span>
+                        <span className="font-semibold text-foreground">{user.first_name} {user.last_name}</span>
                       </div>
                     </div>
                     
