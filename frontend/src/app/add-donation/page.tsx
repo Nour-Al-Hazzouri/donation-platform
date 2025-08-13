@@ -14,10 +14,12 @@ export default function AddDonationPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/')
+      // Store current URL for redirection after authentication
+      localStorage.setItem('redirectAfterAuth', window.location.pathname)
+      // Open sign-in modal instead of redirecting
       openModal('signIn')
     }
-  }, [isAuthenticated, openModal, router])
+  }, [isAuthenticated, openModal])
 
   if (!isAuthenticated) {
     return null

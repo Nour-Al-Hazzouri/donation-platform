@@ -9,12 +9,14 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useModal } from '@/contexts/ModalContext'
 import { useAuthStore } from '@/store/authStore'
 import { toast } from "@/components/ui/use-toast"
+import { useRouter } from 'next/navigation'
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { openModal, closeModal } = useModal()
   const { login } = useAuthStore()
+  const router = useRouter()
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -93,6 +95,15 @@ export default function SignUpPage() {
       
       // Close the modal
       closeModal()
+      
+      // Check if there's a redirect URL in localStorage
+      const redirectUrl = localStorage.getItem('redirectAfterAuth')
+      
+      // If there is a redirect URL, navigate to it and remove it from localStorage
+      if (redirectUrl) {
+        localStorage.removeItem('redirectAfterAuth')
+        router.push(redirectUrl)
+      }
       
       // Show success toast
       toast({

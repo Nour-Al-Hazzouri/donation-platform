@@ -43,6 +43,8 @@ export default function DonationDetailsPage() {
 
   const handleRequest = () => {
     if (!isAuthenticated) {
+      // Store the request URL for redirection after authentication
+      localStorage.setItem('redirectAfterAuth', `/request/${donationId}`)
       openModal('signIn')
       return
     }

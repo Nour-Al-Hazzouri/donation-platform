@@ -7,16 +7,22 @@ import UserProfileDashboard from '@/components/profile/UserProfileDashboard'
 import NotificationsDashboard from '@/components/profile/NotificationsDashboard'
 import { useAuthStore } from '@/store/authStore'
 import { SidebarProvider } from '@/components/ui/sidebar'
+import { useModal } from '@/contexts/ModalContext'
 
 export default function ProfilePage() {
   const { isAuthenticated } = useAuthStore()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { openModal } = useModal()
   const [activeView, setActiveView] = useState<'profile' | 'notifications'>('profile')
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/')
+      // Store current URL for redirection after authentication
+      localStorage.setItem('redirectAfterAuth', window.location.pathname)
+      // Open sign-in modal instead of redirecting
+      openModal('signIn')
+      return
     }
     
     const view = searchParams.get('view')
@@ -25,7 +31,7 @@ export default function ProfilePage() {
     } else if (view === 'profile') {
       setActiveView('profile')
     }
-  }, [isAuthenticated, router, searchParams])
+  }, [isAuthenticated, openModal, searchParams])
 
   if (!isAuthenticated) {
     return null

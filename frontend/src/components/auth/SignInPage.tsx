@@ -47,6 +47,15 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Get the current user
     const user = useAuthStore.getState().user
     
+    // Check if there's a redirect URL in localStorage
+    const redirectUrl = localStorage.getItem('redirectAfterAuth')
+    
+    // If there is a redirect URL, navigate to it and remove it from localStorage
+    if (redirectUrl) {
+      localStorage.removeItem('redirectAfterAuth')
+      router.push(redirectUrl)
+    }
+    
     // For now, we'll just show a welcome message
     // Admin role check will be implemented when the backend provides role information
     toast({
