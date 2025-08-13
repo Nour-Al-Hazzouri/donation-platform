@@ -1,52 +1,176 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# GiveLeb - Donation Platform Backend
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://via.placeholder.com/400x200?text=GiveLeb+Logo" alt="GiveLeb Logo" width="400">
 </p>
 
-## About Laravel
+<p align="center">
+  <a href="#"><img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat&logo=laravel" alt="Laravel 12"></a>
+  <a href="#"><img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat&logo=php" alt="PHP 8.3+"></a>
+  <a href="#"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Status-Active-brightgreen" alt="Status"></a>
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📝 Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+GiveLeb is a comprehensive donation and community support platform built with Laravel 12, designed to connect donors, volunteers, and organizations. This repository contains the backend API that powers the GiveLeb platform, providing a robust foundation for managing donations, community engagement, and user interactions.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 🌟 Key Features
 
-## Learning Laravel
+- **User Authentication & Authorization** with Laravel Sanctum
+- **Role-Based Access Control** using Spatie Laravel-Permission
+- **Donation Management** for both monetary and in-kind contributions
+- **Community Engagement** with posts, comments, and reactions
+- **Real-time Notifications** for platform activities
+- **Comprehensive API** with detailed documentation
+- **Image Processing** with Intervention Image
+- **Automated Testing** with PHPUnit
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🚀 Tech Stack
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **Framework**: Laravel 12
+- **PHP**: 8.3+
+- **Database**: MySQL/SQLite (development)
+- **Authentication**: Laravel Sanctum
+- **Authorization**: Spatie Laravel-Permission
+- **Image Processing**: Intervention Image
+- **API Documentation**: OpenAPI (Swagger)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Prerequisites
 
-## Laravel Sponsors
+Before you begin, ensure you have the following installed:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- PHP 8.3 or higher
+- Composer 2.0 or higher
+- Node.js & NPM (for frontend assets if needed)
+- MySQL 8.0+ or SQLite
+- Git
 
-### Premium Partners
+## 🏗️ Installation
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/donation-platform.git
+   cd donation-platform/backend
+   ```
 
-## Contributing
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3. **Install NPM dependencies** (if needed, no need if u want just the backend API)
+   ```bash
+   npm install
+   ```
+
+4. **Copy environment file**
+   ```bash
+   cp .env.example .env
+   ```
+
+5. **Generate application key**
+   ```bash
+   php artisan key:generate
+   ```
+
+6. **Configure database**
+   - For SQLite (development):
+     ```bash
+     touch database/database.sqlite
+     ```
+     Then update `.env` with:
+     ```
+     DB_CONNECTION=sqlite
+     DB_DATABASE=/absolute/path/to/your/database.sqlite
+     ```
+   - For MySQL:
+     Update `.env` with your database credentials:
+     ```
+     DB_CONNECTION=mysql
+     DB_HOST=127.0.0.1
+     DB_PORT=3306
+     DB_DATABASE=giveleb
+     DB_USERNAME=root
+     DB_PASSWORD=
+     ```
+
+7. **Run database migrations and seeders**
+   ```bash
+   php artisan migrate --seed
+   ```
+
+8. **Generate Passport keys** (for API authentication)
+   ```bash
+   php artisan passport:keys
+   ```
+
+9. **Link storage**
+   ```bash
+   php artisan storage:link
+   ```
+
+## 🚀 Running the Application
+
+### Development
+
+Start the development server:
+```bash
+php artisan serve
+```
+
+The application will be available at `http://localhost:8000`
+
+### Queue Workers
+
+For processing jobs in the background (emails, notifications, etc.):
+```bash
+php artisan queue:work
+```
+
+### Running Tests
+
+```bash
+php artisan test
+```
+
+## 🔐 Authentication
+
+The API uses Laravel Sanctum for authentication. Include the following in your requests:
+
+```
+Authorization: Bearer {your_auth_token}
+Accept: application/json
+```
+
+## 📚 API Documentation
+
+Detailed API documentation is available in [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
+
+## 📦 Dependencies
+
+- [Laravel 12](https://laravel.com/docs/12.x)
+- [Laravel Sanctum](https://laravel.com/docs/sanctum)
+- [Spatie Laravel-Permission](https://spatie.be/docs/laravel-permission/v5/introduction)
+- [Intervention Image](https://image.intervention.io/v2)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Laravel](https://laravel.com) - The PHP Framework For Web Artisans
+- [Spatie](https://spatie.be/) - For their amazing Laravel packages
+- All contributors who have helped shape this project
 
 ## Code of Conduct
 
