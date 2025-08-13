@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\CommunityPost;
 use App\Models\DonationEvent;
+use App\Models\NotificationType;
 use App\Models\User;
 use App\Models\Vote;
 use Database\Seeders\RoleSeeder;
@@ -44,6 +45,11 @@ class VoteTest extends TestCase
         ]);
     }
 
+    private function getNotificationTypeId($name)
+    {
+        return NotificationType::where('name', $name)->first()->id;
+    }
+
     /** @test */
     public function guest_cannot_vote()
     {
@@ -78,6 +84,19 @@ class VoteTest extends TestCase
             'post_id' => $this->post->id,
             'type' => 'upvote'
         ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->post->user->id,
+            'type_id' => $this->getNotificationTypeId('post_upvoted'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->post->user->id)
+            ->where('type_id', $this->getNotificationTypeId('post_upvoted'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->user->id, $notification->data['user_id']);
+        $this->assertEquals($this->post->id, $notification->data['post_id']);
     }
 
     /** @test */
@@ -98,6 +117,25 @@ class VoteTest extends TestCase
                     'total_votes' => -1
                 ]
             ]);
+
+            $this->assertDatabaseHas('votes', [
+                'user_id' => $this->user->id,
+                'post_id' => $this->post->id,
+                'type' => 'downvote'
+            ]);
+
+            $this->assertDatabaseHas('notifications', [
+                'user_id' => $this->post->user->id,
+                'type_id' => $this->getNotificationTypeId('post_downvoted'),
+            ]);
+
+            $notification = \App\Models\Notification::where('user_id', $this->post->user->id)
+                ->where('type_id', $this->getNotificationTypeId('post_downvoted'))
+                ->first();
+
+            $this->assertNotNull($notification);
+            $this->assertEquals($this->user->id, $notification->data['user_id']);
+            $this->assertEquals($this->post->id, $notification->data['post_id']);
     }
 
     /** @test */
@@ -125,6 +163,25 @@ class VoteTest extends TestCase
                     'total_votes' => -1
                 ]
             ]);
+
+            $this->assertDatabaseHas('votes', [
+                'user_id' => $this->user->id,
+                'post_id' => $this->post->id,
+                'type' => 'downvote'
+            ]);
+
+            $this->assertDatabaseHas('notifications', [
+                'user_id' => $this->post->user->id,
+                'type_id' => $this->getNotificationTypeId('post_downvoted'),
+            ]);
+
+            $notification = \App\Models\Notification::where('user_id', $this->post->user->id)
+                ->where('type_id', $this->getNotificationTypeId('post_downvoted'))
+                ->first();
+
+            $this->assertNotNull($notification);
+            $this->assertEquals($this->user->id, $notification->data['user_id']);
+            $this->assertEquals($this->post->id, $notification->data['post_id']);
     }
 
     /** @test */
