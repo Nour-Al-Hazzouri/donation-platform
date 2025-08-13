@@ -99,7 +99,8 @@ class AuthControllerTest extends TestCase
                 'message',
                 'user' => ['id', 'first_name', 'last_name', 'username', 'email', 'phone'],
                 'access_token',
-                'token_type'
+                'token_type',
+                'isAdmin',
             ]);
     }
 
