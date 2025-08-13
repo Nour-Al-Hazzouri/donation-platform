@@ -32,7 +32,7 @@ class DonationEventObserver
 
             // Send notification to the event creator
             $this->notificationService->sendDonationGoalReached(
-                $donationEvent->user_id,
+                $donationEvent->user,
                 $donationEvent->title,
                 [
                     'user_id' => $donationEvent->user_id,
