@@ -30,7 +30,7 @@ export function Header() {
   const { theme } = useTheme()
   const [isMobile, setIsMobile] = useState(false)
   
-  const isAdmin = user?.email === 'admin@gmail.com'
+  const isAdmin = user?.isAdmin === true
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -195,11 +195,19 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-background">
                   <DropdownMenuItem asChild>
-                    <Link href={isAdmin ? "/admin" : "/profile?view=profile"} className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                    <Link href="/profile?view=profile" className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
                       <User size={16} />
-                      <span>{isAdmin ? "Dashboard" : "Profile"}</span>
+                      <span>Profile</span>
                     </Link>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/dashboard" className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                        <LayoutDashboard size={16} />
+                        <span>Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem 
                     onClick={() => logout()} 
                     className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
