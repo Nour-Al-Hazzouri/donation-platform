@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\NotificationType;
 use App\Models\CommunityPost;
 use App\Models\DonationEvent;
 use App\Models\User;
@@ -49,6 +50,11 @@ class CommunityPostTest extends TestCase
         Storage::fake('public');
     }
 
+    protected function getNotificationTypeId(string $name): int
+    {
+        return NotificationType::where('name', $name)->value('id');
+    }
+
     /** @test */
     public function user_can_create_community_post()
     {
@@ -76,6 +82,20 @@ class CommunityPostTest extends TestCase
             'user_id' => $this->user->id,
             'event_id' => $this->event->id,
         ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('new_post'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->user->id)
+            ->where('type_id', $this->getNotificationTypeId('new_post'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->user->id, $notification->data['user_id']);
+        $this->assertEquals($this->event->id, $notification->data['event_id']);
+        $this->assertEquals($response->json('data.id'), $notification->data['post_id']);
     }
 
     /** @test */
@@ -246,6 +266,20 @@ class CommunityPostTest extends TestCase
             ]);
 
         $this->assertDatabaseMissing('community_posts', ['id' => $post->id]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('post_deleted'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->user->id)
+            ->where('type_id', $this->getNotificationTypeId('post_deleted'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->user->id, $notification->data['user_id']);
+        $this->assertEquals($this->event->id, $notification->data['event_id']);
+        $this->assertEquals($post->id, $notification->data['post_id']);
     }
 
     /** @test */
@@ -279,6 +313,20 @@ class CommunityPostTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertDatabaseMissing('community_posts', ['id' => $post->id]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('post_deleted'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->user->id)
+            ->where('type_id', $this->getNotificationTypeId('post_deleted'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->user->id, $notification->data['user_id']);
+        $this->assertEquals($this->event->id, $notification->data['event_id']);
+        $this->assertEquals($post->id, $notification->data['post_id']);
     }
 
     /** @test */
