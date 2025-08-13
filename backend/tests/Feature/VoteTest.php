@@ -7,6 +7,7 @@ use App\Models\DonationEvent;
 use App\Models\User;
 use App\Models\Vote;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -23,6 +24,7 @@ class VoteTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(NotificationTypeSeeder::class);
 
         // Create a regular user
         $this->user = User::factory()->create();

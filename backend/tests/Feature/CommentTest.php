@@ -7,6 +7,7 @@ use App\Models\CommunityPost;
 use App\Models\DonationEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -24,6 +25,7 @@ class CommentTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(NotificationTypeSeeder::class);
 
         // Create admin user
         $this->admin = User::factory()->create();

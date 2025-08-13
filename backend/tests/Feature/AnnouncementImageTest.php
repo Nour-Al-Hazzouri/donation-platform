@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Announcement;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
@@ -24,6 +25,7 @@ class AnnouncementImageTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(NotificationTypeSeeder::class);
 
         $this->user = User::factory()->create();
         $this->user->assignRole('user');
