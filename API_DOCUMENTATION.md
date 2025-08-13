@@ -118,7 +118,8 @@ This document outlines all available API endpoints, their purposes, required per
             }
         },
         "access_token": "1|abcdefghijk...",
-        "token_type": "Bearer"
+        "token_type": "Bearer",
+        "isAdmin": false
     }
     ```
 

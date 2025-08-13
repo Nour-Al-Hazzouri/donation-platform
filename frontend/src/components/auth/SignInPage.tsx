@@ -54,14 +54,22 @@ const handleSubmit = async (e: React.FormEvent) => {
     if (redirectUrl) {
       localStorage.removeItem('redirectAfterAuth')
       router.push(redirectUrl)
+    } else {
+      // Redirect based on user role
+      if (user?.isAdmin) {
+        router.push('/admin')
+        toast({
+          title: "Welcome, Administrator!",
+          description: "You have been redirected to the admin dashboard.",
+        })
+      } else {
+        router.push('/profile')
+        toast({
+          title: "Logged in successfully",
+          description: `Welcome back, ${user?.first_name || 'User'}!`,
+        })
+      }
     }
-    
-    // For now, we'll just show a welcome message
-    // Admin role check will be implemented when the backend provides role information
-    toast({
-      title: "Logged in successfully",
-      description: `Welcome back, ${user?.first_name || 'User'}!`,
-    })
   } catch (error: any) {
     toast({
       title: "Login failed",

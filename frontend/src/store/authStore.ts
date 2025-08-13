@@ -15,6 +15,7 @@ type User = {
   created_at: string;
   updated_at: string;
   token: string;
+  isAdmin?: boolean;
   location?: {
     id: number;
     governorate: string;
@@ -76,6 +77,7 @@ export const useAuthStore = create<AuthState>()(
           const user: User = {
             ...response.user,
             token: response.access_token,
+            isAdmin: response.isAdmin,
             balance: 10000, // For backward compatibility
           };
           
