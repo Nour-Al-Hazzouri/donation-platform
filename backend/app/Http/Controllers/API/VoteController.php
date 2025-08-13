@@ -58,7 +58,7 @@ class VoteController extends Controller
                 if ($type === 'upvote') {
                     $this->notificationService->sendPostUpvoted(
                         $post->user,
-                        $post->user->username,
+                        $user->username,
                         [
                             'user_id' => $user->id,
                             'post_id' => $postId,
@@ -67,7 +67,7 @@ class VoteController extends Controller
                 } elseif ($type === 'downvote') {
                     $this->notificationService->sendPostDownvoted(
                         $post->user,
-                        $post->user->username,
+                        $user->username,
                         [
                             'user_id' => $user->id,
                             'post_id' => $postId,
@@ -88,7 +88,7 @@ class VoteController extends Controller
             if ($type === 'upvote') {
                 $this->notificationService->sendPostUpvoted(
                     $post->user,
-                    $post->user->username,
+                    $user->username,
                     [
                         'user_id' => $user->id,
                         'post_id' => $postId,
@@ -97,7 +97,7 @@ class VoteController extends Controller
             } elseif ($type === 'downvote') {
                 $this->notificationService->sendPostDownvoted(
                     $post->user,
-                    $post->user->username,
+                    $user->username,
                     [
                         'user_id' => $user->id,
                         'post_id' => $postId,
