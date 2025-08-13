@@ -9,6 +9,7 @@
         "php": "^8.2",
         "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
+        "laravel/passport": "^13",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "spatie/laravel-permission": "^6.21"
