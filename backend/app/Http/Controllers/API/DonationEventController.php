@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\NotificationService;
+use Auth;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreDonationEventRequest;
 use App\Http\Requests\UpdateDonationEventRequest;
@@ -11,7 +13,6 @@ use App\Models\DonationEvent;
 use App\Http\Resources\DonationEventResource;
 use App\Services\ImageService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class DonationEventController extends Controller
@@ -24,23 +25,30 @@ class DonationEventController extends Controller
     protected $imageService;
 
     /**
-     * @param ImageService $imageService
+     * @var NotificationService
      */
-    public function __construct(ImageService $imageService)
+    protected $notificationService;
+
+    /**
+     * @param ImageService $imageService
+     * @param NotificationService $notificationService
+     */
+    public function __construct(ImageService $imageService, NotificationService $notificationService)
     {
         $this->imageService = $imageService;
+        $this->notificationService = $notificationService;
     }
 
     /**
      * Display a listing of Donation Events.
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
         $donationEvents = DonationEvent::with('user', 'location')
-        ->latest()
-        ->get();
+            ->latest()
+            ->get();
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
@@ -49,16 +57,16 @@ class DonationEventController extends Controller
 
     /**
      * Display a listing of active Donation Requests.
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function requestsIndex()
     {
         $donationEvents = DonationEvent::with('user', 'location')
-        ->where('status', 'active')
-        ->where('type', 'request')
-        ->latest()
-        ->get();
+            ->where('status', 'active')
+            ->where('type', 'request')
+            ->latest()
+            ->get();
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
@@ -67,16 +75,16 @@ class DonationEventController extends Controller
 
     /**
      * Display a listing of active Donation Offers.
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function offersIndex()
     {
         $donationEvents = DonationEvent::with('user', 'location')
-        ->where('status', 'active')
-        ->where('type', 'offer')
-        ->latest()
-        ->get();
+            ->where('status', 'active')
+            ->where('type', 'offer')
+            ->latest()
+            ->get();
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
@@ -85,16 +93,16 @@ class DonationEventController extends Controller
 
     /**
      * Display a listing of Donation Events for a specific user.
-     * 
+     *
      * @param User $user
      * @return \Illuminate\Http\JsonResponse
      */
     public function userIndex(User $user)
     {
         $donationEvents = DonationEvent::with('user', 'location')
-        ->where('user_id', $user->id)
-        ->latest()
-        ->get();
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
@@ -103,7 +111,7 @@ class DonationEventController extends Controller
 
     /**
      * Store a newly created Donation Event in storage.
-     * 
+     *
      * @param StoreDonationEventRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -135,6 +143,18 @@ class DonationEventController extends Controller
                 'image_urls' => $imagePaths,
             ]));
 
+            $donationEvent->load('user', 'location');
+
+            $this->notificationService->sendEventCreatedStatus(
+                user: $donationEvent->user,
+                eventTitle: $donationEvent->title,
+                isSuccess: true,
+                data: [
+                    'user_id' => Auth::id(),
+                    'event_id' => $donationEvent->id,
+                ]
+            );
+
             return response()->json([
                 'data' => new DonationEventResource($donationEvent->load('user', 'location')),
                 'message' => 'Donation event created successfully.',
@@ -159,7 +179,7 @@ class DonationEventController extends Controller
 
     /**
      * Display the specified Donation Event.
-     * 
+     *
      * @param DonationEvent $donationEvent
      * @return \Illuminate\Http\JsonResponse
      */
@@ -175,7 +195,7 @@ class DonationEventController extends Controller
 
     /**
      * Update the specified Donation Event in storage.
-     * 
+     *
      * @param UpdateDonationEventRequest $request
      * @param DonationEvent $donationEvent
      * @return \Illuminate\Http\JsonResponse
@@ -244,7 +264,7 @@ class DonationEventController extends Controller
 
     /**
      * Remove the specified donation event.
-     * 
+     *
      * @param DonationEvent $donationEvent
      * @return \Illuminate\Http\JsonResponse
      */
@@ -279,5 +299,86 @@ class DonationEventController extends Controller
                 'error' => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Activate a suspended donation event.
+     *
+     * @param DonationEvent $donationEvent
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function activate(DonationEvent $donationEvent)
+    {
+        $this->authorize('update', $donationEvent);
+
+        if ($donationEvent->status !== 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only suspended donation events can be activated.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $donationEvent->status = 'active';
+        $donationEvent->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Donation event activated successfully.',
+            'data' => new DonationEventResource($donationEvent->load('user', 'location')),
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Cancel an active donation event.
+     *
+     * @param DonationEvent $donationEvent
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cancel(DonationEvent $donationEvent)
+    {
+        $this->authorize('update', $donationEvent);
+
+        if ($donationEvent->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only active donation events can be cancelled.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $donationEvent->status = 'cancelled';
+        $donationEvent->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Donation event cancelled successfully.',
+            'data' => new DonationEventResource($donationEvent->load('user', 'location')),
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Suspend an active donation event.
+     *
+     * @param DonationEvent $donationEvent
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function suspend(DonationEvent $donationEvent)
+    {
+        $this->authorize('update', $donationEvent);
+
+        if ($donationEvent->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only active donation events can be suspended.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $donationEvent->status = 'suspended';
+        $donationEvent->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Donation event suspended successfully.',
+            'data' => new DonationEventResource($donationEvent->load('user', 'location')),
+        ], Response::HTTP_OK);
     }
 }

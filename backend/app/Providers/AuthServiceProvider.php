@@ -24,6 +24,7 @@ class AuthServiceProvider extends ServiceProvider
         Comment::class => CommentPolicy::class,
         \App\Models\DonationEvent::class => \App\Policies\DonationEventPolicy::class,
         \App\Models\DonationTransaction::class => \App\Policies\DonationTransactionPolicy::class,
+        \App\Models\Notification::class => \App\Policies\NotificationPolicy::class,
     ];
 
     /**

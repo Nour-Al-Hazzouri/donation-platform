@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\CommunityPost;
 use App\Models\Vote;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,13 @@ use Symfony\Component\HttpFoundation\Response;
 class VoteController extends Controller
 {
     use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+    private NotificationService $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
 
     /**
      * Vote on a community post.
@@ -42,9 +50,30 @@ class VoteController extends Controller
                 $existingVote->delete();
                 $message = 'Vote removed successfully';
             } else {
-                // If different vote type, update the vote
+                // If different vote type, update the vote and send notification
                 $existingVote->update(['type' => $type]);
                 $message = 'Vote updated successfully';
+
+                // Send notification for the updated vote
+                if ($type === 'upvote') {
+                    $this->notificationService->sendPostUpvoted(
+                        $post->user,
+                        $user->username,
+                        [
+                            'user_id' => $user->id,
+                            'post_id' => $postId,
+                        ]
+                    );
+                } elseif ($type === 'downvote') {
+                    $this->notificationService->sendPostDownvoted(
+                        $post->user,
+                        $user->username,
+                        [
+                            'user_id' => $user->id,
+                            'post_id' => $postId,
+                        ]
+                    );
+                }
             }
         } else {
             // Create new vote
@@ -54,6 +83,27 @@ class VoteController extends Controller
                 'type' => $type,
             ]);
             $message = 'Vote submitted successfully';
+
+            // Send notification for the new vote
+            if ($type === 'upvote') {
+                $this->notificationService->sendPostUpvoted(
+                    $post->user,
+                    $user->username,
+                    [
+                        'user_id' => $user->id,
+                        'post_id' => $postId,
+                    ]
+                );
+            } elseif ($type === 'downvote') {
+                $this->notificationService->sendPostDownvoted(
+                    $post->user,
+                    $user->username,
+                    [
+                        'user_id' => $user->id,
+                        'post_id' => $postId,
+                    ]
+                );
+            }
         }
 
         // Get vote counts

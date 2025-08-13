@@ -60,7 +60,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        $isAdmin = $user->role->hasRole('admin');
+        $isAdmin = $user->hasRole('admin');
 
         return response()->json([
             'message' => 'Login successful',

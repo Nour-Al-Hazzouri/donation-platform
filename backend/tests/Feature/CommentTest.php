@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Models\Comment;
 use App\Models\CommunityPost;
 use App\Models\DonationEvent;
+use App\Models\NotificationType;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -24,6 +26,7 @@ class CommentTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(NotificationTypeSeeder::class);
 
         // Create admin user
         $this->admin = User::factory()->create();
@@ -53,6 +56,11 @@ class CommentTest extends TestCase
         ]);
     }
 
+    private function getNotificationTypeId($name)
+    {
+        return NotificationType::where('name', $name)->first()->id;
+    }
+
     /** @test */
     public function user_can_comment_on_post()
     {
@@ -79,6 +87,19 @@ class CommentTest extends TestCase
             'user_id' => $this->user->id,
             'post_id' => $this->post->id
         ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('new_comment'),
+        ]);
+
+        $notification = \App\Models\Notification::where('user_id', $this->user->id)
+            ->where('type_id', $this->getNotificationTypeId('new_comment'))
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertEquals($this->user->id, $notification->data['user_id']);
+        $this->assertEquals($this->post->id, $notification->data['post_id']);
     }
 
     /** @test */

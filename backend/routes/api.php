@@ -11,6 +11,7 @@ use App\Http\Controllers\API\CommentController;
 use App\Http\Controllers\API\DonationEventController;
 use App\Http\Controllers\API\DonationTransactionController;
 use App\Http\Controllers\API\VoteController;
+use App\Http\Controllers\API\NotificationController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -138,6 +139,11 @@ Route::middleware('auth:sanctum')->group(function () {
         // Transactions for a specific donation event
         Route::get('/{donationEvent}/transactions', [DonationTransactionController::class, 'index']);
         Route::post('/{donationEvent}/transactions', [DonationTransactionController::class, 'store']);
+        
+        // Status management routes for donation events
+        Route::post('/{donationEvent}/activate', [DonationEventController::class, 'activate']);
+        Route::post('/{donationEvent}/cancel', [DonationEventController::class, 'cancel']);
+        Route::post('/{donationEvent}/suspend', [DonationEventController::class, 'suspend']);
     }); 
 
     // General donation transactions routes
@@ -145,6 +151,36 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [DonationTransactionController::class, 'index']);
         Route::get('/{transaction}', [DonationTransactionController::class, 'show']);
         Route::put('/{transaction}/status', [DonationTransactionController::class, 'updateStatus']);
+    });
+
+    // Notifications
+    Route::prefix('notifications')->group(function () {
+        // List notifications with optional filters
+        Route::get('/', [NotificationController::class, 'index']);
+        
+        // Get notification types
+        Route::get('/types', [NotificationController::class, 'types']);
+        
+        // Get unread count
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+        
+        // Mark notification as read
+        Route::put('/{notification}/read', [NotificationController::class, 'markAsRead']);
+        
+        // Mark all notifications as read
+        Route::put('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        
+        // Delete all unread notifications for the authenticated user
+        Route::delete('/unread', [NotificationController::class, 'destroyUnread']);
+        
+        // Delete all read notifications for the authenticated user
+        Route::delete('/read', [NotificationController::class, 'destroyRead']);
+        
+        // Delete a specific notification
+        Route::delete('/{notification}', [NotificationController::class, 'destroy']);
+        
+        // Delete all notifications for the authenticated user
+        Route::delete('/', [NotificationController::class, 'destroyAll']);
     });
 });
 
