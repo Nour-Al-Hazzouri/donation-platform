@@ -1,71 +1,86 @@
-"use client"
+"use client";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { useEffect, useState } from "react"
+import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 
 interface DashboardStats {
-  total_users: number
-  total_donation_events: number
-  total_donation_requests: number
-  total_donation_offers: number
-  total_transactions: number
-  total_transaction_contributions: number
-  total_transaction_claims: number
-  total_amount_donated: number
-  active_donation_events: number
+  total_users: number;
+  total_donation_events: number;
+  total_donation_requests: number;
+  total_donation_offers: number;
+  total_transactions: number;
+  total_transaction_contributions: number;
+  total_transaction_claims: number;
+  total_amount_donated: number;
+  active_donation_events: number;
+  recent_transactions?: any[];
 }
 
-interface StatsCardsProps {
-  token?: string // Authentication token for API calls
-}
-
-export function StatsCards({ token }: StatsCardsProps) {
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export function StatsCards() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const ac = new AbortController();
+
     const fetchStats = async () => {
       try {
-        setLoading(true)
-        const headers: HeadersInit = {
-          Accept: "application/json",
+        setLoading(true);
+        setError(null);
+
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        const endpoint = `${backendUrl.replace(/\/$/, "")}/api/statistics`;
+
+        let token: string | null = null;
+        if (typeof window !== "undefined") {
+          const raw = localStorage.getItem("auth-storage");
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw);
+              token = parsed?.state?.user?.token ?? null;
+            } catch (err) {
+              console.error("Failed to parse auth-storage from localStorage", err);
+            }
+          }
         }
 
-        // Add authorization header if token is provided
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`
-        }
+        const headers: HeadersInit = { Accept: "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
 
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
-        const response = await fetch(`${backendUrl}/api/statistics`, {
+        const res = await fetch(endpoint, {
           method: "GET",
           headers,
-          mode: "cors",
-          credentials: "omit",
-        })
+          signal: ac.signal,
+        });
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch statistics: ${response.status}`)
+        if (!res.ok) {
+          let msg = `Failed to fetch statistics: ${res.status}`;
+          try {
+            const body = await res.json();
+            if (body?.message) msg += ` — ${body.message}`;
+          } catch {}
+          throw new Error(msg);
         }
 
-        const result = await response.json()
-
-        if (result.success && result.data) {
-          setStats(result.data)
-        } else {
-          throw new Error("Invalid response format")
+        const payload = await res.json();
+        if (!payload?.success || !payload?.data) {
+          throw new Error("Invalid response format from statistics endpoint");
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch statistics")
-        console.error("Error fetching dashboard statistics:", err)
+
+        setStats(payload.data);
+      } catch (err: any) {
+        if (err.name === "AbortError") return;
+        console.error("StatsCards fetch error:", err);
+        setError(err.message || "Failed to fetch statistics");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchStats()
-  }, [token])
+    fetchStats();
+    return () => ac.abort();
+  }, []);
 
   if (loading) {
     return (
@@ -79,7 +94,7 @@ export function StatsCards({ token }: StatsCardsProps) {
           </Card>
         ))}
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -92,14 +107,14 @@ export function StatsCards({ token }: StatsCardsProps) {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   const dashboardStats = [
-    { label: "Global Users", value: stats?.total_users?.toLocaleString() || "0" },
-    { label: "Donations", value: stats?.total_donation_events?.toLocaleString() || "0" },
-    { label: "Active Events", value: stats?.active_donation_events?.toLocaleString() || "0" },
-  ]
+    { label: "Global Users", value: stats?.total_users?.toLocaleString() ?? "0" },
+    { label: "Donations", value: stats?.total_donation_events?.toLocaleString() ?? "0" },
+    { label: "Active Events", value: stats?.active_donation_events?.toLocaleString() ?? "0" },
+  ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
@@ -115,5 +130,5 @@ export function StatsCards({ token }: StatsCardsProps) {
         </Card>
       ))}
     </div>
-  )
+  );
 }
