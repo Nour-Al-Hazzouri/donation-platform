@@ -44,12 +44,11 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   const { openModal, modalType } = useModal()
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
-    fullName: user?.name || "",
-    gender: user?.gender || "",
-    phoneNumber: user?.phoneNumber || "",
+    fullName: user ? `${user.first_name} ${user.last_name}` : "",
+    phoneNumber: user?.phone || "",
     email: user?.email || "",
-    governorate: user?.governorate || "",
-    district: user?.district || "",
+    governorate: user?.location?.governorate || "",
+    district: user?.location?.district || "",
   })
 
   const getDistricts = () => {
@@ -94,7 +93,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
             <ProfileSidebar 
               activeItem="profile" 
               fullName={profileData.fullName} 
-              profileImage={user?.profileImage}
+              profileImage={user?.avatar_url || undefined}
               onViewChange={onViewChange}
             />
           </div>
@@ -128,27 +127,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                 )}
               </div>
 
-              <div className="space-y-2 w-full">
-                <Label className="text-muted-foreground text-sm sm:text-base">Gender</Label>
-                {isEditing ? (
-                  <div className="h-10 sm:h-12 w-full">
-                    <Select value={profileData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
-                      <SelectTrigger className="w-full h-full px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-w-[200px]">
-                        <SelectValue placeholder="Select gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Male">Male</SelectItem>
-                        <SelectItem value="Female">Female</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : (
-                  <p className="text-foreground text-sm sm:text-base py-2 sm:py-3">
-                    {profileData.gender || "Not specified"}
-                  </p>
-                )}
-              </div>
+
 
               <div className="space-y-2 w-full">
                 <Label className="text-muted-foreground text-sm sm:text-base">Phone Number</Label>
@@ -242,13 +221,13 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                 <h3 className="text-muted-foreground font-medium text-sm sm:text-base">Account Verification</h3>
-                {user?.verified ? (
+                {user?.email_verified_at ? (
                   <div className="flex items-center gap-2">
                     <CheckCircle size={16} className="text-primary" />
                     <span className="text-primary text-sm">Verified</span>
-                    {user.verifiedAt && (
+                    {user.email_verified_at && (
                       <span className="hidden sm:inline text-xs text-muted-foreground ml-2">
-                        Verified on {new Date(user.verifiedAt).toLocaleDateString()}
+                        Verified on {new Date(user.email_verified_at).toLocaleDateString()}
                       </span>
                     )}
                   </div>
@@ -259,7 +238,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                   </div>
                 )}
               </div>
-              {user?.verified ? (
+              {user?.email_verified_at ? (
                 <div className="flex items-center gap-2">
                   <CheckCircle size={16} className="text-primary" />
                   <span className="text-primary text-sm">Verification Complete</span>

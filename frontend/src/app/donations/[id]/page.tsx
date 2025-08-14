@@ -43,6 +43,8 @@ export default function DonationDetailsPage() {
 
   const handleRequest = () => {
     if (!isAuthenticated) {
+      // Store the request URL for redirection after authentication
+      localStorage.setItem('redirectAfterAuth', `/request/${donationId}`)
       openModal('signIn')
       return
     }
@@ -127,15 +129,33 @@ export default function DonationDetailsPage() {
               </p>
             </div>
 
-            {/* Request Button */}
-            <div className="flex justify-center">
-              <Button 
-                onClick={handleRequest}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg"
-              >
-                Request Now
-              </Button>
-            </div>
+            {/* Request Button - Conditionally rendered based on authentication */}
+            {isAuthenticated ? (
+              <div className="flex justify-center">
+                <Button 
+                  onClick={handleRequest}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg"
+                >
+                  Request Now
+                </Button>
+              </div>
+            ) : (
+              <div className="bg-card rounded-lg shadow-sm border p-6 text-center">
+                <h2 className="text-xl font-bold text-card-foreground mb-4">Authentication Required</h2>
+                <p className="text-muted-foreground mb-6">
+                  You need to be logged in to make a request. Please sign in or create an account to continue.
+                </p>
+                <Button
+                  onClick={() => {
+                    localStorage.setItem('redirectAfterAuth', `/request/${donationId}`);
+                    openModal('signIn');
+                  }}
+                  className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 text-lg font-medium"
+                >
+                  Sign In to Request
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* How to Request Section */}

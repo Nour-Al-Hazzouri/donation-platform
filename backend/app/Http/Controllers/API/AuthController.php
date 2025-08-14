@@ -26,19 +26,27 @@ class AuthController extends Controller
      */
     public function register(StoreUserRequest $request)
     {
-        $validated = $request->validated();
-        $validated['password'] = Hash::make($validated['password']);
+        try {
+            $validated = $request->validated();
+            $validated['password'] = Hash::make($validated['password']);
 
-        $user = User::create($validated);
+            $user = User::create($validated);
+            $user->assignRole('user');
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => new UserResource($user),
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ], Response::HTTP_CREATED);
+            return response()->json([
+                'message' => 'User registered successfully',
+                'user' => new UserResource($user),
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ], Response::HTTP_CREATED);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
     }
 
     /**
@@ -49,27 +57,34 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request)
     {
-        $credentials = $request->validated();
+        try {
+            $credentials = $request->validated();
 
-        if (!auth()->attempt($credentials)) {
-            throw ValidationException::withMessages([
-                'email' => [trans('auth.failed')],
-            ]);
+            if (!auth()->attempt($credentials)) {
+                return response()->json([
+                    'message' => 'Invalid credentials',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            $user = User::where('email', $request->email)->firstOrFail();
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            $isAdmin = $user->hasRole('admin');
+
+            return response()->json([
+                'message' => 'Login successful',
+                'user' => new UserResource($user),
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'isAdmin' => $isAdmin,
+            ], Response::HTTP_OK);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-
-        $user = User::where('email', $request->email)->firstOrFail();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        $isAdmin = $user->hasRole('admin');
-
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => new UserResource($user),
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'isAdmin' => $isAdmin,
-        ], Response::HTTP_OK);
-
     }
     /**
      * Log the user out (Invalidate the token).
@@ -79,11 +94,18 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        try {
+            $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ], Response::HTTP_OK);
+            return response()->json([
+                'message' => 'Successfully logged out'
+            ], Response::HTTP_OK);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
     }
 
 
@@ -95,35 +117,42 @@ class AuthController extends Controller
      */
     public function forgotPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        try {
+            $request->validate(['email' => 'required|email']);
 
-        $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)->first();
 
-        // Always return success to prevent email enumeration
-        if (!$user) {
+            // Always return success to prevent email enumeration
+            if (!$user) {
+                return response()->json([
+                    'message' => 'If your email exists in our records, you will receive a password reset code.'
+                ]);
+            }
+
+            $code = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+            $expiresAt = now()->addMinutes(10);
+
+            DB::table('password_resets_codes')->updateOrInsert(
+                ['email' => $request->email],
+                [
+                    'code' => $code,
+                    'created_at' => now(),
+                    'expires_at' => $expiresAt,
+                ]
+            );
+
+            // In production, you would send an email here
+            Log::info('Password reset code for ' . $request->email . ': ' . $code);
+
             return response()->json([
                 'message' => 'If your email exists in our records, you will receive a password reset code.'
-            ]);
+            ], Response::HTTP_OK);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-
-        $code = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
-        $expiresAt = now()->addMinutes(10);
-
-        DB::table('password_resets_codes')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'code' => $code,
-                'created_at' => now(),
-                'expires_at' => $expiresAt,
-            ]
-        );
-
-        // In production, you would send an email here
-        Log::info('Password reset code for ' . $request->email . ': ' . $code);
-
-        return response()->json([
-            'message' => 'If your email exists in our records, you will receive a password reset code.'
-        ], Response::HTTP_OK);
     }
 
     /**
@@ -134,41 +163,48 @@ class AuthController extends Controller
      */
     public function resetPassword(Request $request)
     {
-        $validated = $request->validate([
-            'code' => 'required|string',
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            $validated = $request->validate([
+                'code' => 'required|string',
+                'email' => 'required|email|exists:users,email',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
 
-        $record = DB::table('password_resets_codes')
-            ->where('email', $validated['email'])
-            ->where('code', $validated['code'])
-            ->first();
+            $record = DB::table('password_resets_codes')
+                ->where('email', $validated['email'])
+                ->where('code', $validated['code'])
+                ->first();
 
-        if (!$record) {
-            return response()->json([
-                'message' => 'Invalid or expired reset code.'
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
+            if (!$record) {
+                return response()->json([
+                    'message' => 'Invalid or expired reset code.'
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
 
-        // Check if code is expired
-        if (now()->gt($record->expires_at)) {
+            // Check if code is expired
+            if (now()->gt($record->expires_at)) {
+                DB::table('password_resets_codes')->where('email', $validated['email'])->delete();
+
+                return response()->json([
+                    'message' => 'The reset code has expired. Please request a new one.'
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            // Update user's password
+            User::where('email', $validated['email'])
+                ->update(['password' => Hash::make($validated['password'])]);
+
+            // Delete all reset tokens for this email
             DB::table('password_resets_codes')->where('email', $validated['email'])->delete();
 
             return response()->json([
-                'message' => 'The reset code has expired. Please request a new one.'
+                'message' => 'Password has been reset successfully.'
+            ], Response::HTTP_OK);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-
-        // Update user's password
-        User::where('email', $validated['email'])
-            ->update(['password' => Hash::make($validated['password'])]);
-
-        // Delete all reset tokens for this email
-        DB::table('password_resets_codes')->where('email', $validated['email'])->delete();
-
-        return response()->json([
-            'message' => 'Password has been reset successfully.'
-        ], Response::HTTP_OK);
     }
 }

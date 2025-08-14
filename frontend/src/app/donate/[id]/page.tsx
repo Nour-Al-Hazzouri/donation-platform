@@ -40,12 +40,8 @@ export default function DonatePage() {
     initializeRequests(initialRequestsData)
   }, [initializeRequests])
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/')
-      openModal('signIn')
-    }
-  }, [isAuthenticated, router, openModal])
+  // We no longer automatically show the login modal on page load
+  // Instead, we show a login prompt section and handle authentication checks on user interactions
 
   const requestId = parseInt(params.id as string)
   const request = requests.find(req => req.id === requestId)
@@ -60,9 +56,8 @@ export default function DonatePage() {
     }
   }, [remainingAmountNeeded, donationAmount])
 
-  if (!isAuthenticated) {
-    return null 
-  }
+  // Check authentication status before rendering the donation form
+  // If not authenticated, we'll still render the page but with a login prompt instead of the form
 
   if (!request) {
     return (
@@ -81,6 +76,12 @@ export default function DonatePage() {
   }
 
   const handleSliderChange = (value: number[]) => {
+    // Check authentication before allowing interaction
+    if (!isAuthenticated) {
+      openModal('signIn')
+      return
+    }
+    
     setDonationAmount(value)
     setIsCustom(false)
     setCustomAmount('')
@@ -88,19 +89,38 @@ export default function DonatePage() {
   }
 
   const handleCustomAmountChange = (value: string) => {
+    // Check authentication before allowing interaction
+    if (!isAuthenticated) {
+      openModal('signIn')
+      return
+    }
+    
     setCustomAmount(value)
     setIsCustom(true)
     setDonationError(null)
+    
     if (value && !isNaN(Number(value))) {
       setDonationAmount([Number(value)])
-    } else {
-      setDonationAmount([0])
     }
+  }
+  
+  const handleDonateAction = () => {
+    // Check if user is authenticated before proceeding
+    if (!isAuthenticated) {
+      // Store current URL for redirection after authentication
+      localStorage.setItem('redirectAfterAuth', window.location.pathname)
+      // Open sign-in modal
+      openModal('signIn')
+      return
+    }
+    
+    // Continue with donation process for authenticated users
+    return true
   }
 
   const handleDonate = async () => {
-    if (!isAuthenticated) {
-      openModal('signIn')
+    // Use the handleDonateAction function to check authentication
+    if (!handleDonateAction()) {
       return
     }
 
@@ -177,8 +197,10 @@ export default function DonatePage() {
           </div>
         </div>
 
-        {/* Donation Section */}
-        <div className="bg-card rounded-lg shadow-sm border p-6">
+        {/* Conditional rendering based on authentication status */}
+        {isAuthenticated ? (
+          /* Donation Section - Only shown to authenticated users */
+          <div className="bg-card rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-bold text-card-foreground mb-6">Donate the amount you want</h2>
           
           {/* Slider */}
@@ -231,6 +253,13 @@ export default function DonatePage() {
                 key={amount}
                 variant={displayAmount === amount && !isCustom ? "default" : "outline"}
                 onClick={() => {
+                  // Check authentication before allowing interaction
+                  if (!isAuthenticated) {
+                    localStorage.setItem('redirectAfterAuth', window.location.pathname);
+                    openModal('signIn');
+                    return;
+                  }
+                  
                   setDonationAmount([amount])
                   setIsCustom(false)
                   setCustomAmount('')
@@ -273,6 +302,24 @@ export default function DonatePage() {
             </p>
           </div>
         </div>
+        ) : (
+          /* Login Prompt - Shown to unauthenticated users */
+          <div className="bg-card rounded-lg shadow-sm border p-6 text-center">
+            <h2 className="text-xl font-bold text-card-foreground mb-4">Authentication Required</h2>
+            <p className="text-muted-foreground mb-6">
+              You need to be logged in to make a donation. Please sign in or create an account to continue.
+            </p>
+            <Button
+              onClick={() => {
+                localStorage.setItem('redirectAfterAuth', window.location.pathname);
+                openModal('signIn');
+              }}
+              className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 text-lg font-medium"
+            >
+              Sign In to Donate
+            </Button>
+          </div>
+        )}
       </div>
     </MainLayout>
   )
