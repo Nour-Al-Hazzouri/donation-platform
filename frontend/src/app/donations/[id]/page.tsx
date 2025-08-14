@@ -11,17 +11,47 @@ import { useModal } from '@/contexts/ModalContext'
 import Image from 'next/image'
 import { COLORS } from '@/utils/constants'
 import { HowToRequest } from '@/components/requests/HowToRequest'
+import { useEffect, useState } from 'react'
 
 export default function DonationDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const donationId = Number(params.id)
-  const { donations } = useDonationsStore()
+  const { getDonationById } = useDonationsStore()
   const { isAuthenticated } = useAuthStore()
   const { openModal } = useModal()
+  const [donation, setDonation] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
   
-  // Find the donation by ID from the store
-  const donation = donations.find(donation => donation.id === donationId)
+  useEffect(() => {
+    const loadDonation = async () => {
+      try {
+        const donationData = await getDonationById(donationId)
+        setDonation(donationData)
+      } catch (error) {
+        console.error('Error loading donation:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadDonation()
+  }, [donationId, getDonationById])
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MainLayout>
+          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-foreground mb-4">Loading...</h1>
+              <p className="text-muted-foreground mb-6">Please wait while we load the donation details.</p>
+            </div>
+          </main>
+        </MainLayout>
+      </div>
+    )
+  }
   
   if (!donation) {
     return (
@@ -77,10 +107,10 @@ export default function DonationDetailsPage() {
               <div className="flex items-center">
                 <div className="relative mr-3 md:mr-4">
                   <Avatar className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16">
-                    <AvatarImage src={donation.avatarUrl || "/placeholder.svg"} alt={donation.name} />
-                    <AvatarFallback className="text-sm md:text-lg">{donation.initials}</AvatarFallback>
+                    <AvatarImage src={donation?.avatarUrl || "/placeholder.svg"} alt={donation?.name || 'User'} />
+                    <AvatarFallback className="text-sm md:text-lg">{donation?.initials || '?'}</AvatarFallback>
                   </Avatar>
-                  {donation.isVerified && (
+                  {donation?.isVerified && (
                     <div className="absolute -top-1 -right-1">
                       <Image 
                         src="/verification.png" 
@@ -104,15 +134,15 @@ export default function DonationDetailsPage() {
 
             {/* Donation Title */}
             <div className="mb-4 md:mb-6">
-              <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 md:mb-2">{donation.title}</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 md:mb-2">{donation?.title || 'Donation'}</h3>
             </div>
 
             {/* Donation Image */}
-            {donation.imageUrl && (
+            {donation?.imageUrl && (
               <div className="mb-4 md:mb-6 w-full aspect-video relative rounded-lg overflow-hidden">
                 <Image
                   src={donation.imageUrl}
-                  alt={donation.title}
+                  alt={donation?.title || 'Donation image'}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"

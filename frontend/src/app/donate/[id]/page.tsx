@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { useRequestsStore, initialRequestsData } from "@/store/requestsStore"
+import { useDonationsStore } from "@/store/donationsStore"
 import { useAuthStore } from '@/store/authStore'
 import { useModal } from '@/contexts/ModalContext'
 
@@ -26,7 +26,7 @@ const parseAmount = (value: string | number | undefined | null): number => {
 export default function DonatePage() {
   const params = useParams()
   const router = useRouter()
-  const { requests, initializeRequests, updateRequestCurrentAmount } = useRequestsStore()
+  const { getDonationById, createTransaction } = useDonationsStore()
   const { isAuthenticated, user } = useAuthStore()
   const { openModal } = useModal()
   
@@ -35,19 +35,28 @@ export default function DonatePage() {
   const [isCustom, setIsCustom] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [donationError, setDonationError] = useState<string | null>(null)
-
-  useEffect(() => {
-    initializeRequests(initialRequestsData)
-  }, [initializeRequests])
-
-  // We no longer automatically show the login modal on page load
-  // Instead, we show a login prompt section and handle authentication checks on user interactions
+  const [request, setRequest] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const requestId = parseInt(params.id as string)
-  const request = requests.find(req => req.id === requestId)
 
-  const requestGoalAmount = parseAmount(request?.goalAmount)
-  const requestCurrentAmount = parseAmount(request?.currentAmount)
+  useEffect(() => {
+    const loadRequest = async () => {
+      try {
+        const requestData = await getDonationById(requestId)
+        setRequest(requestData)
+      } catch (error) {
+        console.error('Error loading request:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadRequest()
+  }, [requestId, getDonationById])
+
+  const requestGoalAmount = request ? parseAmount(request.goalAmount) : 0
+  const requestCurrentAmount = request ? parseAmount(request.currentAmount) : 0
   const remainingAmountNeeded = requestGoalAmount - requestCurrentAmount
 
   useEffect(() => {
@@ -58,6 +67,19 @@ export default function DonatePage() {
 
   // Check authentication status before rendering the donation form
   // If not authenticated, we'll still render the page but with a login prompt instead of the form
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Loading...</h1>
+            <p className="text-muted-foreground mb-6">Please wait while we load the request details.</p>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
 
   if (!request) {
     return (
@@ -139,17 +161,21 @@ export default function DonatePage() {
     setDonationError(null)
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Create a transaction using the API service
+      const transactionData = {
+        amount: finalAmount
+      }
       
-      updateRequestCurrentAmount(requestId, finalAmount)
+      const transaction = await createTransaction(requestId, finalAmount)
       
       console.log('Donation processed:', {
         requestId,
         amount: finalAmount,
-        requestTitle: request.title
+        requestTitle: request.title,
+        transactionId: transaction.id
       })
       
-      router.push(`/donate/success?amount=${finalAmount}&requestId=${requestId}`)
+      router.push(`/donate/success?amount=${finalAmount}&requestId=${requestId}&transactionId=${transaction.id}`)
     } catch (error) {
       console.error('Donation failed:', error)
       setDonationError('Donation failed. Please try again.')

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useAuthStore } from '@/store/authStore'
-import { useRequestsStore } from '@/store/requestsStore'
+import { useDonationsStore } from '@/store/donationsStore'
 
 // Helper function to get user initials
 function getUserInitials(name: string): string {
@@ -22,10 +22,10 @@ function getUserInitials(name: string): string {
 export function AddRequestForm() {
   const router = useRouter()
   const { user } = useAuthStore()
-  const { addRequest } = useRequestsStore()
+  const { addDonation } = useDonationsStore()
   
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: user ? `${user.first_name} ${user.last_name}` : '',
     title: '',
     description: '',
     goalAmount: '',
@@ -35,8 +35,8 @@ export function AddRequestForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    if (user?.name) {
-      setFormData(prev => ({ ...prev, name: user.name }))
+    if (user) {
+      setFormData(prev => ({ ...prev, name: `${user.first_name} ${user.last_name}` }))
     }
   }, [user])
 
@@ -90,29 +90,26 @@ export function AddRequestForm() {
     setIsSubmitting(true)
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Create image URL if image was uploaded (in real app, this would be uploaded to a server)
-      let imageUrl: string | undefined
-      if (formData.image) {
-        imageUrl = URL.createObjectURL(formData.image)
-      }
-      
-      // Create the new request object
+      // Create the new donation request object
       const newRequest = {
-        name: formData.name,
         title: formData.title,
         description: formData.description,
-        goalAmount: formData.goalAmount,
-        imageUrl: imageUrl,
-        avatarUrl: "/placeholder.svg?height=48&width=48",
-        initials: getUserInitials(formData.name),
-        isVerified: user?.verified || false
+        type: 'request', // Set type as request
+        goalAmount: parseFloat(formData.goalAmount),
+        imageUrl: formData.image ? URL.createObjectURL(formData.image) : undefined // Create a blob URL for the image
       }
       
-      // Add request to the store
-      addRequest(newRequest)
+      // Add donation request to the store using the API service
+      await addDonation({
+        title: formData.title,
+        description: formData.description,
+        type: 'request',
+        goalAmount: parseFloat(formData.goalAmount),
+        imageUrl: formData.image ? URL.createObjectURL(formData.image) : undefined,
+        name: formData.name,
+        initials: getUserInitials(formData.name),
+        isVerified: false
+      })
       
       // Redirect to requests page
       router.push('/requests')
@@ -138,7 +135,7 @@ export function AddRequestForm() {
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
             className={`mt-2 bg-background dark:bg-background dark:text-foreground border-input dark:border-border ${errors.name ? 'border-red-500' : ''}`}
-            readOnly={!!user?.name}
+            readOnly={!!user}
           />
           {errors.name && (
             <p className="mt-1 text-sm text-red-500">{errors.name}</p>

@@ -117,4 +117,4 @@ const authService = {
   },
 };
 
-export { authService };
+export { authService, authApi };

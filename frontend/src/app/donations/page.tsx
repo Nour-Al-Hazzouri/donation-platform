@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { MainLayout } from "@/components/layouts/MainLayout"
 import { SearchSection } from "@/components/donations/SearchSection"
 import { DonationCards } from "@/components/donations/DonationCards"
-import { useDonationsStore, initialDonationsData, DonationData } from "@/store/donationsStore"
+import { useDonationsStore, DonationData } from "@/store/donationsStore"
 
 function searchDonations(donations: DonationData[], searchTerm: string): DonationData[] {
   if (!searchTerm.trim()) return donations
@@ -36,7 +36,10 @@ export default function DonationsPage() {
   const [isSearchActive, setIsSearchActive] = useState(false)
 
   useEffect(() => {
-    initializeDonations(initialDonationsData)
+    const loadDonations = async () => {
+      await initializeDonations()
+    }
+    loadDonations()
   }, [initializeDonations])
 
   const filteredDonations = useMemo(() => {

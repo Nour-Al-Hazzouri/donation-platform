@@ -1,24 +1,16 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from 'lucide-react'
 import { cn } from '@/utils'
 import { useRouter } from 'next/navigation'
-import { donationsData } from '../donations/DonationCards'
 import Image from 'next/image'
+import { useDonationsStore, DonationData } from '@/store/donationsStore'
 
-interface DonationItem {
-  id: number
-  name: string
-  title: string
-  description: string
-  imageUrl?: string
-  avatarUrl?: string
-  initials: string
-  isVerified: boolean
+interface DonationItem extends Omit<DonationData, 'location'> {
   location: string
   timeAgo: string
   isAvailable: boolean
@@ -29,18 +21,7 @@ interface LatestDonationsProps {
   className?: string
 }
 
-// Generate deterministic quantities based on donation ID
-const mockDonations: DonationItem[] = donationsData.map((donation, index) => ({
-  ...donation,
-  userId: `user${donation.id}`,
-  userName: donation.name,
-  userAvatar: donation.avatarUrl,
-  itemName: donation.title,
-  quantity: (donation.id % 20) + 5, // Deterministic quantity between 5-24 based on ID
-  location: ['Tripoli', 'Beirut', 'Sidon', 'Tyre', 'Baalbek'][index % 5],
-  timeAgo: `${index + 1}h ago`,
-  isAvailable: true
-}))
+
 
 const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
   const router = useRouter();
@@ -122,12 +103,56 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
 
 const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
   const router = useRouter();
-  const [currentIndex, setCurrentIndex] = React.useState(0)
-  const [visibleCards, setVisibleCards] = React.useState(3)
-  const [isTransitioning, setIsTransitioning] = React.useState(false)
+  const { getDonationOffers } = useDonationsStore()
+  const [donations, setDonations] = useState<DonationItem[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [visibleCards, setVisibleCards] = useState(3)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  
+  useEffect(() => {
+    const fetchDonations = async () => {
+      try {
+        const donationData = await getDonationOffers()
+        
+        // Transform API data to match DonationItem interface
+        const transformedDonations: DonationItem[] = donationData.map((donation, index) => ({
+          ...donation,
+          quantity: donation.possibleAmount ? Math.floor(donation.possibleAmount) : 0,
+          location: donation.location?.district || 'Unknown',
+          timeAgo: getTimeAgo(donation.createdAt || ''),
+          isAvailable: donation.status === 'active' && (donation.possibleAmount || 0) > 0
+        }))
+        
+        setDonations(transformedDonations)
+      } catch (error) {
+        console.error('Error fetching donations:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    fetchDonations()
+  }, [])
+  
+  // Helper function to calculate time ago
+  const getTimeAgo = (dateString: string): string => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+    
+    if (diffDays > 0) return `${diffDays}d ago`
+    if (diffHours > 0) return `${diffHours}h ago`
+    return `${diffMins}m ago`
+  }
 
   // Clone the first few items to create infinite loop effect
-  const extendedDonations = [...mockDonations, ...mockDonations.slice(0, visibleCards)]
+  const extendedDonations = donations.length > 0 
+    ? [...donations, ...donations.slice(0, visibleCards)]
+    : []
 
   React.useEffect(() => {
     // Only run on client side
@@ -151,19 +176,23 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
   }, [])
 
   const scrollLeft = () => {
+    if (donations.length === 0) return
+    
     setIsTransitioning(true)
     setCurrentIndex(prev => {
       const newIndex = prev - 1
-      return newIndex < 0 ? mockDonations.length - 1 : newIndex
+      return newIndex < 0 ? donations.length - 1 : newIndex
     })
     setTimeout(() => setIsTransitioning(false), 300)
   }
 
   const scrollRight = () => {
+    if (donations.length === 0) return
+    
     setIsTransitioning(true)
     setCurrentIndex(prev => {
       const newIndex = prev + 1
-      return newIndex >= mockDonations.length ? 0 : newIndex
+      return newIndex >= donations.length ? 0 : newIndex
     })
     setTimeout(() => setIsTransitioning(false), 300)
   }
@@ -187,46 +216,56 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
           </h2>
         </div>
 
-        <div className="relative">
-          <div className="flex items-center justify-center">
-            <Button
-              onClick={scrollLeft}
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
-              aria-label="Previous donations"
-            >
-              <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-
-            <div className="overflow-hidden w-full max-w-6xl">
-              <div
-                className="flex transition-transform duration-300 ease-in-out"
-                style={{
-                  transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
-                }}
-              >
-                {extendedDonations.map((donation, index) => (
-                  <div
-                    key={`${donation.id}-${index}`}
-                    className="flex-shrink-0 px-1 sm:px-2"
-                    style={{ width: `${100 / visibleCards}%` }}
-                  >
-                    <div className="h-full pb-4">
-                      <DonationCard donation={donation} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Button
-              onClick={scrollRight}
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
-              aria-label="Next donations"
-            >
-              <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
           </div>
-        </div>
+        ) : donations.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No donations available at the moment.</p>
+          </div>
+        ) : (
+          <div className="relative">
+            <div className="flex items-center justify-center">
+              <Button
+                onClick={scrollLeft}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
+                aria-label="Previous donations"
+              >
+                <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+
+              <div className="overflow-hidden w-full max-w-6xl">
+                <div
+                  className="flex transition-transform duration-300 ease-in-out"
+                  style={{
+                    transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
+                  }}
+                >
+                  {extendedDonations.map((donation, index) => (
+                    <div
+                      key={`${donation.id}-${index}`}
+                      className="flex-shrink-0 px-1 sm:px-2"
+                      style={{ width: `${100 / visibleCards}%` }}
+                    >
+                      <div className="h-full pb-4">
+                        <DonationCard donation={donation} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Button
+                onClick={scrollRight}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
+                aria-label="Next donations"
+              >
+                <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-center mt-6 sm:mt-8">
           <Button 

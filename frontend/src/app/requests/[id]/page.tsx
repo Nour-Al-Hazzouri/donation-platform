@@ -5,11 +5,11 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { useRequestsStore, initialRequestsData } from "@/store/requestsStore"
+import { useDonationsStore } from "@/store/donationsStore"
 import { MainLayout } from '@/components/layouts/MainLayout'
 import { COLORS } from '@/utils/constants'
 import Image from 'next/image'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { HowDonationHelps } from '@/components/donations/HowDonationHelps'
 
 // More robust helper to parse amounts, handling various types and ensuring a number is returned
@@ -28,13 +28,41 @@ export default function RequestDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const requestId = parseInt(params.id as string)
-  const { requests, initializeRequests } = useRequestsStore()
+  const { getDonationById } = useDonationsStore()
+  const [request, setRequest] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    initializeRequests(initialRequestsData)
-  }, [initializeRequests])
+    const loadRequest = async () => {
+      try {
+        const data = await getDonationById(requestId)
+        setRequest(data)
+      } catch (error) {
+        console.error('Error loading request:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadRequest()
+  }, [requestId, getDonationById])
 
-  const request = requests.find(req => req.id === requestId)
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MainLayout>
+          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex justify-center items-center min-h-[50vh]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+                <p className="text-lg text-muted-foreground">Loading request details...</p>
+              </div>
+            </div>
+          </main>
+        </MainLayout>
+      </div>
+    )
+  }
 
   if (!request) {
     return (
@@ -44,7 +72,7 @@ export default function RequestDetailsPage() {
             <div className="text-center">
               <h1 className="text-2xl font-bold text-foreground mb-4">Request Not Found</h1>
               <p className="text-muted-foreground mb-6">The request you're looking for doesn't exist.</p>
-              <Button onClick={() => router.push('/')} className="bg-red-500 hover:bg-red-600 text-white">
+              <Button onClick={() => router.push('/requests')} className="bg-red-500 hover:bg-red-600 text-white">
                 Back to Requests
               </Button>
             </div>
