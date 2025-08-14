@@ -16,12 +16,17 @@ export default function ProfilePage() {
   const { openModal } = useModal()
   const [activeView, setActiveView] = useState<'profile' | 'notifications'>('profile')
 
+  // Track if we've already shown the login modal
+  const [hasShownLoginModal, setHasShownLoginModal] = useState(false)
+
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !hasShownLoginModal) {
       // Store current URL for redirection after authentication
       localStorage.setItem('redirectAfterAuth', window.location.pathname)
       // Open sign-in modal instead of redirecting
       openModal('signIn')
+      // Mark that we've shown the modal
+      setHasShownLoginModal(true)
       return
     }
     
@@ -31,7 +36,7 @@ export default function ProfilePage() {
     } else if (view === 'profile') {
       setActiveView('profile')
     }
-  }, [isAuthenticated, openModal, searchParams])
+  }, [isAuthenticated, openModal, searchParams, hasShownLoginModal])
 
   if (!isAuthenticated) {
     return null

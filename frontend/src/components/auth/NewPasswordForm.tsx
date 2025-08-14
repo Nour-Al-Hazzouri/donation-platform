@@ -68,12 +68,12 @@ export default function NewPasswordForm({ email, code }: NewPasswordFormProps) {
   }
 
   return (
-    <div className="bg-white flex flex-col px-4 py-6 sm:py-8 rounded-lg shadow-lg transition-all duration-300 ease-in-out">
+    <div className="bg-background flex flex-col px-4 py-6 sm:py-8 rounded-lg shadow-lg transition-all duration-300 ease-in-out">
       {/* Back Button */}
       <div className="pb-3 sm:pb-4">
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-[#5a5a5a] hover:text-[#000000] transition-all duration-300 ease-in-out"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-all duration-300 ease-in-out"
           aria-label="Go back"
         >
           <ChevronLeft size={20} />
@@ -83,15 +83,15 @@ export default function NewPasswordForm({ email, code }: NewPasswordFormProps) {
       
       <div className="w-full max-w-md space-y-6">
         <div className="text-left">
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#f90404] leading-tight transition-all duration-300 ease-in-out">New Password</h1>
-          <p className="mt-2 text-sm sm:text-base text-[#5a5a5a] transition-all duration-300 ease-in-out">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary leading-tight transition-all duration-300 ease-in-out">New Password</h1>
+          <p className="mt-2 text-sm sm:text-base text-muted-foreground transition-all duration-300 ease-in-out">
             Set the new password for your account so you can login and access all features.
           </p>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="password" className="text-base font-normal text-gray-700">
+              <Label htmlFor="password" className="text-base font-normal text-foreground">
                 Password
               </Label>
               <div className="relative mt-1">
@@ -103,13 +103,13 @@ export default function NewPasswordForm({ email, code }: NewPasswordFormProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full h-10 sm:h-12 px-4 pr-12 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300"
+                  className="w-full h-10 sm:h-12 px-4 pr-12 bg-secondary/50 border-0 rounded-lg text-foreground placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary focus:ring-offset-0 transition-all duration-300"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute top-1/2 right-0 -translate-y-1/2 flex items-center pr-3 text-blue-500 hover:bg-transparent"
+                  className="absolute top-1/2 right-0 -translate-y-1/2 flex items-center pr-3 text-muted-foreground hover:text-primary hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -118,7 +118,7 @@ export default function NewPasswordForm({ email, code }: NewPasswordFormProps) {
               </div>
             </div>
             <div>
-              <Label htmlFor="confirm-password" className="text-base font-normal text-gray-700">
+              <Label htmlFor="confirm-password" className="text-base font-normal text-foreground">
                 Confirm Password
               </Label>
               <div className="relative mt-1">
@@ -130,13 +130,13 @@ export default function NewPasswordForm({ email, code }: NewPasswordFormProps) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full h-10 sm:h-12 px-4 pr-12 bg-[#f5f5f5] border-0 rounded-lg text-[#000000] placeholder:text-[#5a5a5a] focus:bg-white focus:ring-2 focus:ring-[#f90404] focus:ring-offset-0 transition-all duration-300"
+                  className="w-full h-10 sm:h-12 px-4 pr-12 bg-secondary/50 border-0 rounded-lg text-foreground placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary focus:ring-offset-0 transition-all duration-300"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute top-1/2 right-0 -translate-y-1/2 flex items-center pr-3 text-blue-500 hover:bg-transparent"
+                  className="absolute top-1/2 right-0 -translate-y-1/2 flex items-center pr-3 text-muted-foreground hover:text-primary hover:bg-transparent"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 >

@@ -1,22 +1,41 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { CommunityChart } from "@/components/admin/dashboard/communityChart"
+import { DashboardSidebar } from "@/components/admin/dashboard/dashboardSiderbar"
+import { StatsCards } from "@/components/admin/dashboard/statsCards"
+import { AdminLayout } from "@/components/layouts/AdminLayout"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
+import { Menu } from "lucide-react"
 
-export default function AdminDashboardRedirect() {
-  const router = useRouter()
-
-  useEffect(() => {
-    // Redirect to the main admin page
-    router.push("/admin")
-  }, [])
-
+export default function AdminDashboard() {
+  // We'll remove the local sidebar state since we'll rely on the AdminHeader's mobile menu
+  
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold mb-2">Redirecting...</h1>
-        <p className="text-gray-500">Taking you to the admin dashboard</p>
-      </div>
-    </div>
+    <AdminLayout>
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full overflow-x-hidden">
+          {/* Desktop sidebar - only visible on md screens and up */}
+          <div className="hidden md:block w-64 flex-shrink-0">
+            <DashboardSidebar />
+          </div>
+
+          {/* Main content */}
+          <div className="flex-1 w-full min-w-0 flex flex-col">
+
+            <SidebarInset className="p-4 md:p-6 flex-1 flex flex-col space-y-8">
+              <div className="w-full">
+                <h2 className="text-3xl font-bold tracking-tight mb-6">Dashboard Overview</h2>
+                <StatsCards />
+              </div>
+              <div className="w-full">
+                <CommunityChart />
+              </div>
+            </SidebarInset>
+          </div>
+        </div>
+      </SidebarProvider>
+    </AdminLayout>
   )
 }
