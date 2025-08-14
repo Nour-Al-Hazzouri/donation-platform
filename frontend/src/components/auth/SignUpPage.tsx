@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
   const { openModal, closeModal } = useModal()
   const { login } = useAuthStore()
   const router = useRouter()
@@ -37,6 +38,11 @@ export default function SignUpPage() {
       ...prev,
       [field]: value
     }))
+    
+    // Clear password error when user types in password fields
+    if ((field === 'password' || field === 'password_confirmation') && passwordError) {
+      setPasswordError('')
+    }
   }
 
   const handleCheckboxChange = (checked: boolean) => {
@@ -49,6 +55,9 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Reset password error
+    setPasswordError('')
+    
     // Validate form data
     if (!formData.email || !formData.password || !formData.first_name || !formData.last_name || !formData.username) {
       toast({
@@ -59,12 +68,14 @@ export default function SignUpPage() {
       return
     }
     
+    // Check password length
+    if (formData.password.length < 8) {
+      setPasswordError('Password must be at least 8 characters long')
+      return
+    }
+    
     if (formData.password !== formData.password_confirmation) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      })
+      setPasswordError('Passwords do not match')
       return
     }
     
@@ -236,6 +247,11 @@ export default function SignUpPage() {
                 {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
             </div>
+            {passwordError && (
+              <div className="text-red-500 text-sm mt-1">
+                {passwordError}
+              </div>
+            )}
           </div>
 
           {/* Confirm Password Field */}

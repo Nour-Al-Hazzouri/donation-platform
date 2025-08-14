@@ -15,6 +15,7 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { openModal, closeModal } = useModal()
   const { login } = useAuthStore()
@@ -28,12 +29,21 @@ export default function SignInPage() {
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
   
+  // Reset password error
+  setPasswordError('')
+  
   if (!email || !password) {
     toast({
       title: "Login failed",
       description: "Please enter valid credentials",
       variant: "destructive",
     })
+    return
+  }
+  
+  // Check password length
+  if (password.length < 8) {
+    setPasswordError('Password must be at least 8 characters long')
     return
   }
   
@@ -123,7 +133,11 @@ if (user?.isAdmin) {
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  // Clear error when user types
+                  if (passwordError) setPasswordError('')
+                }}
                 className="w-full h-10 sm:h-12 px-4 pr-12 bg-secondary/50 border-0 rounded-lg text-foreground placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary focus:ring-offset-0 transition-all duration-300"
                 required
               />
@@ -136,6 +150,11 @@ if (user?.isAdmin) {
                 {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
               </button>
             </div>
+            {passwordError && (
+              <div className="text-red-500 text-sm mt-1">
+                {passwordError}
+              </div>
+            )}
           </div>
 
           {/* Forgot Password Link */}
