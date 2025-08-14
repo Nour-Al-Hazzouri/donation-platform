@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\CommunityPost;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,13 @@ use Symfony\Component\HttpFoundation\Response;
 class CommentController extends Controller
 {
     use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+    private NotificationService $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
 
     /**
      * Display a listing of the comments for a community post.
@@ -54,6 +62,17 @@ class CommentController extends Controller
             'user_id' => Auth::id(),
             'content' => $validated['content'],
         ]);
+
+        $loadedComment = $comment->load('user');
+        $this->notificationService->sendNewComment(
+            $loadedComment->user,
+            $loadedComment->user->username,
+            [
+                'user_id' => Auth::id(),
+                'post_id' => $loadedComment->post_id,
+                'comment_id' => $loadedComment->id,
+            ]
+        );
 
         return response()->json([
             'success' => true,

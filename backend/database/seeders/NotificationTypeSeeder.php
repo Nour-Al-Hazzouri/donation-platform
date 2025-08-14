@@ -51,7 +51,7 @@ class NotificationTypeSeeder extends Seeder
             [
                 'name' => 'post_deleted',
                 'description' => 'Community post was deleted',
-                'template' => 'A post you followed in {event_title} was deleted',
+                'template' => '{event_title} was deleted',
             ],
             
             // Comment related
@@ -59,16 +59,6 @@ class NotificationTypeSeeder extends Seeder
                 'name' => 'new_comment',
                 'description' => 'New comment on your post',
                 'template' => '{user_name} commented on your post',
-            ],
-            [
-                'name' => 'comment_replied',
-                'description' => 'Someone replied to your comment',
-                'template' => '{user_name} replied to your comment',
-            ],
-            [
-                'name' => 'comment_deleted',
-                'description' => 'Comment was deleted',
-                'template' => 'A comment on your post was deleted',
             ],
             
             // Vote/Reaction related
@@ -126,6 +116,13 @@ class NotificationTypeSeeder extends Seeder
                 'name' => 'announcement_updated',
                 'description' => 'Announcement updated',
                 'template' => 'Announcement updated: {announcement_title}',
+            ],
+
+            // Other
+            [
+                'name' => 'other',
+                'description' => 'Other notification',
+                'template' => '{message}',
             ],
         ];
 

@@ -5,11 +5,12 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\DonationEvent;
 use App\Models\Location;
+use App\Models\NotificationType;
 use App\Models\Verification;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\UploadedFile;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -26,6 +27,7 @@ class DonationEventTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(NotificationTypeSeeder::class);
 
         // Create admin user
         $this->admin = User::factory()->create();
@@ -58,6 +60,11 @@ class DonationEventTest extends TestCase
             'type' => 'request',
             'status' => 'active'
         ]);
+    }
+
+    protected function getNotificationTypeId(string $typeName): int
+    {
+        return NotificationType::where('name', $typeName)->value('id');
     }
 
     /** @test */
@@ -182,6 +189,13 @@ class DonationEventTest extends TestCase
             'title' => 'New Donation Event',
             'user_id' => $this->user->id,
         ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $this->user->id,
+            'type_id' => $this->getNotificationTypeId('event_created_success'),
+            'message' => 'Your event "New Donation Event" has been created successfully',
+        ]);
+
     }
 
     /** @test */
@@ -325,5 +339,174 @@ class DonationEventTest extends TestCase
         $this->assertSoftDeleted('donation_events', [
             'id' => $this->donationEvent->id
         ]);
+    }
+
+    /** @test */
+    public function it_can_activate_a_suspended_donation_event()
+    {
+        Sanctum::actingAs($this->user);
+
+        // Create a suspended donation event
+        $donationEvent = DonationEvent::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => 'suspended'
+        ]);
+
+        $response = $this->postJson("/api/donation-events/{$donationEvent->id}/activate");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Donation event activated successfully.',
+                'data' => [
+                    'id' => $donationEvent->id,
+                    'status' => 'active'
+                ]
+            ]);
+
+        $this->assertDatabaseHas('donation_events', [
+            'id' => $donationEvent->id,
+            'status' => 'active'
+        ]);
+    }
+
+    /** @test */
+    public function it_can_cancel_an_active_donation_event()
+    {
+        Sanctum::actingAs($this->user);
+
+        $response = $this->postJson("/api/donation-events/{$this->donationEvent->id}/cancel");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Donation event cancelled successfully.',
+                'data' => [
+                    'id' => $this->donationEvent->id,
+                    'status' => 'cancelled'
+                ]
+            ]);
+
+        $this->assertDatabaseHas('donation_events', [
+            'id' => $this->donationEvent->id,
+            'status' => 'cancelled'
+        ]);
+    }
+
+    /** @test */
+    public function it_can_suspend_an_active_donation_event()
+    {
+        Sanctum::actingAs($this->user);
+
+        $response = $this->postJson("/api/donation-events/{$this->donationEvent->id}/suspend");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Donation event suspended successfully.',
+                'data' => [
+                    'id' => $this->donationEvent->id,
+                    'status' => 'suspended'
+                ]
+            ]);
+
+        $this->assertDatabaseHas('donation_events', [
+            'id' => $this->donationEvent->id,
+            'status' => 'suspended'
+        ]);
+    }
+
+    /** @test */
+    public function it_prevents_activating_non_suspended_events()
+    {
+        Sanctum::actingAs($this->user);
+
+        $response = $this->postJson("/api/donation-events/{$this->donationEvent->id}/activate");
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Only suspended donation events can be activated.'
+            ]);
+    }
+
+    /** @test */
+    public function it_prevents_cancelling_non_active_events()
+    {
+        Sanctum::actingAs($this->user);
+
+        // Create a cancelled event
+        $cancelledEvent = DonationEvent::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => 'cancelled'
+        ]);
+
+        $response = $this->postJson("/api/donation-events/{$cancelledEvent->id}/cancel");
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Only active donation events can be cancelled.'
+            ]);
+    }
+
+    /** @test */
+    public function it_prevents_suspending_non_active_events()
+    {
+        Sanctum::actingAs($this->user);
+
+        // Create a completed event
+        $completedEvent = DonationEvent::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => 'completed'
+        ]);
+
+        $response = $this->postJson("/api/donation-events/{$completedEvent->id}/suspend");
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Only active donation events can be suspended.'
+            ]);
+    }
+
+    /** @test */
+    public function it_prevents_unauthorized_status_changes()
+    {
+        // Create another user
+        $otherUser = User::factory()->create();
+        $otherUser->assignRole('user');
+
+        // Create a verification for the other user
+        Verification::create([
+            'user_id' => $otherUser->id,
+            'document_type' => 'id_card',
+            'image_urls' => ['verifications/2/test.jpg'],
+            'status' => 'approved',
+        ]);
+
+        Sanctum::actingAs($otherUser);
+
+        // Test activate
+        $suspendedEvent = DonationEvent::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => 'suspended'
+        ]);
+
+        $response = $this->postJson("/api/donation-events/{$suspendedEvent->id}/activate");
+        $response->assertStatus(403);
+
+        // Test cancel
+        $activeEvent = DonationEvent::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => 'active'
+        ]);
+
+        $response = $this->postJson("/api/donation-events/{$activeEvent->id}/cancel");
+        $response->assertStatus(403);
+
+        // Test suspend
+        $response = $this->postJson("/api/donation-events/{$this->donationEvent->id}/suspend");
+        $response->assertStatus(403);
     }
 }

@@ -2803,91 +2803,106 @@ This document outlines all available API endpoints, their purposes, required per
     -   `500 Internal Server Error` - Server error (partial deletion may have occurred)
 
 ### Activate Donation Event
-- **URL**: `POST /api/donation-events/{donationEvent}/activate`
-- **Description**: Activate a suspended donation event (owner or admin only)
-- **Role**: Event Owner or Admin
-- **Headers**:
-  - `Authorization`: Bearer {token}
-  - `Accept`: application/json
-  - `Content-Type`: application/json
 
-- **URL Parameters**:
-  - `donationEvent`: ID of the donation event
+-   **URL**: `POST /api/donation-events/{donationEvent}/activate`
+-   **Description**: Activate a suspended donation event (owner or admin only)
+-   **Role**: Event Owner or Admin
+-   **Headers**:
 
-- **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "message": "Donation event activated successfully.",
-    "data": {
-      "id": 1,
-      "status": "active"
+    -   `Authorization`: Bearer {token}
+    -   `Accept`: application/json
+    -   `Content-Type`: application/json
+
+-   **URL Parameters**:
+
+    -   `donationEvent`: ID of the donation event
+
+-   **Response (200 OK)**:
+
+    ```json
+    {
+        "success": true,
+        "message": "Donation event activated successfully.",
+        "data": {
+            "id": 1,
+            "status": "active"
+        }
     }
-  }
-  ```
+    ```
 
-  **Error Responses**:
-  - `400 Bad Request`: If event is not in 'suspended' status
-  - `403 Forbidden`: If user is not authorized
-  - `404 Not Found`: If event doesn't exist
+    **Error Responses**:
+
+    -   `400 Bad Request`: If event is not in 'suspended' status
+    -   `403 Forbidden`: If user is not authorized
+    -   `404 Not Found`: If event doesn't exist
 
 ### Suspend Donation Event
-- **URL**: `POST /api/donation-events/{donationEvent}/suspend`
-- **Description**: Suspend an active donation event (owner or admin only)
-- **Role**: Event Owner or Admin
-- **Headers**:
-  - `Authorization`: Bearer {token}
-  - `Accept`: application/json
-  - `Content-Type`: application/json
 
-- **URL Parameters**:
-  - `donationEvent`: ID of the donation event
+-   **URL**: `POST /api/donation-events/{donationEvent}/suspend`
+-   **Description**: Suspend an active donation event (owner or admin only)
+-   **Role**: Event Owner or Admin
+-   **Headers**:
 
-- **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "message": "Donation event suspended successfully.",
-    "data": {
-      "id": 1,
-      "status": "suspended"
+    -   `Authorization`: Bearer {token}
+    -   `Accept`: application/json
+    -   `Content-Type`: application/json
+
+-   **URL Parameters**:
+
+    -   `donationEvent`: ID of the donation event
+
+-   **Response (200 OK)**:
+
+    ```json
+    {
+        "success": true,
+        "message": "Donation event suspended successfully.",
+        "data": {
+            "id": 1,
+            "status": "suspended"
+        }
     }
-  }
-  ```
+    ```
 
-  **Error Responses**:
-  - `400 Bad Request`: If event is not in 'active' status
-  - `403 Forbidden`: If user is not authorized
-  - `404 Not Found`: If event doesn't exist
+    **Error Responses**:
+
+    -   `400 Bad Request`: If event is not in 'active' status
+    -   `403 Forbidden`: If user is not authorized
+    -   `404 Not Found`: If event doesn't exist
 
 ### Cancel Donation Event
-- **URL**: `POST /api/donation-events/{donationEvent}/cancel`
-- **Description**: Cancel an active donation event (owner or admin only)
-- **Role**: Event Owner or Admin
-- **Headers**:
-  - `Authorization`: Bearer {token}
-  - `Accept`: application/json
-  - `Content-Type`: application/json
 
-- **URL Parameters**:
-  - `donationEvent`: ID of the donation event
+-   **URL**: `POST /api/donation-events/{donationEvent}/cancel`
+-   **Description**: Cancel an active donation event (owner or admin only)
+-   **Role**: Event Owner or Admin
+-   **Headers**:
 
-- **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "message": "Donation event cancelled successfully.",
-    "data": {
-      "id": 1,
-      "status": "cancelled"
+    -   `Authorization`: Bearer {token}
+    -   `Accept`: application/json
+    -   `Content-Type`: application/json
+
+-   **URL Parameters**:
+
+    -   `donationEvent`: ID of the donation event
+
+-   **Response (200 OK)**:
+
+    ```json
+    {
+        "success": true,
+        "message": "Donation event cancelled successfully.",
+        "data": {
+            "id": 1,
+            "status": "cancelled"
+        }
     }
-  }
-  ```
+    ```
 
-  **Error Responses**:
-  - `400 Bad Request`: If event is not in 'active' status
-  - `403 Forbidden`: If user is not authorized
-  - `404 Not Found`: If event doesn't exist
+    **Error Responses**:
+
+    -   `400 Bad Request`: If event is not in 'active' status
+    -   `403 Forbidden`: If user is not authorized
+    -   `404 Not Found`: If event doesn't exist
 
 ## Donation Transactions
 
