@@ -12,8 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { COLORS } from "@/utils/constants"
 import { cn } from '@/utils'
+import { useToast } from "@/components/ui/use-toast"
 
 const PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
@@ -25,7 +25,8 @@ const INITIAL_FORM_DATA = {
   title: "",
   content: "",
   priority: "",
-  image: null as File | null
+  image: null as File | null,
+  removeImage: false
 }
 
 interface CreateBlogPostProps {
@@ -41,6 +42,7 @@ interface BlogPostFormData {
   content: string
   priority: string
   image: File | null
+  removeImage: boolean
 }
 
 export function CreateBlogPost({
@@ -57,6 +59,7 @@ export function CreateBlogPost({
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [imageError, setImageError] = useState<string>("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
 
   // Initialize image preview when in edit mode
   useEffect(() => {
@@ -65,7 +68,7 @@ export function CreateBlogPost({
     }
   }, [mode, initialData?.imageUrl])
 
-  const handleInputChange = (field: keyof BlogPostFormData, value: string) => {
+  const handleInputChange = (field: keyof BlogPostFormData, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -75,9 +78,9 @@ export function CreateBlogPost({
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      // Check file size (max 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        setImageError("Image size must be less than 2MB")
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError("Image size must be less than 5MB")
         return
       }
       
@@ -95,13 +98,18 @@ export function CreateBlogPost({
       
       setFormData(prev => ({
         ...prev,
-        image: file
+        image: file,
+        removeImage: false
       }))
     }
   }
   
   const handleRemoveImage = () => {
-    setFormData(prev => ({ ...prev, image: null }))
+    setFormData(prev => ({ 
+      ...prev, 
+      image: null,
+      removeImage: true
+    }))
     if (imagePreview) {
       // Only revoke object URL if it's not the initial image URL
       if (!initialData?.imageUrl || imagePreview !== initialData.imageUrl) {
@@ -114,11 +122,24 @@ export function CreateBlogPost({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.title || !formData.content || !formData.priority) return
+    if (!formData.title || !formData.content || !formData.priority) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
     
     try {
       setIsSubmitting(true)
       await onCreate?.(formData)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while saving the blog post",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -247,7 +268,7 @@ export function CreateBlogPost({
                         <span className="font-semibold">Click to upload</span> or drag and drop
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        PNG, JPG (MAX. 2MB)
+                        PNG, JPG (MAX. 5MB)
                       </p>
                     </div>
                     <input
