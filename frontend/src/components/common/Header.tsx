@@ -179,44 +179,59 @@ export function Header() {
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
             <ModeToggle />
             {isAuthenticated && user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="default"
-                    style={{
-                      backgroundColor: COLORS.primary,
-                      color: "#fff",
-                    }}
-                    className="hover:bg-[#d90404] transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
-                  >
-                    <User size={16} />
-                    <span>{user.first_name} {user.last_name}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-background">
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile?view=profile" className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
+              isAdmin && pathname.startsWith('/profile') ? (
+                <Button
+                  variant="default"
+                  style={{
+                    backgroundColor: COLORS.primary,
+                    color: "#fff",
+                  }}
+                  className="hover:bg-[#d90404] transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
+                  onClick={() => router.push('/admin/dashboard')}
+                >
+                  <LayoutDashboard size={16} />
+                  <span>Dashboard</span>
+                </Button>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="default"
+                      style={{
+                        backgroundColor: COLORS.primary,
+                        color: "#fff",
+                      }}
+                      className="hover:bg-[#d90404] transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
+                    >
                       <User size={16} />
-                      <span>Profile</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  {isAdmin && (
+                      <span>{user.first_name} {user.last_name}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-background">
                     <DropdownMenuItem asChild>
-                      <Link href="/admin/dashboard" className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
-                        <LayoutDashboard size={16} />
-                        <span>Dashboard</span>
+                      <Link href="/profile?view=profile" className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                        <User size={16} />
+                        <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem 
-                    onClick={() => logout()} 
-                    className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <LogOut size={16} />
-                    <span>Logout</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/dashboard" className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                          <LayoutDashboard size={16} />
+                          <span>Dashboard</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem 
+                      onClick={() => logout()} 
+                      className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <LogOut size={16} />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )
             ) : (
               <>
                 <Button
@@ -281,44 +296,65 @@ export function Header() {
                     {/* Profile sidebar menu items for mobile */}
                     <div className="space-y-3 mb-4">
                       {isAdmin ? (
-                        <>
-                          <h3 className="text-primary font-medium text-sm px-2">Admin Dashboard</h3>
-                          <div className="space-y-2">
+                        pathname.startsWith('/profile') ? (
+                          <>
+                            <h3 className="text-primary font-medium text-sm px-2">Admin Actions</h3>
                             <Button
-                              variant="ghost"
-                              className={cn(
-                                "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
-                                pathname === '/profile' && (!searchParams || searchParams.get('view') === 'profile')
-                                  ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
-                                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                              )}
-                              onClick={handleProfileNavigation}
+                              variant="default"
+                              style={{
+                                backgroundColor: COLORS.primary,
+                                color: "#fff",
+                              }}
+                              className="w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2 hover:bg-[#d90404]"
+                              onClick={() => {
+                                closeMobileMenu()
+                                router.push('/admin/dashboard')
+                              }}
                             >
-                              <User size={16} />
-                              User Profile
-                            </Button>
-                            <Link href="/admin/dashboard" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
-                              <LayoutDashboard className="h-4 w-4" />
+                              <LayoutDashboard size={16} />
                               <span>Dashboard</span>
-                            </Link>
-                            <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
-                              <FileText className="h-4 w-4" />
-                              <span>Manage Blogs</span>
-                            </Link>
-                            <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
-                              <MapPin className="h-4 w-4" />
-                              <span>Manage Locations</span>
-                            </Link>
-                            <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
-                              <Users className="h-4 w-4" />
-                              <span>All Users</span>
-                            </Link>
-                            <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2 pl-6">
-                              <FileText className="h-4 w-4" />
-                              <span>Verification Requests</span>
-                            </Link>
-                          </div>
-                        </>
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <h3 className="text-primary font-medium text-sm px-2">Admin Dashboard</h3>
+                            <div className="space-y-2">
+                              <Button
+                                variant="ghost"
+                                className={cn(
+                                  "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
+                                  pathname === '/profile' && (!searchParams || searchParams.get('view') === 'profile')
+                                    ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                )}
+                                onClick={handleProfileNavigation}
+                              >
+                                <User size={16} />
+                                User Profile
+                              </Button>
+                              <Link href="/admin/dashboard" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                                <LayoutDashboard className="h-4 w-4" />
+                                <span>Dashboard</span>
+                              </Link>
+                              <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                                <FileText className="h-4 w-4" />
+                                <span>Manage Blogs</span>
+                              </Link>
+                              <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                                <MapPin className="h-4 w-4" />
+                                <span>Manage Locations</span>
+                              </Link>
+                              <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                                <Users className="h-4 w-4" />
+                                <span>All Users</span>
+                              </Link>
+                              <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2 pl-6">
+                                <FileText className="h-4 w-4" />
+                                <span>Verification Requests</span>
+                              </Link>
+                            </div>
+                          </>
+                        )
                       ) : (
                         <>
                           <h3 className="text-primary font-medium text-sm px-2">Profile Menu</h3>

@@ -29,10 +29,10 @@ const ADMIN_PROFILE = {
 // Sidebar menu items definition
 const getSidebarMenuItems = (pathname: string) => [
   { 
-    href: "/admin", 
+    href: "/admin/dashboard", 
     icon: LayoutDashboard, 
     label: "Dashboard", 
-    isActive: pathname === "/admin"
+    isActive: pathname === "/admin/dashboard"
   },
   { 
     href: "/admin/blogs", 
