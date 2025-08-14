@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to send verification code. Please try again.",
+        description: error.response?.data?.message || error.message || "Failed to send verification code. Please try again.",
         variant: "destructive",
       })
     } finally {

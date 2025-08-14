@@ -83,7 +83,7 @@ if (user?.isAdmin) {
   } catch (error: any) {
     toast({
       title: "Login failed",
-      description: error.message || "An error occurred during login",
+      description: error.response?.data?.message || error.message || "An error occurred during login",
       variant: "destructive",
     })
   } finally {

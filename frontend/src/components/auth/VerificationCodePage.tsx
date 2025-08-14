@@ -81,7 +81,7 @@ export default function VerificationCodePage({ onBack, onSuccess, userEmail }: V
     } catch (error: any) {
       toast({
         title: "Verification failed",
-        description: error.message || "The code you entered is incorrect. Please try again.",
+        description: error.response?.data?.message || error.message || "The code you entered is incorrect. Please try again.",
         variant: "destructive",
       })
     } finally {

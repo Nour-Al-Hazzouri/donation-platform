@@ -125,7 +125,7 @@ export default function SignUpPage() {
       // Show error toast
       toast({
         title: "Error",
-        description: error.message || "Failed to create account. Please try again.",
+        description: error.response?.data?.message || error.message || "Failed to create account. Please try again.",
         variant: "destructive",
       })
     } finally {
