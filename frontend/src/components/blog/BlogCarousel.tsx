@@ -1,44 +1,66 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Calendar, ArrowRight, ChevronLeftIcon, ChevronRightIcon, BookOpen, Heart, Globe, Users, Droplets, School, Home, MessageCircle, Award } from 'lucide-react'
 import { cn } from '@/utils'
 import { COLORS } from '@/utils/constants'
-import { MOCK_BLOG_POSTS } from '../../../data/blog-posts'
-import { useState } from 'react'
 import BlogPostDetail from './BlogPostDetail'
 import Link from 'next/link'
+import { blogService } from '@/lib/api/blogs'
 
 interface BlogCarouselProps {
   className?: string
 }
 
 const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
-  const [currentIndex, setCurrentIndex] = React.useState(0)
-  const [visibleCards, setVisibleCards] = React.useState(3)
-  const [isTransitioning, setIsTransitioning] = React.useState(false)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [visibleCards, setVisibleCards] = useState(3)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const [selectedPost, setSelectedPost] = useState<number | null>(null)
-  
-  const blogPosts = MOCK_BLOG_POSTS
-  
-  // Clone the first few items to create infinite loop effect
+  const [blogPosts, setBlogPosts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const posts = await blogService.getAll();
+        const detailedPosts = await Promise.all(
+          posts.data.map(async (post) => {
+            const detailedPost = await blogService.getById(post.id);
+            return { ...post, content: detailedPost.content };
+          })
+        );
+        setBlogPosts(detailedPosts);
+      } catch (err: any) {
+        setError('Failed to load blog posts');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPosts();
+    blogService.getAll();
+  }, []);
+
   const extendedBlogPosts = [...blogPosts, ...blogPosts.slice(0, visibleCards)]
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateVisibleCards = () => {
-      if (window.innerWidth < 640) { // xs
+      if (window.innerWidth < 640) {
         setVisibleCards(1)
-      } else if (window.innerWidth < 768) { // sm
+      } else if (window.innerWidth < 768) {
         setVisibleCards(1)
-      } else if (window.innerWidth < 1024) { // md
+      } else if (window.innerWidth < 1024) {
         setVisibleCards(2)
-      } else { // lg+
+      } else {
         setVisibleCards(3)
       }
     }
-
     updateVisibleCards()
     window.addEventListener('resize', updateVisibleCards)
     return () => window.removeEventListener('resize', updateVisibleCards)
@@ -62,8 +84,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
     setTimeout(() => setIsTransitioning(false), 300)
   }
 
-  // Auto-scroll every 5 seconds
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       if (!isTransitioning && !selectedPost) {
         scrollRight()
@@ -73,9 +94,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
   }, [isTransitioning, selectedPost])
 
   const handlePostClick = (postId: number) => {
-    // First scroll to top to ensure consistent starting position
     window.scrollTo(0, 0)
-    // Then set the selected post which will render the detail view
     setSelectedPost(postId)
   }
 
@@ -99,7 +118,11 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
             Latest News and Blog
           </h2>
         </div>
-
+        {loading ? (
+          <div className="text-center py-8">Loading...</div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">{error}</div>
+        ) : (
         <div className="relative">
           <div className="flex items-center justify-center">
             <Button
@@ -109,10 +132,9 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
             >
               <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
-
-            <div className="overflow-hidden w-full max-w-6xl" style={{ height: 'auto', minHeight: '360px' }}>
+            <div className="overflow-hidden w-full max-w-6xl">
               <div
-                className="flex transition-transform duration-300 ease-in-out h-full"
+                className="flex transition-transform duration-300 ease-in-out"
                 style={{
                   transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
                 }}
@@ -120,44 +142,44 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
                 {extendedBlogPosts.map((post, index) => (
                   <div
                     key={`${post.id}-${index}`}
-                    className="flex-shrink-0 px-1 sm:px-2 h-full"
+                    className="flex-shrink-0 px-1 sm:px-2"
                     style={{ width: `${100 / visibleCards}%` }}
                   >
                     <Card 
-                      className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-background cursor-pointer"
+                      className="w-full h-full min-h-[360px] hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-background cursor-pointer"
                       onClick={() => handlePostClick(post.id)}
                     >
-                      <CardContent className="p-5 sm:p-7 flex-1 flex flex-col">
-                        {/* Icon */}
-                        <div className="flex items-center justify-center h-32 w-full bg-muted mb-4 rounded-md">
-                          {post.id === 1 && <Heart className="w-16 h-16 text-red-500" />}
-                          {post.id === 2 && <BookOpen className="w-16 h-16 text-red-500" />}
-                          {post.id === 3 && <Award className="w-16 h-16 text-red-500" />}
-                          {post.id === 4 && <Home className="w-16 h-16 text-red-500" />}
-                          {post.id === 5 && <School className="w-16 h-16 text-red-500" />}
-                          {post.id === 6 && <Droplets className="w-16 h-16 text-red-500" />}
-                          {post.id === 7 && <Users className="w-16 h-16 text-red-500" />}
-                          {post.id === 8 && <Globe className="w-16 h-16 text-red-500" />}
-                          {post.id === 9 && <MessageCircle className="w-16 h-16 text-red-500" />}
+                      <CardContent className="p-5 sm:p-7 flex flex-col h-full">
+                        <div className="flex items-center justify-center h-40 w-full bg-muted mb-4 rounded-md overflow-hidden">
+                          {post.image_full_urls && post.image_full_urls.length > 0 ? (
+                            <img
+                              src={post.image_full_urls[0]}
+                              alt={post.title}
+                              className="object-cover h-full w-full"
+                            />
+                          ) : post.image_urls && post.image_urls.length > 0 ? (
+                            <img
+                              src={post.image_urls[0]}
+                              alt={post.title}
+                              className="object-cover h-full w-full"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full w-full text-muted-foreground">
+                              No Image
+                            </div>
+                          )}
                         </div>
-
-                        {/* Date */}
                         <div className="flex items-center gap-2 text-muted-foreground text-xs mb-2">
                           <Calendar className="w-3 h-3 text-red-500" />
-                          <span>{post.date}</span>
+                          <span>{post.created_at ? new Date(post.created_at).toLocaleDateString() : 'Invalid Date'}</span>
                         </div>
-
-                        {/* Title and Tag */}
-                        <div className="mb-2">
+                        <div className="mb-2 flex-grow">
                           <h3 className="text-sm font-bold text-foreground mb-1 line-clamp-1">{post.title}</h3>
+                          <p className="text-muted-foreground text-xs leading-relaxed mb-4 line-clamp-2">{post.content}</p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${post.tagColor}`}>
                             {post.tag}
                           </span>
                         </div>
-
-                        {/* Description */}
-                        <p className="text-muted-foreground text-xs leading-relaxed mb-4 line-clamp-2">{post.description}</p>
-
                         <Button 
                           variant="link" 
                           className="p-0 h-auto text-primary font-semibold text-xs hover:no-underline flex items-center gap-1 group mt-auto mb-1"
@@ -171,7 +193,6 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
                 ))}
               </div>
             </div>
-
             <Button
               onClick={scrollRight}
               className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
@@ -181,7 +202,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
             </Button>
           </div>
         </div>
-
+        )}
         <div className="flex justify-center mt-6 sm:mt-8">
           <Link href="/blog">
             <Button 
