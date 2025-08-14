@@ -30,7 +30,7 @@ export function Header() {
   const { theme } = useTheme()
   const [isMobile, setIsMobile] = useState(false)
   
-  const isAdmin = user?.email === 'admin@gmail.com'
+  const isAdmin = user?.isAdmin === true
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -107,7 +107,7 @@ export function Header() {
 
   return (
     <>
-      <header className="w-full px-4 md:px-6 py-2 shadow-sm sticky top-0 bg-background z-40">
+      <header className="w-full px-3 md:px-4 py-1 shadow-sm sticky top-0 bg-background z-40 border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link 
@@ -179,36 +179,59 @@ export function Header() {
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
             <ModeToggle />
             {isAuthenticated && user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="default"
-                    style={{
-                      backgroundColor: COLORS.primary,
-                      color: "#fff",
-                    }}
-                    className="hover:bg-[#d90404] transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
-                  >
-                    <User size={16} />
-                    <span>{user.name}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-background">
-                  <DropdownMenuItem asChild>
-                    <Link href={isAdmin ? "/admin" : "/profile?view=profile"} className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
+              isAdmin && pathname.startsWith('/profile') ? (
+                <Button
+                  variant="default"
+                  style={{
+                    backgroundColor: COLORS.primary,
+                    color: "#fff",
+                  }}
+                  className="hover:bg-[#d90404] transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
+                  onClick={() => router.push('/admin/dashboard')}
+                >
+                  <LayoutDashboard size={16} />
+                  <span>Dashboard</span>
+                </Button>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="default"
+                      style={{
+                        backgroundColor: COLORS.primary,
+                        color: "#fff",
+                      }}
+                      className="hover:bg-[#d90404] transition-colors duration-200 rounded-full px-3 lg:px-6 text-sm lg:text-base flex items-center gap-2"
+                    >
                       <User size={16} />
-                      <span>{isAdmin ? "Dashboard" : "Profile"}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => logout()} 
-                    className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <LogOut size={16} />
-                    <span>Logout</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      <span>{user.first_name} {user.last_name}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-background">
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile?view=profile" className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                        <User size={16} />
+                        <span>Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/dashboard" className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                          <LayoutDashboard size={16} />
+                          <span>Dashboard</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem 
+                      onClick={() => logout()} 
+                      className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <LogOut size={16} />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )
             ) : (
               <>
                 <Button
@@ -252,12 +275,12 @@ export function Header() {
                     <div className="flex flex-col items-center space-y-3 p-4 mb-4 bg-secondary/20 rounded-lg">
                       <div className="relative">
                         <Avatar className="w-16 h-16">
-                          <AvatarImage src={user.profileImage} alt={user.name} />
+                          <AvatarImage src={(user.avatar_url || user.avatar_url_full) ?? undefined} alt={`${user.first_name} ${user.last_name}`} />
                           <AvatarFallback className="bg-primary">
                             <User size={32} className="text-primary-foreground" />
                           </AvatarFallback>
                         </Avatar>
-                        {user?.verified && (
+                        {user?.email_verified_at && (
                           <img
                             src={theme === 'dark' ? "/verification-dark.png" : "/verification.png"}
                             alt="Verified"
@@ -266,38 +289,72 @@ export function Header() {
                         )}
                       </div>
                       <div className="flex flex-col items-center">
-                        <span className="font-semibold text-foreground">{user.name}</span>
+                        <span className="font-semibold text-foreground">{user.first_name} {user.last_name}</span>
                       </div>
                     </div>
                     
                     {/* Profile sidebar menu items for mobile */}
                     <div className="space-y-3 mb-4">
                       {isAdmin ? (
-                        <>
-                          <h3 className="text-primary font-medium text-sm px-2">Admin Dashboard</h3>
-                          <div className="space-y-2">
-                            <Link href="/admin" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
-                              <LayoutDashboard className="h-4 w-4" />
+                        pathname.startsWith('/profile') ? (
+                          <>
+                            <h3 className="text-primary font-medium text-sm px-2">Admin Actions</h3>
+                            <Button
+                              variant="default"
+                              style={{
+                                backgroundColor: COLORS.primary,
+                                color: "#fff",
+                              }}
+                              className="w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2 hover:bg-[#d90404]"
+                              onClick={() => {
+                                closeMobileMenu()
+                                router.push('/admin/dashboard')
+                              }}
+                            >
+                              <LayoutDashboard size={16} />
                               <span>Dashboard</span>
-                            </Link>
-                            <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
-                              <FileText className="h-4 w-4" />
-                              <span>Manage Blogs</span>
-                            </Link>
-                            <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
-                              <MapPin className="h-4 w-4" />
-                              <span>Manage Locations</span>
-                            </Link>
-                            <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
-                              <Users className="h-4 w-4" />
-                              <span>All Users</span>
-                            </Link>
-                            <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2 pl-6">
-                              <FileText className="h-4 w-4" />
-                              <span>Verification Requests</span>
-                            </Link>
-                          </div>
-                        </>
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <h3 className="text-primary font-medium text-sm px-2">Admin Dashboard</h3>
+                            <div className="space-y-2">
+                              <Button
+                                variant="ghost"
+                                className={cn(
+                                  "w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2",
+                                  pathname === '/profile' && (!searchParams || searchParams.get('view') === 'profile')
+                                    ? `bg-[${COLORS.primary}] text-white hover:bg-[#d90404]`
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                )}
+                                onClick={handleProfileNavigation}
+                              >
+                                <User size={16} />
+                                User Profile
+                              </Button>
+                              <Link href="/admin/dashboard" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                                <LayoutDashboard className="h-4 w-4" />
+                                <span>Dashboard</span>
+                              </Link>
+                              <Link href="/admin/blogs" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                                <FileText className="h-4 w-4" />
+                                <span>Manage Blogs</span>
+                              </Link>
+                              <Link href="/admin/locations" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                                <MapPin className="h-4 w-4" />
+                                <span>Manage Locations</span>
+                              </Link>
+                              <Link href="/admin/users" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                                <Users className="h-4 w-4" />
+                                <span>All Users</span>
+                              </Link>
+                              <Link href="/admin/users?tab=verification" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2 pl-6">
+                                <FileText className="h-4 w-4" />
+                                <span>Verification Requests</span>
+                              </Link>
+                            </div>
+                          </>
+                        )
                       ) : (
                         <>
                           <h3 className="text-primary font-medium text-sm px-2">Profile Menu</h3>
@@ -332,15 +389,7 @@ export function Header() {
                         </>
                       )}
                       
-                      {isAdmin && (
-                        <Link href="/admin/dashboard" onClick={closeMobileMenu} className="block mb-3">
-                          <Button
-                            className="w-full text-center py-2 px-4 rounded-md bg-red-500 text-white hover:bg-red-600"
-                          >
-                            Dashboard
-                          </Button>
-                        </Link>
-                      )}
+
                       
                       <Button
                         variant="ghost"

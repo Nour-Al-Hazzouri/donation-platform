@@ -12,14 +12,20 @@ export default function AddRequestPage() {
   const { openModal } = useModal()
   const router = useRouter()
 
+  // Track if we've already shown the login modal
+  const [hasShownLoginModal, setHasShownLoginModal] = useState(false)
+
   useEffect(() => {
     // Check authentication when component mounts
-    if (!isAuthenticated) {
-      // Redirect to home and open sign in modal
-      router.push('/')
+    if (!isAuthenticated && !hasShownLoginModal) {
+      // Store current URL for redirection after authentication
+      localStorage.setItem('redirectAfterAuth', window.location.pathname)
+      // Open sign-in modal instead of redirecting
       openModal('signIn')
+      // Mark that we've shown the modal
+      setHasShownLoginModal(true)
     }
-  }, [isAuthenticated, openModal, router])
+  }, [isAuthenticated, openModal, hasShownLoginModal])
 
   // If not authenticated, don't render the page content
   if (!isAuthenticated) {

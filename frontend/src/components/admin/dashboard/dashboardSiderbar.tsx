@@ -23,11 +23,11 @@ const ADMIN_PROFILE = {
 }
 
 const getSidebarMenuItems = (pathname: string) => [
-  {
-    href: "/admin/dashboard",
-    icon: LayoutDashboard,
-    label: "Dashboard",
-    isActive: pathname === "/admin/dashboard",
+  { 
+    href: "/admin/dashboard", 
+    icon: LayoutDashboard, 
+    label: "Dashboard", 
+    isActive: pathname === "/admin/dashboard"
   },
   {
     href: "/admin/blogs",

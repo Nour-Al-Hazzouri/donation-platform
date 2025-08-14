@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AnnouncementResource;
 use App\Models\Announcement;
 use App\Services\ImageService;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class AnnouncementController extends Controller
@@ -23,11 +23,17 @@ class AnnouncementController extends Controller
     protected $imageService;
 
     /**
+     * @var NotificationService
+     */
+    protected $notificationService;
+
+    /**
      * @param ImageService $imageService
      */
-    public function __construct(ImageService $imageService)
+    public function __construct(ImageService $imageService, NotificationService $notificationService)
     {
         $this->imageService = $imageService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -86,6 +92,16 @@ class AnnouncementController extends Controller
                 'priority' => $validated['priority'],
                 'image_urls' => $imagePaths,
             ]);
+
+            $announcement->load('user');
+
+            $this->notificationService->broadcastNewAnnouncement(
+                announcementTitle: $announcement->title,
+                data: [
+                    'user_id' => $announcement->user_id,
+                    'announcement_id' => $announcement->id,
+                ]
+            );
 
             return response()->json([
                 'data' => new AnnouncementResource($announcement->load('user')),
@@ -181,6 +197,17 @@ class AnnouncementController extends Controller
                 'priority' => $validated['priority'] ?? $announcement->priority,
                 'image_urls' => $imagePaths,
             ]);
+
+            $announcement->load('user');
+
+            $this->notificationService->sendAnnouncementUpdated(
+                user: $announcement->user,
+                announcementTitle: $announcement->title,
+                data: [
+                    'user_id' => $announcement->user_id,
+                    'announcement_id' => $announcement->id,
+                ]
+            );
 
             return response()->json([
                 'success' => true,

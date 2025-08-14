@@ -8,7 +8,8 @@ import Image from 'next/image'
 
 interface User {
   id: string
-  name: string
+  first_name: string
+  last_name: string
   verified: boolean
 }
 
@@ -29,7 +30,8 @@ interface CommunityPost {
 
 const mockUser: User = {
   id: 'me',
-  name: 'whatever',
+  first_name: 'User',
+  last_name: 'Name',
   verified: false,
 }
 
@@ -39,7 +41,8 @@ const initialMockPosts: CommunityPost[] = [
     content: 'Just donated to the local food bank! Who else wants to join me in supporting this great cause?',
     user: {
       id: 'user1',
-      name: 'Tony Stark',
+      first_name: 'Tony',
+      last_name: 'Stark',
       verified: false,
     },
     images: ['https://images.unsplash.com/photo-1504281623087-1f6f7c0fd8ce?w=500&h=300&fit=crop'],
@@ -54,7 +57,8 @@ const initialMockPosts: CommunityPost[] = [
     content: 'Looking for volunteers to help distribute supplies at the homeless shelter this weekend. Can anyone lend a hand?',
     user: {
       id: 'user2',
-      name: 'Steve Rogers',
+      first_name: 'Steve',
+      last_name: 'Rogers',
       verified: true,
     },
     likes: 5,
@@ -68,7 +72,8 @@ const initialMockPosts: CommunityPost[] = [
     content: 'Check out this amazing work being done by our local charity! They\'ve helped over 500 families this month alone. Consider donating if you can.',
     user: {
       id: 'user3',
-      name: 'Natasha Romanoff',
+      first_name: 'Natasha',
+      last_name: 'Romanoff',
       verified: true,
     },
     images: ['https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1200&h=800&fit=crop'],
@@ -185,7 +190,7 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           <div className="relative">
             <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
               <span className="text-white text-xs font-bold">
-                {post.user.name.split(' ').map(n => n[0]).join('')}
+                {post.user.first_name && post.user.last_name ? `${post.user.first_name[0]}${post.user.last_name[0]}` : 'U'}
               </span>
             </div>
             {post.user.verified && (
@@ -202,7 +207,7 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1 truncate">
-              <span className="font-semibold text-sm text-foreground truncate">{post.user.name}</span>
+              <span className="font-semibold text-sm text-foreground truncate">{post.user.first_name} {post.user.last_name}</span>
             </div>
             <div className="text-[10px] text-muted-foreground">{formatTimeAgo(post.createdAt)}</div>
           </div>
@@ -284,7 +289,7 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
             <div className="flex items-center gap-2 mt-2">
               <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-primary-foreground text-[10px] font-bold">
-                  {user?.name ? user.name.split(' ').map(n => n[0]).join('') : 'W'}
+                  {user?.first_name && user?.last_name ? `${user.first_name[0]}${user.last_name[0]}` : 'U'}
                 </span>
               </div>
               <div className="flex-1">

@@ -8,6 +8,7 @@ import { ChevronLeft } from 'lucide-react'
 import { useModal } from '@/contexts/ModalContext'
 import VerificationCodePage from './VerificationCodePage'
 import { toast } from "@/components/ui/use-toast"
+import { useAuthStore } from '@/store/authStore'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -24,25 +25,30 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
 
     try {
-      // Here you would typically make an API call to send the verification code
-      // For demonstration, we'll simulate a network request
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Use the authStore forgotPassword method which will call the API through our service
+      await useAuthStore.getState().forgotPassword({ email })
       
-      console.log('Verification code sent to:', email)
       setShowVerification(true)
       toast({
         title: "Verification code sent",
         description: `We've sent a 6-digit code to ${email}`,
       })
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to send verification code. Please try again.",
+        description: error.response?.data?.message || error.message || "Failed to send verification code. Please try again.",
         variant: "destructive",
       })
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const [verificationCode, setVerificationCode] = useState('')
+
+  const handleVerificationSuccess = (code: string) => {
+    setVerificationCode(code)
+    openModal('newPassword', { email, code })
   }
 
   return (
@@ -114,7 +120,9 @@ export default function ForgotPasswordPage() {
         <VerificationCodePage 
           userEmail={email} 
           onBack={() => setShowVerification(false)} 
-          onSuccess={() => openModal('newPassword')}
+          onSuccess={(code) => {
+            openModal('newPassword', { email, code })
+          }}
         />
       )}
     </div>

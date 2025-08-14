@@ -9,7 +9,7 @@ import { toast } from "@/components/ui/use-toast"
 
 interface VerificationCodePageProps {
   onBack?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (code: string) => void;
   userEmail?: string;
 }
 
@@ -67,22 +67,21 @@ export default function VerificationCodePage({ onBack, onSuccess, userEmail }: V
     setIsLoading(true)
     
     try {
-      // Here you would typically validate the code with your backend
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log('Verified code:', verificationCode)
+      // We don't actually verify the code here - we'll do that in the reset password step
+      // This is just to check if the code format is valid
+      console.log('Code entered:', verificationCode)
       toast({
-        title: "Verification successful",
+        title: "Code accepted",
         description: "You can now set a new password",
       })
       
       if (onSuccess) {
-        onSuccess()
+        onSuccess(verificationCode)
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Verification failed",
-        description: "The code you entered is incorrect. Please try again.",
+        description: error.response?.data?.message || error.message || "The code you entered is incorrect. Please try again.",
         variant: "destructive",
       })
     } finally {

@@ -12,12 +12,19 @@ export default function AddDonationPage() {
   const { openModal } = useModal()
   const router = useRouter()
 
+  // Track if we've already shown the login modal
+  const [hasShownLoginModal, setHasShownLoginModal] = useState(false)
+
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/')
+    if (!isAuthenticated && !hasShownLoginModal) {
+      // Store current URL for redirection after authentication
+      localStorage.setItem('redirectAfterAuth', window.location.pathname)
+      // Open sign-in modal instead of redirecting
       openModal('signIn')
+      // Mark that we've shown the modal
+      setHasShownLoginModal(true)
     }
-  }, [isAuthenticated, openModal, router])
+  }, [isAuthenticated, openModal, hasShownLoginModal])
 
   if (!isAuthenticated) {
     return null

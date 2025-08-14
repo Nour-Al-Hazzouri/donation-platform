@@ -6,6 +6,7 @@ use App\Models\CommunityPost;
 use App\Models\DonationEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
@@ -23,6 +24,7 @@ class CommunityPostImageTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(NotificationTypeSeeder::class);
 
         $this->user = User::factory()->create();
         $this->user->assignRole('user');
@@ -94,10 +96,10 @@ class CommunityPostImageTest extends TestCase
         // Create and store initial images
         $image1 = UploadedFile::fake()->image('post1.jpg');
         $image2 = UploadedFile::fake()->image('post2.jpg');
-        
+
         $imagePath1 = 'community/posts/' . uniqid() . '.jpg';
         $imagePath2 = 'community/posts/' . uniqid() . '.jpg';
-        
+
         Storage::disk('public')->put($imagePath1, file_get_contents($image1));
         Storage::disk('public')->put($imagePath2, file_get_contents($image2));
 
@@ -120,7 +122,7 @@ class CommunityPostImageTest extends TestCase
             ]);
 
         $response->assertStatus(200);
-        
+
         // Should have 4 images now (2 existing + 2 new)
         $responseData = $response->json('data');
         $this->assertCount(4, $responseData['image_urls']);
@@ -130,7 +132,7 @@ class CommunityPostImageTest extends TestCase
         foreach ($responseData['image_urls'] as $imagePath) {
             $this->assertTrue(Storage::disk('public')->exists($imagePath));
         }
-        
+
         // Cleanup - delete the test files
         Storage::disk('public')->delete($imagePath1);
         Storage::disk('public')->delete($imagePath2);
@@ -178,7 +180,7 @@ class CommunityPostImageTest extends TestCase
             'type' => 'request',
             'goal_amount' => 100,
         ]);
-        
+
         $imagePath = 'community/posts/' . uniqid() . '.jpg';
         $fakeImage = UploadedFile::fake()->image('test.jpg');
         $imageContent = file_get_contents($fakeImage->getRealPath());

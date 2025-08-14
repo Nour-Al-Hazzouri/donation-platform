@@ -43,7 +43,7 @@ export function AdminHeader() {
 
   return (
     <>
-      <header className="w-full px-4 md:px-6 py-2 shadow-sm sticky top-0 bg-background z-40">
+      <header className="w-full px-3 md:px-4 py-1 shadow-sm sticky top-0 bg-background z-40 border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link
@@ -101,12 +101,12 @@ export function AdminHeader() {
             {/* Theme Toggle */}
             <ThemeToggleProvider />
             
-            {/* Dashboard Button */}
-            <Link href="/admin/dashboard">
+            {/* Profile Button */}
+            <Link href="/profile">
               <Button
                 className="bg-red-500 text-white hover:bg-red-600 transition-colors duration-200 rounded-md px-4 py-2 text-sm font-medium"
               >
-                Dashboard
+                Profile
               </Button>
             </Link>
           </div>
@@ -144,7 +144,7 @@ export function AdminHeader() {
                 <div className="mb-4">
                   <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Dashboard Menu</h3>
                   <div className="space-y-2">
-                    <Link href="/admin" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
+                    <Link href="/admin/dashboard" onClick={closeMobileMenu} className="flex items-center gap-2 text-foreground hover:text-red-500 py-2">
                       <LayoutDashboard className="h-4 w-4" />
                       <span>Dashboard</span>
                     </Link>
@@ -167,12 +167,12 @@ export function AdminHeader() {
                   </div>
                 </div>
 
-                {/* Mobile Dashboard Button */}
-                <Link href="/admin/dashboard" onClick={closeMobileMenu}>
+                {/* Mobile Profile Button */}
+                <Link href="/profile" onClick={closeMobileMenu}>
                   <Button
                     className="w-full text-center py-2 px-4 rounded-md bg-red-500 text-white hover:bg-red-600"
                   >
-                    Dashboard
+                    Profile
                   </Button>
                 </Link>
               </div>

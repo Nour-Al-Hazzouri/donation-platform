@@ -15,6 +15,7 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { openModal, closeModal } = useModal()
   const { login } = useAuthStore()
@@ -25,41 +26,69 @@ export default function SignInPage() {
   }
 
 
-const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
-  setIsLoading(true)
-
-  setTimeout(() => {
-    if (email && password) {
-      const mockUser = {
-        id: '1',
-        name: email.split('@')[0],
-        email,
-        verified: false,
-      }
-
-      login(mockUser)
-
-      if (email === 'admin@gmail.com' && password === 'admin123') {
-        closeModal()
-        router.push('/admin')
-      } else {
-        closeModal()
-        toast({
-          title: "Logged in successfully",
-          description: `Welcome back, ${mockUser.name}!`,
-        })
-      }
+  
+  // Reset password error
+  setPasswordError('')
+  
+  if (!email || !password) {
+    toast({
+      title: "Login failed",
+      description: "Please enter valid credentials",
+      variant: "destructive",
+    })
+    return
+  }
+  
+  // Check password length
+  if (password.length < 8) {
+    setPasswordError('Password must be at least 8 characters long')
+    return
+  }
+  
+  try {
+    setIsLoading(true)
+    // Use the login method from useAuthStore
+    await login(email, password)
+    
+    closeModal()
+    
+    // Get the current user
+    const user = useAuthStore.getState().user
+    
+    // Check if there's a redirect URL in localStorage
+    const redirectUrl = localStorage.getItem('redirectAfterAuth')
+    
+    // If there is a redirect URL, navigate to it and remove it from localStorage
+    if (redirectUrl) {
+      localStorage.removeItem('redirectAfterAuth')
+      router.push(redirectUrl)
     } else {
-      toast({
-        title: "Login failed",
-        description: "Please enter valid credentials",
-        variant: "destructive",
-      })
+      // Redirect based on user role
+if (user?.isAdmin) {
+  router.push('/admin/dashboard'); // go directly to dashboard
+  toast({
+    title: "Welcome, Administrator!",
+    description: "You have been redirected to the admin dashboard.",
+  });
+} else {
+  router.push('/profile');
+  toast({
+    title: "Logged in successfully",
+    description: `Welcome back, ${user?.first_name || 'User'}!`,
+  });
+}
     }
-
+  } catch (error: any) {
+    toast({
+      title: "Login failed",
+      description: error.response?.data?.message || error.message || "An error occurred during login",
+      variant: "destructive",
+    })
+  } finally {
     setIsLoading(false)
-  }, 1000)
+  }
 }
   const handleGoogleSignIn = () => {
     // Handle Google sign in logic here
@@ -104,7 +133,11 @@ const handleSubmit = (e: React.FormEvent) => {
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  // Clear error when user types
+                  if (passwordError) setPasswordError('')
+                }}
                 className="w-full h-10 sm:h-12 px-4 pr-12 bg-secondary/50 border-0 rounded-lg text-foreground placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary focus:ring-offset-0 transition-all duration-300"
                 required
               />
@@ -117,6 +150,11 @@ const handleSubmit = (e: React.FormEvent) => {
                 {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
               </button>
             </div>
+            {passwordError && (
+              <div className="text-red-500 text-sm mt-1">
+                {passwordError}
+              </div>
+            )}
           </div>
 
           {/* Forgot Password Link */}
