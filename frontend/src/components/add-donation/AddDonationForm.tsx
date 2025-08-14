@@ -107,6 +107,12 @@ export function AddDonationForm() {
       return
     }
 
+    // Check if user is verified
+    if (!user.email_verified_at) {
+      setErrors(prev => ({ ...prev, form: 'You must be verified to create a donation event. Please verify your account first.' }))
+      return
+    }
+
     setIsSubmitting(true)
     
     try {
@@ -128,8 +134,14 @@ export function AddDonationForm() {
       
       // Redirect to the donations page
       router.push('/donations')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting donation:', error)
+      // Display the error message from the API
+      if (error.response?.data?.message) {
+        setErrors(prev => ({ ...prev, form: error.response.data.message }))
+      } else {
+        setErrors(prev => ({ ...prev, form: 'Failed to create donation. Please try again later.' }))
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -137,6 +149,11 @@ export function AddDonationForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {errors.form && (
+        <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {errors.form}
+        </div>
+      )}
       <div>
         <Label htmlFor="name" className="text-base font-medium text-foreground">
           Name

@@ -4,9 +4,10 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CheckCircle, Upload } from "lucide-react"
+import { CheckCircle, Upload, AlertCircle } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
 import { useModal } from "@/contexts/ModalContext"
+import { verificationService } from "@/lib/api"
 
 export default function AccVerification() {
   const { user, updateVerification } = useAuthStore()
@@ -14,6 +15,8 @@ export default function AccVerification() {
   const [idImage, setIdImage] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [verificationSuccess, setVerificationSuccess] = useState(false)
+  const [documentType, setDocumentType] = useState<'id_card' | 'passport' | 'driver_license'>('id_card')
+  const [error, setError] = useState<string | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -26,14 +29,21 @@ export default function AccVerification() {
     if (!idImage) return
     
     setIsSubmitting(true)
+    setError(null)
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await verificationService.submitVerification({
+        document_type: documentType,
+        document_image: idImage
+      })
+      
+      // Update the user's verification status in the auth store
       updateVerification(true, new Date().toISOString())
       setVerificationSuccess(true)
       setTimeout(() => closeModal(), 2000)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Verification failed:", error)
+      setError(error?.response?.data?.message || 'Failed to submit verification. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -64,7 +74,35 @@ export default function AccVerification() {
             <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label className="text-[#5a5a5a] text-sm">Upload Government ID</Label>
+                  <Label className="text-[#5a5a5a] text-sm">Document Type</Label>
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    <Button 
+                      type="button"
+                      variant={documentType === 'id_card' ? 'default' : 'outline'}
+                      className={documentType === 'id_card' ? 'bg-[#f90404] hover:bg-[#d90404] text-white' : 'text-[#5a5a5a]'}
+                      onClick={() => setDocumentType('id_card')}
+                    >
+                      ID Card
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant={documentType === 'passport' ? 'default' : 'outline'}
+                      className={documentType === 'passport' ? 'bg-[#f90404] hover:bg-[#d90404] text-white' : 'text-[#5a5a5a]'}
+                      onClick={() => setDocumentType('passport')}
+                    >
+                      Passport
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant={documentType === 'driver_license' ? 'default' : 'outline'}
+                      className={documentType === 'driver_license' ? 'bg-[#f90404] hover:bg-[#d90404] text-white' : 'text-[#5a5a5a]'}
+                      onClick={() => setDocumentType('driver_license')}
+                    >
+                      Driver's License
+                    </Button>
+                  </div>
+                  
+                  <Label className="text-[#5a5a5a] text-sm">Upload Document</Label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     {idImage ? (
                       <div className="flex flex-col items-center">
@@ -101,6 +139,13 @@ export default function AccVerification() {
                   </div>
                 </div>
 
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-md p-3 flex items-start gap-2">
+                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-600">{error}</p>
+                  </div>
+                )}
+                
                 <div className="flex justify-end gap-3 pt-4">
                   <Button
                     type="button"
