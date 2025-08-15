@@ -10,13 +10,30 @@ import { Label } from "@/components/ui/label"
 import { useAuthStore } from '@/store/authStore'
 import { useDonationsStore } from '@/store/donationsStore'
 
-function getUserInitials(firstName: string, lastName: string): string {
+export type AddDonationFormValues = {
+  title: string
+  description: string
+  type: 'request' | 'offer'
+  goalAmount: number
+  unit: string
+  locationId: number
+  imageUrl?: string
+  endDate: string
+}
+
+interface AddDonationFormProps {
+  onSubmit?: (values: AddDonationFormValues) => Promise<void>
+  submitting?: boolean
+  error?: string | null
+}
+
+function getUserInitials(firstName?: string, lastName?: string): string {
   const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : ''
   const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : ''
   return `${firstInitial}${lastInitial}`
 }
 
-export function AddDonationForm() {
+export function AddDonationForm({ onSubmit, submitting: submittingProp, error: externalError }: AddDonationFormProps) {
   const router = useRouter()
   const { user } = useAuthStore()
   const { addDonation } = useDonationsStore()
@@ -30,6 +47,13 @@ export function AddDonationForm() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Sync external submitting prop if provided
+  useEffect(() => {
+    if (typeof submittingProp === 'boolean') {
+      setIsSubmitting(submittingProp)
+    }
+  }, [submittingProp])
 
   // Update the name field if user changes
   useEffect(() => {
@@ -113,30 +137,66 @@ export function AddDonationForm() {
       return
     }
 
+    // Build the values object expected by onSubmit (if provided)
+    const values: AddDonationFormValues = {
+      title: formData.title,
+      description: formData.description,
+      type: 'offer', // This is a donation offer in your form
+      goalAmount: parseFloat(formData.donationAmount),
+      unit: 'LBP',
+      locationId: 1,
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      imageUrl: formData.image ? URL.createObjectURL(formData.image) : undefined
+    }
+
+    // If caller passed an onSubmit prop, prefer that
+    if (onSubmit) {
+      setIsSubmitting(true)
+      try {
+        await onSubmit(values)
+        router.push('/donations')
+      } catch (err: any) {
+        console.error('Error in external onSubmit:', err)
+        setErrors(prev => ({ ...prev, form: err?.response?.data?.message ?? 'Failed to create donation. Please try again later.' }))
+      } finally {
+        setIsSubmitting(false)
+      }
+      return
+    }
+
+    // Otherwise, call the store's addDonation and provide the full Omit<DonationData, 'id'> payload
     setIsSubmitting(true)
-    
     try {
-      // Prepare donation data for API
-      const newDonation = {
+      const donationPayload = {
+        // Required fields from DonationData
+        name: formData.name,
         title: formData.title,
         description: formData.description,
-        type: 'offer', // This is a donation offer
+        imageUrl: formData.image ? URL.createObjectURL(formData.image) : undefined,
+        avatarUrl: user?.avatar_url || undefined,
+        initials: getUserInitials(user?.first_name, user?.last_name),
+        isVerified: !!user.email_verified_at,
+        donationAmount: formData.donationAmount,
+        createdAt: new Date().toISOString(),
         goalAmount: parseFloat(formData.donationAmount),
-        unit: 'LBP', // Default currency unit
-        locationId: 1, // Default location ID
-        imageUrl: formData.image ? URL.createObjectURL(formData.image) : undefined, // Convert File to URL for processing in the store
-        // Set end_date to 30 days from now (this will be used in the store)
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        currentAmount: 0,
+        possibleAmount: 0,
+        unit: 'LBP',
+        type: 'offer' as 'offer',
+        status: 'active' as 'active',
+        userId: user.id,
+        locationId: 1,
+        endDate: values.endDate,
+        location: null
       }
-      
-      // Call the API to create the donation
-      await addDonation(newDonation)
-      
-      // Redirect to the donations page
+
+      // Call your zustand store which will call the API
+      await addDonation(donationPayload as any) // store expects Omit<DonationData,'id'>
+
+      // Redirect to the donations listing after success
       router.push('/donations')
     } catch (error: any) {
       console.error('Error submitting donation:', error)
-      // Display the error message from the API
       if (error.response?.data?.message) {
         setErrors(prev => ({ ...prev, form: error.response.data.message }))
       } else {
@@ -149,9 +209,9 @@ export function AddDonationForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {errors.form && (
+      {(errors.form || externalError) && (
         <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {errors.form}
+          {errors.form || externalError}
         </div>
       )}
       <div>

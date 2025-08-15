@@ -2,7 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { donationsService } from '@/lib/api'
+import donationsService from '@/lib/api/donations' // adjust if your barrel export differs
 import { DonationEvent } from '@/lib/api/donations'
 
 export interface DonationData {
@@ -42,7 +42,7 @@ interface DonationsState {
   getUserDonations: (userId: number) => Promise<DonationData[]>
   getDonationRequests: () => Promise<DonationData[]>
   getDonationOffers: () => Promise<DonationData[]>
-  initializeDonations: () => Promise<void>
+  initializeDonations: (force?: boolean) => Promise<void>
   createTransaction: (eventId: number, amount: number) => Promise<any>
   getTransaction: (transactionId: number) => Promise<any>
 }
@@ -56,7 +56,7 @@ const mapEventToDonationData = (event: DonationEvent): DonationData => ({
   imageUrl: event.image_urls?.[0] || undefined,
   avatarUrl: event.user.avatar_url || undefined,
   initials: `${event.user.first_name[0]}${event.user.last_name[0]}`,
-  isVerified: true, // Assuming all users with donation events are verified
+  isVerified: true,
   createdAt: event.created_at,
   goalAmount: event.goal_amount,
   currentAmount: event.current_amount,
@@ -76,28 +76,23 @@ export const useDonationsStore = create<DonationsState>()(
       isLoading: false,
       error: null,
 
-      initializeDonations: async (): Promise<void> => {
-        set({ isLoading: true, error: null })
-        try {
-          const response = await donationsService.getAllEvents()
-          const mappedDonations = response.data.map(mapEventToDonationData)
-          set({ donations: mappedDonations, isLoading: false })
-          return
-        } catch (error: any) {
-          console.error('Error initializing donations:', error)
-          set({ 
-            error: error.response?.data?.message || 'Failed to load donations', 
-            isLoading: false 
-          })
-          return
-        }
-      },
+      // Replaced initializeDonations with force flag
+  initializeDonations: async (force = false) => {
+    set({ isLoading: true, error: null })
+    try {
+      // fetch always (or short-circuit if you want)
+      const response = await donationsService.getAllEvents()
+      const mappedDonations = response.data.map(mapEventToDonationData)
+      set({ donations: mappedDonations, isLoading: false })
+    } catch (err: any) {
+      console.error('Error initializing donations:', err)
+      set({ error: err?.response?.data?.message || 'Failed to load donations', isLoading: false })
+    }
+  },
 
       addDonation: async (newDonation) => {
         set({ isLoading: true, error: null })
         try {
-          // Convert DonationData to CreateDonationEventData
-          // Using the interface from @/lib/api/donations to ensure consistency
           interface CreateDonationEventData {
             title: string;
             description: string;
@@ -115,23 +110,25 @@ export const useDonationsStore = create<DonationsState>()(
             type: newDonation.type || 'request',
             goal_amount: newDonation.goalAmount || 0,
             unit: newDonation.unit || 'LBP',
-            end_date: newDonation.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Use provided endDate or default to 30 days from now
-            location_id: newDonation.locationId || 1, // Default to location ID 1 if not provided
+            end_date: newDonation.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            location_id: newDonation.locationId || 1,
             image_urls: []
           }
 
-          // Handle image upload if available
-          if (newDonation.imageUrl) {
+          // If callers pass a real File, prefer that (make sure your form passes imageFile)
+          if ((newDonation as any).imageFile) {
+            eventData.image_urls.push((newDonation as any).imageFile)
+          } else if (newDonation.imageUrl) {
+            // backward-compatible fallback: try fetching blob from a blob: or data: URL
             try {
               const response = await fetch(newDonation.imageUrl)
               const blob = await response.blob()
               const fileName = 'donation-image.jpg'
-              const mimeType = blob.type || 'image/jpeg' // Use the blob's type or default to image/jpeg
+              const mimeType = blob.type || 'image/jpeg'
               const file = new File([blob], fileName, { type: mimeType })
               eventData.image_urls.push(file)
-            } catch (error) {
-              console.error('Error processing image:', error)
-              // Continue without the image if there's an error
+            } catch (err) {
+              console.error('Error processing image:', err)
             }
           }
 
@@ -272,7 +269,8 @@ export const useDonationsStore = create<DonationsState>()(
       }
     }),
     {
-      name: 'donations-storage'
+      // Bump the key when you want to invalidate old persisted state in users' browsers
+      name: 'donations-storage-v2'
     }
   )
 )
