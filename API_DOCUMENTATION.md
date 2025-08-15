@@ -2232,9 +2232,11 @@ This document outlines all available API endpoints, their purposes, required per
 -   **Description**: List all donation events (both requests and offers)
 -   **Role**: Any User
 -   **Query Parameters**:
+    -   `q`: Search term for title, username, first name, or last name
     -   `type`: Filter by type - 'request' or 'offer'
     -   `status`: Filter by status - 'active', 'completed', 'cancelled', or 'suspended'
     -   `location_id`: Filter by location ID
+    -   `per_page`: Number of results per page (default: 15)
 -   **Response (200 OK)**:
 
     ```json
@@ -2281,6 +2283,7 @@ This document outlines all available API endpoints, their purposes, required per
     -   Image URLs include both storage paths and full URLs
     -   `current_amount` shows confirmed donations
     -   `possible_amount` shows pledged but not yet confirmed donations
+    -   `per_page` shows number of results per page
 
     **Error Responses**:
 
@@ -2291,6 +2294,8 @@ This document outlines all available API endpoints, their purposes, required per
 -   **URL**: `GET /api/donation-events/requests`
 -   **Description**: List all active donation requests
 -   **Role**: Any User
+-   **Query Parameters**:
+    -   `per_page`: Number of results per page (default: 15)
 -   **Response (200 OK)**:
 
     ```json
@@ -2344,6 +2349,8 @@ This document outlines all available API endpoints, their purposes, required per
 -   **URL**: `GET /api/donation-events/offers`
 -   **Description**: List all active donation offers
 -   **Role**: Any User
+-   **Query Parameters**:
+    -   `per_page`: Number of results per page (default: 15)
 -   **Response (200 OK)**:
 
     ```json
@@ -2402,10 +2409,7 @@ This document outlines all available API endpoints, their purposes, required per
 -   **URL Parameters**:
     -   `user`: integer (required) - ID of the user whose events to retrieve
 -   **Query Parameters**:
-
-    -   `type`: Optional - Filter by type ('request' or 'offer')
-    -   `status`: Optional - Filter by status ('active', 'completed', 'cancelled', 'suspended')
-
+    -   `per_page`: Number of results per page (default: 15)
 -   **Response (200 OK)**:
 
     ```json
@@ -2449,7 +2453,7 @@ This document outlines all available API endpoints, their purposes, required per
     -   Returns all events for the specified user, regardless of status
     -   Results are ordered by creation date (newest first)
     -   Includes user and location details for each event
-    -   Can be filtered by type and/or status using query parameters
+    -   `per_page` shows number of results per page
 
     **Error Responses**:
 
