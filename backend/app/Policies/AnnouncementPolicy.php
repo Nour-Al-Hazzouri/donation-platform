@@ -15,7 +15,7 @@ class AnnouncementPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view announcements');
+        return true;
     }
 
     /**
@@ -23,7 +23,7 @@ class AnnouncementPolicy
      */
     public function view(User $user, Announcement $announcement): bool
     {
-        return $user->can('view announcements');
+        return true;
     }
 
     /**
