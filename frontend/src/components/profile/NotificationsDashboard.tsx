@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { CheckCircle, MessageCircle, Heart, User as UserIcon } from "lucide-react"
 import ProfileSidebar from "./Sidebar"
-import { useAuthStore } from "@/lib/store/authStore"
+import { useAuthStore } from "@/store/store/authStore"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 interface Notification {
