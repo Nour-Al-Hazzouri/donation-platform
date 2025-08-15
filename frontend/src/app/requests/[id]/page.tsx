@@ -143,14 +143,15 @@ export default function RequestDetailsPage() {
 
             {request.image_urls?.[0] && (
               <div className="mb-4 md:mb-6 w-full aspect-video relative rounded-lg overflow-hidden">
-                <Image
-                  src={request.image_urls[0]}
-                  alt={request.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
-                  priority
-                />
+<Image
+  src={request.image_urls[0].startsWith('http') ? request.image_urls[0] : '/' + request.image_urls[0]}
+  alt={request.title}
+  fill
+  className="object-cover"
+  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
+  priority
+/>
+
               </div>
             )}
 
