@@ -1,11 +1,11 @@
+// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\components\blog\BlogCarousel.tsx
 'use client'
 
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calendar, ArrowRight, ChevronLeftIcon, ChevronRightIcon, BookOpen, Heart, Globe, Users, Droplets, School, Home, MessageCircle, Award } from 'lucide-react'
+import { Calendar, ArrowRight, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/utils'
-import { COLORS } from '@/utils/constants'
 import BlogPostDetail from './BlogPostDetail'
 import Link from 'next/link'
 import { blogService } from '@/lib/api/blogs'
@@ -28,23 +28,31 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
       setLoading(true);
       setError(null);
       try {
-        const posts = await blogService.getAll();
-        const detailedPosts = await Promise.all(
-          posts.data.map(async (post) => {
-            const detailedPost = await blogService.getById(post.id);
-            return { ...post, content: detailedPost.content };
-          })
-        );
-        setBlogPosts(detailedPosts);
+        // First try to get all posts without details
+        const postsResponse = await blogService.getAll();
+        
+        if (postsResponse?.data?.length) {
+          // Only get basic info for the carousel to reduce requests
+          const basicPosts = postsResponse.data.slice(0, 6).map(post => ({
+            ...post,
+            // Add fallback content if needed
+            content: post.content || 'No content available'
+          }));
+          
+          setBlogPosts(basicPosts);
+        } else {
+          setBlogPosts([]);
+        }
       } catch (err: any) {
-        setError('Failed to load blog posts');
+        console.error('Error fetching blog posts:', err);
+        setError(err.response?.data?.message || 'Failed to load blog posts');
+        setBlogPosts([]);
       } finally {
         setLoading(false);
       }
     };
     
     fetchPosts();
-    blogService.getAll();
   }, []);
 
   const extendedBlogPosts = [...blogPosts, ...blogPosts.slice(0, visibleCards)]
@@ -122,86 +130,96 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ className }) => {
           <div className="text-center py-8">Loading...</div>
         ) : error ? (
           <div className="text-center py-8 text-red-500">{error}</div>
+        ) : blogPosts.length === 0 ? (
+          <div className="text-center py-8">No blog posts available</div>
         ) : (
-        <div className="relative">
-          <div className="flex items-center justify-center">
-            <Button
-              onClick={scrollLeft}
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
-              aria-label="Previous blog posts"
-            >
-              <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-            <div className="overflow-hidden w-full max-w-6xl">
-              <div
-                className="flex transition-transform duration-300 ease-in-out"
-                style={{
-                  transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
-                }}
+          <div className="relative">
+            <div className="flex items-center justify-center">
+              <Button
+                onClick={scrollLeft}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
+                aria-label="Previous blog posts"
               >
-                {extendedBlogPosts.map((post, index) => (
-                  <div
-                    key={`${post.id}-${index}`}
-                    className="flex-shrink-0 px-1 sm:px-2"
-                    style={{ width: `${100 / visibleCards}%` }}
-                  >
-                    <Card 
-                      className="w-full h-full min-h-[360px] hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-background cursor-pointer"
-                      onClick={() => handlePostClick(post.id)}
+                <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+              <div className="overflow-hidden w-full max-w-6xl">
+                <div
+                  className="flex transition-transform duration-300 ease-in-out"
+                  style={{
+                    transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
+                  }}
+                >
+                  {extendedBlogPosts.map((post, index) => (
+                    <div
+                      key={`${post.id}-${index}`}
+                      className="flex-shrink-0 px-1 sm:px-2"
+                      style={{ width: `${100 / visibleCards}%` }}
                     >
-                      <CardContent className="p-5 sm:p-7 flex flex-col h-full">
-                        <div className="flex items-center justify-center h-40 w-full bg-muted mb-4 rounded-md overflow-hidden">
-                          {post.image_full_urls && post.image_full_urls.length > 0 ? (
-                            <img
-                              src={post.image_full_urls[0]}
-                              alt={post.title}
-                              className="object-cover h-full w-full"
-                            />
-                          ) : post.image_urls && post.image_urls.length > 0 ? (
-                            <img
-                              src={post.image_urls[0]}
-                              alt={post.title}
-                              className="object-cover h-full w-full"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-                              No Image
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground text-xs mb-2">
-                          <Calendar className="w-3 h-3 text-red-500" />
-                          <span>{post.created_at ? new Date(post.created_at).toLocaleDateString() : 'Invalid Date'}</span>
-                        </div>
-                        <div className="mb-2 flex-grow">
-                          <h3 className="text-sm font-bold text-foreground mb-1 line-clamp-1">{post.title}</h3>
-                          <p className="text-muted-foreground text-xs leading-relaxed mb-4 line-clamp-2">{post.content}</p>
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${post.tagColor}`}>
-                            {post.tag}
-                          </span>
-                        </div>
-                        <Button 
-                          variant="link" 
-                          className="p-0 h-auto text-primary font-semibold text-xs hover:no-underline flex items-center gap-1 group mt-auto mb-1"
-                        >
-                          READ MORE
-                          <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform text-red-500" />
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))}
+                      <Card 
+                        className="w-full h-full min-h-[360px] hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-background cursor-pointer"
+                        onClick={() => handlePostClick(post.id)}
+                      >
+                        <CardContent className="p-5 sm:p-7 flex flex-col h-full">
+                          <div className="flex items-center justify-center h-40 w-full bg-muted mb-4 rounded-md overflow-hidden">
+                            {post.image_full_urls?.[0] ? (
+                              <img
+                                src={post.image_full_urls[0]}
+                                alt={post.title}
+                                className="object-cover h-full w-full"
+                              />
+                            ) : post.image_urls?.[0] ? (
+                              <img
+                                src={post.image_urls[0]}
+                                alt={post.title}
+                                className="object-cover h-full w-full"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full w-full text-muted-foreground">
+                                No Image
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-2">
+                            <Calendar className="w-3 h-3 text-red-500" />
+                            <span>{post.created_at ? new Date(post.created_at).toLocaleDateString() : 'No date'}</span>
+                          </div>
+                          <div className="mb-2 flex-grow">
+                            <h3 className="text-sm font-bold text-foreground mb-1 line-clamp-1">{post.title || 'Untitled Post'}</h3>
+                            <p className="text-muted-foreground text-xs leading-relaxed mb-4 line-clamp-2">
+                              {post.content || 'No content available'}
+                            </p>
+                            {post.priority && (
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                                post.priority === 'high' ? 'bg-red-100 text-red-800' :
+                                post.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-blue-100 text-blue-800'
+                              }`}>
+                                {post.priority}
+                              </span>
+                            )}
+                          </div>
+                          <Button 
+                            variant="link" 
+                            className="p-0 h-auto text-primary font-semibold text-xs hover:no-underline flex items-center gap-1 group mt-auto mb-1"
+                          >
+                            READ MORE
+                            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform text-red-500" />
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
               </div>
+              <Button
+                onClick={scrollRight}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
+                aria-label="Next blog posts"
+              >
+                <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
             </div>
-            <Button
-              onClick={scrollRight}
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
-              aria-label="Next blog posts"
-            >
-              <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
           </div>
-        </div>
         )}
         <div className="flex justify-center mt-6 sm:mt-8">
           <Link href="/blog">

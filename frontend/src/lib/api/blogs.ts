@@ -3,6 +3,16 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
 
+// Create a basic axios instance without auth interceptors for public requests
+const publicApi = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+});
+
+// Create an authenticated axios instance for protected requests
 const authApi = axios.create({
   baseURL: API_URL,
   headers: {
@@ -11,7 +21,7 @@ const authApi = axios.create({
   },
 });
 
-// Add a request interceptor to include the auth token in requests
+// Add auth interceptor only to the authenticated instance
 authApi.interceptors.request.use(
   (config) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth-storage') : null;
@@ -52,55 +62,56 @@ export interface Announcement {
   };
 }
 
-export interface CreateAnnouncementData {
-  title: string;
-  content: string;
-  priority: 'low' | 'medium' | 'high';
-  image_urls?: File[];
-}
-
-export interface UpdateAnnouncementData extends Partial<CreateAnnouncementData> {
-  remove_image_urls?: string[];
-}
-
-export interface PaginatedAnnouncements {
-  data: Announcement[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-  from: number;
-  to: number;
-}
-
 const blogService = {
-  // Get all announcements (blogs)
+  // Get all announcements (blogs) - public access
   getAll: async (params?: {
     page?: number;
     per_page?: number;
     priority?: string;
   }): Promise<{ data: Announcement[] }> => {
     try {
-      const response = await authApi.get('/announcements', { params });
+      // First try with public API
+      const response = await publicApi.get('/announcements', { params });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        // If public access fails with 401, try with authenticated API
+        try {
+          const authResponse = await authApi.get('/announcements', { params });
+          return authResponse.data;
+        } catch (authError) {
+          console.error('Error fetching announcements:', authError);
+          throw authError;
+        }
+      }
       console.error('Error fetching announcements:', error);
       throw error;
     }
   },
 
-  // Get a single announcement (blog)
+  // Get a single announcement (blog) - public access
   getById: async (id: number): Promise<Announcement> => {
     try {
-      const response = await authApi.get(`/announcements/${id}`);
+      // First try with public API
+      const response = await publicApi.get(`/announcements/${id}`);
       return response.data.data;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        // If public access fails with 401, try with authenticated API
+        try {
+          const authResponse = await authApi.get(`/announcements/${id}`);
+          return authResponse.data.data;
+        } catch (authError) {
+          console.error('Error fetching announcement:', authError);
+          throw authError;
+        }
+      }
       console.error('Error fetching announcement:', error);
       throw error;
     }
   },
 
-  // Create a new announcement (blog)
+  // Create/Update/Delete operations remain authenticated-only
   create: async (data: CreateAnnouncementData): Promise<Announcement> => {
     const formData = new FormData();
     formData.append('title', data.title);
@@ -126,7 +137,6 @@ const blogService = {
     }
   },
 
-  // Update an announcement (blog)
   update: async (id: number, data: UpdateAnnouncementData): Promise<Announcement> => {
     const formData = new FormData();
     if (data.title) formData.append('title', data.title);
@@ -159,7 +169,6 @@ const blogService = {
     }
   },
 
-  // Delete an announcement (blog)
   delete: async (id: number): Promise<void> => {
     try {
       await authApi.delete(`/announcements/${id}`);

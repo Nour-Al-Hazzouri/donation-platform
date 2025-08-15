@@ -1,3 +1,4 @@
+// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\app\api\blogs\route.ts
 import { NextResponse } from 'next/server'
 import axios from 'axios'
 
@@ -8,11 +9,16 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const params = Object.fromEntries(searchParams.entries())
     
+    const headers: Record<string, string> = {}
+    const authHeader = request.headers.get('Authorization')
+    
+    if (authHeader) {
+      headers['Authorization'] = authHeader
+    }
+    
     const response = await axios.get(`${API_BASE_URL}/announcements`, {
       params,
-      headers: {
-        'Authorization': request.headers.get('Authorization') || ''
-      }
+      headers
     })
     
     return NextResponse.json(response.data)
@@ -28,11 +34,17 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData()
     
+    const headers: Record<string, string> = {
+      'Content-Type': 'multipart/form-data'
+    }
+    const authHeader = request.headers.get('Authorization')
+    
+    if (authHeader) {
+      headers['Authorization'] = authHeader
+    }
+    
     const response = await axios.post(`${API_BASE_URL}/announcements`, formData, {
-      headers: {
-        'Authorization': request.headers.get('Authorization') || '',
-        'Content-Type': 'multipart/form-data'
-      }
+      headers
     })
     
     return NextResponse.json(response.data)
@@ -50,12 +62,18 @@ export async function PUT(request: Request) {
     const id = searchParams.get('id')
     const formData = await request.formData()
     
+    const headers: Record<string, string> = {
+      'Content-Type': 'multipart/form-data',
+      'X-HTTP-Method-Override': 'PUT'
+    }
+    const authHeader = request.headers.get('Authorization')
+    
+    if (authHeader) {
+      headers['Authorization'] = authHeader
+    }
+    
     const response = await axios.post(`${API_BASE_URL}/announcements/${id}`, formData, {
-      headers: {
-        'Authorization': request.headers.get('Authorization') || '',
-        'Content-Type': 'multipart/form-data',
-        'X-HTTP-Method-Override': 'PUT'
-      }
+      headers
     })
     
     return NextResponse.json(response.data)
@@ -72,10 +90,15 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     
+    const headers: Record<string, string> = {}
+    const authHeader = request.headers.get('Authorization')
+    
+    if (authHeader) {
+      headers['Authorization'] = authHeader
+    }
+    
     const response = await axios.delete(`${API_BASE_URL}/announcements/${id}`, {
-      headers: {
-        'Authorization': request.headers.get('Authorization') || ''
-      }
+      headers
     })
     
     return NextResponse.json(response.data)
