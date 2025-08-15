@@ -1,4 +1,3 @@
-// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\app\api\blogs\route.ts
 import { NextResponse } from 'next/server'
 import axios from 'axios'
 

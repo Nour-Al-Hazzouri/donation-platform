@@ -1,4 +1,3 @@
-// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\components\blog\BlogCarousel.tsx
 'use client'
 
 import React, { useEffect, useState } from 'react'
