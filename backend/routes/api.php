@@ -62,7 +62,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (Request $request) {
         return new UserResource($request->user());
     });
-
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('users/search', [UserController::class, 'searchUsers']);
+        Route::get('verifications/search', [VerificationController::class, 'search']);
+    });
     // Users resource (protected by auth and permissions)
     Route::apiResource('users', UserController::class)
         ->except('promoteToModerator')

@@ -41,7 +41,63 @@ class VerificationController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(): JsonResponse
+    /**
+     * Search verification requests (Admin only)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function search(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'query' => 'required|string|max:255',
+                'per_page' => 'sometimes|integer|min:1|max:100',
+            ]);
+
+            $searchTerm = $request->query('query');
+            $perPage = $request->query('per_page', 15);
+
+            $verifications = Verification::with(['user', 'verifier'])
+                ->whereHas('user', function($query) use ($searchTerm) {
+                    $query->where('username', 'like', '%' . $searchTerm . '%')
+                          ->orWhere('email', 'like', '%' . $searchTerm . '%')
+                          ->orWhere('phone', 'like', '%' . $searchTerm . '%')
+                          ->orWhere('first_name', 'like', '%' . $searchTerm . '%')
+                          ->orWhere('last_name', 'like', '%' . $searchTerm . '%');
+                })
+                ->where('status', 'pending')
+                ->latest()
+                ->paginate($perPage);
+
+            return response()->json([
+                'data' => VerificationResource::collection($verifications),
+                'meta' => [
+                    'current_page' => $verifications->currentPage(),
+                    'last_page' => $verifications->lastPage(),
+                    'per_page' => $verifications->perPage(),
+                    'total' => $verifications->total(),
+                ],
+                'message' => 'Verification requests retrieved successfully.',
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            Log::error('Error searching verification requests: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to search verification requests',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Display a listing of all verification requests.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function index(Request $request): JsonResponse
     {
         try {
             // Only admins can view all verification requests

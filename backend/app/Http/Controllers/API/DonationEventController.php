@@ -44,6 +44,77 @@ class DonationEventController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+    /**
+     * Search donation requests by title with real-time filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function searchRequests(Request $request)
+    {
+        return $this->searchDonationEvents($request, 'request');
+    }
+
+    /**
+     * Search donation offers by title with real-time filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function searchOffers(Request $request)
+    {
+        return $this->searchDonationEvents($request, 'offer');
+    }
+
+    /**
+     * Common search method for donation events.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $type
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function searchDonationEvents(Request $request, string $type)
+    {
+        $request->validate([
+            'query' => 'required|string|max:255',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        $searchTerm = $request->query('query');
+        $perPage = $request->query('per_page', 15);
+
+        $donationEvents = DonationEvent::query()
+            ->with('user', 'location')
+            ->join('users', 'donation_events.user_id', '=', 'users.id')
+            ->where('donation_events.type', $type)
+            ->where('donation_events.status', 'active')
+            ->where(function($query) use ($searchTerm) {
+                $query->where('donation_events.title', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('users.username', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('users.first_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('users.last_name', 'like', '%' . $searchTerm . '%');
+            })
+            ->select('donation_events.*')
+            ->latest('donation_events.created_at')
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => DonationEventResource::collection($donationEvents),
+            'meta' => [
+                'current_page' => $donationEvents->currentPage(),
+                'last_page' => $donationEvents->lastPage(),
+                'per_page' => $donationEvents->perPage(),
+                'total' => $donationEvents->total(),
+            ],
+            'message' => 'Search results retrieved successfully.',
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Display a listing of Donation Events.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         $donationEvents = DonationEvent::with('user', 'location')
