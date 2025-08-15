@@ -14,7 +14,7 @@ class CommentPolicy
     /**
      * Determine whether the user can view any comments.
      */
-    public function viewAny(User $user, CommunityPost $communityPost): bool
+    public function viewAny(?User $user, CommunityPost $communityPost): bool
     {
         return true;
     }

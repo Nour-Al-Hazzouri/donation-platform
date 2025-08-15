@@ -10,7 +10,7 @@ class DonationEventPolicy
     /**
      * Determine whether the user can view the donation event.
      */
-    public function view(User $user, DonationEvent $donationEvent)
+    public function view(?User $user, DonationEvent $donationEvent)
     {
         // Allow all authenticated users to view donation events
         return true;
@@ -25,7 +25,7 @@ class DonationEventPolicy
         if ($user->hasRole('admin')) {
             return true;
         }
-        
+
         // Regular users must have at least one approved verification request
         return $user->verifications()->where('status', 'approved')->exists();
     }
