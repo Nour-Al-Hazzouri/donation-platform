@@ -36,60 +36,6 @@ class VerificationController extends Controller
         $this->notificationService = $notificationService;
         $this->imageService = $imageService;
     }
-    /**
-     * Display a listing of all verification requests.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    /**
-     * Search verification requests (Admin only)
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function search(Request $request): JsonResponse
-    {
-        try {
-            $request->validate([
-                'query' => 'required|string|max:255',
-                'per_page' => 'sometimes|integer|min:1|max:100',
-            ]);
-
-            $searchTerm = $request->query('query');
-            $perPage = $request->query('per_page', 15);
-
-            $verifications = Verification::with(['user', 'verifier'])
-                ->whereHas('user', function($query) use ($searchTerm) {
-                    $query->where('username', 'like', '%' . $searchTerm . '%')
-                          ->orWhere('email', 'like', '%' . $searchTerm . '%')
-                          ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                          ->orWhere('first_name', 'like', '%' . $searchTerm . '%')
-                          ->orWhere('last_name', 'like', '%' . $searchTerm . '%');
-                })
-                ->where('status', 'pending')
-                ->latest()
-                ->paginate($perPage);
-
-            return response()->json([
-                'data' => VerificationResource::collection($verifications),
-                'meta' => [
-                    'current_page' => $verifications->currentPage(),
-                    'last_page' => $verifications->lastPage(),
-                    'per_page' => $verifications->perPage(),
-                    'total' => $verifications->total(),
-                ],
-                'message' => 'Verification requests retrieved successfully.',
-            ], Response::HTTP_OK);
-
-        } catch (\Exception $e) {
-            Log::error('Error searching verification requests: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to search verification requests',
-                'error' => $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
 
     /**
      * Display a listing of all verification requests.
@@ -108,23 +54,39 @@ class VerificationController extends Controller
                 ], Response::HTTP_FORBIDDEN);
             }
 
+            $request->validate([
+                'per_page' => 'sometimes|integer|min:1|max:100',
+                'status' => 'sometimes|string|in:pending,approved,rejected',
+                'query' => 'sometimes|string|max:255',
+            ]);
+            $perPage = $request->query('per_page', 15);
             $verifications = Verification::with(['user'])
+                ->when($request->has('status'), function ($query) use ($request) {
+                    $query->where('status', $request->status);
+                })
+                ->when($request->has('query'), function ($query) use ($request) {
+                    $query->whereHas('user', function ($query) use ($request) {
+                        $query->where('username', 'like', '%' . $request->query . '%')
+                            ->orWhere('email', 'like', '%' . $request->query . '%')
+                            ->orWhere('phone', 'like', '%' . $request->query . '%')
+                            ->orWhere('first_name', 'like', '%' . $request->query . '%')
+                            ->orWhere('last_name', 'like', '%' . $request->query . '%');
+                    });
+                })
                 ->latest()
-                ->paginate(15);
+                ->paginate($perPage);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Verification requests retrieved successfully.',
                 'data' => VerificationResource::collection($verifications),
-                'pagination' => [
-                    'total' => $verifications->total(),
-                    'per_page' => $verifications->perPage(),
+                'meta' => [
                     'current_page' => $verifications->currentPage(),
                     'last_page' => $verifications->lastPage(),
-                    'from' => $verifications->firstItem(),
-                    'to' => $verifications->lastItem(),
+                    'per_page' => $verifications->perPage(),
+                    'total' => $verifications->total(),
                 ],
-            ]);
+            ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
             Log::error('Error fetching verification requests: ' . $e->getMessage());
@@ -179,7 +141,7 @@ class VerificationController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\JsonResponse
      */
-    public function userVerifications(User $user): JsonResponse
+    public function userVerifications(Request $request, User $user): JsonResponse
     {
         try {
             $currentUser = Auth::user();
@@ -192,22 +154,24 @@ class VerificationController extends Controller
                 ], Response::HTTP_FORBIDDEN);
             }
 
+            $request->validate([
+                'per_page' => 'sometimes|integer|min:1|max:100',
+            ]);
+            $perPage = $request->query('per_page', 15);
             $verifications = Verification::where('user_id', $user->id)
                 ->with(['user'])
                 ->latest()
-                ->paginate(15);
+                ->paginate($perPage);
 
             return response()->json([
                 'success' => true,
                 'message' => 'User verification requests retrieved successfully.',
                 'data' => VerificationResource::collection($verifications),
-                'pagination' => [
+                'meta' => [
                     'total' => $verifications->total(),
                     'per_page' => $verifications->perPage(),
                     'current_page' => $verifications->currentPage(),
                     'last_page' => $verifications->lastPage(),
-                    'from' => $verifications->firstItem(),
-                    'to' => $verifications->lastItem(),
                 ],
             ]);
 
