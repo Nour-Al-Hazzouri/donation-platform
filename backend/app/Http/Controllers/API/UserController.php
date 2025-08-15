@@ -28,13 +28,36 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view users');
-        $users = User::with('location')->paginate(15);
+
+        $request->validate([
+            'query' => 'sometimes|string|max:255',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        $searchTerm = $request->query('query');
+        $perPage = $request->query('per_page', 15);
+        $users = User::with('location')
+            ->when($searchTerm, function ($query) use ($searchTerm) {
+                $query->where('username', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('email', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('phone', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('first_name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('last_name', 'like', '%' . $searchTerm . '%');
+            })
+            ->latest()
+            ->paginate($perPage);
 
         return response()->json([
             'data' => UserResource::collection($users),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ],
             'message' => 'Users retrieved successfully',
         ], Response::HTTP_OK);
     }

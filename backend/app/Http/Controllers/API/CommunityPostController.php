@@ -11,6 +11,7 @@ use App\Models\DonationEvent;
 use App\Services\ImageService;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,10 +38,19 @@ class CommunityPostController extends Controller
     /**
      * Display a listing of the community posts.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'query' => 'sometimes|string|max:255',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        $perPage = $request->query('per_page', 15);
+        $searchTerm = $request->query('query');
+
         $posts = CommunityPost::with([
             'user',
             'event',
@@ -55,8 +65,11 @@ class CommunityPostController extends Controller
                     $query->where('type', 'downvote');
                 }
             ])
+            ->when($searchTerm, function ($query) use ($searchTerm) {
+                $query->where('content', 'like', '%' . $searchTerm . '%');
+            })
             ->latest()
-            ->paginate(10);
+            ->paginate($perPage);
 
         return response()->json([
             'success' => true,

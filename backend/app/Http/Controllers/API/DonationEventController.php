@@ -42,49 +42,147 @@ class DonationEventController extends Controller
     /**
      * Display a listing of Donation Events.
      *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        $donationEvents = DonationEvent::with('user', 'location')
-            ->latest()
-            ->get();
-        return response()->json([
-            'data' => DonationEventResource::collection($donationEvents),
-            'message' => 'Donation events retrieved successfully.',
-        ], Response::HTTP_OK);
+        try {
+            $request->validate([
+                'query' => 'sometimes|string|max:255',
+                'per_page' => 'sometimes|integer|min:1|max:100',
+                'type' => 'sometimes|string|in:all,request,offer',
+                'status' => 'sometimes|string|in:active,completed,cancelled,suspended',
+                'location_id' => 'sometimes|exists:locations,id',
+            ]);
+
+            $searchTerm = $request->query('query');
+            $perPage = $request->query('per_page', 15);
+            $type = $request->query('type', 'all');
+            $status = $request->query('status', 'active');
+            $locationId = $request->query('location_id');
+
+            $searchQuery = DonationEvent::query()
+                ->with('user', 'location')
+                ->join('users', 'donation_events.user_id', '=', 'users.id');
+
+            if ($type === 'all') {
+                $searchQuery->where('donation_events.status', 'active');
+            } else {
+                $searchQuery->where('donation_events.type', $type)
+                    ->where('donation_events.status', 'active');
+            }
+
+            if ($status !== 'all') {
+                $searchQuery->where('donation_events.status', $status);
+            }
+
+            if ($locationId) {
+                $searchQuery->where('donation_events.location_id', $locationId);
+            }
+
+            if ($searchTerm) {
+                $searchQuery->where(function ($query) use ($searchTerm) {
+                    $query->where('donation_events.title', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('users.username', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('users.first_name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('users.last_name', 'like', '%' . $searchTerm . '%');
+                });
+            }
+
+            $donationEvents = $searchQuery->select('donation_events.*')
+                ->latest('donation_events.created_at')
+                ->paginate($perPage);
+
+            return response()->json([
+                'data' => DonationEventResource::collection($donationEvents),
+                'meta' => [
+                    'current_page' => $donationEvents->currentPage(),
+                    'last_page' => $donationEvents->lastPage(),
+                    'per_page' => $donationEvents->perPage(),
+                    'total' => $donationEvents->total(),
+                ],
+                'message' => 'Search results retrieved successfully.',
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('Error retrieving donation events: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Failed to retrieve donation events',
+                'error' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
      * Display a listing of active Donation Requests.
      *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function requestsIndex()
+    public function requestsIndex(Request $request)
     {
-        $donationEvents = DonationEvent::with('user', 'location')
-            ->where('status', 'active')
-            ->where('type', 'request')
-            ->latest()
-            ->get();
-        return response()->json([
-            'data' => DonationEventResource::collection($donationEvents),
-            'message' => 'Donation events retrieved successfully.',
-        ], Response::HTTP_OK);
+        try {
+            $request->validate([
+                'per_page' => 'sometimes|integer|min:1|max:100',
+            ]);
+
+            $perPage = $request->query('per_page', 15);
+
+            $donationEvents = DonationEvent::with('user', 'location')
+                ->where('status', 'active')
+                ->where('type', 'request')
+                ->latest()
+                ->paginate($perPage);
+
+            return response()->json([
+                'data' => DonationEventResource::collection($donationEvents),
+                'meta' => [
+                    'current_page' => $donationEvents->currentPage(),
+                    'last_page' => $donationEvents->lastPage(),
+                    'per_page' => $donationEvents->perPage(),
+                    'total' => $donationEvents->total(),
+                ],
+                'message' => 'Donation events retrieved successfully.',
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('Error retrieving donation events: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Failed to retrieve donation events',
+                'error' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
      * Display a listing of active Donation Offers.
      *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function offersIndex()
+    public function offersIndex(Request $request)
     {
+        try {
+            $request->validate([
+                'per_page' => 'sometimes|integer|min:1|max:100',
+            ]);
+
+            $perPage = $request->query('per_page', 15);
+        } catch (\Exception $e) {
+            Log::error('Error retrieving donation events: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Failed to retrieve donation events',
+                'error' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
         $donationEvents = DonationEvent::with('user', 'location')
             ->where('status', 'active')
             ->where('type', 'offer')
             ->latest()
-            ->get();
+            ->paginate($perPage);
         return response()->json([
             'data' => DonationEventResource::collection($donationEvents),
             'message' => 'Donation events retrieved successfully.',
@@ -95,18 +193,41 @@ class DonationEventController extends Controller
      * Display a listing of Donation Events for a specific user.
      *
      * @param User $user
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function userIndex(User $user)
+    public function userIndex(User $user, Request $request)
     {
-        $donationEvents = DonationEvent::with('user', 'location')
-            ->where('user_id', $user->id)
-            ->latest()
-            ->get();
-        return response()->json([
-            'data' => DonationEventResource::collection($donationEvents),
-            'message' => 'Donation events retrieved successfully.',
-        ], Response::HTTP_OK);
+        try {
+            $request->validate([
+                'per_page' => 'sometimes|integer|min:1|max:100',
+            ]);
+
+            $perPage = $request->query('per_page', 15);
+
+            $donationEvents = DonationEvent::with('user', 'location')
+                ->where('user_id', $user->id)
+                ->latest()
+                ->paginate($perPage);
+
+            return response()->json([
+                'data' => DonationEventResource::collection($donationEvents),
+                'meta' => [
+                    'current_page' => $donationEvents->currentPage(),
+                    'last_page' => $donationEvents->lastPage(),
+                    'per_page' => $donationEvents->perPage(),
+                    'total' => $donationEvents->total(),
+                ],
+                'message' => 'Donation events retrieved successfully.',
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('Error retrieving donation events: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Failed to retrieve donation events',
+                'error' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

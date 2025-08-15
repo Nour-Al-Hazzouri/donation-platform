@@ -76,20 +76,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Verification routes
     Route::prefix('verifications')->group(function () {
-        // Public verification request submission
-        Route::post('/', [VerificationController::class, 'store']);
-
-        // View own verification requests
-        Route::get('/my-verifications', function () {
-            return app(VerificationController::class)->userVerifications(auth()->user());
-        });
-
-        // View specific verification request (users can view their own, admins can view any)
-        Route::get('/{verification}', [VerificationController::class, 'show']);
-
-        // Delete verification request (users can delete their own pending requests, admins can delete any)
-        Route::delete('/{verification}', [VerificationController::class, 'destroy']);
-
         // Admin only routes
         Route::middleware(['role:admin'])->group(function () {
             // List all verification requests
@@ -101,11 +87,25 @@ Route::middleware('auth:sanctum')->group(function () {
             // Update verification status
             Route::post('/{verification}/{status}', [VerificationController::class, 'updateStatus']);
         });
+
+        // Public verification request submission
+        Route::post('/', [VerificationController::class, 'store']);
+
+        // View own verification requests
+        Route::get('/my-verifications', function (Request $request) {
+            return app(VerificationController::class)->userVerifications($request, auth()->user());
+        });
+
+        // View specific verification request (users can view their own, admins can view any)
+        Route::get('/{verification}', [VerificationController::class, 'show']);
+
+        // Delete verification request (users can delete their own pending requests, admins can delete any)
+        Route::delete('/{verification}', [VerificationController::class, 'destroy']);
     });
 
     // Admin only routes
     Route::middleware(['role:admin'])->group(function () {
-        Route::apiResource('locations', LocationController::class);
+        Route::apiResource('locations', LocationController::class)->except(['index', 'show']);
         Route::get('statistics', [StatisticsController::class, 'index']);
         Route::post('users/{user}/promote-to-moderator', [UserController::class, 'promoteToModerator']);
         Route::apiResource('announcements', AnnouncementController::class)->except(['index', 'show']);
