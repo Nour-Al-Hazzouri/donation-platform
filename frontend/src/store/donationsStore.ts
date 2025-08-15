@@ -1,9 +1,9 @@
+// src/store/donationsStore.ts
 'use client'
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import donationsService from '@/lib/api/donations' // adjust if your barrel export differs
-import { DonationEvent } from '@/lib/api/donations'
+import donationsService, { DonationEvent } from '@/lib/api/donations' // adjust path if needed
 
 export interface DonationData {
   id: number
@@ -36,6 +36,8 @@ interface DonationsState {
   donations: DonationData[]
   isLoading: boolean
   error: string | null
+
+  // existing methods
   addDonation: (donation: Omit<DonationData, 'id'>) => Promise<void>
   getDonations: () => Promise<DonationData[]>
   getDonationById: (id: number) => Promise<DonationData | undefined>
@@ -45,6 +47,9 @@ interface DonationsState {
   initializeDonations: (force?: boolean) => Promise<void>
   createTransaction: (eventId: number, amount: number) => Promise<any>
   getTransaction: (transactionId: number) => Promise<any>
+
+  // NEW: replace or upsert a donation (after API updates like transaction create)
+  replaceDonation: (event: DonationEvent) => void
 }
 
 // Helper function to convert API DonationEvent to DonationData
@@ -53,20 +58,21 @@ const mapEventToDonationData = (event: DonationEvent): DonationData => ({
   name: `${event.user.first_name} ${event.user.last_name}`,
   title: event.title,
   description: event.description,
-  imageUrl: event.image_urls?.[0] || undefined,
-  avatarUrl: event.user.avatar_url || undefined,
-  initials: `${event.user.first_name[0]}${event.user.last_name[0]}`,
-  isVerified: true,
+  imageUrl: event.image_full_urls?.[0] || event.image_urls?.[0] || undefined,
+  avatarUrl: (event.user as any).avatar || (event.user as any).avatar_url || undefined,
+  initials: `${event.user.first_name[0] ?? ''}${event.user.last_name[0] ?? ''}`,
+  isVerified: true, // assume donation creators are verified; adjust as needed
   createdAt: event.created_at,
-  goalAmount: event.goal_amount,
-  currentAmount: event.current_amount,
-  possibleAmount: event.possible_amount,
-  unit: event.unit,
+  goalAmount: typeof event.goal_amount === 'string' ? parseFloat(event.goal_amount) : (event as any).goal_amount,
+  currentAmount: typeof event.current_amount === 'string' ? parseFloat(event.current_amount) : (event as any).current_amount,
+  possibleAmount: typeof event.possible_amount === 'string' ? parseFloat(event.possible_amount) : (event as any).possible_amount,
+  unit: (event as any).unit,
   type: event.type,
   status: event.status,
   userId: event.user.id,
   locationId: event.location?.id,
-  location: event.location
+  location: event.location ?? null,
+  endDate: (event as any).end_date
 })
 
 export const useDonationsStore = create<DonationsState>()(
@@ -76,35 +82,31 @@ export const useDonationsStore = create<DonationsState>()(
       isLoading: false,
       error: null,
 
-      // Replaced initializeDonations with force flag
-  initializeDonations: async (force = false) => {
-    set({ isLoading: true, error: null })
-    try {
-      // fetch always (or short-circuit if you want)
-      const response = await donationsService.getAllEvents()
-      const mappedDonations = response.data.map(mapEventToDonationData)
-      set({ donations: mappedDonations, isLoading: false })
-    } catch (err: any) {
-      console.error('Error initializing donations:', err)
-      set({ error: err?.response?.data?.message || 'Failed to load donations', isLoading: false })
-    }
-  },
+      // Initialize donations from API. `force=true` can be used to always fetch
+      initializeDonations: async (force = false): Promise<void> => {
+        set({ isLoading: true, error: null })
+        try {
+          // Always fetch fresh data from API (force param reserved for future logic)
+          const response = await donationsService.getAllEvents()
+          const payload = response?.data ?? response
+          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
+          set({ donations: mappedDonations, isLoading: false })
+          return
+        } catch (error: any) {
+          console.error('Error initializing donations:', error)
+          set({
+            error: error?.response?.data?.message || 'Failed to load donations',
+            isLoading: false
+          })
+          return
+        }
+      },
 
       addDonation: async (newDonation) => {
         set({ isLoading: true, error: null })
         try {
-          interface CreateDonationEventData {
-            title: string;
-            description: string;
-            type: 'request' | 'offer';
-            goal_amount: number;
-            unit: string;
-            end_date: string;
-            location_id: number;
-            image_urls: File[];
-          }
-          
-          const eventData: CreateDonationEventData = {
+          // Build API payload (server expects snake_case fields)
+          const eventData: any = {
             title: newDonation.title,
             description: newDonation.description,
             type: newDonation.type || 'request',
@@ -115,36 +117,32 @@ export const useDonationsStore = create<DonationsState>()(
             image_urls: []
           }
 
-          // If callers pass a real File, prefer that (make sure your form passes imageFile)
-          if ((newDonation as any).imageFile) {
-            eventData.image_urls.push((newDonation as any).imageFile)
-          } else if (newDonation.imageUrl) {
-            // backward-compatible fallback: try fetching blob from a blob: or data: URL
+          // If imageUrl is a blob/URL we attempt to fetch and convert to File
+          if (newDonation.imageUrl) {
             try {
-              const response = await fetch(newDonation.imageUrl)
-              const blob = await response.blob()
-              const fileName = 'donation-image.jpg'
-              const mimeType = blob.type || 'image/jpeg'
-              const file = new File([blob], fileName, { type: mimeType })
+              const resp = await fetch(newDonation.imageUrl)
+              const blob = await resp.blob()
+              const file = new File([blob], 'image.jpg', { type: blob.type || 'image/jpeg' })
               eventData.image_urls.push(file)
-            } catch (err) {
-              console.error('Error processing image:', err)
+            } catch (error) {
+              console.warn('Failed to attach image for event creation', error)
             }
           }
 
           const response = await donationsService.createEvent(eventData)
-          const mappedDonation = mapEventToDonationData(response.data)
-          
+          const eventPayload = response?.data ?? response
+          const mappedDonation = mapEventToDonationData(eventPayload)
+
           const currentDonations = get().donations
-          set({ 
+          set({
             donations: [mappedDonation, ...currentDonations],
-            isLoading: false 
+            isLoading: false
           })
         } catch (error: any) {
           console.error('Error adding donation:', error)
-          set({ 
-            error: error.response?.data?.message || 'Failed to add donation', 
-            isLoading: false 
+          set({
+            error: error?.response?.data?.message || 'Failed to add donation',
+            isLoading: false
           })
           throw error
         }
@@ -154,14 +152,15 @@ export const useDonationsStore = create<DonationsState>()(
         set({ isLoading: true, error: null })
         try {
           const response = await donationsService.getAllEvents()
-          const mappedDonations = response.data.map(mapEventToDonationData)
+          const payload = response?.data ?? response
+          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
           set({ donations: mappedDonations, isLoading: false })
           return mappedDonations
         } catch (error: any) {
           console.error('Error getting donations:', error)
-          set({ 
-            error: error.response?.data?.message || 'Failed to load donations', 
-            isLoading: false 
+          set({
+            error: error?.response?.data?.message || 'Failed to load donations',
+            isLoading: false
           })
           return []
         }
@@ -171,13 +170,14 @@ export const useDonationsStore = create<DonationsState>()(
         set({ isLoading: true, error: null })
         try {
           const response = await donationsService.getEvent(id)
-          const mappedDonation = mapEventToDonationData(response.data)
+          const payload = response?.data ?? response
+          const mappedDonation = mapEventToDonationData(payload)
           return mappedDonation
         } catch (error: any) {
           console.error(`Error getting donation with ID ${id}:`, error)
-          set({ 
-            error: error.response?.data?.message || `Failed to load donation with ID ${id}`, 
-            isLoading: false 
+          set({
+            error: error?.response?.data?.message || `Failed to load donation with ID ${id}`,
+            isLoading: false
           })
           return undefined
         } finally {
@@ -189,14 +189,15 @@ export const useDonationsStore = create<DonationsState>()(
         set({ isLoading: true, error: null })
         try {
           const response = await donationsService.getUserEvents(userId)
-          const mappedDonations = response.data.map(mapEventToDonationData)
+          const payload = response?.data ?? response
+          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
           set({ isLoading: false })
           return mappedDonations
         } catch (error: any) {
           console.error(`Error getting donations for user ${userId}:`, error)
-          set({ 
-            error: error.response?.data?.message || `Failed to load donations for user ${userId}`, 
-            isLoading: false 
+          set({
+            error: error?.response?.data?.message || `Failed to load donations for user ${userId}`,
+            isLoading: false
           })
           return []
         }
@@ -206,14 +207,15 @@ export const useDonationsStore = create<DonationsState>()(
         set({ isLoading: true, error: null })
         try {
           const response = await donationsService.getRequests()
-          const mappedDonations = response.data.map(mapEventToDonationData)
+          const payload = response?.data ?? response
+          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
           set({ isLoading: false })
           return mappedDonations
         } catch (error: any) {
           console.error('Error getting donation requests:', error)
-          set({ 
-            error: error.response?.data?.message || 'Failed to load donation requests', 
-            isLoading: false 
+          set({
+            error: error?.response?.data?.message || 'Failed to load donation requests',
+            isLoading: false
           })
           return []
         }
@@ -223,14 +225,15 @@ export const useDonationsStore = create<DonationsState>()(
         set({ isLoading: true, error: null })
         try {
           const response = await donationsService.getOffers()
-          const mappedDonations = response.data.map(mapEventToDonationData)
+          const payload = response?.data ?? response
+          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
           set({ isLoading: false })
           return mappedDonations
         } catch (error: any) {
           console.error('Error getting donation offers:', error)
-          set({ 
-            error: error.response?.data?.message || 'Failed to load donation offers', 
-            isLoading: false 
+          set({
+            error: error?.response?.data?.message || 'Failed to load donation offers',
+            isLoading: false
           })
           return []
         }
@@ -241,12 +244,12 @@ export const useDonationsStore = create<DonationsState>()(
         try {
           const response = await donationsService.createTransaction(eventId, { amount })
           set({ isLoading: false })
-          return response.data
+          return response?.data ?? response
         } catch (error: any) {
           console.error('Error creating transaction:', error)
-          set({ 
-            error: error.response?.data?.message || 'Failed to create transaction', 
-            isLoading: false 
+          set({
+            error: error?.response?.data?.message || 'Failed to create transaction',
+            isLoading: false
           })
           throw error
         }
@@ -257,20 +260,39 @@ export const useDonationsStore = create<DonationsState>()(
         try {
           const response = await donationsService.getTransaction(transactionId)
           set({ isLoading: false })
-          return response.data
+          return response?.data ?? response
         } catch (error: any) {
           console.error(`Error getting transaction with ID ${transactionId}:`, error)
-          set({ 
-            error: error.response?.data?.message || `Failed to load transaction with ID ${transactionId}`, 
-            isLoading: false 
+          set({
+            error: error?.response?.data?.message || `Failed to load transaction with ID ${transactionId}`,
+            isLoading: false
           })
           return null
+        }
+      },
+
+      // NEW: Replace or upsert a donation using the API DonationEvent object
+      replaceDonation: (event: DonationEvent) => {
+        try {
+          const mapped = mapEventToDonationData(event)
+          set((state) => {
+            const exists = state.donations.some(d => d.id === mapped.id)
+            if (exists) {
+              return {
+                donations: state.donations.map(d => (d.id === mapped.id ? mapped : d))
+              }
+            } else {
+              // Prepend the new/updated donation
+              return { donations: [mapped, ...state.donations] }
+            }
+          })
+        } catch (e) {
+          console.warn('replaceDonation failed:', e)
         }
       }
     }),
     {
-      // Bump the key when you want to invalidate old persisted state in users' browsers
-      name: 'donations-storage-v2'
+      name: 'donations-storage'
     }
   )
 )

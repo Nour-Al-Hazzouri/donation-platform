@@ -14,6 +14,7 @@ export interface DonationEvent {
   start_date: string;
   end_date: string;
   image_urls: string[];
+  image_full_urls?: string[]; // <-- added (optional)
   user: {
     id: number;
     username: string;

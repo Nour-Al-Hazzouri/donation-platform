@@ -16,36 +16,55 @@ export default function RequestPage() {
   const params = useParams()
   const router = useRouter()
   const donationId = Number(params.id)
-  const { donations } = useDonationsStore()
+
+  const { getDonationById } = useDonationsStore()
   const { isAuthenticated } = useAuthStore()
   const { openModal } = useModal()
-  
+
+  const [donation, setDonation] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
   const [requestAmount, setRequestAmount] = useState([1])
   const [customAmount, setCustomAmount] = useState('')
   const [isCustom, setIsCustom] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Find the donation by ID
-  const donation = donations.find(donation => donation.id === donationId)
+  // Pending transactions state
+  const [pendingTransactions, setPendingTransactions] = useState<{ id: string; amount: number; requestId: string }[]>([])
 
-  if (!donation) {
-    return (
-      <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-4">Donation Not Found</h1>
-            <p className="text-muted-foreground mb-6">The donation you're trying to request doesn't exist.</p>
-            <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white">
-              Back to Donations
-            </Button>
-          </div>
-        </div>
-      </MainLayout>
-    )
-  }
+  // Fetch donation by ID
+  useEffect(() => {
+    const loadDonation = async () => {
+      setIsLoading(true)
+      try {
+        const donationData = await getDonationById(donationId)
+        setDonation(donationData)
+      } catch (err) {
+        console.error('Donation not found:', err)
+        setDonation(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadDonation()
+  }, [donationId, getDonationById])
+
+  // Load pending requests from localStorage
+  useEffect(() => {
+    const storedPending = JSON.parse(localStorage.getItem('pendingDonations') || '[]')
+    const filtered = storedPending.filter((tx: any) => tx.requestId === params.id)
+    setPendingTransactions(filtered)
+  }, [params.id])
+
+  if (isLoading) return <LoadingState />
+  if (!donation) return <NotFoundState router={router} />
 
   const donationAmount = parseFloat(donation.donationAmount || '1000')
-  const remainingAmount = donationAmount // Simplified for this example
+  const remainingAmount = donationAmount
+
+  const finalAmount = isCustom
+    ? Math.min(Math.max(Number(customAmount), 1), remainingAmount)
+    : Math.min(Math.max(requestAmount[0], 1), remainingAmount)
 
   const handleSliderChange = (value: number[]) => {
     setRequestAmount(value)
@@ -70,26 +89,23 @@ export default function RequestPage() {
 
     setIsProcessing(true)
     try {
+      // Simulate pending request (replace with actual API call)
+      const requestId = Math.floor(Math.random() * 1000000).toString()
+
       await new Promise(resolve => setTimeout(resolve, 2000)) // simulate processing
 
-      const finalAmount = isCustom
-        ? Math.min(Math.max(Number(customAmount), 1), remainingAmount)
-        : requestAmount[0]
+      // Save pending request to localStorage
+      const storedPending = JSON.parse(localStorage.getItem('pendingDonations') || '[]')
+      storedPending.push({ id: requestId, amount: finalAmount, requestId: params.id })
+      localStorage.setItem('pendingDonations', JSON.stringify(storedPending))
 
-      router.push(`/request/success?amount=${finalAmount}&donationId=${donationId}`)
+      // Redirect to success page with request info
+      router.push(`/request/success?requestId=${requestId}&donationId=${donationId}&amount=${finalAmount}`)
     } catch (error) {
       console.error('Failed to submit request:', error)
     } finally {
       setIsProcessing(false)
     }
-  }
-
-  const finalAmount = isCustom
-    ? Math.min(Math.max(Number(customAmount), 1), remainingAmount)
-    : Math.min(Math.max(requestAmount[0], 1), remainingAmount)
-
-  if (!isAuthenticated) {
-    return null
   }
 
   return (
@@ -105,38 +121,29 @@ export default function RequestPage() {
           </Button>
         </div>
 
-        {/* Donation Info Section */}
+        {/* Donation Info */}
         <div className="bg-card rounded-lg shadow-sm border p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-4">Donation Info</h2>
-          
           <div className="space-y-2 mb-6">
-            <p className="text-card-foreground">
-              <span className="font-medium">Donation title:</span> {donation.title}
-            </p>
-            <p className="text-card-foreground">
-              <span className="font-medium">Donation amount:</span> ${donationAmount.toLocaleString()}
-            </p>
+            <p className="text-card-foreground"><span className="font-medium">Donation title:</span> {donation.title}</p>
+            <p className="text-card-foreground"><span className="font-medium">Donation amount:</span> ${donationAmount.toLocaleString()}</p>
           </div>
-
           <div className="border-t pt-4">
             <h3 className="font-semibold text-foreground mb-2">Description</h3>
             <p className="text-sm text-muted-foreground">{donation.description}</p>
           </div>
         </div>
 
-        {/* Request Section */}
-        <div className="bg-card rounded-lg shadow-sm border p-6">
+        {/* Request Amount Section */}
+        <div className="bg-card rounded-lg shadow-sm border p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-6">Request Amount</h2>
-          
+
           {/* Slider */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
-              <Label className="text-sm font-medium text-foreground">
-                Amount: ${finalAmount.toLocaleString()}
-              </Label>
+              <Label className="text-sm font-medium text-foreground">Amount: ${finalAmount.toLocaleString()}</Label>
               <span className="text-sm text-muted-foreground">Max: ${remainingAmount.toLocaleString()}</span>
             </div>
-            
             <Slider
               value={requestAmount}
               onValueChange={handleSliderChange}
@@ -145,7 +152,6 @@ export default function RequestPage() {
               step={1}
               className="w-full"
             />
-            
             <div className="flex justify-between text-xs text-muted-foreground mt-2">
               <span>$1</span>
               <span>${remainingAmount.toLocaleString()}</span>
@@ -171,7 +177,7 @@ export default function RequestPage() {
 
           {/* Preset Amount Buttons */}
           <div className="grid grid-cols-4 gap-3 mb-8">
-            {[10, 25, 50, 100].map((amount) => (
+            {[10, 25, 50, 100].map(amount => (
               <Button
                 key={amount}
                 variant={requestAmount[0] === amount && !isCustom ? "default" : "outline"}
@@ -196,21 +202,42 @@ export default function RequestPage() {
           >
             {isProcessing ? 'Processing...' : `Request $${finalAmount.toLocaleString()}`}
           </Button>
-
-          {/* Notice */}
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 bg-green-500 dark:bg-green-700 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs">✓</span>
-              </div>
-              <span className="text-sm font-medium text-foreground">Secure Request</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Your request information will be processed securely and confidentially.
-            </p>
-          </div>
         </div>
+
+        {/* Pending Requests */}
+        {pendingTransactions.length > 0 && (
+          <div className="mt-6 bg-yellow-50 border border-yellow-400 p-4 rounded-lg">
+            <h4 className="font-medium text-yellow-800 mb-2">Your Pending Requests</h4>
+            <ul className="list-disc list-inside text-yellow-900 text-sm">
+              {pendingTransactions.map(txn => (
+                <li key={txn.id}>
+                  ${txn.amount.toLocaleString()} — Pending approval
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </MainLayout>
+  )
+}
+
+// Loading & Not Found states
+function LoadingState() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <h1 className="text-2xl font-bold text-foreground">Loading...</h1>
+    </div>
+  )
+}
+
+function NotFoundState({ router }: { router: any }) {
+  return (
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center text-center">
+      <h1 className="text-2xl font-bold text-foreground mb-4">Donation Not Found</h1>
+      <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white">
+        Back to Donations
+      </Button>
+    </div>
   )
 }
