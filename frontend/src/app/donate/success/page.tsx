@@ -1,21 +1,87 @@
 'use client'
 
-import { useSearchParams, useRouter } from 'next/navigation'
-import { CheckCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { CheckCircle2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { MainLayout } from '@/components/layouts/MainLayout'
-import { useEffect, useState } from 'react'
+import { useDonationsStore } from '@/store/donationsStore'
 
 export default function DonationSuccessPage() {
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const [amount, setAmount] = useState('')
-  const [requestId, setRequestId] = useState('')
+  const searchParams = useSearchParams()
+  const { getDonationById, getTransaction } = useDonationsStore()
+  const [requestDetails, setRequestDetails] = useState<{
+    title: string
+    amount: string
+    requestId: string
+    transactionId: string
+  } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    setAmount(searchParams.get('amount') || '0')
-    setRequestId(searchParams.get('requestId') || '')
-  }, [searchParams])
+    const amount = searchParams.get('amount')
+    const requestId = searchParams.get('requestId')
+    const transactionId = searchParams.get('transactionId')
+    
+    if (!amount || !requestId) {
+      router.push('/requests')
+      return
+    }
+
+    const loadDetails = async () => {
+      try {
+        const requestData = await getDonationById(parseInt(requestId))
+        let transactionData = null
+        
+        if (transactionId) {
+          transactionData = await getTransaction(parseInt(transactionId))
+        }
+        
+        setRequestDetails({
+          title: requestData?.title || 'Donation',
+          amount: amount,
+          requestId: requestId,
+          transactionId: transactionId || ''
+        })
+      } catch (error) {
+        console.error('Error loading details:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadDetails()
+  }, [searchParams, router, getDonationById, getTransaction])
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-background">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Loading...</h1>
+            <p className="text-muted-foreground mb-6">Please wait while we load your donation details.</p>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  if (!requestDetails) {
+    return (
+      <MainLayout>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-background">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Donation Not Found</h1>
+            <p className="text-muted-foreground mb-6">We couldn't find details for your donation.</p>
+            <Button onClick={() => router.push('/requests')} className="bg-red-500 hover:bg-red-600 text-white">
+              Browse Requests
+            </Button>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
 
   return (
     <MainLayout>
@@ -23,7 +89,7 @@ export default function DonationSuccessPage() {
         <div className="text-center">
           {/* Success Icon */}
           <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
-            <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
           </div>
 
           {/* Success Message */}
@@ -32,7 +98,7 @@ export default function DonationSuccessPage() {
           </h1>
           
           <p className="text-lg text-muted-foreground mb-2">
-            Your donation of <span className="font-semibold text-green-600 dark:text-green-400">${amount}</span> has been processed successfully.
+            Your donation of <span className="font-semibold text-green-600 dark:text-green-400">${parseInt(requestDetails.amount).toLocaleString()}</span> has been processed successfully.
           </p>
           
           <p className="text-muted-foreground mb-8">
@@ -42,7 +108,7 @@ export default function DonationSuccessPage() {
           {/* Action Buttons */}
           <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
             <Button
-              onClick={() => router.push(`/requests/${requestId}`)}
+              onClick={() => router.push(`/requests/${requestDetails.requestId}`)}
               className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
             >
               View Request

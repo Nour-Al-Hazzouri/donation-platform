@@ -3,47 +3,45 @@
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MainLayout } from '@/components/layouts/MainLayout'
 import { useDonationsStore } from '@/store/donationsStore'
 import { useAuthStore } from '@/store/authStore'
 import { useModal } from '@/contexts/ModalContext'
 import Image from 'next/image'
-import { COLORS } from '@/utils/constants'
 import { HowToRequest } from '@/components/requests/HowToRequest'
+import { useEffect, useState } from 'react'
 
 export default function DonationDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const donationId = Number(params.id)
-  const { donations } = useDonationsStore()
+  const { getDonationById } = useDonationsStore()
   const { isAuthenticated } = useAuthStore()
   const { openModal } = useModal()
-  
-  // Find the donation by ID from the store
-  const donation = donations.find(donation => donation.id === donationId)
-  
-  if (!donation) {
-    return (
-      <div className="min-h-screen bg-background">
-        <MainLayout>
-          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-foreground mb-4">Donation Not Found</h1>
-              <p className="text-muted-foreground mb-6">The donation you're looking for doesn't exist.</p>
-              <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white">
-                Back to Donations
-              </Button>
-            </div>
-          </main>
-        </MainLayout>
-      </div>
-    )
-  }
+  const [donation, setDonation] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadDonation = async () => {
+      try {
+        const donationData = await getDonationById(donationId)
+        setDonation(donationData)
+      } catch (error) {
+        console.error('Error loading donation:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadDonation()
+  }, [donationId, getDonationById])
+
+  if (isLoading) return <LoadingState />
+
+  if (!donation) return <NotFoundState router={router} />
 
   const handleRequest = () => {
     if (!isAuthenticated) {
-      // Store the request URL for redirection after authentication
       localStorage.setItem('redirectAfterAuth', `/request/${donationId}`)
       openModal('signIn')
       return
@@ -51,11 +49,18 @@ export default function DonationDetailsPage() {
     router.push(`/request/${donationId}`)
   }
 
+  // FIX: Normalize donation image URL
+  const imageSrc = donation.imageUrl
+    ? donation.imageUrl.startsWith('http')
+      ? donation.imageUrl
+      : `/${donation.imageUrl.replace(/^\/?/, '')}`
+    : undefined
+
   return (
     <div className="min-h-screen bg-background">
       <MainLayout>
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-          {/* Back Button - Standardized style */}
+          {/* Back Button */}
           <div className="mb-4 md:mb-6">
             <Button 
               onClick={() => router.back()}
@@ -70,95 +75,54 @@ export default function DonationDetailsPage() {
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">Donation Details</h1>
           </div>
 
-          {/* Donation Details Card */}
+          {/* Donation Card */}
           <div className="bg-card rounded-lg shadow-sm border p-4 md:p-8">
-            {/* User Profile Section */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center">
                 <div className="relative mr-3 md:mr-4">
                   <Avatar className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16">
-                    <AvatarImage src={donation.avatarUrl || "/placeholder.svg"} alt={donation.name} />
-                    <AvatarFallback className="text-sm md:text-lg">{donation.initials}</AvatarFallback>
+                    <AvatarImage src={donation.avatarUrl || "/placeholder.svg"} alt={donation.name || 'User'} />
+                    <AvatarFallback className="text-sm md:text-lg">{donation.initials || '?'}</AvatarFallback>
                   </Avatar>
                   {donation.isVerified && (
                     <div className="absolute -top-1 -right-1">
-                      <Image 
-                        src="/verification.png" 
-                        alt="Verified" 
-                        width={16} 
-                        height={16}
-                        className="rounded-full border-2 border-white"
-                      />
+                      <Image src="/verification.png" alt="Verified" width={16} height={16} className="rounded-full border-2 border-white" />
                     </div>
                   )}
                 </div>
                 <div>
-                  <div className="flex items-center gap-1 md:gap-2 mb-1">
-                    <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">{donation.name}</h2>
-                  </div>
+                  <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">{donation.name}</h2>
                   <p className="text-xs sm:text-sm text-muted-foreground">Lebanon • {new Date().toLocaleDateString()}</p>
                 </div>
               </div>
-             
             </div>
 
             {/* Donation Title */}
             <div className="mb-4 md:mb-6">
-              <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 md:mb-2">{donation.title}</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-foreground">{donation.title || 'Donation'}</h3>
             </div>
 
             {/* Donation Image */}
-            {donation.imageUrl && (
+            {imageSrc && (
               <div className="mb-4 md:mb-6 w-full aspect-video relative rounded-lg overflow-hidden">
-                <Image
-                  src={donation.imageUrl}
-                  alt={donation.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
-                  priority
-                />
+                <Image src={imageSrc} alt={donation.title || 'Donation image'} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px" priority />
               </div>
             )}
 
             {/* Full Description */}
             <div className="mb-6 md:mb-8">
               <h4 className="text-base md:text-lg font-semibold text-foreground mb-2 md:mb-3">About this donation</h4>
-              <p className="text-sm sm:text-base text-card-foreground leading-relaxed whitespace-pre-line">
-                {donation.description}
-              </p>
+              <p className="text-sm sm:text-base text-card-foreground leading-relaxed whitespace-pre-line">{donation.description}</p>
             </div>
 
-            {/* Request Button - Conditionally rendered based on authentication */}
-            {isAuthenticated ? (
-              <div className="flex justify-center">
-                <Button 
-                  onClick={handleRequest}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg"
-                >
-                  Request Now
-                </Button>
-              </div>
-            ) : (
-              <div className="bg-card rounded-lg shadow-sm border p-6 text-center">
-                <h2 className="text-xl font-bold text-card-foreground mb-4">Authentication Required</h2>
-                <p className="text-muted-foreground mb-6">
-                  You need to be logged in to make a request. Please sign in or create an account to continue.
-                </p>
-                <Button
-                  onClick={() => {
-                    localStorage.setItem('redirectAfterAuth', `/request/${donationId}`);
-                    openModal('signIn');
-                  }}
-                  className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 text-lg font-medium"
-                >
-                  Sign In to Request
-                </Button>
-              </div>
-            )}
+            {/* Request Button */}
+            <div className="flex justify-center">
+              <Button onClick={handleRequest} className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg">
+                Request Now
+              </Button>
+            </div>
           </div>
 
-          {/* How to Request Section */}
           <div className="mt-6 md:mt-8">
             <HowToRequest />
           </div>
@@ -168,6 +132,20 @@ export default function DonationDetailsPage() {
   )
 }
 
-function cn(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+// Loading & Not Found states
+function LoadingState() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <h1 className="text-2xl font-bold text-foreground">Loading...</h1>
+    </div>
+  )
+}
+
+function NotFoundState({ router }: { router: any }) {
+  return (
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center text-center">
+      <h1 className="text-2xl font-bold text-foreground mb-4">Donation Not Found</h1>
+      <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white">Back to Donations</Button>
+    </div>
+  )
 }

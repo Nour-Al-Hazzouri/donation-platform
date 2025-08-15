@@ -5,10 +5,10 @@ import { useSearchParams } from 'next/navigation'
 import { MainLayout } from "@/components/layouts/MainLayout"
 import { SearchSection } from "@/components/requests/SearchSection"
 import { RequestCards } from "@/components/requests/RequestCards"
-import { useRequestsStore, initialRequestsData, type RequestData } from "@/store/requestsStore"
+import { useDonationsStore, type DonationData } from "@/store/donationsStore"
 
 // Search function that filters requests based on multiple criteria
-function searchRequests(requests: RequestData[], searchTerm: string): RequestData[] {
+function searchRequests(requests: DonationData[], searchTerm: string): DonationData[] {
   if (!searchTerm.trim()) return requests
   
   const term = searchTerm.toLowerCase().trim()
@@ -38,15 +38,28 @@ function searchRequests(requests: RequestData[], searchTerm: string): RequestDat
 
 export default function RequestsPage() {
   const searchParams = useSearchParams()
-  const { requests, initializeRequests } = useRequestsStore()
+  const { getDonationRequests } = useDonationsStore()
+  const [requests, setRequests] = useState<DonationData[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [isSearchActive, setIsSearchActive] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Initialize requests store with initial data on first load
+  // Load requests from API on first load
   useEffect(() => {
-    initializeRequests(initialRequestsData)
-  }, [initializeRequests])
+    const loadRequests = async () => {
+      try {
+        const data = await getDonationRequests()
+        setRequests(data)
+      } catch (error) {
+        console.error('Error loading requests:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadRequests()
+  }, [getDonationRequests])
 
   // Check for success message
   useEffect(() => {
@@ -85,6 +98,21 @@ export default function RequestsPage() {
   const clearSearch = () => {
     setSearchTerm('')
     setIsSearchActive(false)
+  }
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
+          <div className="flex justify-center items-center min-h-[50vh]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+              <p className="text-lg text-muted-foreground">Loading requests...</p>
+            </div>
+          </div>
+        </main>
+      </MainLayout>
+    )
   }
 
   return (
@@ -128,7 +156,18 @@ export default function RequestsPage() {
         )}
 
         <RequestCards 
-          requests={filteredRequests} 
+          requests={filteredRequests.map(request => ({
+            id: request.id,
+            name: request.name,
+            title: request.title,
+            description: request.description,
+            imageUrl: request.imageUrl,
+            avatarUrl: request.avatarUrl,
+            initials: request.initials || (request.name ? `${request.name.charAt(0)}${request.name.split(' ')[1]?.charAt(0) || ''}` : 'NA'),
+            isVerified: request.isVerified || false,
+            goalAmount: request.goalAmount?.toString() || '0',
+            currentAmount: request.currentAmount || 0
+          }))} 
           searchTerm={isSearchActive ? searchTerm : ''}
         />
       </main>
