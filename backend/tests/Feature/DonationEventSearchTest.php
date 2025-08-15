@@ -4,178 +4,174 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\DonationEvent;
+use App\Models\Location;
+use App\Models\NotificationType;
+use Database\Seeders\RoleSeeder;
+use Database\Seeders\NotificationTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class DonationEventSearchTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
+
+    protected $user;
+    protected $location;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        
-        // Create roles if they don't exist
-        if (!Role::where('name', 'admin')->exists()) {
-            // Create permissions
-            $permissions = [
-                'view donation_events',
-                'create donation_events',
-                'edit donation_events',
-                'delete donation_events',
-                'manage donation_events',
-            ];
-            
-            foreach ($permissions as $permission) {
-                Permission::firstOrCreate(['name' => $permission]);
-            }
-            
-            // Create admin role and assign permissions
-            $adminRole = Role::firstOrCreate(['name' => 'admin']);
-            $adminRole->syncPermissions($permissions);
-        }
-        
-        // Create a test user with admin role
-        $this->user = User::factory()->create([
-            'username' => 'testuser',
-            'email' => 'test@example.com',
-            'is_verified' => true
-        ]);
-        
-        $this->user->assignRole('admin');
-        
+        $this->seed(RoleSeeder::class);
+        $this->seed(NotificationTypeSeeder::class);
+
+        // Create regular user
+        $this->user = User::factory()->create();
+        $this->user->assignRole('user');
+
+        // Create a location
+        $this->location = Location::factory()->create();
+
         // Authenticate the user for all requests
-        $this->actingAs($this->user, 'sanctum');
+        Sanctum::actingAs($this->user);
     }
 
     /** @test */
-    public function it_can_search_donation_requests_by_title()
+    public function it_can_search_donation_events_by_title()
     {
         // Create test data
-        $user1 = User::factory()->create(['username' => 'johndoe']);
-        $user2 = User::factory()->create(['username' => 'janedoe']);
-        
         $event1 = DonationEvent::factory()->create([
-            'user_id' => $user1->id,
+            'user_id' => $this->user->id,
+            'location_id' => $this->location->id,
             'type' => 'request',
             'title' => 'Help needed for education',
             'status' => 'active'
         ]);
-        
+
         $event2 = DonationEvent::factory()->create([
-            'user_id' => $user2->id,
+            'user_id' => $this->user->id,
+            'location_id' => $this->location->id,
             'type' => 'request',
             'title' => 'Medical bills assistance',
             'status' => 'active'
         ]);
 
         // Search by title
-        $response = $this->getJson('/api/donation-events/requests/search?query=education');
-        
+        $response = $this->getJson('/api/donation-events?q=education');
+
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $event1->id);
     }
 
     /** @test */
-    public function it_can_search_donation_requests_by_username()
+    public function it_can_search_donation_events_by_username()
     {
-        // Create test data
-        $user1 = User::factory()->create(['username' => 'johndoe']);
-        $user2 = User::factory()->create(['username' => 'janedoe']);
-        
-        $event1 = DonationEvent::factory()->create([
-            'user_id' => $user1->id,
-            'type' => 'request',
-            'title' => 'Help needed for education',
-            'status' => 'active'
+        // Create a test user with a specific username
+        $testUser = User::factory()->create([
+            'username' => 'testdonor',
+            'first_name' => 'Test',
+            'last_name' => 'Donor'
         ]);
-        
-        $event2 = DonationEvent::factory()->create([
-            'user_id' => $user2->id,
+
+        $event1 = DonationEvent::factory()->create([
+            'user_id' => $testUser->id,
+            'location_id' => $this->location->id,
             'type' => 'request',
-            'title' => 'Medical bills assistance',
+            'title' => 'Help needed',
             'status' => 'active'
         ]);
 
         // Search by username
-        $response = $this->getJson('/api/donation-events/requests/search?query=johndoe');
-        
+        $response = $this->getJson('/api/donation-events?q=testdonor');
+
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $event1->id);
     }
 
     /** @test */
-    public function it_can_search_donation_offers()
+    public function it_can_filter_events_by_type()
     {
         // Create test data
-        $user1 = User::factory()->create(['username' => 'foodlover']);
-        
-        $event1 = DonationEvent::factory()->create([
-            'user_id' => $user1->id,
+        $offerEvent = DonationEvent::factory()->create([
+            'user_id' => $this->user->id,
+            'location_id' => $this->location->id,
             'type' => 'offer',
             'title' => 'Free food available',
             'status' => 'active'
         ]);
-        
-        $event2 = DonationEvent::factory()->create([
-            'user_id' => $user1->id,
-            'type' => 'offer',
-            'title' => 'Clothes donation',
+
+        $requestEvent = DonationEvent::factory()->create([
+            'user_id' => $this->user->id,
+            'location_id' => $this->location->id,
+            'type' => 'request',
+            'title' => 'Need food assistance',
             'status' => 'active'
         ]);
 
-        // Search offers
-        $response = $this->getJson('/api/donation-events/offers/search?query=food');
-        
+        // Filter by offer type
+        $response = $this->getJson('/api/donation-events?type=offer');
+
         $response->assertStatus(200)
-            ->assertJsonCount(2, 'data')
-            ->assertJsonPath('data.0.id', $event1->id);
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $offerEvent->id);
+
+        // Filter by request type
+        $response = $this->getJson('/api/donation-events?type=request');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $requestEvent->id);
     }
 
     /** @test */
     public function it_returns_empty_when_no_matches_found()
     {
         DonationEvent::factory()->count(3)->create([
-            'type' => 'request', 
+            'user_id' => $this->user->id,
+            'location_id' => $this->location->id,
+            'type' => 'request',
             'status' => 'active'
         ]);
-        
-        $response = $this->getJson('/api/donation-events/requests/search?query=nonexistent');
-        
+
+        $response = $this->getJson('/api/donation-events?q=nonexistent');
+
         $response->assertStatus(200)
             ->assertJsonCount(0, 'data');
     }
 
     /** @test */
-    public function it_requires_search_query_parameter()
+    public function it_does_not_require_search_query_parameter()
     {
-        $response = $this->getJson('/api/donation-events/requests/search');
-        
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['query']);
+        DonationEvent::factory()->count(3)->create([
+            'user_id' => $this->user->id,
+            'location_id' => $this->location->id,
+            'type' => 'request',
+            'status' => 'active'
+        ]);
+
+        $response = $this->getJson('/api/donation-events');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(3, 'data');
     }
 
     /** @test */
     public function it_respects_pagination_parameters()
     {
         // Create 25 test events
-        $user = User::factory()->create();
         DonationEvent::factory()->count(25)->create([
-            'user_id' => $user->id,
+            'user_id' => $this->user->id,
+            'location_id' => $this->location->id,
             'type' => 'request',
             'status' => 'active',
             'title' => 'Test Event'
         ]);
-        
-        $response = $this->getJson('/api/donation-events/requests/search?query=Test&per_page=10');
-        
+
+        $response = $this->getJson('/api/donation-events?q=Test&per_page=10');
+
         $response->assertStatus(200)
             ->assertJson([
                 'meta' => [
@@ -188,29 +184,38 @@ class DonationEventSearchTest extends TestCase
     }
 
     /** @test */
-    public function it_only_returns_active_events()
+    public function it_filters_events_by_location()
     {
-        $user = User::factory()->create(['username' => 'testcreator']);
-        
-        // Create active and inactive events
-        $activeEvent = DonationEvent::factory()->create([
-            'user_id' => $user->id,
+        // Create a different location
+        $otherLocation = Location::factory()->create();
+
+        // Create events in different locations
+        $event1 = DonationEvent::factory()->create([
+            'user_id' => $this->user->id,
+            'location_id' => $this->location->id,
             'type' => 'request',
-            'title' => 'Active event',
+            'title' => 'Event in location 1',
             'status' => 'active'
         ]);
-        
-        $inactiveEvent = DonationEvent::factory()->create([
-            'user_id' => $user->id,
+
+        $event2 = DonationEvent::factory()->create([
+            'user_id' => $this->user->id,
+            'location_id' => $otherLocation->id,
             'type' => 'request',
-            'title' => 'Inactive event',
-            'status' => 'completed'
+            'title' => 'Event in location 2',
+            'status' => 'active'
         ]);
-        
-        $response = $this->getJson('/api/donation-events/requests/search?query=event');
-        
+
+        // Filter by first location
+        $response = $this->getJson("/api/donation-events?location_id={$this->location->id}");
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.id', $activeEvent->id);
+            ->assertJsonPath('data.0.id', $event1->id);
+
+        // Filter by second location
+        $response = $this->getJson("/api/donation-events?location_id={$otherLocation->id}");
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $event2->id);
     }
 }
