@@ -41,13 +41,35 @@ class AnnouncementController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $announcements = Announcement::with('user')->latest()->paginate(10);
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'query' => 'sometimes|string|max:255',
+        ]);
+        $perPage = $request->query('per_page', 15);
+        $announcements = Announcement::with('user')
+            ->when($request->has('query'), function ($query) use ($request) {
+                $query->whereHas('user', function ($query) use ($request) {
+                    $query->where('username', 'like', '%' . $request->query . '%')
+                        ->orWhere('email', 'like', '%' . $request->query . '%')
+                        ->orWhere('phone', 'like', '%' . $request->query . '%')
+                        ->orWhere('first_name', 'like', '%' . $request->query . '%')
+                        ->orWhere('last_name', 'like', '%' . $request->query . '%');
+                });
+            })
+            ->latest()
+            ->paginate($perPage);
 
         return response()->json([
             'data' => AnnouncementResource::collection($announcements),
             'message' => 'Announcements retrieved successfully',
+            'meta' => [
+                'total' => $announcements->total(),
+                'per_page' => $announcements->perPage(),
+                'current_page' => $announcements->currentPage(),
+                'last_page' => $announcements->lastPage(),
+            ],
         ], Response::HTTP_OK);
     }
 
