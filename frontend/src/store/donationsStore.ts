@@ -77,26 +77,18 @@ export const useDonationsStore = create<DonationsState>()(
       error: null,
 
       // Replaced initializeDonations with force flag
-initializeDonations: async (force = false): Promise<void> => {
-  set({ isLoading: true, error: null })
-  try {
-    // Always fetch from API if force is true
-    if (force || get().donations.length === 0) {
+  initializeDonations: async (force = false) => {
+    set({ isLoading: true, error: null })
+    try {
+      // fetch always (or short-circuit if you want)
       const response = await donationsService.getAllEvents()
       const mappedDonations = response.data.map(mapEventToDonationData)
       set({ donations: mappedDonations, isLoading: false })
-    } else {
-      set({ isLoading: false }) // Already have data, skip API call
+    } catch (err: any) {
+      console.error('Error initializing donations:', err)
+      set({ error: err?.response?.data?.message || 'Failed to load donations', isLoading: false })
     }
-  } catch (error: any) {
-    console.error('Error initializing donations:', error)
-    set({
-      error: error.response?.data?.message || 'Failed to load donations',
-      isLoading: false
-    })
-  }
-}
-,
+  },
 
       addDonation: async (newDonation) => {
         set({ isLoading: true, error: null })
