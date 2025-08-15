@@ -52,7 +52,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (Request $request) {
         return new UserResource($request->user());
     });
-
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('users/search', [UserController::class, 'searchUsers']);
+        Route::get('verifications/search', [VerificationController::class, 'search']);
+    });
     // Users resource (protected by auth and permissions)
     Route::apiResource('users', UserController::class)
         ->except('promoteToModerator')
@@ -128,6 +131,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Donation events (public for all authenticated users to view, but only admins/moderators can create/update/delete)
     Route::prefix('donation-events')->group(function () {
         Route::get('/', [DonationEventController::class, 'index']);
+        Route::get('/requests/search', [DonationEventController::class, 'searchRequests']);
+        Route::get('/offers/search', [DonationEventController::class, 'searchOffers']);
         Route::get('/requests', [DonationEventController::class, 'requestsIndex']);
         Route::get('/offers', [DonationEventController::class, 'offersIndex']);
         Route::get('/user/{user}', [DonationEventController::class, 'userIndex']);
