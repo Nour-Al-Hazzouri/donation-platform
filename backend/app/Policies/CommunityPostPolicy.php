@@ -13,7 +13,7 @@ class CommunityPostPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
         return true;
     }
@@ -21,7 +21,7 @@ class CommunityPostPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, CommunityPost $communityPost): bool
+    public function view(?User $user, CommunityPost $communityPost): bool
     {
         return true;
     }
