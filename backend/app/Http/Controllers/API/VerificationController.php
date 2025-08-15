@@ -60,17 +60,19 @@ class VerificationController extends Controller
                 'query' => 'sometimes|string|max:255',
             ]);
             $perPage = $request->query('per_page', 15);
+            $searchTerm = $request->query('query');
+
             $verifications = Verification::with(['user'])
                 ->when($request->has('status'), function ($query) use ($request) {
                     $query->where('status', $request->status);
                 })
-                ->when($request->has('query'), function ($query) use ($request) {
-                    $query->whereHas('user', function ($query) use ($request) {
-                        $query->where('username', 'like', '%' . $request->query . '%')
-                            ->orWhere('email', 'like', '%' . $request->query . '%')
-                            ->orWhere('phone', 'like', '%' . $request->query . '%')
-                            ->orWhere('first_name', 'like', '%' . $request->query . '%')
-                            ->orWhere('last_name', 'like', '%' . $request->query . '%');
+                ->when($request->has('query'), function ($query) use ($searchTerm) {
+                    $query->whereHas('user', function ($query) use ($searchTerm) {
+                        $query->where('username', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('email', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('phone', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('first_name', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('last_name', 'like', '%' . $searchTerm . '%');
                     });
                 })
                 ->latest()

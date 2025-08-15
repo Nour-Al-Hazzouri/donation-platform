@@ -366,13 +366,14 @@ This document outlines all available API endpoints, their purposes, required per
 ### List All Users (Admin)
 
 -   **URL**: `GET /api/users`
--   **Description**: List all users with pagination (15 per page)
+-   **Description**: List all users with pagination
 -   **Role**: Admin
 -   **Permissions**: `view users`
 -   **Headers**:
     -   `Authorization`: Bearer {token}
 -   **Query Parameters**:
-    -   `page`: integer (optional, default: 1)
+    -   `query`: string (optional) - Search query for user details (username, email, phone, first_name, last_name)
+    -   `per_page`: integer (optional, default: 15)
 -   **Response (200 OK)**:
 
     ```json
@@ -697,7 +698,6 @@ This document outlines all available API endpoints, their purposes, required per
 -   **URL Parameters**:
     -   `user`: integer (required) - ID of the user whose verifications to retrieve
 -   **Query Parameters**:
-    -   `page`: integer (optional) - Page number for pagination (default: 1)
     -   `per_page`: integer (optional) - Number of items per page (default: 15, max: 100)
 -   **Response (200 OK)**:
 
@@ -724,13 +724,11 @@ This document outlines all available API endpoints, their purposes, required per
                 }
             }
         ],
-        "pagination": {
+        "meta": {
             "total": 1,
             "per_page": 15,
             "current_page": 1,
-            "last_page": 1,
-            "from": 1,
-            "to": 1
+            "last_page": 1
         }
     }
     ```
@@ -814,13 +812,9 @@ This document outlines all available API endpoints, their purposes, required per
 -   **Headers**:
     -   `Authorization`: Bearer {token}
 -   **Query Parameters**:
-    -   `page`: integer (optional) - Page number for pagination (default: 1)
     -   `per_page`: integer (optional) - Number of items per page (default: 15, max: 100)
     -   `status`: string (optional) - Filter by status (pending, approved, rejected)
-    -   `user_id`: integer (optional) - Filter by user ID
-    -   `document_type`: string (optional) - Filter by document type (id_card, passport, driver_license)
-    -   `sort_by`: string (optional) - Field to sort by (created_at, updated_at, verified_at)
-    -   `sort_order`: string (optional) - Sort order (asc, desc) - default: desc
+    -   `query`: string (optional) - Search query for user details (username, email, phone, first_name, last_name)
 -   **Response (200 OK)**:
 
     ```json
@@ -845,12 +839,11 @@ This document outlines all available API endpoints, their purposes, required per
                 }
             }
         ],
-        "pagination": {
+        "meta": {
             "total": 1,
             "per_page": 15,
             "current_page": 1,
             "last_page": 1,
-            "from": 1,
             "to": 1
         }
     }
@@ -861,7 +854,6 @@ This document outlines all available API endpoints, their purposes, required per
     -   Only accessible by admins
     -   Response includes pagination metadata
     -   User details are included for each verification
-    -   Use query parameters to filter and sort results
 
     **Error Responses**:
 
@@ -1195,6 +1187,7 @@ This document outlines all available API endpoints, their purposes, required per
     -   `Authorization`: Bearer {token}
     -   `Accept`: application/json
 -   **Query Parameters**:
+    -   `query`: string (optional) - Search query for announcement details (title, content)
     -   `page`: integer (optional) - Page number for pagination (default: 1)
     -   `per_page`: integer (optional) - Number of items per page (default: 10, max: 100)
     -   `priority`: string (optional) - Filter by priority (low, medium, high)
@@ -2232,7 +2225,7 @@ This document outlines all available API endpoints, their purposes, required per
 -   **Description**: List all donation events (both requests and offers)
 -   **Role**: Any User
 -   **Query Parameters**:
-    -   `q`: Search term for title, username, first name, or last name
+    -   `query`: Search term for title, username, first name, or last name
     -   `type`: Filter by type - 'request' or 'offer'
     -   `status`: Filter by status - 'active', 'completed', 'cancelled', or 'suspended'
     -   `location_id`: Filter by location ID
