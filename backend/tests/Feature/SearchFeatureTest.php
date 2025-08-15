@@ -224,12 +224,12 @@ class SearchFeatureTest extends TestCase
             ]);
             
         // Test with custom pagination
-        $response = $this->getJson('/api/users?query=John&per_page=5');
+        $response = $this->getJson('/api/users?query=Test&per_page=5');
         $response->assertStatus(200)
             ->assertJson([
                 'meta' => [
                     'per_page' => 5,
-                    'last_page' => 5 // 21 John's total / 5 per page = 5 pages
+                    'last_page' => 4 // 20 Test's total / 5 per page = 4 pages
                 ]
             ]);
     }
