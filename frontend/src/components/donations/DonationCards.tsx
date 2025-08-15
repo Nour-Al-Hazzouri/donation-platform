@@ -34,11 +34,13 @@ export function DonationCards({ donations, searchTerm }: DonationCardsProps) {
           name={donation.name}
           title={donation.title}
           description={donation.description}
-          imageUrl={donation.imageUrl} // Uncommented to show images
+          imageUrl={donation.imageUrl}
           avatarUrl={donation.avatarUrl}
           initials={donation.initials}
           isVerified={donation.isVerified}
           searchTerm={searchTerm}
+          goalAmount={donation.goalAmount}
+          currentAmount={donation.currentAmount}
         />
       ))}
     </div>

@@ -44,8 +44,11 @@ export default function RequestPage() {
     )
   }
 
-  const donationAmount = parseFloat(donation.donationAmount || '1000')
-  const remainingAmount = donationAmount // Simplified for this example
+  // Use goalAmount from the donation data
+  const donationAmount = donation.goalAmount || parseFloat(donation.donationAmount || '1000')
+  // Calculate remaining amount (available amount minus claimed amount)
+  const remainingAmount = donation.currentAmount !== undefined ? 
+    donationAmount - donation.currentAmount : donationAmount
 
   const handleSliderChange = (value: number[]) => {
     setRequestAmount(value)

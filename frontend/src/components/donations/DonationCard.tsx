@@ -16,6 +16,8 @@ interface DonationCardProps {
   initials: string
   isVerified?: boolean
   searchTerm?: string
+  goalAmount?: number
+  currentAmount?: number
 }
 
 function highlightText(text: string, searchTerm: string) {
@@ -44,7 +46,9 @@ export function DonationCard({
   avatarUrl, 
   initials, 
   isVerified = true,
-  searchTerm = ""
+  searchTerm = "",
+  goalAmount,
+  currentAmount
 }: DonationCardProps) {
   const router = useRouter()
 
@@ -103,6 +107,22 @@ export function DonationCard({
         <p className="text-sm text-muted-foreground mb-4 line-clamp-4 flex-grow">
           {highlightText(description, searchTerm)}
         </p>
+        
+        {/* Display amount information */}
+        {goalAmount !== undefined && (
+          <div className="mb-4 text-sm">
+            <p className="text-foreground">
+              <span className="font-medium">Amount: </span>
+              ${goalAmount.toLocaleString()}
+            </p>
+            {currentAmount !== undefined && currentAmount > 0 && (
+              <p className="text-foreground">
+                <span className="font-medium">Claimed: </span>
+                ${currentAmount.toLocaleString()}
+              </p>
+            )}
+          </div>
+        )}
         
         <Button 
           className="w-full bg-red-500 hover:bg-red-600 text-white mt-auto"
