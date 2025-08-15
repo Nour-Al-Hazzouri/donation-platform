@@ -1,27 +1,59 @@
 "use client"
 
-import React from "react"
-import { ArrowLeft, Heart, BookOpen, Award, Home, School, Droplets, Users, Globe, MessageCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { MOCK_BLOG_POSTS } from "../../../data/blog-posts"
-import { DETAILED_BLOG_CONTENT } from "../../../data/blog-content"
-import ReactMarkdown from "react-markdown"
+import React, { useEffect, useState } from "react";
+import { ArrowLeft, Heart, BookOpen, Award, Home, School, Droplets, Users, Globe, MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ReactMarkdown from "react-markdown";
+import { blogService, Announcement } from "@/lib/api/blogs";
 
 interface BlogPostDetailProps {
-  postId: number
-  onClose: () => void
+  postId: number;
+  onClose: () => void;
 }
 
 export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps) {
-  const post = MOCK_BLOG_POSTS.find((p) => p.id === postId)
-  const detailedContent = DETAILED_BLOG_CONTENT[postId as keyof typeof DETAILED_BLOG_CONTENT]
-  
-  // Ensure we scroll to the top when the component mounts
-  React.useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [postId])
+  const [post, setPost] = useState<Announcement | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!post || !detailedContent) return null
+  useEffect(() => {
+    const fetchPost = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const fetchedPost = await blogService.getById(postId);
+        setPost(fetchedPost);
+      } catch (err) {
+        setError("Failed to fetch blog post details.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [postId]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [postId]);
+
+  const getPriorityStyle = (priority: string) => {
+    switch (priority.toLowerCase()) {
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!post) return null;
 
   return (
     <div className="bg-background" id="blog-post-top">
@@ -39,11 +71,13 @@ export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps)
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground">{post.title}</h1>
                 <div className="flex items-center gap-4 text-muted-foreground text-sm mt-1">
-                  <span>{post.date}</span>
+                  <span>{new Date(post.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${post.tagColor}`}>{post.tag}</span>
+            <span className={`px-4 py-2 rounded-full text-lg font-bold ${getPriorityStyle(post.priority)}`}>
+              {post.priority}
+            </span>
           </div>
         </div>
       </div>
@@ -52,26 +86,22 @@ export default function BlogPostDetail({ postId, onClose }: BlogPostDetailProps)
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Hero Icon */}
         <div className="flex items-center justify-center h-64 md:h-96 w-full mb-8 rounded-2xl overflow-hidden bg-muted">
-          {post.id === 1 && <Heart className="w-32 h-32 text-red-500" />}
-          {post.id === 2 && <BookOpen className="w-32 h-32 text-red-500" />}
-          {post.id === 3 && <Award className="w-32 h-32 text-red-500" />}
-          {post.id === 4 && <Home className="w-32 h-32 text-red-500" />}
-          {post.id === 5 && <School className="w-32 h-32 text-red-500" />}
-          {post.id === 6 && <Droplets className="w-32 h-32 text-red-500" />}
-          {post.id === 7 && <Users className="w-32 h-32 text-red-500" />}
-          {post.id === 8 && <Globe className="w-32 h-32 text-red-500" />}
-          {post.id === 9 && <MessageCircle className="w-32 h-32 text-red-500" />}
+          {post.image_full_urls && post.image_full_urls.length > 0 ? (
+            <img src={post.image_full_urls[0]} alt={post.title} className="w-full h-full object-cover" />
+          ) : (
+            <Heart className="w-32 h-32 text-red-500" />
+          )}
         </div>
 
         {/* Article Content */}
         <div className="prose prose-lg max-w-none">
           <ReactMarkdown components={{
-            p: ({children}) => <p className="text-muted-foreground leading-relaxed">{children}</p>
+            p: ({ children }) => <p className="text-muted-foreground leading-relaxed">{children}</p>
           }}>
-            {detailedContent.content}
+            {post.content}
           </ReactMarkdown>
         </div>
       </div>
     </div>
-  )
+  );
 }

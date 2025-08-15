@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search } from "lucide-react"
 import { AdminLayout } from "@/components/layouts/AdminLayout"
 import { DashboardSidebar } from "@/components/admin/dashboard/dashboardSiderbar"
@@ -8,14 +8,18 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CreateBlogPost } from "./CreateBlogPost"
+import { blogService } from "@/lib/api/blogs"
+import { useToast } from "@/components/ui/use-toast"
 
 interface BlogPost {
-  id: string
-  title: string
-  content: string
-  priority: string
-  createdAt: string
-  imageUrl?: string
+  id: number;
+  title: string;
+  content: string;
+  priority: 'low' | 'medium' | 'high';
+  created_at: string;
+  updated_at: string;
+  image_urls?: string[];
+  image_full_urls?: string[];
 }
 
 export function BlogsAdminPage() {
@@ -23,69 +27,59 @@ export function BlogsAdminPage() {
   const [isCreating, setIsCreating] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [currentBlogPost, setCurrentBlogPost] = useState<BlogPost | null>(null)
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([
-    {
-      id: "1",
-      title: "How to Donate Effectively",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-      priority: "high",
-      createdAt: "2023-06-15",
-      imageUrl: "/placeholder-blog.jpg"
-    },
-    {
-      id: "2",
-      title: "Community Impact Stories",
-      content: "Ut enim ad minim veniam, quis nostrud exercitation...",
-      priority: "medium",
-      createdAt: "2023-07-22",
-      imageUrl: "/placeholder-blog.jpg"
-    },
-    {
-      id: "3",
-      title: "Upcoming Charity Events",
-      content: "Duis aute irure dolor in reprehenderit in voluptate...",
-      priority: "low",
-      createdAt: "2023-08-10",
-      imageUrl: "/placeholder-blog.jpg"
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const { toast } = useToast()
+
+  useEffect(() => {
+    fetchBlogPosts()
+  }, [])
+
+  const fetchBlogPosts = async () => {
+    try {
+      setIsLoading(true)
+      const response = await blogService.getAll()
+      setBlogPosts(response.data)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch blog posts",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
-  ])
+  }
 
   const filteredBlogPosts = blogPosts.filter(post =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.content.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const uploadImage = async (file: File): Promise<string> => {
-    // In a real app, you would upload the image to your server or cloud storage
-    // and return the URL. For this example, we'll simulate a delay and return
-    // a placeholder URL.
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve(URL.createObjectURL(file))
-      }, 1000)
-    })
-  }
-
   const handleCreateBlogPost = async (formData: any) => {
     try {
-      let imageUrl = ""
-      if (formData.image) {
-        imageUrl = await uploadImage(formData.image)
-      }
-
-      const newBlogPost: BlogPost = {
-        id: Date.now().toString(),
-        title: formData.title,
-        content: formData.content,
-        priority: formData.priority,
-        createdAt: new Date().toISOString().split('T')[0],
-        imageUrl: imageUrl || "/placeholder-blog.jpg"
-      }
-
-      setBlogPosts([newBlogPost, ...blogPosts])
+      const { title, content, priority, image } = formData
+      const imageFiles = image ? [image] : undefined
+      
+      await blogService.create({
+        title,
+        content,
+        priority,
+        image_urls: imageFiles,
+      })
+      
+      toast({
+        title: "Success",
+        description: "Blog post created successfully",
+      })
       setIsCreating(false)
+      fetchBlogPosts()
     } catch (error) {
-      console.error("Error creating blog post:", error)
+      toast({
+        title: "Error",
+        description: "Failed to create blog post",
+        variant: "destructive",
+      })
     }
   }
 
@@ -93,34 +87,49 @@ export function BlogsAdminPage() {
     if (!currentBlogPost) return
 
     try {
-      let imageUrl = currentBlogPost.imageUrl
-      if (formData.image) {
-        imageUrl = await uploadImage(formData.image)
-      }
-
-      const updatedBlogPosts = blogPosts.map(post =>
-        post.id === currentBlogPost.id
-          ? {
-              ...post,
-              title: formData.title,
-              content: formData.content,
-              priority: formData.priority,
-              imageUrl: imageUrl || post.imageUrl
-            }
-          : post
-      )
-
-      setBlogPosts(updatedBlogPosts)
+      const { title, content, priority, image } = formData
+      const imageFiles = image ? [image] : undefined
+      const removeImages = formData.removeImage ? currentBlogPost.image_urls : undefined
+      
+      await blogService.update(currentBlogPost.id, {
+        title,
+        content,
+        priority,
+        image_urls: imageFiles,
+        remove_image_urls: removeImages,
+      })
+      
+      toast({
+        title: "Success",
+        description: "Blog post updated successfully",
+      })
       setIsEditing(false)
       setCurrentBlogPost(null)
+      fetchBlogPosts()
     } catch (error) {
-      console.error("Error updating blog post:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update blog post",
+        variant: "destructive",
+      })
     }
   }
 
-  const handleDeleteBlogPost = (id: string) => {
-    const updatedBlogPosts = blogPosts.filter(post => post.id !== id)
-    setBlogPosts(updatedBlogPosts)
+  const handleDeleteBlogPost = async (id: number) => {
+    try {
+      await blogService.delete(id)
+      toast({
+        title: "Success",
+        description: "Blog post deleted successfully",
+      })
+      fetchBlogPosts()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete blog post",
+        variant: "destructive",
+      })
+    }
   }
 
   const startEditing = (blogPost: BlogPost) => {
@@ -160,7 +169,7 @@ export function BlogsAdminPage() {
                     title: currentBlogPost.title,
                     content: currentBlogPost.content,
                     priority: currentBlogPost.priority,
-                    imageUrl: currentBlogPost.imageUrl
+                    imageUrl: currentBlogPost.image_full_urls?.[0]
                   }}
                   mode="edit"
                 />
@@ -199,13 +208,17 @@ export function BlogsAdminPage() {
                     </div>
                     <div className="overflow-x-auto">
                       <div className="divide-y">
-                      {filteredBlogPosts.length > 0 ? (
+                      {isLoading ? (
+                        <div className="p-8 text-center text-muted-foreground">
+                          Loading blog posts...
+                        </div>
+                      ) : filteredBlogPosts.length > 0 ? (
                         filteredBlogPosts.map((post) => (
                           <div key={post.id} className="md:grid md:grid-cols-12 flex flex-col gap-3 p-4 items-start md:items-center hover:bg-muted">
                             <div className="md:col-span-5 font-medium text-foreground flex items-center gap-3 w-full">
-                              {post.imageUrl && (
+                              {post.image_full_urls?.[0] && (
                                 <img 
-                                  src={post.imageUrl} 
+                                  src={post.image_full_urls[0]} 
                                   alt={post.title}
                                   className="w-10 h-10 rounded object-cover flex-shrink-0"
                                 />
@@ -214,7 +227,7 @@ export function BlogsAdminPage() {
                             </div>
                             <div className="md:col-span-3 text-muted-foreground text-sm md:text-base w-full md:w-auto flex items-center gap-2">
                               <span className="md:hidden font-medium text-muted-foreground">Date:</span>
-                              {post.createdAt}
+                              {new Date(post.created_at).toLocaleDateString()}
                             </div>
                             <div className="md:col-span-2 w-full md:w-auto flex items-center gap-2">
                               <span className="md:hidden font-medium text-muted-foreground">Priority:</span>
