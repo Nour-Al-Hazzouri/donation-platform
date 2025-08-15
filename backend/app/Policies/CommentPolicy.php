@@ -16,7 +16,7 @@ class CommentPolicy
      */
     public function viewAny(User $user, CommunityPost $communityPost): bool
     {
-        return $user->can('view comments');
+        return true;
     }
 
     /**
