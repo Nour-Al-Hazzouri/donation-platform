@@ -1,73 +1,9 @@
 import { DonationCard } from "@/components/donations/DonationCard"
 
-export interface DonationData {
-  id: number
-  name: string
-  title: string
-  description: string
-  imageUrl?: string
-  avatarUrl?: string
-  initials: string
-  isVerified: boolean
-}
+// This interface is now imported from donationsStore.ts
+// Keeping this here for backward compatibility
+import type { DonationData } from "@/store/donationsStore"
 
-export const donationsData: DonationData[] = [
-  {
-    id: 1,
-    name: "Rahul Kadam",
-    title: "Offering help for cancer treatment",
-    description: "I want to support families battling cancer. My donation will help cover treatment costs for those in need. Together we can make a difference in their fight against this disease.",
-    imageUrl: "/cancer.jpg", // Added image for first card
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "RK",
-    isVerified: true
-  },
-  {
-    id: 2,
-    name: "Rahul Kadam",
-    title: "Funding for heart surgeries",
-    description: "I'm committing funds to help cover heart surgeries for those who can't afford them. Your matching donations can help us save more lives. Let's work together to give the gift of health.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "RK",
-    isVerified: true
-  },
-  {
-    id: 3,
-    name: "Rajesh Joy",
-    title: "Supporting lifelong medical care",
-    description: "I'm establishing a fund to support individuals needing lifelong medical care. Your contributions will help provide consistent care for those with chronic conditions. Every bit helps create a better quality of life.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "RJ",
-    isVerified: true
-  },
-  {
-    id: 4,
-    name: "Sarah Ahmed",
-    title: "Emergency medical fund",
-    description: "I've created an emergency medical fund to help families in crisis situations. Your matching donations will allow us to respond quickly when urgent needs arise. Together we can be there when it matters most.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "SA",
-    isVerified: true
-  },
-  {
-    id: 5,
-    name: "Michael Chen",
-    title: "Disaster relief fund",
-    description: "I'm offering support for families affected by disasters like fires or floods. Your contributions will help provide temporary housing and basic necessities. Let's help rebuild lives together.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "MC",
-    isVerified: false
-  },
-  {
-    id: 6,
-    name: "Priya Sharma",
-    title: "Education support fund",
-    description: "I'm funding education for underprivileged children in our community. Your matching donations will help provide school supplies and tuition assistance. Education is the key to breaking the cycle of poverty.",
-    avatarUrl: "/placeholder.svg?height=48&width=48",
-    initials: "PS",
-    isVerified: true
-  }
-]
 
 interface DonationCardsProps {
   donations: DonationData[]

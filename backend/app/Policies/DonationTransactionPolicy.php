@@ -16,6 +16,11 @@ class DonationTransactionPolicy
      */
     public function viewAny(User $user): bool
     {
+        // Admin users can view transactions without verification
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
         // Only verified users can view transactions
         return $this->isUserVerified($user);
     }
@@ -29,11 +34,15 @@ class DonationTransactionPolicy
      */
     public function view(User $user, DonationTransaction $donationTransaction): bool
     {
-        // User can view if they are the transaction owner, event owner, or admin
+        // Admin users can view any transaction
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
+        // User can view if they are the transaction owner or event owner and are verified
         return $this->isUserVerified($user) && (
             $user->id === $donationTransaction->user_id ||
-            ($donationTransaction->event && $user->id === $donationTransaction->event->user_id) ||
-            $user->hasRole('admin')
+            ($donationTransaction->event && $user->id === $donationTransaction->event->user_id)
         );
     }
 
@@ -45,6 +54,11 @@ class DonationTransactionPolicy
      */
     public function create(User $user): bool
     {
+        // Admin users can create transactions without verification
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
         // Only verified users can create transactions
         return $this->isUserVerified($user);
     }
@@ -58,6 +72,11 @@ class DonationTransactionPolicy
      */
     public function updateStatus(User $user, DonationTransaction $donationTransaction): bool
     {
+        // Admin users can update transaction status
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
         // Only the event owner can update the status of a transaction
         return $this->isUserVerified($user) && ($donationTransaction->event && $user->id === $donationTransaction->event->user_id);
     }

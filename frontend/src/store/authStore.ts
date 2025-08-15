@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, PersistOptions } from 'zustand/middleware'
 import { authService } from '@/lib/api/auth'
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
 
 type User = {
   id: number;
@@ -89,10 +89,19 @@ login: async (email: string, password: string) => {
       isLoading: false,
     });
 
+    // Create the auth storage state object
+    const authState = { state: { user, isAuthenticated: true } };
+    
+    // Save in localStorage for client-side access
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth-storage', JSON.stringify(authState));
+    }
+    
     // Save user in cookie for server-side middleware
-    Cookies.set('auth-storage', JSON.stringify({ state: { user } }), {
+    Cookies.set('auth-storage', JSON.stringify(authState), {
       path: '/',
       expires: 7, // expires in 7 days
+      sameSite: 'strict',
     });
 
   } catch (error: any) {
@@ -121,6 +130,21 @@ login: async (email: string, password: string) => {
             isAuthenticated: true,
             isLoading: false,
           });
+          
+          // Create the auth storage state object
+          const authState = { state: { user, isAuthenticated: true } };
+          
+          // Save in localStorage for client-side access
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('auth-storage', JSON.stringify(authState));
+          }
+          
+          // Save user in cookie for server-side middleware
+          Cookies.set('auth-storage', JSON.stringify(authState), {
+            path: '/',
+            expires: 7, // expires in 7 days
+            sameSite: 'strict',
+          });
         } catch (error: any) {
           console.error('Registration error:', error);
           set({ 
@@ -136,6 +160,14 @@ login: async (email: string, password: string) => {
         try {
           await authService.logout();
           set({ user: null, isAuthenticated: false, isLoading: false });
+          
+          // Clear localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('auth-storage');
+          }
+          
+          // Clear cookies
+          Cookies.remove('auth-storage', { path: '/' });
         } catch (error: any) {
           console.error('Logout error:', error);
           // Even if the API call fails, we should still clear the local state
@@ -145,6 +177,14 @@ login: async (email: string, password: string) => {
             isLoading: false,
             error: error.response?.data?.message || 'Failed to logout properly.'
           });
+          
+          // Clear localStorage and cookies even on error
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('auth-storage');
+          }
+          
+          // Clear cookies
+          Cookies.remove('auth-storage', { path: '/' });
         }
       },
       

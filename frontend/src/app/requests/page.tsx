@@ -5,25 +5,18 @@ import { useSearchParams } from 'next/navigation'
 import { MainLayout } from "@/components/layouts/MainLayout"
 import { SearchSection } from "@/components/requests/SearchSection"
 import { RequestCards } from "@/components/requests/RequestCards"
-import { useRequestsStore, initialRequestsData, type RequestData } from "@/store/requestsStore"
+import requestsService, { RequestEvent } from '@/lib/api/requests'
 
-// Search function that filters requests based on multiple criteria
-function searchRequests(requests: RequestData[], searchTerm: string): RequestData[] {
+function searchRequests(requests: RequestEvent[], searchTerm: string): RequestEvent[] {
   if (!searchTerm.trim()) return requests
   
   const term = searchTerm.toLowerCase().trim()
   
   return requests.filter(request => {
-    // Search in title
     const titleMatch = request.title.toLowerCase().includes(term)
-    
-    // Search in name
-    const nameMatch = request.name.toLowerCase().includes(term)
-    
-    // Search in description
+    const nameMatch = request.user.username.toLowerCase().includes(term)
     const descriptionMatch = request.description.toLowerCase().includes(term)
     
-    // Search for individual words in title (for partial matches)
     const titleWords = request.title.toLowerCase().split(' ')
     const searchWords = term.split(' ')
     const wordMatch = searchWords.some(searchWord => 
@@ -38,58 +31,67 @@ function searchRequests(requests: RequestData[], searchTerm: string): RequestDat
 
 export default function RequestsPage() {
   const searchParams = useSearchParams()
-  const { requests, initializeRequests } = useRequestsStore()
+  const [requests, setRequests] = useState<RequestEvent[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [isSearchActive, setIsSearchActive] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Initialize requests store with initial data on first load
+  // Load requests from API
   useEffect(() => {
-    initializeRequests(initialRequestsData)
-  }, [initializeRequests])
+    const loadRequests = async () => {
+      try {
+        const res = await requestsService.getAllRequests()
+        setRequests(res.data)
+      } catch (error) {
+        console.error('Error loading requests:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadRequests()
+  }, [])
 
-  // Check for success message
+  // Show success message if request just created
   useEffect(() => {
     if (searchParams.get('success') === 'request-created') {
       setShowSuccessMessage(true)
-      // Hide success message after 5 seconds
-      const timer = setTimeout(() => {
-        setShowSuccessMessage(false)
-      }, 5000)
+      const timer = setTimeout(() => setShowSuccessMessage(false), 5000)
       return () => clearTimeout(timer)
     }
   }, [searchParams])
 
-  // Filter requests based on search term
   const filteredRequests = useMemo(() => {
-    if (!isSearchActive && !searchTerm.trim()) {
-      return requests
-    }
+    if (!isSearchActive && !searchTerm.trim()) return requests
     return searchRequests(requests, searchTerm)
   }, [requests, searchTerm, isSearchActive])
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
-    // Auto-search as user types (debounced effect)
-    if (value.trim()) {
-      setIsSearchActive(true)
-    } else {
-      setIsSearchActive(false)
-    }
+    setIsSearchActive(value.trim().length > 0)
   }
 
-  const handleSearchSubmit = () => {
-    setIsSearchActive(true)
-  }
-
+  const handleSearchSubmit = () => setIsSearchActive(true)
   const clearSearch = () => {
     setSearchTerm('')
     setIsSearchActive(false)
   }
 
+  if (isLoading) return (
+    <MainLayout>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+            <p className="text-lg text-muted-foreground">Loading requests...</p>
+          </div>
+        </div>
+      </main>
+    </MainLayout>
+  )
+
   return (
     <MainLayout>
-      {/* Success Message */}
       {showSuccessMessage && (
         <div className="bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 px-4 py-3 rounded mx-4 mt-4">
           <div className="flex">
@@ -106,7 +108,6 @@ export default function RequestsPage() {
         </div>
       )}
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background">
         <SearchSection 
           searchTerm={searchTerm}
@@ -114,8 +115,6 @@ export default function RequestsPage() {
           onSearchSubmit={handleSearchSubmit}
           resultsCount={filteredRequests.length}
         />
-
-        {/* Clear Search Button */}
         {(searchTerm || isSearchActive) && (
           <div className="flex justify-center mb-6">
             <button 
@@ -126,11 +125,22 @@ export default function RequestsPage() {
             </button>
           </div>
         )}
+<RequestCards 
+  requests={filteredRequests.map(r => ({
+    id: r.id,
+    name: `${r.user.first_name} ${r.user.last_name}`,
+    title: r.title,
+    description: r.description,
+    imageUrl: r.image_urls?.[0] ?? undefined, // <-- use undefined instead of null
+    avatarUrl: r.user.avatar_url ?? undefined,
+    initials: r.user.first_name.charAt(0) + r.user.last_name.charAt(0),
+    isVerified: false,
+    goalAmount: r.goal_amount.toString(),
+    currentAmount: r.current_amount
+  }))}
+  searchTerm={isSearchActive ? searchTerm : ''}
+/>
 
-        <RequestCards 
-          requests={filteredRequests} 
-          searchTerm={isSearchActive ? searchTerm : ''}
-        />
       </main>
     </MainLayout>
   )

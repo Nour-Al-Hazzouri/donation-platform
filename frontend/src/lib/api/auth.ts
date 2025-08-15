@@ -24,6 +24,25 @@ authApi.interceptors.request.use(
         }
       } catch (error) {
         console.error('Error parsing auth token:', error);
+        
+        // Try to get token from cookies as fallback
+        if (typeof window !== 'undefined' && document.cookie) {
+          const cookies = document.cookie.split(';');
+          const authCookie = cookies.find(cookie => cookie.trim().startsWith('auth-storage='));
+          
+          if (authCookie) {
+            try {
+              const cookieValue = decodeURIComponent(authCookie.split('=')[1]);
+              const parsedCookie = JSON.parse(cookieValue);
+              
+              if (parsedCookie.state?.user?.token) {
+                config.headers['Authorization'] = `Bearer ${parsedCookie.state.user.token}`;
+              }
+            } catch (cookieError) {
+              console.error('Error parsing auth cookie:', cookieError);
+            }
+          }
+        }
       }
     }
     
@@ -117,4 +136,4 @@ const authService = {
   },
 };
 
-export { authService };
+export { authService, authApi };

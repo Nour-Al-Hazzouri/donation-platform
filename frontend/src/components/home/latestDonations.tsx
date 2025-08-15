@@ -1,24 +1,16 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from 'lucide-react'
 import { cn } from '@/utils'
 import { useRouter } from 'next/navigation'
-import { donationsData } from '../donations/DonationCards'
 import Image from 'next/image'
+import { useDonationsStore, DonationData } from '@/store/donationsStore'
 
-interface DonationItem {
-  id: number
-  name: string
-  title: string
-  description: string
-  imageUrl?: string
-  avatarUrl?: string
-  initials: string
-  isVerified: boolean
+interface DonationItem extends Omit<DonationData, 'location'> {
   location: string
   timeAgo: string
   isAvailable: boolean
@@ -29,23 +21,18 @@ interface LatestDonationsProps {
   className?: string
 }
 
-// Generate deterministic quantities based on donation ID
-const mockDonations: DonationItem[] = donationsData.map((donation, index) => ({
-  ...donation,
-  userId: `user${donation.id}`,
-  userName: donation.name,
-  userAvatar: donation.avatarUrl,
-  itemName: donation.title,
-  quantity: (donation.id % 20) + 5, // Deterministic quantity between 5-24 based on ID
-  location: ['Tripoli', 'Beirut', 'Sidon', 'Tyre', 'Baalbek'][index % 5],
-  timeAgo: `${index + 1}h ago`,
-  isAvailable: true
-}))
-
 const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
-  const router = useRouter();
+  const router = useRouter()
+
+  // Ensure valid URL for Next.js Image
+  const imageSrc = donation.imageUrl
+    ? donation.imageUrl.startsWith('http')
+      ? donation.imageUrl
+      : `/${donation.imageUrl.replace(/^\/?/, '')}` // add leading slash
+    : undefined
+
   return (
-    <Card 
+    <Card
       className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-background cursor-pointer"
       onClick={() => donation.isAvailable && router.push(`/donations/${donation.id}`)}
     >
@@ -60,9 +47,9 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
             </Avatar>
             {donation.isVerified && (
               <div className="absolute -top-1 -right-1">
-                <Image 
-                  src="/verification.png" 
-                  alt="Verified" 
+                <Image
+                  src="/verification.png"
+                  alt="Verified"
                   width={16}
                   height={16}
                   className="rounded-full border border-white"
@@ -70,20 +57,18 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
               </div>
             )}
           </div>
-          <span className="text-foreground font-medium text-sm sm:text-base">
-            {donation.name}
-          </span>
+          <span className="text-foreground font-medium text-sm sm:text-base">{donation.name}</span>
         </div>
 
         <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
           <h3 className="font-semibold text-base sm:text-lg line-clamp-2">
             {donation.title} ({donation.quantity} available)
           </h3>
-          
-          {donation.imageUrl && (
+
+          {imageSrc && (
             <div className="w-full h-32 sm:h-40 relative rounded-md overflow-hidden">
-              <Image 
-                src={donation.imageUrl} 
+              <Image
+                src={imageSrc}
                 alt={donation.title}
                 fill
                 className="object-cover"
@@ -91,28 +76,30 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
               />
             </div>
           )}
-          
-          <p className="text-muted-foreground text-xs sm:text-sm line-clamp-3">
-            {donation.description}
-          </p>
-          
+
+          <p className="text-muted-foreground text-xs sm:text-sm line-clamp-3">{donation.description}</p>
+
           <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm">
             <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
-            <span>{donation.location} • {donation.timeAgo}</span>
+            <span>
+              {donation.location} • {donation.timeAgo}
+            </span>
           </div>
         </div>
 
         <div className="mt-auto">
-          <Button 
-            className={`w-full text-sm sm:text-base ${donation.isAvailable ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-secondary text-secondary-foreground'}`}
-            variant={donation.isAvailable ? "default" : "secondary"}
+          <Button
+            className={`w-full text-sm sm:text-base ${
+              donation.isAvailable ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-secondary text-secondary-foreground'
+            }`}
+            variant={donation.isAvailable ? 'default' : 'secondary'}
             disabled={!donation.isAvailable}
             onClick={(e) => {
-              e.stopPropagation();
-              donation.isAvailable && router.push(`/donations/${donation.id}`);
+              e.stopPropagation()
+              donation.isAvailable && router.push(`/donations/${donation.id}`)
             }}
           >
-            {donation.isAvailable ? "Request" : "Unavailable"}
+            {donation.isAvailable ? 'Request' : 'Unavailable'}
           </Button>
         </div>
       </CardContent>
@@ -121,65 +108,88 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
 }
 
 const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
-  const router = useRouter();
-  const [currentIndex, setCurrentIndex] = React.useState(0)
-  const [visibleCards, setVisibleCards] = React.useState(3)
-  const [isTransitioning, setIsTransitioning] = React.useState(false)
+  const { getDonationOffers } = useDonationsStore()
+  const [donations, setDonations] = useState<DonationItem[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [visibleCards, setVisibleCards] = useState(3)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
-  // Clone the first few items to create infinite loop effect
-  const extendedDonations = [...mockDonations, ...mockDonations.slice(0, visibleCards)]
-
-  React.useEffect(() => {
-    // Only run on client side
-    if (typeof window !== 'undefined') {
-      const updateVisibleCards = () => {
-        if (window.innerWidth < 640) { // xs
-          setVisibleCards(1)
-        } else if (window.innerWidth < 768) { // sm
-          setVisibleCards(1)
-        } else if (window.innerWidth < 1024) { // md
-          setVisibleCards(2)
-        } else { // lg+
-          setVisibleCards(3)
-        }
+  useEffect(() => {
+    const fetchDonations = async () => {
+      try {
+        const donationData = await getDonationOffers()
+        const transformedDonations: DonationItem[] = donationData.map((donation) => ({
+          ...donation,
+          quantity: donation.possibleAmount ? Math.floor(donation.possibleAmount) : 0,
+          location: donation.location?.district || 'Unknown',
+          timeAgo: getTimeAgo(donation.createdAt || ''),
+          isAvailable: donation.status === 'active' && (donation.possibleAmount || 0) > 0,
+        }))
+        setDonations(transformedDonations)
+      } catch (error) {
+        console.error('Error fetching donations:', error)
+      } finally {
+        setIsLoading(false)
       }
-
-      updateVisibleCards()
-      window.addEventListener('resize', updateVisibleCards)
-      return () => window.removeEventListener('resize', updateVisibleCards)
     }
+
+    fetchDonations()
+  }, [])
+
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+
+    if (diffDays > 0) return `${diffDays}d ago`
+    if (diffHours > 0) return `${diffHours}h ago`
+    return `${diffMins}m ago`
+  }
+
+  // Clone for infinite loop
+  const extendedDonations = donations.length > 0 ? [...donations, ...donations.slice(0, visibleCards)] : []
+
+  useEffect(() => {
+    const updateVisibleCards = () => {
+      if (window.innerWidth < 640) setVisibleCards(1)
+      else if (window.innerWidth < 768) setVisibleCards(1)
+      else if (window.innerWidth < 1024) setVisibleCards(2)
+      else setVisibleCards(3)
+    }
+
+    updateVisibleCards()
+    window.addEventListener('resize', updateVisibleCards)
+    return () => window.removeEventListener('resize', updateVisibleCards)
   }, [])
 
   const scrollLeft = () => {
+    if (donations.length === 0) return
     setIsTransitioning(true)
-    setCurrentIndex(prev => {
-      const newIndex = prev - 1
-      return newIndex < 0 ? mockDonations.length - 1 : newIndex
-    })
+    setCurrentIndex((prev) => (prev - 1 < 0 ? donations.length - 1 : prev - 1))
     setTimeout(() => setIsTransitioning(false), 300)
   }
 
   const scrollRight = () => {
+    if (donations.length === 0) return
     setIsTransitioning(true)
-    setCurrentIndex(prev => {
-      const newIndex = prev + 1
-      return newIndex >= mockDonations.length ? 0 : newIndex
-    })
+    setCurrentIndex((prev) => (prev + 1 >= donations.length ? 0 : prev + 1))
     setTimeout(() => setIsTransitioning(false), 300)
   }
 
-  // Auto-scroll every 5 seconds
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
-      if (!isTransitioning) {
-        scrollRight()
-      }
+      if (!isTransitioning) scrollRight()
     }, 5000)
     return () => clearInterval(interval)
   }, [isTransitioning])
 
   return (
-    <section className={cn("py-8 sm:py-12", className)}>
+    <section className={cn('py-8 sm:py-12', className)}>
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center mb-6 sm:mb-8">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground text-center">
@@ -187,49 +197,53 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
           </h2>
         </div>
 
-        <div className="relative">
-          <div className="flex items-center justify-center">
-            <Button
-              onClick={scrollLeft}
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
-              aria-label="Previous donations"
-            >
-              <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-
-            <div className="overflow-hidden w-full max-w-6xl">
-              <div
-                className="flex transition-transform duration-300 ease-in-out"
-                style={{
-                  transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
-                }}
-              >
-                {extendedDonations.map((donation, index) => (
-                  <div
-                    key={`${donation.id}-${index}`}
-                    className="flex-shrink-0 px-1 sm:px-2"
-                    style={{ width: `${100 / visibleCards}%` }}
-                  >
-                    <div className="h-full pb-4">
-                      <DonationCard donation={donation} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Button
-              onClick={scrollRight}
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
-              aria-label="Next donations"
-            >
-              <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
           </div>
-        </div>
+        ) : donations.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No donations available at the moment.</p>
+          </div>
+        ) : (
+          <div className="relative">
+            <div className="flex items-center justify-center">
+              <Button
+                onClick={scrollLeft}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
+                aria-label="Previous donations"
+              >
+                <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+
+              <div className="overflow-hidden w-full max-w-6xl">
+                <div
+                  className="flex transition-transform duration-300 ease-in-out"
+                  style={{ transform: `translateX(-${currentIndex * (100 / visibleCards)}%)` }}
+                >
+                  {extendedDonations.map((donation, index) => (
+                    <div key={`${donation.id}-${index}`} className="flex-shrink-0 px-1 sm:px-2" style={{ width: `${100 / visibleCards}%` }}>
+                      <div className="h-full pb-4">
+                        <DonationCard donation={donation} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Button
+                onClick={scrollRight}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
+                aria-label="Next donations"
+              >
+                <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-center mt-6 sm:mt-8">
-          <Button 
+          <Button
             className="transition-colors duration-200 rounded-full px-6 py-1.5 sm:px-8 sm:py-2 text-xs sm:text-sm lg:text-base bg-red-500 text-white hover:bg-red-600"
             onClick={() => router.push('/donations')}
           >

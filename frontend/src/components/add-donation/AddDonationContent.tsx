@@ -5,7 +5,25 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { AddDonationForm } from '@/components/add-donation/AddDonationForm'
 
-export function AddDonationContent() {
+// Re-use the same shape as your page/store expects
+export type AddDonationFormValues = {
+  title: string
+  description: string
+  type: 'request' | 'offer'
+  goalAmount: number
+  unit: string
+  endDate: string // 'YYYY-MM-DD'
+  locationId: number
+  imageUrl?: string
+}
+
+interface AddDonationContentProps {
+  onSubmit?: (values: AddDonationFormValues) => Promise<void>
+  submitting?: boolean
+  error?: string | null
+}
+
+export function AddDonationContent({ onSubmit, submitting, error }: AddDonationContentProps) {
   const router = useRouter()
 
   return (
@@ -24,7 +42,8 @@ export function AddDonationContent() {
         <h1 className="text-3xl font-bold text-foreground">Add Donation</h1>
       </div>
 
-      <AddDonationForm />
+      {/* Forward props to the form */}
+      <AddDonationForm onSubmit={onSubmit} submitting={submitting} error={error} />
     </main>
   )
 }

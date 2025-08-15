@@ -186,7 +186,7 @@ class DonationEventController extends Controller
     public function show(DonationEvent $donationEvent)
     {
         $this->authorize('view', $donationEvent);
-        $donationEvent = DonationEvent::with('user', 'location')->findOrFail($donationEvent->id);
+        $donationEvent->load('user', 'location');
         return response()->json([
             'data' => new DonationEventResource($donationEvent),
             'message' => 'Donation event retrieved successfully.',
