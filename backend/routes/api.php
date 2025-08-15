@@ -48,10 +48,10 @@ Route::apiResource('announcements', AnnouncementController::class)->only(['index
 Route::apiResource('locations', LocationController::class)->only(['index', 'show']);
 Route::apiResource('community-posts', CommunityPostController::class)->only(['index', 'show']);
 Route::get('community-posts/{communityPost}/comments', [CommentController::class, 'index']);
-Route::apiResource('donation-events', DonationEventController::class)->only(['index', 'show']);
 Route::get('donation-events/requests', [DonationEventController::class, 'requestsIndex']);
 Route::get('donation-events/offers', [DonationEventController::class, 'offersIndex']);
 Route::get('donation-events/user/{user}', [DonationEventController::class, 'userIndex']);
+Route::apiResource('donation-events', DonationEventController::class)->only(['index', 'show']);
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
