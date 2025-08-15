@@ -43,6 +43,16 @@ Route::prefix('auth')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
+// public routes for unauthenticated users
+Route::apiResource('announcements', AnnouncementController::class)->only(['index', 'show']);
+Route::apiResource('locations', LocationController::class)->only(['index', 'show']);
+Route::apiResource('community-posts', CommunityPostController::class)->only(['index', 'show']);
+Route::get('community-posts/{communityPost}/comments', [CommentController::class, 'index']);
+Route::apiResource('donation-events', DonationEventController::class)->only(['index', 'show']);
+Route::get('donation-events/requests', [DonationEventController::class, 'requestsIndex']);
+Route::get('donation-events/offers', [DonationEventController::class, 'offersIndex']);
+Route::get('donation-events/user/{user}', [DonationEventController::class, 'userIndex']);
+
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
@@ -68,7 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('verifications')->group(function () {
         // Public verification request submission
         Route::post('/', [VerificationController::class, 'store']);
-        
+
         // View own verification requests
         Route::get('/my-verifications', function () {
             return app(VerificationController::class)->userVerifications(auth()->user());
@@ -84,10 +94,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::middleware(['role:admin'])->group(function () {
             // List all verification requests
             Route::get('/', [VerificationController::class, 'index']);
-            
+
             // Get verifications for a specific user
             Route::get('/user/{user}', [VerificationController::class, 'userVerifications']);
-            
+
             // Update verification status
             Route::post('/{verification}/{status}', [VerificationController::class, 'updateStatus']);
         });
@@ -101,25 +111,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('announcements', AnnouncementController::class)->except(['index', 'show']);
     });
 
-    // Announcements (public for all authenticated users to view, but only admins/moderators can create/update/delete)
-    Route::apiResource('announcements', AnnouncementController::class)->only(['index', 'show']);
-
-    // Public locations (for all authenticated users)
-    Route::get('locations', [LocationController::class, 'index']);
-    Route::get('locations/{location}', [LocationController::class, 'show']);
-
     // Community Posts
     Route::apiResource('community-posts', CommunityPostController::class);
-    
+
     // Votes for community posts
     Route::prefix('community-posts/{postId}')->group(function () {
         Route::post('/vote', [VoteController::class, 'vote']);
         Route::get('/my-vote', [VoteController::class, 'getUserVote']);
     });
-    
+
     // Comments for community posts
     Route::prefix('community-posts/{communityPost}/comments')->group(function () {
-        Route::get('/', [CommentController::class, 'index']);
         Route::post('/', [CommentController::class, 'store']);
         Route::put('/{comment}', [CommentController::class, 'update']);
         Route::delete('/{comment}', [CommentController::class, 'destroy']);
@@ -135,16 +137,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [DonationEventController::class, 'store']);
         Route::put('/{donationEvent}', [DonationEventController::class, 'update']);
         Route::delete('/{donationEvent}', [DonationEventController::class, 'destroy']);
-        
+
         // Transactions for a specific donation event
         Route::get('/{donationEvent}/transactions', [DonationTransactionController::class, 'index']);
         Route::post('/{donationEvent}/transactions', [DonationTransactionController::class, 'store']);
-        
+
         // Status management routes for donation events
         Route::post('/{donationEvent}/activate', [DonationEventController::class, 'activate']);
         Route::post('/{donationEvent}/cancel', [DonationEventController::class, 'cancel']);
         Route::post('/{donationEvent}/suspend', [DonationEventController::class, 'suspend']);
-    }); 
+    });
 
     // General donation transactions routes
     Route::prefix('donation-transactions')->group(function () {
@@ -157,28 +159,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('notifications')->group(function () {
         // List notifications with optional filters
         Route::get('/', [NotificationController::class, 'index']);
-        
+
         // Get notification types
         Route::get('/types', [NotificationController::class, 'types']);
-        
+
         // Get unread count
         Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
-        
+
         // Mark notification as read
         Route::put('/{notification}/read', [NotificationController::class, 'markAsRead']);
-        
+
         // Mark all notifications as read
         Route::put('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
-        
+
         // Delete all unread notifications for the authenticated user
         Route::delete('/unread', [NotificationController::class, 'destroyUnread']);
-        
+
         // Delete all read notifications for the authenticated user
         Route::delete('/read', [NotificationController::class, 'destroyRead']);
-        
+
         // Delete a specific notification
         Route::delete('/{notification}', [NotificationController::class, 'destroy']);
-        
+
         // Delete all notifications for the authenticated user
         Route::delete('/', [NotificationController::class, 'destroyAll']);
     });

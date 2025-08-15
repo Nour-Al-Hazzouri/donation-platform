@@ -15,7 +15,7 @@ class CommunityPostPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view posts');
+        return true;
     }
 
     /**
@@ -23,7 +23,7 @@ class CommunityPostPolicy
      */
     public function view(User $user, CommunityPost $communityPost): bool
     {
-        return $user->can('view posts');
+        return true;
     }
 
     /**
