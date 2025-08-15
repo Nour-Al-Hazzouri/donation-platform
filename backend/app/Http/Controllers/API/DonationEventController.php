@@ -49,14 +49,14 @@ class DonationEventController extends Controller
     {
         try {
             $request->validate([
-                'q' => 'sometimes|string|max:255',
+                'query' => 'sometimes|string|max:255',
                 'per_page' => 'sometimes|integer|min:1|max:100',
                 'type' => 'sometimes|string|in:all,request,offer',
                 'status' => 'sometimes|string|in:active,completed,cancelled,suspended',
                 'location_id' => 'sometimes|exists:locations,id',
             ]);
 
-            $searchTerm = $request->query('q');
+            $searchTerm = $request->query('query');
             $perPage = $request->query('per_page', 15);
             $type = $request->query('type', 'all');
             $status = $request->query('status', 'active');

@@ -58,7 +58,7 @@ class DonationEventSearchTest extends TestCase
         ]);
 
         // Search by title
-        $response = $this->getJson('/api/donation-events?q=education');
+        $response = $this->getJson('/api/donation-events?query=education');
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
@@ -84,7 +84,7 @@ class DonationEventSearchTest extends TestCase
         ]);
 
         // Search by username
-        $response = $this->getJson('/api/donation-events?q=testdonor');
+        $response = $this->getJson('/api/donation-events?query=testdonor');
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
@@ -136,7 +136,7 @@ class DonationEventSearchTest extends TestCase
             'status' => 'active'
         ]);
 
-        $response = $this->getJson('/api/donation-events?q=nonexistent');
+        $response = $this->getJson('/api/donation-events?query=nonexistent');
 
         $response->assertStatus(200)
             ->assertJsonCount(0, 'data');
@@ -170,7 +170,7 @@ class DonationEventSearchTest extends TestCase
             'title' => 'Test Event'
         ]);
 
-        $response = $this->getJson('/api/donation-events?q=Test&per_page=10');
+        $response = $this->getJson('/api/donation-events?query=Test&per_page=10');
 
         $response->assertStatus(200)
             ->assertJson([
