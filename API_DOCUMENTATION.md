@@ -1253,10 +1253,7 @@ This document outlines all available API endpoints, their purposes, required per
 
 -   **URL**: `GET /api/announcements/{announcement}`
 -   **Description**: Retrieve details of a specific announcement
--   **Role**: Authenticated User
--   **Headers**:
-    -   `Authorization`: Bearer {token}
-    -   `Accept`: application/json
+-   **Role**: Any User
 -   **URL Parameters**:
     -   `announcement`: integer (required) - ID of the announcement to retrieve
 -   **Response (200 OK)**:
@@ -1294,8 +1291,6 @@ This document outlines all available API endpoints, their purposes, required per
 
     **Error Responses**:
 
-    -   `401 Unauthorized` - Missing or invalid authentication token
-    -   `403 Forbidden` - User doesn't have permission to view this announcement
     -   `404 Not Found` - Announcement not found
     -   `500 Internal Server Error` - Server error
 
@@ -1510,10 +1505,7 @@ This document outlines all available API endpoints, their purposes, required per
 
 -   **URL**: `GET /api/community-posts`
 -   **Description**: Retrieve a paginated list of community posts with vote counts and user information
--   **Role**: Authenticated User
--   **Headers**:
-    -   `Authorization`: Bearer {token}
-    -   `Accept`: application/json
+-   **Role**: Any User
 -   **Query Parameters**:
 
     -   `page`: integer (optional) - Page number for pagination (default: 1)
@@ -1585,7 +1577,6 @@ This document outlines all available API endpoints, their purposes, required per
 
     **Error Responses**:
 
-    -   `401 Unauthorized` - Missing or invalid authentication token
     -   `500 Internal Server Error` - Server error
 
 ### Create Post
@@ -1680,10 +1671,7 @@ This document outlines all available API endpoints, their purposes, required per
 
 -   **URL**: `GET /api/community-posts/{post}`
 -   **Description**: Retrieve detailed information about a specific community post including comments and votes
--   **Role**: Authenticated User
--   **Headers**:
-    -   `Authorization`: Bearer {token}
-    -   `Accept`: application/json
+-   **Role**: Any User
 -   **URL Parameters**:
 
     -   `post`: integer (required) - ID of the post to retrieve
@@ -1748,8 +1736,6 @@ This document outlines all available API endpoints, their purposes, required per
 
     **Error Responses**:
 
-    -   `401 Unauthorized` - Missing or invalid authentication token
-    -   `403 Forbidden` - User doesn't have permission to view this post
     -   `404 Not Found` - Post not found or deleted
     -   `500 Internal Server Error` - Server error
 
@@ -1901,10 +1887,7 @@ This document outlines all available API endpoints, their purposes, required per
 
 -   **URL**: `GET /api/community-posts/{communityPost}/comments`
 -   **Description**: Retrieve all comments for a specific community post
--   **Role**: Authenticated User
--   **Headers**:
-    -   `Authorization`: Bearer {token}
-    -   `Accept`: application/json
+-   **Role**: Any User
 -   **URL Parameters**:
 
     -   `communityPost`: integer (required) - ID of the community post
@@ -1954,8 +1937,6 @@ This document outlines all available API endpoints, their purposes, required per
 
     **Error Responses**:
 
-    -   `401 Unauthorized` - Missing or invalid authentication token
-    -   `403 Forbidden` - User doesn't have permission to view comments
     -   `404 Not Found` - Community post not found
     -   `500 Internal Server Error` - Server error
 
@@ -2137,8 +2118,6 @@ This document outlines all available API endpoints, their purposes, required per
 
 ## Votes
 
-{{ ... }}
-
 ### Vote on Post
 
 -   **URL**: `POST /api/community-posts/{postId}/vote`
@@ -2251,10 +2230,7 @@ This document outlines all available API endpoints, their purposes, required per
 
 -   **URL**: `GET /api/donation-events`
 -   **Description**: List all donation events (both requests and offers)
--   **Role**: Authenticated User
--   **Headers**:
-    -   `Accept`: application/json
-    -   `Authorization`: Bearer {token}
+-   **Role**: Any User
 -   **Query Parameters**:
     -   `type`: Filter by type - 'request' or 'offer'
     -   `status`: Filter by status - 'active', 'completed', 'cancelled', or 'suspended'
@@ -2308,19 +2284,13 @@ This document outlines all available API endpoints, their purposes, required per
 
     **Error Responses**:
 
-    -   `401 Unauthorized` - Missing or invalid authentication token
     -   `500 Internal Server Error` - Server error
 
 ### List Donation Requests
 
 -   **URL**: `GET /api/donation-events/requests`
 -   **Description**: List all active donation requests
--   **Role**: Authenticated User
--   **Headers**:
-
-    -   `Accept`: application/json
-    -   `Authorization`: Bearer {token}
-
+-   **Role**: Any User
 -   **Response (200 OK)**:
 
     ```json
@@ -2367,19 +2337,13 @@ This document outlines all available API endpoints, their purposes, required per
 
     **Error Responses**:
 
-    -   `401 Unauthorized` - Missing or invalid authentication token
     -   `500 Internal Server Error` - Server error
 
 ### List Donation Offers
 
 -   **URL**: `GET /api/donation-events/offers`
 -   **Description**: List all active donation offers
--   **Role**: Authenticated User
--   **Headers**:
-
-    -   `Accept`: application/json
-    -   `Authorization`: Bearer {token}
-
+-   **Role**: Any User
 -   **Response (200 OK)**:
 
     ```json
@@ -2428,19 +2392,13 @@ This document outlines all available API endpoints, their purposes, required per
 
     **Error Responses**:
 
-    -   `401 Unauthorized` - Missing or invalid authentication token
     -   `500 Internal Server Error` - Server error
 
 ### List User's Donation Events
 
 -   **URL**: `GET /api/donation-events/user/{user}`
 -   **Description**: List all donation events for a specific user
--   **Role**: Authenticated User
--   **Headers**:
-
-    -   `Accept`: application/json
-    -   `Authorization`: Bearer {token}
-
+-   **Role**: Any User
 -   **URL Parameters**:
     -   `user`: integer (required) - ID of the user whose events to retrieve
 -   **Query Parameters**:
@@ -2495,7 +2453,6 @@ This document outlines all available API endpoints, their purposes, required per
 
     **Error Responses**:
 
-    -   `401 Unauthorized` - Missing or invalid authentication token
     -   `404 Not Found` - User not found
     -   `500 Internal Server Error` - Server error
 
@@ -2598,12 +2555,7 @@ This document outlines all available API endpoints, their purposes, required per
 
 -   **URL**: `GET /api/donation-events/{donationEvent}`
 -   **Description**: Get details of a specific donation event
--   **Role**: Authenticated User
--   **Headers**:
-
-    -   `Accept`: application/json
-    -   `Authorization`: Bearer {token}
-
+-   **Role**: Any User
 -   **URL Parameters**:
 
     -   `donationEvent`: integer (required) - ID of the donation event to retrieve
@@ -2655,8 +2607,6 @@ This document outlines all available API endpoints, their purposes, required per
 
     **Error Responses**:
 
-    -   `401 Unauthorized` - Missing or invalid authentication token
-    -   `403 Forbidden` - Not authorized to view this event (for private events)
     -   `404 Not Found` - Event not found or not accessible
     -   `500 Internal Server Error` - Server error
 
