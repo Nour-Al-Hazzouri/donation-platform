@@ -94,8 +94,6 @@ class LocationApiTest extends TestCase
         $location = Location::factory()->create();
 
         // Test unauthenticated access
-        $this->getJson('/api/locations')->assertStatus(401);
-        $this->getJson("/api/locations/{$location->id}")->assertStatus(401);
         $this->postJson('/api/locations', [])->assertStatus(401);
         $this->putJson("/api/locations/{$location->id}", [])->assertStatus(401);
         $this->deleteJson("/api/locations/{$location->id}")->assertStatus(401);

@@ -105,7 +105,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin only routes
     Route::middleware(['role:admin'])->group(function () {
-        Route::apiResource('locations', LocationController::class);
+        Route::apiResource('locations', LocationController::class)->except(['index', 'show']);
         Route::get('statistics', [StatisticsController::class, 'index']);
         Route::post('users/{user}/promote-to-moderator', [UserController::class, 'promoteToModerator']);
         Route::apiResource('announcements', AnnouncementController::class)->except(['index', 'show']);

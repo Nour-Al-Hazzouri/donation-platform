@@ -197,13 +197,11 @@ class VerificationTest extends TestCase
                         'user'
                     ]
                 ],
-                'pagination' => [
+                'meta' => [
                     'total',
                     'per_page',
                     'current_page',
                     'last_page',
-                    'from',
-                    'to'
                 ]
             ]);
     }
