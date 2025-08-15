@@ -129,11 +129,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Donation events (public for all authenticated users to view, but only admins/moderators can create/update/delete)
     Route::prefix('donation-events')->group(function () {
-        Route::get('/', [DonationEventController::class, 'index']);
-        Route::get('/requests', [DonationEventController::class, 'requestsIndex']);
-        Route::get('/offers', [DonationEventController::class, 'offersIndex']);
-        Route::get('/user/{user}', [DonationEventController::class, 'userIndex']);
-        Route::get('/{donationEvent}', [DonationEventController::class, 'show']);
         Route::post('/', [DonationEventController::class, 'store']);
         Route::put('/{donationEvent}', [DonationEventController::class, 'update']);
         Route::delete('/{donationEvent}', [DonationEventController::class, 'destroy']);
