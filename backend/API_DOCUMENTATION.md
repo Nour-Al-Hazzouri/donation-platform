@@ -1500,11 +1500,8 @@ This document outlines all available API endpoints, their purposes, required per
 -   **Description**: Retrieve a paginated list of community posts with vote counts and user information
 -   **Role**: Any User
 -   **Query Parameters**:
-
-    -   `page`: integer (optional) - Page number for pagination (default: 1)
+    -   `query`: string (optional) - Search query for post content
     -   `per_page`: integer (optional) - Number of items per page (default: 10, max: 100)
-    -   `event_id`: integer (optional) - Filter posts by event ID
-    -   `user_id`: integer (optional) - Filter posts by user ID
 
 -   **Response (200 OK)**:
 
@@ -2864,12 +2861,9 @@ This document outlines all available API endpoints, their purposes, required per
 -   **URL Parameters**:
     -   `donationEvent`: integer (optional) - ID of the donation event to filter transactions
 -   **Query Parameters**:
-
-    -   `page`: integer (optional) - Page number for pagination
     -   `per_page`: integer (optional, max: 100) - Number of items per page
     -   `status`: string (optional) - Filter by status: 'pending', 'approved', or 'declined'
     -   `type`: string (optional) - Filter by transaction type: 'contribution' or 'claim'
-
 -   **Response (200 OK)**:
 
     ```json
