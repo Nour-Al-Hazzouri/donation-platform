@@ -68,10 +68,10 @@ export function EventSelector({
       </div>
       
       {open && (
-        <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-300 bg-white shadow-lg">
+        <div className="absolute z-10 mt-1 w-full rounded-md border border-input bg-background shadow-lg">
           <div className="max-h-60 overflow-auto p-1">
             <input
-              className="w-full rounded-md border border-gray-300 px-3 py-2 mb-2"
+              className="w-full rounded-md border border-input bg-background text-foreground px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Search events..."
               onChange={(e) => {
                 // Implement search filtering if needed
@@ -79,7 +79,7 @@ export function EventSelector({
             />
             
             {events.length === 0 && (
-              <div className="py-2 px-3 text-center text-sm text-gray-500">
+              <div className="py-2 px-3 text-center text-sm text-muted-foreground">
                 No events found.
               </div>
             )}
@@ -87,7 +87,7 @@ export function EventSelector({
             {events.map((event) => (
               <div
                 key={event.id}
-                className={`flex items-start px-3 py-2 rounded-md cursor-pointer ${selectedEvent?.id === event.id ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                className={`flex items-start px-3 py-2 rounded-md cursor-pointer ${selectedEvent?.id === event.id ? 'bg-secondary' : 'hover:bg-secondary/50'}`}
                 onClick={() => {
                   setSelectedEvent(event)
                   onSelect(event.id.toString())
@@ -95,8 +95,8 @@ export function EventSelector({
                 }}
               >
                 <div className="flex flex-col">
-                  <span className="font-medium">{event.title}</span>
-                  <span className="text-xs text-gray-500">
+                  <span className="font-medium text-foreground">{event.title}</span>
+                  <span className="text-xs text-muted-foreground">
                     {event.type === 'request' ? 'Request' : 'Offer'} • 
                     {event.goal_amount} {event.unit}
                   </span>
@@ -105,7 +105,7 @@ export function EventSelector({
             ))}
             
             <div 
-              className="border-t mt-1 py-2 text-center text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-50 rounded-md"
+              className="border-t border-border mt-1 py-2 text-center text-sm font-medium text-muted-foreground cursor-pointer hover:bg-secondary/50 rounded-md"
               onClick={() => {
                 setSelectedEvent(null)
                 onSelect(null)

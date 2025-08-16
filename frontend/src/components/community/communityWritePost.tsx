@@ -59,6 +59,12 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
     e.preventDefault()
     if (!postContent.trim()) return
     
+    // Validate event selection
+    if (!selectedEventId) {
+      setError('Please select a donation event')
+      return
+    }
+    
     setIsSubmitting(true)
     setError(null)
     
@@ -157,13 +163,16 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
           {/* Event Selector Field */}
           <div className="mb-6">
             <Label className="mb-2">
-              Related Donation Event (Optional)
+              Related Donation Event <span className="text-red-500">*</span>
             </Label>
             <EventSelector 
               onSelect={setSelectedEventId}
               selectedEventId={selectedEventId}
               placeholder="Select a related donation event..."
             />
+            {error && !selectedEventId && (
+              <p className="text-destructive text-xs mt-1">Please select a donation event</p>
+            )}
           </div>
 
           {/* Tags Field */}
