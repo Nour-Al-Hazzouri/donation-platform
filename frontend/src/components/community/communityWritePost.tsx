@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ArrowLeft, ImageIcon, ArrowUp, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -10,6 +10,8 @@ import { useAuthStore } from '@/store/authStore'
 import { CommunityPost } from '@/types'
 import { communityService } from '@/lib/api/community'
 import { toast } from 'sonner'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import donationsService from '@/lib/api/donations'
 
 interface CommunityWritePostProps {
   onCancel: () => void;
@@ -22,11 +24,50 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   const [images, setImages] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [title, setTitle] = useState('')
+  const [eventId, setEventId] = useState<string>('')
+  const [userPosts, setUserPosts] = useState<{id: number, title: string, type: string}[]>([])
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false)
   const { user } = useAuthStore()
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [previewImages, setPreviewImages] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
+  
+  // Fetch user's donation and request posts
+  useEffect(() => {
+    const fetchUserPosts = async () => {
+      if (!user?.id) return
+      
+      setIsLoadingPosts(true)
+      try {
+        // Get user's donation events
+        const response = await donationsService.getUserEvents(user.id)
+        
+        if (response && response.data) {
+          // Filter for only request and offer type events
+          const filteredEvents = response.data.filter(event => 
+            event.type === 'request' || event.type === 'offer'
+          )
+          
+          // Map to the format we need for the dropdown
+          const formattedPosts = filteredEvents.map(event => ({
+            id: event.id,
+            title: event.title,
+            type: event.type
+          }))
+          
+          setUserPosts(formattedPosts)
+        }
+      } catch (error) {
+        console.error('Error fetching user posts:', error)
+        toast.error('Failed to load your posts')
+      } finally {
+        setIsLoadingPosts(false)
+      }
+    }
+    
+    fetchUserPosts()
+  }, [user?.id])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -64,6 +105,12 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       // Prepare form data for API
       const formData = new FormData()
       formData.append('content', postContent)
+      formData.append('title', title)
+      
+      // Add event_id if selected and not 'none'
+      if (eventId && eventId !== 'none') {
+        formData.append('event_id', eventId)
+      }
       
       // Add tags if present
       const tagsList = tags.split(',').map(tag => tag.trim()).filter(tag => tag)
@@ -81,7 +128,8 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       // Send to API
       const postData = {
         content: postContent,
-        title: title, // Use title instead of event_id
+        title: title,
+        event_id: eventId && eventId !== 'none' ? eventId : undefined, // Include the selected event ID, or undefined if 'none'
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
         image_urls: selectedFiles
       };
@@ -149,6 +197,35 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
               onChange={(e) => setTitle(e.target.value)}
               required
             />
+          </div>
+          
+          {/* Event Field */}
+          <div className="mb-6">
+            <Label className="mb-2">
+              Event
+            </Label>
+            <Select value={eventId} onValueChange={setEventId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select an event" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {isLoadingPosts ? (
+                  <SelectItem value="loading" disabled>
+                    Loading...
+                  </SelectItem>
+                ) : (
+                  userPosts.map((post) => (
+                    <SelectItem key={post.id} value={post.id.toString()}>
+                      {post.title} ({post.type === 'request' ? 'Request' : 'Donation'})
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Select one of your donation or request posts
+            </p>
           </div>
 
           {/* Tags Field */}

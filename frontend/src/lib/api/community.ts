@@ -98,8 +98,17 @@ const communityService = {
     const formData = new FormData();
     formData.append('content', data.content);
     
+    // Add title to the form data
     if (data.title) {
-      formData.append('event_id', '1'); // Use a default event_id since the API requires it
+      formData.append('title', data.title);
+    }
+    
+    // Add event_id if provided
+    if (data.event_id) {
+      formData.append('event_id', data.event_id);
+    } else {
+      // Use a default event_id if none provided (API might require it)
+      formData.append('event_id', '0');
     }
     
     if (data.tags && data.tags.length > 0) {
