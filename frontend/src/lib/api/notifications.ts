@@ -10,6 +10,7 @@ export interface Notification {
     currency?: string;
     user_id?: number;
     event_id?: number;
+    event_type?: string;
     post_id?: number;
     comment_id?: number;
   };
@@ -45,7 +46,7 @@ export interface NotificationType {
 }
 
 export interface NotificationsResponse {
-  success: boolean;
+  success?: boolean;
   data: Notification[];
   links?: {
     first: string;
@@ -70,6 +71,7 @@ export interface UnreadCountResponse {
 }
 
 const notificationService = {
+  // List notifications for both admin and normal users
   list: async (params?: {
     type?: string;
     unread_only?: boolean;
@@ -77,6 +79,10 @@ const notificationService = {
     page?: number;
   }): Promise<NotificationsResponse> => {
     const response = await authApi.get('/notifications', { params });
+    // Always return an object with data array for consistency
+    if (Array.isArray(response.data)) {
+      return { data: response.data };
+    }
     return response.data;
   },
 
