@@ -29,7 +29,6 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
     total: 0
   })
 
-  // Fetch notifications and unread count on mount or when user changes
   useEffect(() => {
     setNotifications([])
     setPage(1)
@@ -38,7 +37,6 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
     // eslint-disable-next-line
   }, [user?.id, user?.isAdmin])
 
-  // Fetch notifications for both admin and normal users
   const fetchNotifications = async (reset = false) => {
     try {
       setLoading(true)
@@ -113,6 +111,8 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
       case 'claim':
       case 'donation_contribution':
       case 'donation_claim':
+      case 'admin_transaction':
+      case 'admin_request':
         return <CheckCircle className="text-green-500" size={20} />
       case 'admin_action':
       case 'admin_approved':
@@ -133,16 +133,60 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
   // Render notification messages for both user and admin actions
   const formatNotificationMessage = (notification: Notification) => {
     const { type, related_user, data, message, user: notifUser } = notification
+
+    // Transaction/donation/request logic for both admin and normal users
+    if (
+      [
+        'transaction_contribution',
+        'contribution',
+        'donation_contribution',
+        'admin_transaction'
+      ].includes(type.name)
+    ) {
+      // If the notification is for the current user (self), show confirmation
+      if (notifUser?.id === user?.id) {
+        if (user?.isAdmin) {
+          return `You (Admin) have successfully donated $${data?.amount || ''}${data?.event_type ? ` to ${data.event_type}` : ''}.`
+        }
+        return `You have successfully donated $${data?.amount || ''}${data?.event_type ? ` to ${data.event_type}` : ''}.`
+      }
+      // If the notification is for admin (and not self), show admin message
+      if (user?.isAdmin) {
+        return `New donation received from ${related_user?.first_name || 'a user'}${data?.amount ? ` ($${data.amount})` : ''}.`
+      }
+      // If the notification is for a normal user and admin made the donation
+      if (related_user?.isAdmin) {
+        return `Admin has made a donation of $${data?.amount || ''}${data?.event_type ? ` to ${data.event_type}` : ''}.`
+      }
+    }
+
+    if (
+      [
+        'transaction_claim',
+        'claim',
+        'donation_claim',
+        'admin_request'
+      ].includes(type.name)
+    ) {
+      // If the notification is for the current user (self), show confirmation
+      if (notifUser?.id === user?.id) {
+        if (user?.isAdmin) {
+          return `You (Admin) have submitted a request for ${data?.event_type || 'a donation'}.`
+        }
+        return `You have submitted a request for ${data?.event_type || 'a donation'}.`
+      }
+      // If the notification is for admin (and not self), show admin message
+      if (user?.isAdmin) {
+        return `New request submitted by ${related_user?.first_name || 'a user'}.`
+      }
+      // If the notification is for a normal user and admin made the request
+      if (related_user?.isAdmin) {
+        return `Admin submitted a request for ${data?.event_type || 'a donation'}.`
+      }
+    }
+
+    // Other notification types
     switch (type.name) {
-      case 'transaction_contribution':
-      case 'contribution':
-      case 'donation_contribution':
-        // Show for both user and admin
-        return `${related_user?.first_name || 'Someone'} contributed $${data?.amount || 'an amount'} to your donation request`
-      case 'transaction_claim':
-      case 'claim':
-      case 'donation_claim':
-        return `${related_user?.first_name || 'Someone'} claimed $${data?.amount || 'an amount'} from your donation offer`
       case 'admin_action':
       case 'admin_approved':
         return `Admin approved your ${data?.event_type || 'request'}${data?.amount ? ` ($${data.amount})` : ''}`

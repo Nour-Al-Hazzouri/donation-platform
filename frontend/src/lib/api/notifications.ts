@@ -13,6 +13,7 @@ export interface Notification {
     event_type?: string;
     post_id?: number;
     comment_id?: number;
+    isAdmin?: boolean; // for frontend logic
   };
   is_read: boolean;
   read_at: string | null;
@@ -29,6 +30,7 @@ export interface Notification {
     first_name: string;
     last_name: string;
     avatar: string | null;
+    isAdmin?: boolean; // for frontend logic
   };
   related_user?: {
     id: number;
@@ -36,6 +38,7 @@ export interface Notification {
     first_name: string;
     last_name: string;
     avatar: string | null;
+    isAdmin?: boolean; // for frontend logic
   };
 }
 
@@ -82,6 +85,18 @@ const notificationService = {
     // Always return an object with data array for consistency
     if (Array.isArray(response.data)) {
       return { data: response.data };
+    }
+    // Patch: Mark isAdmin on related_user if possible for frontend logic
+    if (response.data?.data) {
+      response.data.data = response.data.data.map((notif: Notification) => {
+        if (notif.related_user && typeof notif.related_user.isAdmin === "undefined") {
+          notif.related_user.isAdmin = notif.related_user.username?.toLowerCase() === "admin" || notif.related_user.first_name?.toLowerCase() === "admin";
+        }
+        if (notif.user && typeof notif.user.isAdmin === "undefined") {
+          notif.user.isAdmin = notif.user.username?.toLowerCase() === "admin" || notif.user.first_name?.toLowerCase() === "admin";
+        }
+        return notif;
+      });
     }
     return response.data;
   },
