@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { CommunityPost, CommentResource } from '@/types'
 import { communityService } from '@/lib/api/community'
 import { toast } from '@/components/ui/use-toast'
+import { ImageGallery } from '@/components/ui/image-gallery'
 
 interface User {
   id: string
@@ -360,14 +361,10 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           )}
         </div>
 
-        {/* Image */}
+        {/* Image Gallery */}
         {post.image_urls && post.image_urls.length > 0 && (
-          <div className="mb-2 rounded-lg overflow-hidden">
-            <img
-              src={post.image_urls[0]}
-              alt="post"
-              className="w-full h-auto max-h-96 object-cover"
-            />
+          <div className="mb-2">
+            <ImageGallery images={post.image_full_urls || post.image_urls} />
           </div>
         )}
 

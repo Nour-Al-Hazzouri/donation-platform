@@ -201,23 +201,47 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
           )}
 
           {previewImages.length > 0 && (
-            <div className="mb-6 grid grid-cols-2 gap-2">
-              {previewImages.map((img, index) => (
-                <div key={index} className="relative group">
+            <div className="mb-6">
+              {previewImages.length === 1 ? (
+                <div className="relative group">
                   <img 
-                    src={img} 
-                    alt={`Preview ${index}`} 
-                    className="w-full h-32 object-cover rounded-lg"
+                    src={previewImages[0]} 
+                    alt="Preview" 
+                    className="w-full h-48 object-cover rounded-lg"
                   />
                   <button
                     type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => removeImage(0)}
+                    className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     ×
                   </button>
                 </div>
-              ))}
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {previewImages.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={img} 
+                        alt={`Preview ${index + 1}`} 
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        {index + 1} / {previewImages.length}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -225,7 +249,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
             <Button variant="outline" asChild>
               <Label className="cursor-pointer">
                 <ImageIcon className="w-4 h-4 mr-2" />
-                Add Image
+                {previewImages.length > 0 ? `Add More Images (${previewImages.length})` : 'Add Images'}
                 <input 
                   type="file" 
                   className="hidden" 
