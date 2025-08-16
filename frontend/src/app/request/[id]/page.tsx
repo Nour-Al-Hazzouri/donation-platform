@@ -38,7 +38,13 @@ export default function RequestPage() {
       setIsLoading(true)
       try {
         const donationData = await getDonationById(donationId)
-        setDonation(donationData)
+        // Check if donationData is undefined (not found or error)
+        if (!donationData) {
+          console.warn(`Donation with ID ${donationId} not found or could not be loaded`)
+          setDonation(null)
+        } else {
+          setDonation(donationData)
+        }
       } catch (err) {
         console.error('Donation not found:', err)
         setDonation(null)

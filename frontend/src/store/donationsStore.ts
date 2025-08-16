@@ -53,27 +53,57 @@ interface DonationsState {
 }
 
 // Helper function to convert API DonationEvent to DonationData
-const mapEventToDonationData = (event: DonationEvent): DonationData => ({
-  id: event.id,
-  name: `${event.user.first_name} ${event.user.last_name}`,
-  title: event.title,
-  description: event.description,
-  imageUrl: event.image_full_urls?.[0] || event.image_urls?.[0] || undefined,
-  avatarUrl: (event.user as any).avatar || (event.user as any).avatar_url || undefined,
-  initials: `${event.user.first_name[0] ?? ''}${event.user.last_name[0] ?? ''}`,
-  isVerified: true, // assume donation creators are verified; adjust as needed
-  createdAt: event.created_at,
-  goalAmount: typeof event.goal_amount === 'string' ? parseFloat(event.goal_amount) : (event as any).goal_amount,
-  currentAmount: typeof event.current_amount === 'string' ? parseFloat(event.current_amount) : (event as any).current_amount,
-  possibleAmount: typeof event.possible_amount === 'string' ? parseFloat(event.possible_amount) : (event as any).possible_amount,
-  unit: (event as any).unit,
-  type: event.type,
-  status: event.status,
-  userId: event.user.id,
-  locationId: event.location?.id,
-  location: event.location ?? null,
-  endDate: (event as any).end_date
-})
+const mapEventToDonationData = (event: DonationEvent | null): DonationData | undefined => {
+  // Guard against null or undefined events
+  if (!event) {
+    console.warn('Attempted to map null or undefined event to DonationData');
+    return undefined;
+  }
+  
+  // Guard against missing user data
+  if (!event.user) {
+    console.warn(`Event ID ${event.id} has missing user data`);
+    return {
+      id: event.id,
+      name: 'Unknown User',
+      title: event.title || 'Untitled Donation',
+      description: event.description || '',
+      initials: 'UN',
+      isVerified: false,
+      goalAmount: typeof event.goal_amount === 'string' ? parseFloat(event.goal_amount) : (event as any).goal_amount,
+      currentAmount: typeof event.current_amount === 'string' ? parseFloat(event.current_amount) : (event as any).current_amount,
+      possibleAmount: typeof event.possible_amount === 'string' ? parseFloat(event.possible_amount) : (event as any).possible_amount,
+      type: event.type,
+      status: event.status,
+      createdAt: event.created_at,
+      unit: (event as any).unit,
+      location: event.location ?? null,
+      endDate: (event as any).end_date
+    };
+  }
+  
+  return {
+    id: event.id,
+    name: `${event.user.first_name || ''} ${event.user.last_name || ''}`.trim() || 'Unknown User',
+    title: event.title || 'Untitled Donation',
+    description: event.description || '',
+    imageUrl: event.image_full_urls?.[0] || event.image_urls?.[0] || undefined,
+    avatarUrl: (event.user as any).avatar || (event.user as any).avatar_url || undefined,
+    initials: `${event.user.first_name?.[0] ?? ''}${event.user.last_name?.[0] ?? ''}` || 'UN',
+    isVerified: true, // assume donation creators are verified; adjust as needed
+    createdAt: event.created_at,
+    goalAmount: typeof event.goal_amount === 'string' ? parseFloat(event.goal_amount) : (event as any).goal_amount,
+    currentAmount: typeof event.current_amount === 'string' ? parseFloat(event.current_amount) : (event as any).current_amount,
+    possibleAmount: typeof event.possible_amount === 'string' ? parseFloat(event.possible_amount) : (event as any).possible_amount,
+    unit: (event as any).unit,
+    type: event.type,
+    status: event.status,
+    userId: event.user.id,
+    locationId: event.location?.id,
+    location: event.location ?? null,
+    endDate: (event as any).end_date
+  };
+}
 
 export const useDonationsStore = create<DonationsState>()(
   persist(
@@ -89,7 +119,10 @@ export const useDonationsStore = create<DonationsState>()(
           // Always fetch fresh data from API (force param reserved for future logic)
           const response = await donationsService.getAllEvents()
           const payload = response?.data ?? response
-          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
+          // Filter out any undefined values that might be returned by mapEventToDonationData
+          const mappedDonations = (payload ?? [])
+            .map(mapEventToDonationData)
+            .filter((donation): donation is DonationData => donation !== undefined)
           set({ donations: mappedDonations, isLoading: false })
           return
         } catch (error: any) {
@@ -135,7 +168,6 @@ export const useDonationsStore = create<DonationsState>()(
 
           const currentDonations = get().donations
           set({
-            donations: [mappedDonation, ...currentDonations],
             isLoading: false
           })
         } catch (error: any) {
@@ -153,7 +185,10 @@ export const useDonationsStore = create<DonationsState>()(
         try {
           const response = await donationsService.getAllEvents()
           const payload = response?.data ?? response
-          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
+          // Filter out any undefined values that might be returned by mapEventToDonationData
+          const mappedDonations = (payload ?? [])
+            .map(mapEventToDonationData)
+            .filter((donation): donation is DonationData => donation !== undefined)
           set({ donations: mappedDonations, isLoading: false })
           return mappedDonations
         } catch (error: any) {
@@ -170,6 +205,15 @@ export const useDonationsStore = create<DonationsState>()(
         set({ isLoading: true, error: null })
         try {
           const response = await donationsService.getEvent(id)
+          // Check if response is null (404 not found case)
+          if (!response) {
+            console.warn(`Donation with ID ${id} not found`)
+            set({
+              error: `Donation with ID ${id} not found`,
+              isLoading: false
+            })
+            return undefined
+          }
           const payload = response?.data ?? response
           const mappedDonation = mapEventToDonationData(payload)
           return mappedDonation
@@ -190,7 +234,10 @@ export const useDonationsStore = create<DonationsState>()(
         try {
           const response = await donationsService.getUserEvents(userId)
           const payload = response?.data ?? response
-          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
+          // Filter out any undefined values that might be returned by mapEventToDonationData
+          const mappedDonations = (payload ?? [])
+            .map(mapEventToDonationData)
+            .filter((donation): donation is DonationData => donation !== undefined)
           set({ isLoading: false })
           return mappedDonations
         } catch (error: any) {
@@ -208,7 +255,10 @@ export const useDonationsStore = create<DonationsState>()(
         try {
           const response = await donationsService.getRequests()
           const payload = response?.data ?? response
-          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
+          // Filter out any undefined values that might be returned by mapEventToDonationData
+          const mappedDonations = (payload ?? [])
+            .map(mapEventToDonationData)
+            .filter((donation): donation is DonationData => donation !== undefined)
           set({ isLoading: false })
           return mappedDonations
         } catch (error: any) {
@@ -226,7 +276,10 @@ export const useDonationsStore = create<DonationsState>()(
         try {
           const response = await donationsService.getOffers()
           const payload = response?.data ?? response
-          const mappedDonations = (payload ?? []).map(mapEventToDonationData)
+          // Filter out any undefined values that might be returned by mapEventToDonationData
+          const mappedDonations = (payload ?? [])
+            .map(mapEventToDonationData)
+            .filter((donation): donation is DonationData => donation !== undefined)
           set({ isLoading: false })
           return mappedDonations
         } catch (error: any) {
@@ -275,6 +328,12 @@ export const useDonationsStore = create<DonationsState>()(
       replaceDonation: (event: DonationEvent) => {
         try {
           const mapped = mapEventToDonationData(event)
+          // If mapping failed, don't update the store
+          if (!mapped) {
+            console.warn('replaceDonation failed: could not map event to donation data', event)
+            return;
+          }
+          
           set((state) => {
             const exists = state.donations.some(d => d.id === mapped.id)
             if (exists) {
