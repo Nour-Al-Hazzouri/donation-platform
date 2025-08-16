@@ -10,6 +10,7 @@ import { useAuthStore } from '@/store/authStore'
 import { CommunityPost } from '@/types'
 import { communityService } from '@/lib/api/community'
 import { toast } from 'sonner'
+import { EventSelector } from './EventSelector'
 
 interface CommunityWritePostProps {
   onCancel: () => void;
@@ -22,6 +23,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   const [images, setImages] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [title, setTitle] = useState('')
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const { user } = useAuthStore()
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
@@ -81,7 +83,8 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       // Send to API
       const postData = {
         content: postContent,
-        title: title, // Use title instead of event_id
+        title: title,
+        event_id: selectedEventId, // Add the selected event ID
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
         image_urls: selectedFiles
       };
@@ -148,6 +151,18 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
+            />
+          </div>
+
+          {/* Event Selector Field */}
+          <div className="mb-6">
+            <Label className="mb-2">
+              Related Donation Event (Optional)
+            </Label>
+            <EventSelector 
+              onSelect={setSelectedEventId}
+              selectedEventId={selectedEventId}
+              placeholder="Select a related donation event..."
             />
           </div>
 
