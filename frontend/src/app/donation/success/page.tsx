@@ -66,8 +66,8 @@ export default function DonationSuccessPage() {
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-foreground mb-2">Donation Successful!</h1>
-          <p className="text-muted-foreground mb-6">Thank you for your generosity. Your donation has been successfully processed.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Donation Submitted!</h1>
+          <p className="text-muted-foreground mb-6">Thank you for your generosity. Your donation of <span className="font-semibold">${parseInt(donationDetails.amount).toLocaleString()}</span> is pending approval.</p>
 
           <div className="bg-background rounded-lg border p-4 mb-6">
             <h2 className="font-semibold text-foreground mb-4">Donation Details</h2>
@@ -77,6 +77,9 @@ export default function DonationSuccessPage() {
               </p>
               <p className="text-sm">
                 <span className="font-medium">Amount:</span> ${parseInt(donationDetails.amount).toLocaleString()}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Status:</span> <span className="text-amber-600">Pending Approval</span>
               </p>
             </div>
           </div>

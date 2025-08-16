@@ -12,11 +12,13 @@ export default function RequestSuccessPage() {
   const router = useRouter()
   const [requestId, setRequestId] = useState('')
   const [donationId, setDonationId] = useState('')
+  const [requestAmount, setRequestAmount] = useState('')
   const { donations } = useDonationsStore()
 
   useEffect(() => {
     setRequestId(searchParams.get('requestId') || '')
     setDonationId(searchParams.get('donationId') || '') // Get donationId from query params
+    setRequestAmount(searchParams.get('amount') || '0') // Get amount from query params
   }, [searchParams])
 
   const matchedRequest = donations.find(d => d.id.toString() === requestId)
@@ -32,17 +34,28 @@ export default function RequestSuccessPage() {
 
           {/* Success Message */}
           <h1 className="text-3xl font-bold text-foreground mb-4">
-            Your Request Has Been Submitted!
+            Request Submitted!
           </h1>
 
           <p className="text-lg text-muted-foreground mb-2">
-            Thank you for submitting your request. We will review it shortly and notify you of any updates.
+            Thank you for submitting your request for <span className="font-semibold">${parseInt(requestAmount).toLocaleString()}</span>. Your request is pending approval.
           </p>
 
           {matchedRequest && (
-            <p className="text-muted-foreground text-sm mb-4">
-              Request Title: <span className="font-semibold">{matchedRequest.title}</span>
-            </p>
+            <div className="bg-background rounded-lg border p-4 mb-6">
+              <h2 className="font-semibold text-foreground mb-4">Request Details</h2>
+              <div className="space-y-2">
+                <p className="text-sm">
+                  <span className="font-medium">Title:</span> {matchedRequest.title}
+                </p>
+                <p className="text-sm">
+                  <span className="font-medium">Amount:</span> ${parseInt(requestAmount).toLocaleString()}
+                </p>
+                <p className="text-sm">
+                  <span className="font-medium">Status:</span> <span className="text-amber-600">Pending Approval</span>
+                </p>
+              </div>
+            </div>
           )}
 
           <p className="text-muted-foreground mb-8">
