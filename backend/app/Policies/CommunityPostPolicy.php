@@ -31,6 +31,11 @@ class CommunityPostPolicy
      */
     public function create(User $user): bool
     {
+        // Check if user is verified before allowing post creation
+        if (!$user->is_verified) {
+            return false;
+        }
+        
         return $user->can('create posts') || $user->can('manage posts');
     }
 
