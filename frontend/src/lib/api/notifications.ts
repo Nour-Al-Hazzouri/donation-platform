@@ -13,7 +13,7 @@ export interface Notification {
     event_type?: string;
     post_id?: number;
     comment_id?: number;
-    isAdmin?: boolean; // for frontend logic
+    isAdmin?: boolean;
   };
   is_read: boolean;
   read_at: string | null;
@@ -30,7 +30,7 @@ export interface Notification {
     first_name: string;
     last_name: string;
     avatar: string | null;
-    isAdmin?: boolean; // for frontend logic
+    isAdmin?: boolean;
   };
   related_user?: {
     id: number;
@@ -38,7 +38,7 @@ export interface Notification {
     first_name: string;
     last_name: string;
     avatar: string | null;
-    isAdmin?: boolean; // for frontend logic
+    isAdmin?: boolean;
   };
 }
 
@@ -74,41 +74,85 @@ export interface UnreadCountResponse {
 }
 
 const notificationService = {
-  // List notifications for both admin and normal users
   list: async (params?: {
     type?: string;
     unread_only?: boolean;
     per_page?: number;
     page?: number;
   }): Promise<NotificationsResponse> => {
-    const response = await authApi.get('/notifications', { params });
-    // Always return an object with data array for consistency
-    if (Array.isArray(response.data)) {
-      return { data: response.data };
-    }
-    // Patch: Mark isAdmin on related_user if possible for frontend logic
-    if (response.data?.data) {
-      response.data.data = response.data.data.map((notif: Notification) => {
-        if (notif.related_user && typeof notif.related_user.isAdmin === "undefined") {
-          notif.related_user.isAdmin = notif.related_user.username?.toLowerCase() === "admin" || notif.related_user.first_name?.toLowerCase() === "admin";
+    try {
+      const response = await authApi.get('/notifications', { params });
+      
+      // Normalize the response data structure
+      let normalizedData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      
+      // Process each notification
+      normalizedData = normalizedData.map((notif: Notification) => {
+        // Ensure related_user exists
+        if (!notif.related_user && notif.data?.user_id) {
+          notif.related_user = {
+            id: notif.data.user_id,
+            username: '',
+            first_name: '',
+            last_name: '',
+            avatar: null
+          };
         }
-        if (notif.user && typeof notif.user.isAdmin === "undefined") {
-          notif.user.isAdmin = notif.user.username?.toLowerCase() === "admin" || notif.user.first_name?.toLowerCase() === "admin";
+
+        // Set isAdmin flags
+        if (notif.related_user) {
+          notif.related_user.isAdmin = notif.related_user.isAdmin || 
+            notif.related_user.username?.toLowerCase() === "admin" || 
+            notif.related_user.first_name?.toLowerCase() === "admin";
         }
+        
+        if (notif.user) {
+          notif.user.isAdmin = notif.user.isAdmin || 
+            notif.user.username?.toLowerCase() === "admin" || 
+            notif.user.first_name?.toLowerCase() === "admin";
+        }
+
+        // Normalize type names for donations/requests
+        if (notif.type) {
+          if (['donation', 'contribution'].some(t => notif.type.name.toLowerCase().includes(t))) {
+            notif.type.name = 'donation_contribution';
+          } else if (['request', 'claim'].some(t => notif.type.name.toLowerCase().includes(t))) {
+            notif.type.name = 'donation_claim';
+          }
+        }
+
         return notif;
       });
+
+      // Return consistent response structure
+      return {
+        data: normalizedData,
+        meta: response.data?.meta || {
+          current_page: 1,
+          last_page: 1,
+          per_page: params?.per_page || 10,
+          total: normalizedData.length
+        }
+      };
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      return { data: [], message: 'Failed to fetch notifications' };
     }
-    return response.data;
   },
 
   getUnreadCount: async (): Promise<UnreadCountResponse> => {
-    const response = await authApi.get('/notifications/unread-count');
-    return response.data;
+    try {
+      const response = await authApi.get('/notifications/unread-count');
+      return { unread_count: response.data?.unread_count || 0 };
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+      return { unread_count: 0 };
+    }
   },
 
   getTypes: async (): Promise<{ data: NotificationType[] }> => {
     const response = await authApi.get('/notifications/types');
-    return response.data;
+    return { data: response.data || [] };
   },
 
   markAsRead: async (notificationId: string): Promise<{ message: string; data: Notification }> => {

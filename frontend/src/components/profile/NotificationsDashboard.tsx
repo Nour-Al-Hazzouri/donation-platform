@@ -102,7 +102,6 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
     }
   }
 
-  // Recognize all possible transaction and admin action notification types
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'transaction_contribution':
@@ -113,6 +112,8 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
       case 'donation_claim':
       case 'admin_transaction':
       case 'admin_request':
+      case 'donation':
+      case 'request':
         return <CheckCircle className="text-green-500" size={20} />
       case 'admin_action':
       case 'admin_approved':
@@ -130,62 +131,64 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
     }
   }
 
-  // Render notification messages for both user and admin actions
   const formatNotificationMessage = (notification: Notification) => {
     const { type, related_user, data, message, user: notifUser } = notification
 
-    // Transaction/donation/request logic for both admin and normal users
-    if (
-      [
-        'transaction_contribution',
-        'contribution',
-        'donation_contribution',
-        'admin_transaction'
-      ].includes(type.name)
-    ) {
-      // If the notification is for the current user (self), show confirmation
+    // Log for debugging
+    console.log('Processing notification:', notification)
+
+    // Handle all donation/contribution types
+    const donationTypes = [
+      'transaction_contribution',
+      'contribution',
+      'donation_contribution',
+      'admin_transaction',
+      'donation',
+      'contribution_request'
+    ]
+    
+    // Handle all request/claim types
+    const requestTypes = [
+      'transaction_claim',
+      'claim',
+      'donation_claim',
+      'admin_request',
+      'request',
+      'donation_request'
+    ]
+
+    if (donationTypes.includes(type.name)) {
       if (notifUser?.id === user?.id) {
         if (user?.isAdmin) {
           return `You (Admin) have successfully donated $${data?.amount || ''}${data?.event_type ? ` to ${data.event_type}` : ''}.`
         }
         return `You have successfully donated $${data?.amount || ''}${data?.event_type ? ` to ${data.event_type}` : ''}.`
       }
-      // If the notification is for admin (and not self), show admin message
       if (user?.isAdmin) {
         return `New donation received from ${related_user?.first_name || 'a user'}${data?.amount ? ` ($${data.amount})` : ''}.`
       }
-      // If the notification is for a normal user and admin made the donation
       if (related_user?.isAdmin) {
         return `Admin has made a donation of $${data?.amount || ''}${data?.event_type ? ` to ${data.event_type}` : ''}.`
       }
+      return `New donation received${data?.amount ? ` ($${data.amount})` : ''}`
     }
 
-    if (
-      [
-        'transaction_claim',
-        'claim',
-        'donation_claim',
-        'admin_request'
-      ].includes(type.name)
-    ) {
-      // If the notification is for the current user (self), show confirmation
+    if (requestTypes.includes(type.name)) {
       if (notifUser?.id === user?.id) {
         if (user?.isAdmin) {
           return `You (Admin) have submitted a request for ${data?.event_type || 'a donation'}.`
         }
         return `You have submitted a request for ${data?.event_type || 'a donation'}.`
       }
-      // If the notification is for admin (and not self), show admin message
       if (user?.isAdmin) {
         return `New request submitted by ${related_user?.first_name || 'a user'}.`
       }
-      // If the notification is for a normal user and admin made the request
       if (related_user?.isAdmin) {
         return `Admin submitted a request for ${data?.event_type || 'a donation'}.`
       }
+      return `New request submitted${data?.event_type ? ` for ${data.event_type}` : ''}`
     }
 
-    // Other notification types
     switch (type.name) {
       case 'admin_action':
       case 'admin_approved':
@@ -205,8 +208,8 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
       case 'new_announcement':
         return message || 'A new announcement has been posted'
       default:
-        if (message) return message
-        return type.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+        console.warn('Unhandled notification type:', type.name)
+        return message || `New notification: ${type.name.replace(/_/g, ' ')}`
     }
   }
 
