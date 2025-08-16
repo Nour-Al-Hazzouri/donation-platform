@@ -112,7 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Community Posts
-    Route::apiResource('community-posts', CommunityPostController::class);
+    Route::apiResource('community-posts', CommunityPostController::class)->except('index', 'show');
 
     // Votes for community posts
     Route::prefix('community-posts/{postId}')->group(function () {
