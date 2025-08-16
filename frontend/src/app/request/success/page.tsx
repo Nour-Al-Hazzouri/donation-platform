@@ -76,8 +76,8 @@ export default function RequestSuccessPage() {
       <MainLayout>
         <div className="max-w-2xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold">Request Not Found</h1>
-          <Button onClick={() => router.push('/requests')} className="bg-red-500 hover:bg-red-600 text-white mt-4">
-            Browse Requests
+          <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white mt-4">
+            Browse Donations
           </Button>
         </div>
       </MainLayout>
@@ -122,11 +122,11 @@ export default function RequestSuccessPage() {
             View Request
           </Button> */}
           <Button
-            onClick={() => router.push('/requests')}
+            onClick={() => router.push('/donations')}
             variant="outline"
             className="w-full sm:w-auto"
           >
-            Browse More Requests
+            Browse More Donations
           </Button>
         </div>
 
