@@ -1,68 +1,153 @@
+// frontend/src/components/profile/NotificationsDashboard.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CheckCircle, MessageCircle, Heart, User as UserIcon } from "lucide-react"
 import ProfileSidebar from "./Sidebar"
 import { useAuthStore } from "@/store/authStore"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-
-interface Notification {
-  id: string
-  avatar: string
-  message: string
-  timestamp: string
-  isHighlighted?: boolean
-}
-
-const generateMockNotifications = (): Notification[] => [
-  {
-    id: `1-${crypto.randomUUID()}`,
-    avatar: "/default-avatar.png",
-    message: "Sarah Johnson donated $50 to Emergency Food Relief\nYour generous contribution will help provide meals for families in need.",
-    timestamp: "2m ago",
-  },
-  {
-    id: `2-${crypto.randomUUID()}`,
-    avatar: "/default-avatar.png",
-    message: "Ahmed Hassan requested Winter Clothing Drive\nLooking for warm clothes and blankets for displaced families.",
-    timestamp: "5m ago",
-  },
-  {
-    id: `3-${crypto.randomUUID()}`,
-    avatar: "/default-avatar.png",
-    message: "Your account has been verified\nYou now have access to all donation and request features.",
-    timestamp: "10m ago",
-  },
-  {
-    id: `4-${crypto.randomUUID()}`,
-    avatar: "/default-avatar.png",
-    message: "Account verification pending\nPlease check your email and complete the verification process.",
-    timestamp: "15m ago",
-  },
-  {
-    id: `5-${crypto.randomUUID()}`,
-    avatar: "/default-avatar.png",
-    message: 'Maria Rodriguez commented on your post\n"Thank you for organizing this amazing initiative!"',
-    timestamp: "20m ago",
-  }
-]
+import { notificationService } from "@/lib/api/notifications"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { formatDistanceToNow } from "date-fns"
 
 interface NotificationsDashboardProps {
   onViewChange?: (view: 'profile' | 'notifications') => void
 }
 
+interface AuthUser {
+  id?: number;
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  email?: string;
+  avatar_url?: string | null;
+  avatar_url_full?: string | null;
+  [key: string]: any; // Allow additional properties
+}
+
 export default function NotificationsDashboard({ onViewChange }: NotificationsDashboardProps) {
   const { user } = useAuthStore()
-  const [notifications, setNotifications] = useState<Notification[]>(() => generateMockNotifications())
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
+    total: 0
+  })
 
-  const loadMoreNotifications = () => {
-    setNotifications(prev => [
-      ...prev,
-      ...generateMockNotifications().map(notif => ({
-        ...notif,
-        id: `${notif.id.split('-')[0]}-${crypto.randomUUID()}`
-      }))
-    ])
+  useEffect(() => {
+    fetchNotifications()
+    fetchUnreadCount()
+  }, [])
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true)
+      const response = await notificationService.list({
+        page,
+        per_page: 10
+      })
+      
+      if (response.success && response.data) {
+        setNotifications(prev => [...prev, ...response.data])
+        
+        if (response.meta) {
+          setPagination({
+            current_page: response.meta.current_page,
+            last_page: response.meta.last_page,
+            per_page: response.meta.per_page,
+            total: response.meta.total
+          })
+          setHasMore(response.meta.current_page < response.meta.last_page)
+        }
+        
+        setPage(prev => prev + 1)
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await notificationService.getUnreadCount()
+      setUnreadCount(response.unread_count)
+    } catch (error) {
+      console.error("Failed to fetch unread count:", error)
+    }
+  }
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      await notificationService.markAsRead(notificationId)
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif.id === notificationId ? { ...notif, is_read: true } : notif
+        )
+      )
+      setUnreadCount(prev => Math.max(0, prev - 1))
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error)
+    }
+  }
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead()
+      setNotifications(prev => 
+        prev.map(notif => ({ ...notif, is_read: true }))
+      )
+      setUnreadCount(0)
+    } catch (error) {
+      console.error("Failed to mark all notifications as read:", error)
+    }
+  }
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'transaction_contribution':
+      case 'transaction_claim':
+        return <CheckCircle className="text-green-500" size={20} />
+      case 'new_comment':
+        return <MessageCircle className="text-blue-500" size={20} />
+      case 'post_upvoted':
+      case 'post_downvoted':
+        return <Heart className="text-red-500" size={20} />
+      default:
+        return <UserIcon className="text-gray-500" size={20} />
+    }
+  }
+
+  const formatNotificationMessage = (notification: any) => {
+    const { type, related_user, data } = notification
+    
+    switch (type.name) {
+      case 'transaction_contribution':
+        return `${related_user?.first_name || 'Someone'} contributed $${data?.amount || 'an amount'} to your donation request`
+      case 'transaction_claim':
+        return `${related_user?.first_name || 'Someone'} claimed $${data?.amount || 'an amount'} from your donation offer`
+      case 'new_comment':
+        return `${related_user?.first_name || 'Someone'} commented on your post`
+      case 'post_upvoted':
+        return `${related_user?.first_name || 'Someone'} upvoted your post`
+      case 'post_downvoted':
+        return `${related_user?.first_name || 'Someone'} downvoted your post`
+      case 'verification_approved':
+        return 'Your account verification has been approved'
+      case 'verification_rejected':
+        return 'Your account verification was rejected'
+      case 'new_announcement':
+        return 'A new announcement has been posted'
+      default:
+        return notification.message
+    }
   }
 
   return (
@@ -72,8 +157,8 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
           <div className="hidden md:block">
             <ProfileSidebar 
               activeItem="notifications" 
-              fullName={user?.name || "Guest"} 
-              profileImage={user?.profileImage}
+              fullName={`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || "Guest"} 
+              profileImage={user?.avatar_url || user?.avatar_url_full || undefined}
               onViewChange={onViewChange}
             />
           </div>
@@ -81,62 +166,84 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
 
         <div className="flex-1 p-4 lg:p-8 lg:overflow-y-auto md:ml-64">
           <div className="max-w-4xl">
-            <h1 className="text-2xl lg:text-3xl font-semibold text-foreground mb-6">
-              Notifications
-            </h1>
-            
-            <div className="space-y-4">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className="flex items-start gap-4 p-4 bg-card border border-border rounded-lg hover:shadow-sm transition-shadow"
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl lg:text-3xl font-semibold text-foreground">
+                Notifications {unreadCount > 0 && `(${unreadCount})`}
+              </h1>
+              {unreadCount > 0 && (
+                <Button 
+                  variant="ghost"
+                  onClick={handleMarkAllAsRead}
+                  className="text-sm text-muted-foreground hover:text-primary"
                 >
-                  <div className="flex-shrink-0">
-                    <Avatar className="h-10 w-10 lg:h-12 lg:w-12">
-                      <AvatarImage 
-                        src={notification.avatar} 
-                        alt="Notification avatar"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none'
-                        }}
-                      />
-                      <AvatarFallback className="bg-muted">
-                        <UserIcon size={20} className="text-muted-foreground" />
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
+                  Mark all as read
+                </Button>
+              )}
+            </div>
+            
+            {loading && notifications.length === 0 ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 w-full rounded-lg" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`flex items-start gap-4 p-4 bg-card border border-border rounded-lg hover:shadow-sm transition-shadow ${
+                      !notification.is_read ? 'border-l-4 border-l-primary' : ''
+                    }`}
+                    onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
+                  >
+                    <div className="flex-shrink-0">
+                      <Avatar className="h-10 w-10 lg:h-12 lg:w-12">
+                        <AvatarImage 
+                          src={notification.related_user?.avatar || '/default-avatar.png'} 
+                          alt="Notification avatar"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = 'none'
+                          }}
+                        />
+                        <AvatarFallback className="bg-muted">
+                          {getNotificationIcon(notification.type.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="space-y-1">
-                      {notification.message.split("\n").map((line, index) => (
+                    <div className="flex-1 min-w-0">
+                      <div className="space-y-1">
                         <p
-                          key={index}
                           className={`text-sm lg:text-base leading-relaxed ${
-                            index === 0
-                              ? notification.isHighlighted
-                                ? "text-primary font-medium"
-                                : "text-foreground font-medium"
-                              : "text-muted-foreground"
+                            !notification.is_read
+                              ? "text-primary font-medium"
+                              : "text-foreground"
                           }`}
                         >
-                          {line}
+                          {formatNotificationMessage(notification)}
                         </p>
-                      ))}
+                      </div>
+                      <p className="text-xs lg:text-sm text-muted-foreground mt-2">
+                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                      </p>
                     </div>
-                    <p className="text-xs lg:text-sm text-muted-foreground mt-2">{notification.timestamp}</p>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
-            <div className="text-center mt-8">
-              <button 
-                className="bg-red-500 hover:bg-red-600 text-white font-medium text-sm lg:text-base transition-colors px-4 py-2 rounded-lg"
-                onClick={loadMoreNotifications}
-              >
-                Load more notifications
-              </button>
-            </div>
+            {hasMore && (
+              <div className="text-center mt-8">
+                <Button 
+                  variant="outline"
+                  onClick={fetchNotifications}
+                  disabled={loading}
+                >
+                  {loading ? 'Loading...' : 'Load more notifications'}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
