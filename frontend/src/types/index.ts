@@ -71,6 +71,11 @@ export interface CommunityPost {
     last_name: string;
     avatar?: string;
   };
+  event?: {
+    id: number;
+    title: string;
+    type?: 'request' | 'offer';
+  };
   comments_count?: number;
   comments?: CommentResource[];
 }
