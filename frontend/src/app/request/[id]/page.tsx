@@ -29,7 +29,7 @@ export default function RequestPage() {
   const [isCustom, setIsCustom] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Pending transactions state
+  // Pending transactions state.
   const [pendingTransactions, setPendingTransactions] = useState<{ id: string; amount: number; requestId: string }[]>([])
 
   // Fetch donation by ID
