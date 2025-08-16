@@ -51,7 +51,7 @@ export interface Comment {
 export interface CommunityPost {
   id: number;
   user_id: number;
-  event_id?: number;
+  title: string;
   content: string;
   image_urls?: string[];
   image_full_urls?: string[];
@@ -70,10 +70,6 @@ export interface CommunityPost {
     first_name: string;
     last_name: string;
     avatar?: string;
-  };
-  event?: {
-    id: number;
-    title: string;
   };
   comments_count?: number;
   comments?: CommentResource[];

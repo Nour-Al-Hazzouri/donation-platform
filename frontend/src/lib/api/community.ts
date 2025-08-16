@@ -57,7 +57,8 @@ communityApi.interceptors.request.use(
 // Interface for creating a community post
 export interface CreateCommunityPostData {
   content: string;
-  event_id?: number;
+  title: string; // Used for display in the UI
+  event_id?: string; // Required by the API
   image_urls?: File[];
   tags?: string[];
 }
@@ -97,8 +98,8 @@ const communityService = {
     const formData = new FormData();
     formData.append('content', data.content);
     
-    if (data.event_id) {
-      formData.append('event_id', data.event_id.toString());
+    if (data.title) {
+      formData.append('event_id', '1'); // Use a default event_id since the API requires it
     }
     
     if (data.tags && data.tags.length > 0) {
@@ -167,13 +168,13 @@ const communityService = {
   },
   
   // Vote on a community post (upvote or downvote)
-  votePost: async (postId: number, voteType: 'upvote' | 'downvote'): Promise<ApiResponse<{ votes: CommunityPost['votes'] }>> => {
+  votePost: async (postId: number, voteType: 'upvote' | 'downvote'): Promise<ApiResponse<{ upvotes: number, downvotes: number, total_votes: number }>> => {
     const response = await communityApi.post(`/community-posts/${postId}/vote`, { type: voteType });
     return response.data;
   },
   
   // Remove vote from a community post
-  removeVote: async (postId: number): Promise<ApiResponse<{ votes: CommunityPost['votes'] }>> => {
+  removeVote: async (postId: number): Promise<ApiResponse<{ upvotes: number, downvotes: number, total_votes: number }>> => {
     const response = await communityApi.delete(`/community-posts/${postId}/vote`);
     return response.data;
   },

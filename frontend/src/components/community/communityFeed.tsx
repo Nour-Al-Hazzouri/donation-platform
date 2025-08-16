@@ -30,6 +30,7 @@ interface MockCommunityPost {
   isDisliked?: boolean
   createdAt: string
   tags: string[]
+  // Title is generated from content in convertMockToCommunityPost function
 }
 
 const mockUser: User = {
@@ -94,6 +95,7 @@ const convertMockToCommunityPost = (mockPost: MockCommunityPost): CommunityPost 
   return {
     id: parseInt(mockPost.id),
     user_id: parseInt(mockPost.user.id.replace('user', '')) || 1,
+    title: mockPost.content.substring(0, 50) + (mockPost.content.length > 50 ? '...' : ''), // Generate title from content
     content: mockPost.content,
     image_urls: mockPost.images,
     image_full_urls: mockPost.images,
@@ -192,8 +194,8 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           const response = await communityService.removeVote(post.id)
           if (response.success) {
             setIsLiked(false)
-            setLikesCount(response.data.upvotes || 0)
-            setDislikesCount(response.data.downvotes || 0)
+            setLikesCount(response.data.upvotes)
+            setDislikesCount(response.data.downvotes)
           }
         } else {
           // Add upvote
@@ -201,8 +203,8 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           if (response.success) {
             if (isDisliked) setIsDisliked(false)
             setIsLiked(true)
-            setLikesCount(response.data.upvotes || 0)
-            setDislikesCount(response.data.downvotes || 0)
+            setLikesCount(response.data.upvotes)
+            setDislikesCount(response.data.downvotes)
           }
         }
       } catch (error) {
@@ -228,8 +230,8 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           const response = await communityService.removeVote(post.id)
           if (response.success) {
             setIsDisliked(false)
-            setLikesCount(response.data.upvotes || 0)
-            setDislikesCount(response.data.downvotes || 0)
+            setLikesCount(response.data.upvotes)
+            setDislikesCount(response.data.downvotes)
           }
         } else {
           // Add downvote
@@ -237,8 +239,8 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           if (response.success) {
             if (isLiked) setIsLiked(false)
             setIsDisliked(true)
-            setLikesCount(response.data.upvotes || 0)
-            setDislikesCount(response.data.downvotes || 0)
+            setLikesCount(response.data.upvotes)
+            setDislikesCount(response.data.downvotes)
           }
         }
       } catch (error) {
@@ -335,8 +337,11 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           </div>
         </div>
 
-        {/* Post content */}
+        {/* Post title and content */}
         <div className="mb-2 whitespace-pre-line">
+          <h3 className="text-foreground font-medium text-base mb-1">
+            {post.title}
+          </h3>
           <p className="text-foreground text-sm mb-1 line-clamp-3 leading-snug">
             {post.content}
           </p>

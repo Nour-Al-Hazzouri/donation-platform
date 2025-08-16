@@ -21,13 +21,12 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   const [postContent, setPostContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [eventId, setEventId] = useState<number>(1) // Default to event ID 1
+  const [title, setTitle] = useState('')
   const { user } = useAuthStore()
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [previewImages, setPreviewImages] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [events, setEvents] = useState<{id: number, title: string}[]>([{id: 1, title: 'Default Event'}]) // Mock events, should be fetched from API
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -82,7 +81,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       // Send to API
       const postData = {
         content: postContent,
-        event_id: eventId, // Include the event_id as required by API
+        title: title, // Use title instead of event_id
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
         image_urls: selectedFiles
       };
@@ -96,6 +95,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
         }
         
         // Reset form
+        setTitle('')
         setTags('')
         setPostContent('')
         setSelectedFiles([])
@@ -137,21 +137,18 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
 
       <div className="px-4 py-6">
         <form onSubmit={handleSubmit}>
-          {/* Event Selection */}
+          {/* Title Field */}
           <div className="mb-6">
             <Label className="mb-2">
-              Event
+              Title
             </Label>
-            <select
-              className="w-full p-3 border border-input rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-foreground bg-background"
-              value={eventId}
-              onChange={(e) => setEventId(Number(e.target.value))}
+            <Input
+              type="text"
+              placeholder="Enter post title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               required
-            >
-              {events.map(event => (
-                <option key={event.id} value={event.id}>{event.title}</option>
-              ))}
-            </select>
+            />
           </div>
 
           {/* Tags Field */}
