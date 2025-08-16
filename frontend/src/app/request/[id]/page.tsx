@@ -59,7 +59,7 @@ export default function RequestPage() {
   if (isLoading) return <LoadingState />
   if (!donation) return <NotFoundState router={router} />
 
-  const donationAmount = parseFloat(donation.donationAmount || '1000')
+  const donationAmount = donation.possibleAmount || donation.goalAmount || 0
   const remainingAmount = donationAmount
 
   const finalAmount = isCustom
