@@ -1,16 +1,19 @@
 "use client"
 
 import React, { useState } from 'react'
-import { ArrowLeft, ImageIcon, ArrowUp } from 'lucide-react'
+import { ArrowLeft, ImageIcon, ArrowUp, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { COLORS } from '@/utils/constants'
 import { useAuthStore } from '@/store/authStore'
+import { CommunityPost } from '@/types'
+import { communityService } from '@/lib/api/community'
+import { toast } from 'sonner'
 
 interface CommunityWritePostProps {
   onCancel: () => void;
-  onSubmitSuccess?: (newPost: any) => void;
+  onSubmitSuccess?: (newPost: CommunityPost) => void;
 }
 
 export default function CommunityWritePost({ onCancel, onSubmitSuccess }: CommunityWritePostProps) {
@@ -18,20 +21,37 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   const [postContent, setPostContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [eventId, setEventId] = useState<number>(1) // Default to event ID 1
   const { user } = useAuthStore()
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [previewImages, setPreviewImages] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [events, setEvents] = useState<{id: number, title: string}[]>([{id: 1, title: 'Default Event'}]) // Mock events, should be fetched from API
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files) {
-      const newImages = Array.from(files).map(file => URL.createObjectURL(file))
-      setImages([...images, ...newImages])
+      const newFiles = Array.from(files)
+      const newPreviewImages = newFiles.map(file => URL.createObjectURL(file))
+      
+      setSelectedFiles([...selectedFiles, ...newFiles])
+      setPreviewImages([...previewImages, ...newPreviewImages])
     }
   }
 
   const removeImage = (index: number) => {
-    const newImages = [...images]
-    newImages.splice(index, 1)
-    setImages(newImages)
+    const newFiles = [...selectedFiles]
+    const newPreviewImages = [...previewImages]
+    
+    // Revoke the object URL to avoid memory leaks
+    URL.revokeObjectURL(newPreviewImages[index])
+    
+    newFiles.splice(index, 1)
+    newPreviewImages.splice(index, 1)
+    
+    setSelectedFiles(newFiles)
+    setPreviewImages(newPreviewImages)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,35 +59,58 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
     if (!postContent.trim()) return
     
     setIsSubmitting(true)
+    setError(null)
     
     try {
-      // Create a new post object
-      const newPost = {
-        id: Date.now().toString(), // Use timestamp for more unique ID
+      // Prepare form data for API
+      const formData = new FormData()
+      formData.append('content', postContent)
+      
+      // Add tags if present
+      const tagsList = tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+      if (tagsList.length > 0) {
+        tagsList.forEach(tag => {
+          formData.append('tags[]', tag)
+        })
+      }
+      
+      // Add images if present
+      selectedFiles.forEach(file => {
+        formData.append('image_urls[]', file)
+      })
+      
+      // Send to API
+      const postData = {
         content: postContent,
-        user: {
-          id: user?.id || 'user' + Math.random().toString(36).substring(2, 5),
-          name: user?.name || 'Anonymous',
-          verified: false
-        },
-        images: images,
-        likes: 0,
-        dislikes: 0,
-        comments: [],
-        createdAt: new Date().toISOString(),
-        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-      }
+        event_id: eventId, // Include the event_id as required by API
+        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        image_urls: selectedFiles
+      };
+      const response = await communityService.createPost(postData)
       
-      if (onSubmitSuccess) {
-        onSubmitSuccess(newPost)
+      if (response.success) {
+        toast.success('Post created successfully!')
+        
+        if (onSubmitSuccess && response.data) {
+          onSubmitSuccess(response.data)
+        }
+        
+        // Reset form
+        setTags('')
+        setPostContent('')
+        setSelectedFiles([])
+        setPreviewImages([])
+        
+        // Return to feed
+        onCancel()
+      } else {
+        setError('Failed to create post. Please try again.')
+        toast.error('Failed to create post')
       }
-      
-      // Reset form
-      setTags('')
-      setPostContent('')
-      setImages([])
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating post:', error)
+      setError(error?.message || 'Failed to create post. Please try again.')
+      toast.error('Error creating post')
     } finally {
       setIsSubmitting(false)
     }
@@ -94,6 +137,23 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
 
       <div className="px-4 py-6">
         <form onSubmit={handleSubmit}>
+          {/* Event Selection */}
+          <div className="mb-6">
+            <Label className="mb-2">
+              Event
+            </Label>
+            <select
+              className="w-full p-3 border border-input rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-foreground bg-background"
+              value={eventId}
+              onChange={(e) => setEventId(Number(e.target.value))}
+              required
+            >
+              {events.map(event => (
+                <option key={event.id} value={event.id}>{event.title}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Tags Field */}
           <div className="mb-6">
             <Label className="mb-2">
@@ -121,9 +181,16 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
             />
           </div>
 
-          {images.length > 0 && (
+          {/* Error message */}
+          {error && (
+            <div className="mb-6 p-3 bg-destructive/10 text-destructive rounded-md">
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+
+          {previewImages.length > 0 && (
             <div className="mb-6 grid grid-cols-2 gap-2">
-              {images.map((img, index) => (
+              {previewImages.map((img, index) => (
                 <div key={index} className="relative group">
                   <img 
                     src={img} 
@@ -163,8 +230,17 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
               variant="default"
               className="bg-red-500 hover:bg-red-600 text-white gap-2"
             >
-              <ArrowUp className="w-4 h-4" />
-              Post
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Posting...
+                </>
+              ) : (
+                <>
+                  <ArrowUp className="w-4 h-4" />
+                  Post
+                </>
+              )}
             </Button>
           </div>
         </form>
