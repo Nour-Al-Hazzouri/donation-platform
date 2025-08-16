@@ -21,15 +21,17 @@ interface LatestDonationsProps {
   className?: string
 }
 
+const FALLBACK_IMAGE = '/images/fallback.jpg'
+
 const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
   const router = useRouter()
 
-  // Ensure valid URL for Next.js Image
+  // Make sure image URLs work with Next.js Image
   const imageSrc = donation.imageUrl
     ? donation.imageUrl.startsWith('http')
       ? donation.imageUrl
-      : `/${donation.imageUrl.replace(/^\/?/, '')}` // add leading slash
-    : undefined
+      : `${process.env.NEXT_PUBLIC_API_URL || ''}/${donation.imageUrl.replace(/^\/?/, '')}`
+    : FALLBACK_IMAGE
 
   return (
     <Card
@@ -73,6 +75,10 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.src = FALLBACK_IMAGE
+                }}
               />
             </div>
           )}
@@ -116,6 +122,19 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+
+    if (diffDays > 0) return `${diffDays}d ago`
+    if (diffHours > 0) return `${diffHours}h ago`
+    return `${diffMins}m ago`
+  }
+
   useEffect(() => {
     const fetchDonations = async () => {
       try {
@@ -138,20 +157,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
     fetchDonations()
   }, [])
 
-  const getTimeAgo = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMins / 60)
-    const diffDays = Math.floor(diffHours / 24)
-
-    if (diffDays > 0) return `${diffDays}d ago`
-    if (diffHours > 0) return `${diffHours}h ago`
-    return `${diffMins}m ago`
-  }
-
-  // Clone for infinite loop
+  // Duplicate items for smooth looping
   const extendedDonations = donations.length > 0 ? [...donations, ...donations.slice(0, visibleCards)] : []
 
   useEffect(() => {
@@ -222,7 +228,11 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
                   style={{ transform: `translateX(-${currentIndex * (100 / visibleCards)}%)` }}
                 >
                   {extendedDonations.map((donation, index) => (
-                    <div key={`${donation.id}-${index}`} className="flex-shrink-0 px-1 sm:px-2" style={{ width: `${100 / visibleCards}%` }}>
+                    <div
+                      key={`${donation.id}-${index}`}
+                      className="flex-shrink-0 px-1 sm:px-2"
+                      style={{ width: `${100 / visibleCards}%` }}
+                    >
                       <div className="h-full pb-4">
                         <DonationCard donation={donation} />
                       </div>

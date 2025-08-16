@@ -1,3 +1,4 @@
+// src/lib/api/donations.ts
 import axios from 'axios';
 import { authApi } from './auth';
 
@@ -14,7 +15,7 @@ export interface DonationEvent {
   start_date: string;
   end_date: string;
   image_urls: string[];
-  image_full_urls?: string[]; // <-- added (optional)
+  image_full_urls?: string[]; // computed full urls
   user: {
     id: number;
     username: string;
@@ -68,6 +69,30 @@ export interface CreateDonationTransactionData {
   amount: number;
 }
 
+const buildFullImageUrls = (imagePaths: string[] | undefined): string[] => {
+  if (!imagePaths || imagePaths.length === 0) return [];
+  // prefer axios instance baseURL, fallback to env var
+  const base = authApi.defaults.baseURL || process.env.NEXT_PUBLIC_API_URL || '';
+  return imagePaths.map((p) => {
+    // if already absolute URL, return as-is
+    try {
+      const url = new URL(p);
+      return url.href;
+    } catch (e) {
+      // relative path -> join with base (ensure no double slashes)
+      if (!base) return p;
+      return `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
+    }
+  });
+};
+
+const handle404AsEmptyList = (err: any) => {
+  if (err?.response?.status === 404) {
+    return { data: [], meta: {} };
+  }
+  throw err;
+};
+
 const donationsService = {
   // Get all donation events with optional filters
   getAllEvents: async (params?: {
@@ -76,60 +101,112 @@ const donationsService = {
     location_id?: number;
     page?: number;
   }): Promise<{ data: DonationEvent[]; meta: any }> => {
-    const response = await authApi.get('/donation-events', { params });
-    return response.data;
+    try {
+      const response = await authApi.get('/donation-events', { params });
+      const payload = response.data;
+      if (Array.isArray(payload?.data)) {
+        payload.data = payload.data.map((ev: DonationEvent) => ({
+          ...ev,
+          image_full_urls: buildFullImageUrls(ev.image_urls),
+        }));
+      }
+      return payload;
+    } catch (err) {
+      return handle404AsEmptyList(err);
+    }
   },
 
   // Get donation requests
   getRequests: async (params?: { page?: number }): Promise<{ data: DonationEvent[]; meta: any }> => {
-    const response = await authApi.get('/donation-events/requests', { params });
-    return response.data;
+    try {
+      const response = await authApi.get('/donation-events/requests', { params });
+      const payload = response.data;
+      if (Array.isArray(payload?.data)) {
+        payload.data = payload.data.map((ev: DonationEvent) => ({
+          ...ev,
+          image_full_urls: buildFullImageUrls(ev.image_urls),
+        }));
+      }
+      return payload;
+    } catch (err) {
+      return handle404AsEmptyList(err);
+    }
   },
 
   // Get donation offers
   getOffers: async (params?: { page?: number }): Promise<{ data: DonationEvent[]; meta: any }> => {
-    const response = await authApi.get('/donation-events/offers', { params });
-    return response.data;
+    try {
+      const response = await authApi.get('/donation-events/offers', { params });
+      const payload = response.data;
+      if (Array.isArray(payload?.data)) {
+        payload.data = payload.data.map((ev: DonationEvent) => ({
+          ...ev,
+          image_full_urls: buildFullImageUrls(ev.image_urls),
+        }));
+      }
+      return payload;
+    } catch (err) {
+      return handle404AsEmptyList(err);
+    }
   },
 
   // Get donation events for a specific user
   getUserEvents: async (userId: number, params?: { page?: number }): Promise<{ data: DonationEvent[]; meta: any }> => {
     const response = await authApi.get(`/donation-events/user/${userId}`, { params });
-    return response.data;
+    const payload = response.data;
+    if (Array.isArray(payload?.data)) {
+      payload.data = payload.data.map((ev: DonationEvent) => ({
+        ...ev,
+        image_full_urls: buildFullImageUrls(ev.image_urls),
+      }));
+    }
+    return payload;
   },
 
   // Get a specific donation event by ID
-  getEvent: async (eventId: number): Promise<{ data: DonationEvent }> => {
-    const response = await authApi.get(`/donation-events/${eventId}`);
-    return response.data;
+  // NOTE: returns `null` when the API returns 404 (so UI can handle 'not found' gracefully)
+  getEvent: async (eventId: number): Promise<{ data: DonationEvent } | null> => {
+    try {
+      const response = await authApi.get(`/donation-events/${eventId}`);
+      const payload = response.data;
+      if (payload?.data) {
+        payload.data.image_full_urls = buildFullImageUrls(payload.data.image_urls);
+      }
+      return payload;
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        // not found -> return null (safe for callers)
+        return null;
+      }
+      // rethrow other errors
+      throw err;
+    }
   },
 
   // Create a new donation event
   createEvent: async (data: CreateDonationEventData): Promise<{ data: DonationEvent }> => {
-    // Use FormData for multipart/form-data requests with file uploads
     const formData = new FormData();
-    
+
     // Add all text fields
     Object.entries(data).forEach(([key, value]) => {
-      // Skip image_urls as we'll handle it separately
       if (key !== 'image_urls') {
         formData.append(key, String(value));
       }
     });
-    
+
     // Add image files if any
     if (data.image_urls && data.image_urls.length > 0) {
       data.image_urls.forEach((file, index) => {
         formData.append(`image_urls[${index}]`, file);
       });
     }
-    
+
     const response = await authApi.post('/donation-events', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
-    
+
     return response.data;
   },
 
