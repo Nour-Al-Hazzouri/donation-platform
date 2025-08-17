@@ -1,5 +1,8 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 import { MainLayout } from "@/components/layouts/MainLayout";
 import CommunityFeed from "@/components/community/communityFeed";
 import CommunityWritePost from "@/components/community/communityWritePost";

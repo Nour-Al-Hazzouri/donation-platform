@@ -1,5 +1,8 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MainLayout } from '@/components/layouts/MainLayout'
@@ -76,7 +79,7 @@ export default function DonationSuccessPage() {
                 <span className="font-medium">Title:</span> {donationDetails.title}
               </p>
               <p className="text-sm">
-                <span className="font-medium">Amount:</span> ${parseInt(donationDetails.amount).toLocaleString()}
+                <span className="font-medium">Amount:</span> ${parseFloat(donationDetails.amount).toLocaleString()}
               </p>
             </div>
           </div>

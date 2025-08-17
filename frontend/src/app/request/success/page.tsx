@@ -1,5 +1,8 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 import { useSearchParams, useRouter } from 'next/navigation'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -94,7 +97,7 @@ export default function RequestSuccessPage() {
         <h1 className="text-3xl font-bold text-foreground mb-4">Your Request Has Been Submitted!</h1>
 
         <p className="text-lg text-muted-foreground mb-2">
-          Your request of <span className="font-semibold text-yellow-600">${requestDetails.amount.toLocaleString()}</span> is <strong>pending approval</strong>.
+          Your request of <span className="font-semibold text-yellow-600">${(requestDetails.amount || 0).toLocaleString()}</span> is <strong>pending approval</strong>.
         </p>
 
         {pendingTransactions.length > 0 && (
@@ -103,7 +106,7 @@ export default function RequestSuccessPage() {
             <ul className="list-disc list-inside text-yellow-900 text-sm">
               {pendingTransactions.map(txn => (
                 <li key={txn.id}>
-                  ${txn.amount.toLocaleString()} — Pending approval
+                  ${(txn.amount || 0).toLocaleString()} — Pending approval
                 </li>
               ))}
             </ul>

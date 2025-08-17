@@ -1,5 +1,8 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 import { MainLayout } from "@/components/layouts/MainLayout"
 import AddRequestContent from '@/components/add-request/AddRequestContent'
 import { useAuthStore } from '@/store/authStore'

@@ -1,5 +1,8 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { MainLayout } from '@/components/layouts/MainLayout'
