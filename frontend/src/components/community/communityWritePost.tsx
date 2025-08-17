@@ -157,7 +157,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       }
     } catch (error: any) {
       console.error('Error creating post:', error)
-      setError(error?.message || 'Failed to create post. Please try again.')
+      setError(error?.response?.data?.message || 'Failed to create post. Please try again.')
       toast.error('Error creating post')
     } finally {
       setIsSubmitting(false)
