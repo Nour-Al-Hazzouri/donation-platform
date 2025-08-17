@@ -2,7 +2,22 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { CheckCircle, MessageCircle, Heart, User as UserIcon, Megaphone, ShieldCheck } from "lucide-react"
+import { 
+  CheckCircle, 
+  MessageCircle, 
+  Heart, 
+  User as UserIcon, 
+  Megaphone, 
+  ShieldCheck,
+  HandCoins,
+  Package,
+  BadgeCheck,
+  FileText,
+  MessageSquare,
+  ShieldAlert,
+  Calendar,
+  Bell
+} from "lucide-react"
 import ProfileSidebar from "./Sidebar"
 import { useAuthStore } from "@/store/authStore"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -102,116 +117,44 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
     }
   }
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'transaction_contribution':
-      case 'transaction_claim':
-      case 'contribution':
-      case 'claim':
-      case 'donation_contribution':
-      case 'donation_claim':
-      case 'admin_transaction':
-      case 'admin_request':
-      case 'donation':
-      case 'request':
-        return <CheckCircle className="text-green-500" size={20} />
-      case 'admin_action':
-      case 'admin_approved':
-      case 'admin_rejected':
-        return <ShieldCheck className="text-blue-500" size={20} />
-      case 'new_comment':
-        return <MessageCircle className="text-blue-500" size={20} />
-      case 'post_upvoted':
-      case 'post_downvoted':
-        return <Heart className="text-red-500" size={20} />
-      case 'new_announcement':
-        return <Megaphone className="text-yellow-500" size={20} />
-      default:
-        return <UserIcon className="text-gray-500" size={20} />
-    }
-  }
-
-  const formatNotificationMessage = (notification: Notification) => {
-    const { type, related_user, data, message, user: notifUser } = notification
-
-    // Log for debugging
-    console.log('Processing notification:', notification)
-
-    // Handle all donation/contribution types
-    const donationTypes = [
-      'transaction_contribution',
-      'contribution',
-      'donation_contribution',
-      'admin_transaction',
-      'donation',
-      'contribution_request'
-    ]
+  const getNotificationIcon = (typeName: string) => {
+    const type = typeName?.toLowerCase() || '';
     
-    // Handle all request/claim types
-    const requestTypes = [
-      'transaction_claim',
-      'claim',
-      'donation_claim',
-      'admin_request',
-      'request',
-      'donation_request'
-    ]
+    // Donation related
+    if (type.includes('donation_contribution')) return <HandCoins className="text-green-500" />;
+    if (type.includes('donation_claim')) return <Package className="text-blue-500" />;
+    if (type.includes('donation_approved') || type.includes('donation_rejected')) 
+      return <BadgeCheck className="text-purple-500" />;
+    
+    // Post related
+    if (type.includes('post_created') || type.includes('post_deleted')) 
+      return <FileText className="text-orange-500" />;
+    
+    // Comment related
+    if (type.includes('comment_created') || type.includes('comment_reply')) 
+      return <MessageSquare className="text-amber-500" />;
+    
+    // Like/Reaction related
+    if (type.includes('_liked') || type.includes('_voted')) 
+      return <Heart className="text-pink-500" />;
+    
+    // Verification related
+    if (type.includes('verification_')) 
+      return type.includes('approved') 
+        ? <ShieldCheck className="text-emerald-500" /> 
+        : <ShieldAlert className="text-rose-500" />;
+    
+    // Event related
+    if (type.includes('event_')) 
+      return <Calendar className="text-cyan-500" />;
+    
+    // Default icon
+    return <Bell className="text-gray-500" />;
+  };
 
-    if (donationTypes.includes(type.name)) {
-      if (notifUser?.id === user?.id) {
-        if (user?.isAdmin) {
-          return `You (Admin) have successfully donated $${data?.amount || ''}${data?.event_type ? ` to ${data.event_type}` : ''}.`
-        }
-        return `You have successfully donated $${data?.amount || ''}${data?.event_type ? ` to ${data.event_type}` : ''}.`
-      }
-      if (user?.isAdmin) {
-        return `New donation received from ${related_user?.first_name || 'a user'}${data?.amount ? ` ($${data.amount})` : ''}.`
-      }
-      if (related_user?.isAdmin) {
-        return `Admin has made a donation of $${data?.amount || ''}${data?.event_type ? ` to ${data.event_type}` : ''}.`
-      }
-      return `New donation received${data?.amount ? ` ($${data.amount})` : ''}`
-    }
-
-    if (requestTypes.includes(type.name)) {
-      if (notifUser?.id === user?.id) {
-        if (user?.isAdmin) {
-          return `You (Admin) have submitted a request for ${data?.event_type || 'a donation'}.`
-        }
-        return `You have submitted a request for ${data?.event_type || 'a donation'}.`
-      }
-      if (user?.isAdmin) {
-        return `New request submitted by ${related_user?.first_name || 'a user'}.`
-      }
-      if (related_user?.isAdmin) {
-        return `Admin submitted a request for ${data?.event_type || 'a donation'}.`
-      }
-      return `New request submitted${data?.event_type ? ` for ${data.event_type}` : ''}`
-    }
-
-    switch (type.name) {
-      case 'admin_action':
-      case 'admin_approved':
-        return `Admin approved your ${data?.event_type || 'request'}${data?.amount ? ` ($${data.amount})` : ''}`
-      case 'admin_rejected':
-        return `Admin rejected your ${data?.event_type || 'request'}${data?.amount ? ` ($${data.amount})` : ''}`
-      case 'new_comment':
-        return `${related_user?.first_name || 'Someone'} commented on your post`
-      case 'post_upvoted':
-        return `${related_user?.first_name || 'Someone'} upvoted your post`
-      case 'post_downvoted':
-        return `${related_user?.first_name || 'Someone'} downvoted your post`
-      case 'verification_approved':
-        return 'Your account verification has been approved'
-      case 'verification_rejected':
-        return 'Your account verification was rejected'
-      case 'new_announcement':
-        return message || 'A new announcement has been posted'
-      default:
-        console.warn('Unhandled notification type:', type.name)
-        return message || `New notification: ${type.name.replace(/_/g, ' ')}`
-    }
-  }
+  const formatMessage = (notification: Notification) => {
+    return notification.message || 'New notification';
+  };
 
   return (
     <section className="bg-background min-h-screen">
@@ -287,7 +230,7 @@ export default function NotificationsDashboard({ onViewChange }: NotificationsDa
                               : "text-foreground"
                           }`}
                         >
-                          {formatNotificationMessage(notification)}
+                          {formatMessage(notification)}
                         </p>
                         {user?.isAdmin && notification.type.name === 'new_announcement' && (
                           <span className="text-xs text-yellow-700 font-semibold">System Announcement</span>
