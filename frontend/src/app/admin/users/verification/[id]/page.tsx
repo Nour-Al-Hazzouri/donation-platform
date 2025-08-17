@@ -234,12 +234,10 @@ export default function VerificationRequestDetailsPage({ params }: { params: Pro
                               {/* Document Image */}
                               <div className="flex justify-center mb-4">
                                 <div className="w-full max-w-md rounded-lg overflow-hidden bg-muted shadow-md">
-                                  <Image
+                                  <img
                                     src={imageUrl.original || "/placeholder.svg?height=250&width=400&text=Document"}
                                     alt={`Document ${index + 1}`}
-                                    width={400}
-                                    height={250}
-                                    className="w-full h-auto object-cover"
+                                    className="w-full min-h-[250px] h-auto object-cover"
                                   />
                                 </div>
                               </div>
