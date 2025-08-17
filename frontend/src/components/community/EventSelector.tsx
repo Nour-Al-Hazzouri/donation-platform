@@ -5,6 +5,7 @@ import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DonationEvent } from '@/lib/api/donations'
 import donationsService from '@/lib/api/donations'
+import { useAuthStore } from '@/store/authStore'
 
 interface EventSelectorProps {
   onSelect: (eventId: string | null) => void
@@ -21,14 +22,14 @@ export function EventSelector({
   const [events, setEvents] = useState<DonationEvent[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<DonationEvent | null>(null)
+  const { user } = useAuthStore()
 
   useEffect(() => {
     const fetchEvents = async () => {
+      if (!user?.id) return
       setLoading(true)
       try {
-        const response = await donationsService.getAllEvents({
-          status: 'active' // Only show active events
-        })
+        const response = await donationsService.getUserEvents(user.id)
         setEvents(response.data)
         
         // If there's a selectedEventId, find and set the selected event
@@ -44,7 +45,7 @@ export function EventSelector({
     }
 
     fetchEvents()
-  }, [selectedEventId])
+  }, [selectedEventId, user?.id])
 
   return (
     <div className="relative">
