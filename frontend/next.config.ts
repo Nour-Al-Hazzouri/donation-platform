@@ -3,22 +3,21 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: 'standalone', // Enable for Docker deployment
   images: {
     remotePatterns: [
-      // matches http://localhost:8000/...
+      // Local development
       {
         protocol: 'http',
         hostname: 'localhost',
         port: '8000',
         pathname: '/**',
       },
-      // matches http://localhost/... (no explicit port)
       {
         protocol: 'http',
         hostname: 'localhost',
         pathname: '/**',
       },
-      // common aliases that might appear in Docker/WSL
       {
         protocol: 'http',
         hostname: '127.0.0.1',
@@ -31,7 +30,16 @@ const nextConfig: NextConfig = {
         port: '8000',
         pathname: '/**',
       },
+      // Production - Railway deployment
+      {
+        protocol: 'https',
+        hostname: '*.railway.app',
+        pathname: '/**',
+      },
     ],
+  },
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
   },
 }
 
