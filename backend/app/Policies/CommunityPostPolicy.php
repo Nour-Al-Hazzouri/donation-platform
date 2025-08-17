@@ -31,7 +31,8 @@ class CommunityPostPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create posts') || $user->can('manage posts');
+        return $this->isVerified($user) &&
+            ($user->can('create posts') || $user->can('manage posts'));
     }
 
     /**
@@ -43,7 +44,8 @@ class CommunityPostPolicy
             return true;
         }
 
-        return $user->can('edit own posts') &&
+        return $this->isVerified($user) &&
+            $user->can('edit own posts') &&
             $communityPost->user_id === $user->id;
     }
 
@@ -56,7 +58,8 @@ class CommunityPostPolicy
             return true;
         }
 
-        return $user->can('delete own posts') &&
+        return $this->isVerified($user) &&
+            $user->can('delete own posts') &&
             $communityPost->user_id === $user->id;
     }
 
@@ -65,7 +68,8 @@ class CommunityPostPolicy
      */
     public function restore(User $user, CommunityPost $communityPost): bool
     {
-        return $user->can('manage posts');
+        return $this->isVerified($user) &&
+            $user->can('manage posts');
     }
 
     /**
@@ -73,6 +77,12 @@ class CommunityPostPolicy
      */
     public function forceDelete(User $user, CommunityPost $communityPost): bool
     {
-        return $user->can('manage posts');
+        return $this->isVerified($user) &&
+            $user->can('manage posts');
+    }
+
+    private function isVerified(User $user)
+    {
+        return $user->verifications()->where('status', 'approved')->exists();
     }
 }
