@@ -45,18 +45,18 @@ class DatabaseSeeder extends Seeder
         ]);
         $admin->assignRole('admin');
 
-        // Create test users
-        User::factory(10)->create();
+        // // Create test users
+        // User::factory(10)->create();
 
-        // Create other data
-        $this->call([
-            DonationEventSeeder::class,
-            DonationTransactionSeeder::class,
-            CommunityPostSeeder::class,
-            CommentSeeder::class,
-            VoteSeeder::class,
-            VerificationSeeder::class,
-            AnnouncementSeeder::class,
-        ]);
+        // // Create other data
+        // $this->call([
+        //     DonationEventSeeder::class,
+        //     DonationTransactionSeeder::class,
+        //     CommunityPostSeeder::class,
+        //     CommentSeeder::class,
+        //     VoteSeeder::class,
+        //     VerificationSeeder::class,
+        //     AnnouncementSeeder::class,
+        // ]);
     }
 }
