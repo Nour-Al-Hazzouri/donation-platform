@@ -10,8 +10,7 @@ import { useAuthStore } from '@/store/authStore'
 import { CommunityPost } from '@/types'
 import { communityService } from '@/lib/api/community'
 import { toast } from 'sonner'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import donationsService from '@/lib/api/donations'
+import { EventSelector } from './EventSelector'
 
 interface CommunityWritePostProps {
   onCancel: () => void;
@@ -24,9 +23,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   const [images, setImages] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [title, setTitle] = useState('')
-  const [eventId, setEventId] = useState<string>('')
-  const [userPosts, setUserPosts] = useState<{id: number, title: string, type: string}[]>([])
-  const [isLoadingPosts, setIsLoadingPosts] = useState(false)
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const { user } = useAuthStore()
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
@@ -98,6 +95,12 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
     e.preventDefault()
     if (!postContent.trim()) return
     
+    // Validate event selection
+    if (!selectedEventId) {
+      setError('Please select a donation event')
+      return
+    }
+    
     setIsSubmitting(true)
     setError(null)
     
@@ -129,7 +132,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       const postData = {
         content: postContent,
         title: title,
-        event_id: eventId && eventId !== 'none' ? eventId : undefined, // Include the selected event ID, or undefined if 'none'
+        event_id: selectedEventId, // Add the selected event ID
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
         image_urls: selectedFiles
       };
@@ -198,34 +201,20 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
               required
             />
           </div>
-          
-          {/* Event Field */}
+
+          {/* Event Selector Field */}
           <div className="mb-6">
             <Label className="mb-2">
-              Event
+              Related Donation Event <span className="text-red-500">*</span>
             </Label>
-            <Select value={eventId} onValueChange={setEventId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select an event" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                {isLoadingPosts ? (
-                  <SelectItem value="loading" disabled>
-                    Loading...
-                  </SelectItem>
-                ) : (
-                  userPosts.map((post) => (
-                    <SelectItem key={post.id} value={post.id.toString()}>
-                      {post.title} ({post.type === 'request' ? 'Request' : 'Donation'})
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-1">
-              Select one of your donation or request posts
-            </p>
+            <EventSelector 
+              onSelect={setSelectedEventId}
+              selectedEventId={selectedEventId}
+              placeholder="Select a related donation event..."
+            />
+            {error && !selectedEventId && (
+              <p className="text-destructive text-xs mt-1">Please select a donation event</p>
+            )}
           </div>
 
           {/* Tags Field */}
@@ -263,23 +252,47 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
           )}
 
           {previewImages.length > 0 && (
-            <div className="mb-6 grid grid-cols-2 gap-2">
-              {previewImages.map((img, index) => (
-                <div key={index} className="relative group">
+            <div className="mb-6">
+              {previewImages.length === 1 ? (
+                <div className="relative group">
                   <img 
-                    src={img} 
-                    alt={`Preview ${index}`} 
-                    className="w-full h-32 object-cover rounded-lg"
+                    src={previewImages[0]} 
+                    alt="Preview" 
+                    className="w-full h-48 object-cover rounded-lg"
                   />
                   <button
                     type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => removeImage(0)}
+                    className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     ×
                   </button>
                 </div>
-              ))}
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {previewImages.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={img} 
+                        alt={`Preview ${index + 1}`} 
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        {index + 1} / {previewImages.length}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -287,7 +300,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
             <Button variant="outline" asChild>
               <Label className="cursor-pointer">
                 <ImageIcon className="w-4 h-4 mr-2" />
-                Add Image
+                {previewImages.length > 0 ? `Add More Images (${previewImages.length})` : 'Add Images'}
                 <input 
                   type="file" 
                   className="hidden" 
