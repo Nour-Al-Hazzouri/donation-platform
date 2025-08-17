@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { cn } from '@/utils'
 
 interface ImageGalleryProps {
-  images: string[]
+  images: string[] | undefined
   className?: string
 }
 
