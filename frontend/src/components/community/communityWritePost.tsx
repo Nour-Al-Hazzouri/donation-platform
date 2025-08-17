@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { ArrowLeft, ImageIcon, ArrowUp, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -29,42 +29,6 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [previewImages, setPreviewImages] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
-  
-  // Fetch user's donation and request posts
-  useEffect(() => {
-    const fetchUserPosts = async () => {
-      if (!user?.id) return
-      
-      setIsLoadingPosts(true)
-      try {
-        // Get user's donation events
-        const response = await donationsService.getUserEvents(user.id)
-        
-        if (response && response.data) {
-          // Filter for only request and offer type events
-          const filteredEvents = response.data.filter(event => 
-            event.type === 'request' || event.type === 'offer'
-          )
-          
-          // Map to the format we need for the dropdown
-          const formattedPosts = filteredEvents.map(event => ({
-            id: event.id,
-            title: event.title,
-            type: event.type
-          }))
-          
-          setUserPosts(formattedPosts)
-        }
-      } catch (error) {
-        console.error('Error fetching user posts:', error)
-        toast.error('Failed to load your posts')
-      } finally {
-        setIsLoadingPosts(false)
-      }
-    }
-    
-    fetchUserPosts()
-  }, [user?.id])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -108,12 +72,6 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       // Prepare form data for API
       const formData = new FormData()
       formData.append('content', postContent)
-      formData.append('title', title)
-      
-      // Add event_id if selected and not 'none'
-      if (eventId && eventId !== 'none') {
-        formData.append('event_id', eventId)
-      }
       
       // Add tags if present
       const tagsList = tags.split(',').map(tag => tag.trim()).filter(tag => tag)
@@ -160,7 +118,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       }
     } catch (error: any) {
       console.error('Error creating post:', error)
-      setError(error?.response?.data?.message || 'Failed to create post. Please try again.')
+      setError(error?.message || 'Failed to create post. Please try again.')
       toast.error('Error creating post')
     } finally {
       setIsSubmitting(false)
