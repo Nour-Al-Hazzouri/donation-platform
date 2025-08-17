@@ -79,13 +79,7 @@ const saveUsersToStorage = (users: User[]) => {
 // Get initial users from storage or defaults
 const MOCK_USERS: User[] = getUsersFromStorage();
 
-// IDs of users with pending verification requests
-const VERIFICATION_REQUEST_USER_IDS = ["2", "5"]
-
-// Generate verification requests from users with matching IDs
-const MOCK_VERIFICATION_REQUESTS: User[] = MOCK_USERS.filter(user => 
-  VERIFICATION_REQUEST_USER_IDS.includes(user.id)
-)
+// We'll replace mock verification requests with API data
 
 interface ManageUsersProps {
   activeTab?: string;
@@ -222,17 +216,57 @@ export function useUsersContext() {
 
 export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
   const [searchQuery, setSearchQuery] = useState("")
+  const [verificationRequests, setVerificationRequests] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const { users } = useUsersContext();
   
+  // Fetch verification requests when the component mounts or when activeTab changes
+  useEffect(() => {
+    if (activeTab === "Verification") {
+      setLoading(true);
+      setError(null);
+      
+      // Import verificationService dynamically to avoid circular dependencies
+      import("@/lib/api").then(({ verificationService }) => {
+        verificationService.getAllVerifications()
+          .then(response => {
+            if (response.success) {
+              // Map verification data to include user information
+              const requests = response.data.map((verification: any) => ({
+                id: verification.id,
+                name: verification.user?.name || 'Unknown User',
+                email: verification.user?.email || 'No email',
+                phone: verification.user?.phone || 'No phone',
+                avatar: verification.user?.avatar || "/placeholder.svg?height=40&width=40",
+                status: verification.status,
+                created_at: verification.created_at
+              }));
+              setVerificationRequests(requests);
+            } else {
+              setError('Failed to fetch verification requests');
+            }
+          })
+          .catch(err => {
+            console.error('Error fetching verification requests:', err);
+            setError('Error fetching verification requests');
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      });
+    }
+  }, [activeTab]);
+  
   // Determine which data to use based on active tab
-  const dataSource = activeTab === "Verification" ? MOCK_VERIFICATION_REQUESTS : users
+  const dataSource = activeTab === "Verification" ? verificationRequests : users
   
   // Filter users based on search query
-  const filteredUsers = dataSource.filter(user => 
+  const filteredUsers = dataSource.filter((user: User) => 
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.phone.toLowerCase().includes(searchQuery.toLowerCase())
+    (user.phone && user.phone.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   return (
@@ -274,63 +308,132 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
           <div></div>
         </div>
 
-        {/* Table Body */}
-        <div className="divide-y overflow-x-auto">
-          {filteredUsers.length > 0 ? (
-            filteredUsers.map((user) => (
-              <div key={user.id} className="flex flex-col md:grid md:grid-cols-4 gap-3 p-4 items-start md:items-center hover:bg-secondary/50">
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                  <div className="w-10 h-10 rounded-full bg-muted overflow-hidden flex-shrink-0">
-                    <Image
-                      src={user.avatar || "/placeholder.svg"}
-                      alt={user.name}
-                      width={40}
-                      height={40}
-                      className="rounded-full object-cover"
-                    />
-                  </div>
-                  <span className="font-medium text-foreground truncate">{user.name}</span>
-                </div>
-                <div className="text-muted-foreground w-full md:w-auto">
-                  <span className="md:hidden font-medium text-foreground">Email: </span>
-                  <span className="break-all">{user.email}</span>
-                </div>
-                <div className="text-muted-foreground w-full md:w-auto">
-                  <span className="md:hidden font-medium text-foreground">Phone: </span>
-                  {user.phone}
-                </div>
-                <div className="flex flex-wrap justify-start md:justify-end gap-2 w-full md:w-auto mt-2 md:mt-0">
-                  {activeTab === "Verification" && (
-                    <div className="flex items-center mr-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        Pending
-                      </span>
-                    </div>
-                  )}
-                  <Button 
-                    size="sm" 
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 w-full sm:w-auto"
-                    onClick={() => {
-                      if (activeTab === "Verification") {
-                        // Navigate to verification request details page
-                        router.push(`/admin/users/verification/${user.id}`);
-                      } else {
-                        // Navigate to user management page
-                        router.push(`/admin/users/manage/${user.id}`);
-                      }
-                    }}
-                  >
-                    {activeTab === "Verification" ? "View Request" : "Manage"}
-                  </Button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="p-8 text-center text-muted-foreground">
-              No users found matching your search criteria.
+        {/* Loading State */}
+        {activeTab === "Verification" && loading && (
+          <div className="p-8 text-center text-muted-foreground">
+            <div className="animate-pulse flex flex-col items-center">
+              <div className="h-4 bg-muted rounded w-32 mb-4"></div>
+              <div className="h-4 bg-muted rounded w-48"></div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {activeTab === "Verification" && error && (
+          <div className="p-8 text-center text-red-500">
+            {error}
+            <div className="mt-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => {
+                  setLoading(true);
+                  setError(null);
+                  import("@/lib/api").then(({ verificationService }) => {
+                    verificationService.getAllVerifications()
+                      .then(response => {
+                        if (response.success) {
+                          const requests = response.data.map((verification: any) => ({
+                            id: verification.id,
+                            name: verification.user?.name || 'Unknown User',
+                            email: verification.user?.email || 'No email',
+                            phone: verification.user?.phone || 'No phone',
+                            avatar: verification.user?.avatar || "/placeholder.svg?height=40&width=40",
+                            status: verification.status,
+                            created_at: verification.created_at
+                          }));
+                          setVerificationRequests(requests);
+                        } else {
+                          setError('Failed to fetch verification requests');
+                        }
+                      })
+                      .catch(err => {
+                        console.error('Error fetching verification requests:', err);
+                        setError('Error fetching verification requests');
+                      })
+                      .finally(() => {
+                        setLoading(false);
+                      });
+                  });
+                }}
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Table Body */}
+        {!loading && !error && (
+          <div className="divide-y overflow-x-auto">
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => (
+                <div key={user.id} className="flex flex-col md:grid md:grid-cols-4 gap-3 p-4 items-start md:items-center hover:bg-secondary/50">
+                  <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="w-10 h-10 rounded-full bg-muted overflow-hidden flex-shrink-0">
+                      <Image
+                        src={user.avatar || "/placeholder.svg"}
+                        alt={user.name}
+                        width={40}
+                        height={40}
+                        className="rounded-full object-cover"
+                      />
+                    </div>
+                    <span className="font-medium text-foreground truncate">{user.name}</span>
+                  </div>
+                  <div className="text-muted-foreground w-full md:w-auto">
+                    <span className="md:hidden font-medium text-foreground">Email: </span>
+                    <span className="break-all">{user.email}</span>
+                  </div>
+                  <div className="text-muted-foreground w-full md:w-auto">
+                    <span className="md:hidden font-medium text-foreground">Phone: </span>
+                    {user.phone}
+                  </div>
+                  <div className="flex flex-wrap justify-start md:justify-end gap-2 w-full md:w-auto mt-2 md:mt-0">
+                    {activeTab === "Verification" && (
+                      <div className="flex items-center mr-2">
+                        {user.status === 'approved' && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Approved
+                          </span>
+                        )}
+                        {user.status === 'rejected' && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Rejected
+                          </span>
+                        )}
+                        {(user.status === 'pending' || !user.status) && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Pending
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <Button 
+                      size="sm" 
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 w-full sm:w-auto"
+                      onClick={() => {
+                        if (activeTab === "Verification") {
+                          // Navigate to verification request details page
+                          router.push(`/admin/users/verification/${user.id}`);
+                        } else {
+                          // Navigate to user management page
+                          router.push(`/admin/users/manage/${user.id}`);
+                        }
+                      }}
+                    >
+                      {activeTab === "Verification" ? "View Request" : "Manage"}
+                    </Button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center text-muted-foreground">
+                {activeTab === "Verification" ? "No verification requests found." : "No users found matching your search criteria."}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
