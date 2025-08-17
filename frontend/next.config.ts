@@ -3,7 +3,6 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: 'standalone', // Enable for Docker deployment
   images: {
     remotePatterns: [
       // Local development
