@@ -137,7 +137,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
               </Button>
             </div>
           </div>
-          <h1 className="text-lg font-medium text-foreground">Tags</h1>
+          <h1 className="text-lg font-medium text-foreground">Write a Post</h1>
         </div>
       </div>
 
