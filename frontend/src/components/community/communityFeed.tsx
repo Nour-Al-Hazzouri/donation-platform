@@ -97,7 +97,6 @@ const convertMockToCommunityPost = (mockPost: MockCommunityPost): CommunityPost 
   return {
     id: parseInt(mockPost.id),
     user_id: parseInt(mockPost.user.id.replace('user', '')) || 1,
-    title: mockPost.content.substring(0, 50) + (mockPost.content.length > 50 ? '...' : ''), // Generate title from content
     content: mockPost.content,
     image_urls: mockPost.images,
     image_full_urls: mockPost.images,
@@ -339,11 +338,8 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           </div>
         </div>
 
-        {/* Post title and content */}
+        {/* Post content */}
         <div className="mb-2 whitespace-pre-line">
-          <h3 className="text-foreground font-medium text-base mb-1">
-            {post.title}
-          </h3>
           {/* Display event reference if available */}
           {post.event && (
             <div className="mb-2 bg-primary/5 rounded-md p-1.5 border border-primary/10">

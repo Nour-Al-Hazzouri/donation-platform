@@ -51,7 +51,6 @@ export interface Comment {
 export interface CommunityPost {
   id: number;
   user_id: number;
-  title: string;
   content: string;
   image_urls?: string[];
   image_full_urls?: string[];

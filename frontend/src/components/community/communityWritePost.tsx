@@ -22,7 +22,6 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   const [postContent, setPostContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [title, setTitle] = useState('')
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const { user } = useAuthStore()
 
@@ -89,7 +88,6 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
       // Send to API
       const postData = {
         content: postContent,
-        title: title,
         event_id: selectedEventId, // Add the selected event ID
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
         image_urls: selectedFiles
@@ -104,7 +102,6 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
         }
         
         // Reset form
-        setTitle('')
         setTags('')
         setPostContent('')
         setSelectedFiles([])
@@ -146,21 +143,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
 
       <div className="px-4 py-6">
         <form onSubmit={handleSubmit}>
-          {/* Title Field */}
-          <div className="mb-6">
-            <Label className="mb-2">
-              Title
-            </Label>
-            <Input
-              type="text"
-              placeholder="Enter post title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
-
-          {/* Event Selector Field */}
+{/* Event Selector Field */}
           <div className="mb-6">
             <Label className="mb-2">
               Related Donation Event <span className="text-red-500">*</span>

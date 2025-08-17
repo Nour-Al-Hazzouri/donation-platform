@@ -57,7 +57,6 @@ communityApi.interceptors.request.use(
 // Interface for creating a community post
 export interface CreateCommunityPostData {
   content: string;
-  title: string; // Used for display in the UI
   event_id?: string | null; // Optional event ID to associate with the post
   image_urls?: File[];
   tags?: string[];
@@ -97,11 +96,6 @@ const communityService = {
     // Create FormData for file uploads
     const formData = new FormData();
     formData.append('content', data.content);
-    
-    // Add title for display purposes
-    if (data.title) {
-      formData.append('title', data.title);
-    }
     
     // Add event_id if provided
     if (data.event_id) {
