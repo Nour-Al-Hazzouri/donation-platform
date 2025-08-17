@@ -85,7 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/user/{user}', [VerificationController::class, 'userVerifications']);
 
             // Update verification status
-            Route::post('/{verification}/{status}', [VerificationController::class, 'updateStatus']);
+            Route::put('/{verification}/{status}', [VerificationController::class, 'updateStatus']);
         });
 
         // Public verification request submission
@@ -112,7 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Community Posts
-    Route::apiResource('community-posts', CommunityPostController::class);
+    Route::apiResource('community-posts', CommunityPostController::class)->except('index', 'show');
 
     // Votes for community posts
     Route::prefix('community-posts/{postId}')->group(function () {
