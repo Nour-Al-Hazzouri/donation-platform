@@ -83,7 +83,13 @@ export function AddRequestForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) {
+    if (!validateForm() || !user) {
+      return
+    }
+
+    // Check if user is verified
+    if (!user.email_verified_at) {
+      setErrors(prev => ({ ...prev, form: 'You must be verified to create a request. Please verify your account first.' }))
       return
     }
 
@@ -108,13 +114,14 @@ export function AddRequestForm() {
         imageUrl: formData.image ? URL.createObjectURL(formData.image) : undefined,
         name: formData.name,
         initials: getUserInitials(formData.name),
-        isVerified: false
+        isVerified: !!user.email_verified_at
       })
       
       // Redirect to requests page
       router.push('/requests')
     } catch (error) {
       console.error('Error submitting request:', error)
+      setErrors(prev => ({ ...prev, form: 'Failed to create request. Please try again later.' }))
     } finally {
       setIsSubmitting(false)
     }
@@ -123,6 +130,11 @@ export function AddRequestForm() {
   return (
     <div className="bg-background">
       <form onSubmit={handleSubmit} className="space-y-6">
+        {errors.form && (
+          <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {errors.form}
+          </div>
+        )}
         {/* Name Field */}
         <div>
           <Label htmlFor="name" className="text-base font-medium text-foreground">
