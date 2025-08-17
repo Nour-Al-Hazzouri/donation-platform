@@ -36,8 +36,8 @@ class VerificationResource extends JsonResource
             'user' => $this->when($this->relationLoaded('user'), function () {
                 return new UserResource($this->user);
             }),
-            'verifier' => $this->when($this->relationLoaded('user'), function () {
-                return new UserResource($this->user);
+            'verifier' => $this->when($this->relationLoaded('verifier'), function () {
+                return new UserResource($this->verifier);
             }),
         ];
     }
