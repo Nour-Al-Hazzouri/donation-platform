@@ -4,6 +4,7 @@ import { MainLayout } from "@/components/layouts/MainLayout";
 import CommunityFeed from "@/components/community/communityFeed";
 import CommunityWritePost from "@/components/community/communityWritePost";
 import { useState } from 'react';
+import { CommunityPost } from '@/types';
 
 export default function CommunityPage() {
   const [isWritingPost, setIsWritingPost] = useState(false);
@@ -33,18 +34,4 @@ export default function CommunityPage() {
   );
 }
 
-interface CommunityPost {
-  id: string;
-  content: string;
-  user: {
-    id: string;
-    name: string;
-    verified: boolean;
-  };
-  images?: string[];
-  likes: number;
-  dislikes: number;
-  comments: string[];
-  createdAt: string;
-  tags: string[];
-}
+// Using CommunityPost interface imported from @/types

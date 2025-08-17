@@ -1,16 +1,20 @@
 "use client"
 
 import React, { useState } from 'react'
-import { ArrowLeft, ImageIcon, ArrowUp } from 'lucide-react'
+import { ArrowLeft, ImageIcon, ArrowUp, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { COLORS } from '@/utils/constants'
 import { useAuthStore } from '@/store/authStore'
+import { CommunityPost } from '@/types'
+import { communityService } from '@/lib/api/community'
+import { toast } from 'sonner'
+import { EventSelector } from './EventSelector'
 
 interface CommunityWritePostProps {
   onCancel: () => void;
-  onSubmitSuccess?: (newPost: any) => void;
+  onSubmitSuccess?: (newPost: CommunityPost) => void;
 }
 
 export default function CommunityWritePost({ onCancel, onSubmitSuccess }: CommunityWritePostProps) {
@@ -18,56 +22,101 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
   const [postContent, setPostContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const { user } = useAuthStore()
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [previewImages, setPreviewImages] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files) {
-      const newImages = Array.from(files).map(file => URL.createObjectURL(file))
-      setImages([...images, ...newImages])
+      const newFiles = Array.from(files)
+      const newPreviewImages = newFiles.map(file => URL.createObjectURL(file))
+      
+      setSelectedFiles([...selectedFiles, ...newFiles])
+      setPreviewImages([...previewImages, ...newPreviewImages])
     }
   }
 
   const removeImage = (index: number) => {
-    const newImages = [...images]
-    newImages.splice(index, 1)
-    setImages(newImages)
+    const newFiles = [...selectedFiles]
+    const newPreviewImages = [...previewImages]
+    
+    // Revoke the object URL to avoid memory leaks
+    URL.revokeObjectURL(newPreviewImages[index])
+    
+    newFiles.splice(index, 1)
+    newPreviewImages.splice(index, 1)
+    
+    setSelectedFiles(newFiles)
+    setPreviewImages(newPreviewImages)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!postContent.trim()) return
     
+    // Validate event selection
+    if (!selectedEventId) {
+      setError('Please select a donation event')
+      return
+    }
+    
     setIsSubmitting(true)
+    setError(null)
     
     try {
-      // Create a new post object
-      const newPost = {
-        id: Date.now().toString(), // Use timestamp for more unique ID
+      // Prepare form data for API
+      const formData = new FormData()
+      formData.append('content', postContent)
+      
+      // Add tags if present
+      const tagsList = tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+      if (tagsList.length > 0) {
+        tagsList.forEach(tag => {
+          formData.append('tags[]', tag)
+        })
+      }
+      
+      // Add images if present
+      selectedFiles.forEach(file => {
+        formData.append('image_urls[]', file)
+      })
+      
+      // Send to API
+      const postData = {
         content: postContent,
-        user: {
-          id: user?.id || 'user' + Math.random().toString(36).substring(2, 5),
-          name: user?.name || 'Anonymous',
-          verified: false
-        },
-        images: images,
-        likes: 0,
-        dislikes: 0,
-        comments: [],
-        createdAt: new Date().toISOString(),
-        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-      }
+        event_id: selectedEventId, // Add the selected event ID
+        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        image_urls: selectedFiles
+      };
+      const response = await communityService.createPost(postData)
       
-      if (onSubmitSuccess) {
-        onSubmitSuccess(newPost)
+      if (response.success) {
+        toast.success('Post created successfully!')
+        
+        if (onSubmitSuccess && response.data) {
+          onSubmitSuccess(response.data)
+        }
+        
+        // Reset form
+        setTags('')
+        setPostContent('')
+        setSelectedFiles([])
+        setPreviewImages([])
+        
+        // Return to feed
+        onCancel()
+      } else {
+        setError('Failed to create post. Please try again.')
+        toast.error('Failed to create post')
       }
-      
-      // Reset form
-      setTags('')
-      setPostContent('')
-      setImages([])
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating post:', error)
+      setError(error?.message || 'Failed to create post. Please try again.')
+      toast.error('Error creating post')
     } finally {
       setIsSubmitting(false)
     }
@@ -88,12 +137,27 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
               </Button>
             </div>
           </div>
-          <h1 className="text-lg font-medium text-foreground">Tags</h1>
+          <h1 className="text-lg font-medium text-foreground">Write a Post</h1>
         </div>
       </div>
 
       <div className="px-4 py-6">
         <form onSubmit={handleSubmit}>
+{/* Event Selector Field */}
+          <div className="mb-6">
+            <Label className="mb-2">
+              Related Donation Event <span className="text-red-500">*</span>
+            </Label>
+            <EventSelector 
+              onSelect={setSelectedEventId}
+              selectedEventId={selectedEventId}
+              placeholder="Select a related donation event..."
+            />
+            {error && !selectedEventId && (
+              <p className="text-destructive text-xs mt-1">Please select a donation event</p>
+            )}
+          </div>
+
           {/* Tags Field */}
           <div className="mb-6">
             <Label className="mb-2">
@@ -121,24 +185,55 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
             />
           </div>
 
-          {images.length > 0 && (
-            <div className="mb-6 grid grid-cols-2 gap-2">
-              {images.map((img, index) => (
-                <div key={index} className="relative group">
+          {/* Error message */}
+          {error && (
+            <div className="mb-6 p-3 bg-destructive/10 text-destructive rounded-md">
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+
+          {previewImages.length > 0 && (
+            <div className="mb-6">
+              {previewImages.length === 1 ? (
+                <div className="relative group">
                   <img 
-                    src={img} 
-                    alt={`Preview ${index}`} 
-                    className="w-full h-32 object-cover rounded-lg"
+                    src={previewImages[0]} 
+                    alt="Preview" 
+                    className="w-full h-48 object-cover rounded-lg"
                   />
                   <button
                     type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => removeImage(0)}
+                    className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     ×
                   </button>
                 </div>
-              ))}
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {previewImages.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={img} 
+                        alt={`Preview ${index + 1}`} 
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        {index + 1} / {previewImages.length}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -146,7 +241,7 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
             <Button variant="outline" asChild>
               <Label className="cursor-pointer">
                 <ImageIcon className="w-4 h-4 mr-2" />
-                Add Image
+                {previewImages.length > 0 ? `Add More Images (${previewImages.length})` : 'Add Images'}
                 <input 
                   type="file" 
                   className="hidden" 
@@ -163,8 +258,17 @@ export default function CommunityWritePost({ onCancel, onSubmitSuccess }: Commun
               variant="default"
               className="bg-red-500 hover:bg-red-600 text-white gap-2"
             >
-              <ArrowUp className="w-4 h-4" />
-              Post
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Posting...
+                </>
+              ) : (
+                <>
+                  <ArrowUp className="w-4 h-4" />
+                  Post
+                </>
+              )}
             </Button>
           </div>
         </form>

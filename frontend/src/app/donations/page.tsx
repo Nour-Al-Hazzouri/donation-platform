@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { MainLayout } from "@/components/layouts/MainLayout"
 import { SearchSection } from "@/components/donations/SearchSection"
 import { DonationCards } from "@/components/donations/DonationCards"
+import { Pagination } from "@/components/ui/Pagination"
 import donationsService from '@/lib/api/donations' // direct API service
 
 // Minimal local Donation type (matches your UI's needs)
@@ -85,6 +86,8 @@ export default function DonationsPage() {
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [isSearchActive, setIsSearchActive] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const postsPerPage = 9
 
   // Fetch directly from API
   useEffect(() => {
@@ -114,14 +117,31 @@ export default function DonationsPage() {
     if (!isSearchActive && !searchTerm.trim()) return donations
     return searchDonations(donations, searchTerm)
   }, [donations, searchTerm, isSearchActive])
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredDonations.length / postsPerPage)
+  const indexOfLastPost = currentPage * postsPerPage
+  const indexOfFirstPost = indexOfLastPost - postsPerPage
+  const currentPosts = filteredDonations.slice(indexOfFirstPost, indexOfLastPost)
+  
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
     setIsSearchActive(value.trim().length > 0)
+    setCurrentPage(1) // Reset to first page on new search
   }
 
   const handleSearchSubmit = () => setIsSearchActive(true)
-  const clearSearch = () => { setSearchTerm(''); setIsSearchActive(false) }
+  const clearSearch = () => { 
+    setSearchTerm('') 
+    setIsSearchActive(false)
+    setCurrentPage(1) // Reset to first page when clearing search
+  }
 
   return (
     <MainLayout>
@@ -149,7 +169,16 @@ export default function DonationsPage() {
         ) : error ? (
           <div className="text-center py-12 text-destructive">{error}</div>
         ) : (
-          <DonationCards donations={filteredDonations} searchTerm={isSearchActive ? searchTerm : ''} />
+          <>
+            <DonationCards donations={currentPosts} searchTerm={isSearchActive ? searchTerm : ''} />
+            
+            {/* Pagination */}
+            <Pagination 
+              currentPage={currentPage} 
+              totalPages={totalPages} 
+              onPageChange={handlePageChange} 
+            />
+          </>
         )}
       </main>
     </MainLayout>

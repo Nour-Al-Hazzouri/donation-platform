@@ -339,11 +339,13 @@ class VerificationController extends Controller
                 if ($status === 'approved') {
                     $verification->user->update([
                         'is_verified' => true,
+                        'email_verified_at' => now(),
                     ]);
                 } else if ($status === 'rejected') {
                     // If rejected, delete the uploaded documents
                     $verification->user->update([
                         'is_verified' => false,
+                        'email_verified_at' => null,
                     ]);
                     $verification->deleteImages();
                 }

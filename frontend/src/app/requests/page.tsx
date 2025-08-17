@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { MainLayout } from "@/components/layouts/MainLayout"
 import { SearchSection } from "@/components/requests/SearchSection"
 import { RequestCards } from "@/components/requests/RequestCards"
+import { Pagination } from "@/components/ui/Pagination"
 import requestsService, { RequestEvent } from '@/lib/api/requests'
 
 function searchRequests(requests: RequestEvent[], searchTerm: string): RequestEvent[] {
@@ -36,6 +37,8 @@ export default function RequestsPage() {
   const [isSearchActive, setIsSearchActive] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const postsPerPage = 9
 
   // Load requests from API
   useEffect(() => {
@@ -65,16 +68,30 @@ export default function RequestsPage() {
     if (!isSearchActive && !searchTerm.trim()) return requests
     return searchRequests(requests, searchTerm)
   }, [requests, searchTerm, isSearchActive])
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredRequests.length / postsPerPage)
+  const indexOfLastPost = currentPage * postsPerPage
+  const indexOfFirstPost = indexOfLastPost - postsPerPage
+  const currentPosts = filteredRequests.slice(indexOfFirstPost, indexOfLastPost)
+  
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
     setIsSearchActive(value.trim().length > 0)
+    setCurrentPage(1) // Reset to first page on new search
   }
 
   const handleSearchSubmit = () => setIsSearchActive(true)
   const clearSearch = () => {
     setSearchTerm('')
     setIsSearchActive(false)
+    setCurrentPage(1) // Reset to first page when clearing search
   }
 
   if (isLoading) return (
@@ -125,21 +142,30 @@ export default function RequestsPage() {
             </button>
           </div>
         )}
-<RequestCards 
-  requests={filteredRequests.map(r => ({
-    id: r.id,
-    name: `${r.user.first_name} ${r.user.last_name}`,
-    title: r.title,
-    description: r.description,
-    imageUrl: r.image_urls?.[0] ?? undefined, // <-- use undefined instead of null
-    avatarUrl: r.user.avatar_url ?? undefined,
-    initials: r.user.first_name.charAt(0) + r.user.last_name.charAt(0),
-    isVerified: false,
-    goalAmount: r.goal_amount.toString(),
-    currentAmount: r.current_amount
-  }))}
-  searchTerm={isSearchActive ? searchTerm : ''}
-/>
+<>
+  <RequestCards 
+    requests={currentPosts.map(r => ({
+      id: r.id,
+      name: `${r.user.first_name} ${r.user.last_name}`,
+      title: r.title,
+      description: r.description,
+      imageUrl: r.image_urls?.[0] ?? undefined, // <-- use undefined instead of null
+      avatarUrl: r.user.avatar_url ?? undefined,
+      initials: r.user.first_name.charAt(0) + r.user.last_name.charAt(0),
+      isVerified: false,
+      goalAmount: r.goal_amount.toString(),
+      currentAmount: r.current_amount
+    }))}
+    searchTerm={isSearchActive ? searchTerm : ''}
+  />
+  
+  {/* Pagination */}
+  <Pagination 
+    currentPage={currentPage} 
+    totalPages={totalPages} 
+    onPageChange={handlePageChange} 
+  />
+</>
 
       </main>
     </MainLayout>

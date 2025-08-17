@@ -31,6 +31,7 @@ class User extends Authenticatable
         'avatar_url',
         'location_id',
         'is_verified',
+        'email_verified_at',
         'role'
     ];
 
