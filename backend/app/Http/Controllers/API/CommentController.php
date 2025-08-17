@@ -65,7 +65,7 @@ class CommentController extends Controller
 
         $loadedComment = $comment->load('user');
         $this->notificationService->sendNewComment(
-            $loadedComment->user,
+            $loadedComment->post->user,
             $loadedComment->user->username,
             [
                 'user_id' => Auth::id(),
