@@ -85,7 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/user/{user}', [VerificationController::class, 'userVerifications']);
 
             // Update verification status
-            Route::post('/{verification}/{status}', [VerificationController::class, 'updateStatus']);
+            Route::put('/{verification}/{status}', [VerificationController::class, 'updateStatus']);
         });
 
         // Public verification request submission
