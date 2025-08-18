@@ -1,6 +1,19 @@
 #!/bin/bash
 set -e
 
+# Function to check if database is ready
+check_db_connection() {
+    php artisan db:show > /dev/null 2>&1
+    return $?
+}
+
+# Wait for database to be ready
+echo "Checking database connection..."
+until check_db_connection; do
+    echo "Waiting for database to be ready..."
+    sleep 5
+done
+
 # Check if maintenance mode is enabled
 if [ "$MAINTENANCE_MODE" = "true" ]; then
     echo "Maintenance mode is enabled"
@@ -22,6 +35,12 @@ fi
 chown -R www-data:www-data /var/www/html/storage
 chown -R www-data:www-data /var/www/html/bootstrap/cache
 
+# Clear configuration cache first (doesn't require DB)
+echo "Clearing configuration cache..."
+php artisan config:clear || true
+php artisan view:clear || true
+php artisan route:clear || true
+
 # Run database migrations
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Running database migrations..."
@@ -32,14 +51,11 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
         echo "Running database seeders..."
         php artisan db:seed --force
     fi
-fi
 
-# Clear all caches
-echo "Clearing caches..."
-php artisan config:clear
-php artisan cache:clear
-php artisan view:clear
-php artisan route:clear
+    # Only try to clear cache tables if they exist
+    echo "Clearing caches..."
+    php artisan cache:clear 2>/dev/null || echo "Cache table might not exist yet, skipping..."
+fi
 
 # Cache configuration for production
 if [ "$APP_ENV" = "production" ]; then
