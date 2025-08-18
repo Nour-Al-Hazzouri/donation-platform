@@ -72,7 +72,7 @@ export interface CreateDonationTransactionData {
 const buildFullImageUrls = (imagePaths: string[] | undefined): string[] => {
   if (!imagePaths || imagePaths.length === 0) return [];
   // prefer axios instance baseURL, fallback to env var
-  const base = authApi.defaults.baseURL || process.env.NEXT_PUBLIC_API_URL || '';
+  const base = authApi.defaults.baseURL || process.env.NEXT_PUBLIC_API_URL || 'https://amusing-presence-production.up.railway.app/api';
   return imagePaths.map((p) => {
     // if already absolute URL, return as-is
     try {

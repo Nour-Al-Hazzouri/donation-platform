@@ -29,7 +29,7 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
   const imageSrc = donation.imageUrl
     ? donation.imageUrl.startsWith('http')
       ? donation.imageUrl
-      : `${process.env.NEXT_PUBLIC_API_URL || ''}/${donation.imageUrl.replace(/^\/?/, '')}`
+      : `${process.env.NEXT_PUBLIC_API_URL || 'https://amusing-presence-production.up.railway.app/api'}/${donation.imageUrl.replace(/^\//, '')}`
     : FALLBACK_IMAGE
 
   return (

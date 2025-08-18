@@ -1,14 +1,7 @@
 import axios from 'axios';
+import { apiConfig } from './config';
 
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
-
-const verificationApi = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-});
+const verificationApi = axios.create(apiConfig);
 
 // Add a request interceptor to include the auth token in requests
 verificationApi.interceptors.request.use(

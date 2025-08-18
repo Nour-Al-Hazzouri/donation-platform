@@ -1,25 +1,12 @@
 // C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\lib\api\blogs.ts
 import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
+import { apiConfig } from './config';
 
 // Create a basic axios instance without auth interceptors for public requests
-const publicApi = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-});
+const publicApi = axios.create(apiConfig);
 
 // Create an authenticated axios instance for protected requests
-const authApi = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-});
+const authApi = axios.create(apiConfig);
 
 // Add auth interceptor only to the authenticated instance
 authApi.interceptors.request.use(

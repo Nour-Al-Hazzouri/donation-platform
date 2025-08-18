@@ -1,14 +1,7 @@
 import axios from 'axios';
+import { apiConfig } from './config';
 
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
-
-const authApi = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-});
+const authApi = axios.create(apiConfig);
 
 // Add a request interceptor to include the auth token in requests
 authApi.interceptors.request.use(
