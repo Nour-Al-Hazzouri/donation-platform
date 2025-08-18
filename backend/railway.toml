@@ -1,0 +1,34 @@
+[build]
+  builder = "DOCKERFILE"
+  dockerfile = "Dockerfile"
+  installCommand = "composer install --no-dev --optimize-autoloader --no-interaction"
+  buildCommand = """
+    php artisan config:cache &&
+    php artisan route:cache &&
+    php artisan view:cache
+  """
+
+[deploy]
+  startCommand = "/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"
+  healthcheckPath = "/api/health"
+  healthcheckTimeout = 100
+  restartDelay = "5s"
+  restartMaxAttempts = 5
+  restartWindow = "5m"
+
+[variables]
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  LOG_CHANNEL = "stderr"
+  SESSION_DRIVER = "file"
+  SESSION_LIFETIME = "120"
+  CACHE_DRIVER = "file"
+  QUEUE_CONNECTION = "sync"
+
+[build.environment]
+  NODE_ENV = "production"
+  COMPOSER_ALLOW_SUPERUSER = "1"
+  COMPOSER_MEMORY_LIMIT = "-1"
+
+[deploy.environment]
+  APP_NAME = "Donation Platform"
