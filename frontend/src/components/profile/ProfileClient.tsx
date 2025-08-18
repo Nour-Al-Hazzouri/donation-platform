@@ -52,36 +52,36 @@ export default function ProfileClient() {
         
         <div className="flex-grow">
           {activeView === 'profile' ? (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow dark:shadow-gray-800 p-6 border dark:border-gray-800">
-              <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Profile</h1>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h1 className="text-2xl font-bold mb-6">Profile</h1>
               
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Personal Information</h2>
+                  <h2 className="text-lg font-medium mb-2">Personal Information</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">First Name</p>
-                      <p className="text-gray-900 dark:text-white">{user.first_name || 'Not provided'}</p>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">First Name</p>
+                      <p>{user.first_name || 'Not provided'}</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Last Name</p>
-                      <p className="text-gray-900 dark:text-white">{user.last_name || 'Not provided'}</p>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Last Name</p>
+                      <p>{user.last_name || 'Not provided'}</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Username</p>
-                      <p className="text-gray-900 dark:text-white">{user.username || 'Not provided'}</p>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Username</p>
+                      <p>{user.username || 'Not provided'}</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Email</p>
-                      <p className="text-gray-900 dark:text-white">{user.email}</p>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                      <p>{user.email}</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Phone</p>
-                      <p className="text-gray-900 dark:text-white">{user.phone || 'Not provided'}</p>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                      <p>{user.phone || 'Not provided'}</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Verification Status</p>
-                      <p className="text-gray-900 dark:text-white">{user.verified ? 'Verified' : 'Not verified'}</p>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Verification Status</p>
+                      <p>{user.verified ? 'Verified' : 'Not verified'}</p>
                     </div>
                   </div>
                 </div>
