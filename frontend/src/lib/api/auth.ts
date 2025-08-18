@@ -102,6 +102,8 @@ const authService = {
   
   login: async (data: LoginData): Promise<AuthResponse> => {
     const response = await authApi.post('/auth/login', data);
+    console.log(response.data);
+    console.log(process.env.NEXT_PUBLIC_API_BASE_URL);
     return response.data;
   },
   
