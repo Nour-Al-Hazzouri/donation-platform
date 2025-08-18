@@ -23,7 +23,7 @@ const teamMembers = [
     id: 2,
     name: "Mariam Kanj",
     role: "UI/UX Designer, Front-end Developer",
-    image: "/team-female.svg",
+    image: "/team-female.png",
     social: {
       facebook: "#",
       twitter: "#",

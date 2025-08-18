@@ -1,5 +1,8 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 import type React from "react"
 import { AdminHeader } from "@/components/common/AdminHeader"
 import { Footer } from "@/components/common/Footer"

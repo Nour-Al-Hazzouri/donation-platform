@@ -39,9 +39,6 @@ export function SearchSection({
 
   return (
     <div className="text-center mb-8">
-      <h1 className="text-3xl font-bold text-foreground mb-2">Latest Donations</h1>
-      <p className="text-muted-foreground max-w-2xl mx-auto mb-6">Browse available medication donations or add your own to help those in need</p>
-      
       {/* Search Bar */}
       <form onSubmit={handleSubmit} className="flex justify-center items-center max-w-md mx-auto mb-6">
         <div className="relative flex-1">

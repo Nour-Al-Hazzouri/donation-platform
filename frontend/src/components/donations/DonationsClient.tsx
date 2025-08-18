@@ -145,7 +145,7 @@ export default function DonationsClient() {
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Donations</h1>
           <p className="text-muted-foreground">
             Browse through donation requests and offers from our community
