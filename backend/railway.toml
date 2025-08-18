@@ -10,7 +10,7 @@
 
 [deploy]
   startCommand = "/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"
-  healthcheckPath = "/api/health"
+  healthcheckPath = "/api/up"
   healthcheckTimeout = 100
   restartDelay = "5s"
   restartMaxAttempts = 5
