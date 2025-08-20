@@ -12,12 +12,12 @@ check_db_connection() {
     # First try to connect using mysql client with SSL disabled
     if command -v mysql &> /dev/null; then
         echo "Testing connection using mysql client (with SSL disabled)..."
-        if ! mysql --ssl-mode=DISABLED -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
+        if ! mysql --skip-ssl -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
             echo "MySQL client connection with SSL disabled failed with error:"
             cat /tmp/mysql_error
-            echo "Trying with SSL verification disabled..."
-            if ! mysql --ssl-mode=VERIFY_IDENTITY --ssl-verify-server-cert=OFF -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
-                echo "MySQL client connection with SSL verification disabled also failed with error:"
+            echo "Trying with SSL but skip certificate verification..."
+            if ! mysql --ssl -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" --ssl-verify-server-cert=0 -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
+                echo "MySQL client connection with SSL (skip verify) also failed with error:"
                 cat /tmp/mysql_error
                 return 1
             fi
@@ -39,8 +39,9 @@ check_db_connection() {
         
         # Try without SSL as a fallback
         echo "Trying without SSL..."
-        if ! mysql --ssl-mode=DISABLED -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/dev/null; then
-            echo "Failed to connect to database with or without SSL"
+        if ! mysql --skip-ssl -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_fallback_error; then
+            echo "Fallback connection without SSL failed with error:"
+            cat /tmp/mysql_fallback_error
             return 1
         fi
     fi
