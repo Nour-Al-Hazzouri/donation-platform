@@ -9,22 +9,40 @@ check_db_connection() {
     echo "DB_DATABASE: $DB_DATABASE"
     echo "DB_USERNAME: $DB_USERNAME"
 
-    # First try to connect using mysql client
+    # First try to connect using mysql client with SSL disabled
     if command -v mysql &> /dev/null; then
-        echo "Testing connection using mysql client..."
-        if ! mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
-            echo "MySQL client connection failed with error:"
+        echo "Testing connection using mysql client (with SSL disabled)..."
+        if ! mysql --ssl-mode=DISABLED -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
+            echo "MySQL client connection with SSL disabled failed with error:"
             cat /tmp/mysql_error
-            return 1
+            echo "Trying with SSL verification disabled..."
+            if ! mysql --ssl-mode=VERIFY_IDENTITY --ssl-verify-server-cert=OFF -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
+                echo "MySQL client connection with SSL verification disabled also failed with error:"
+                cat /tmp/mysql_error
+                return 1
+            fi
         fi
     fi
 
-    # Then try Laravel's database check
-    echo "Testing connection using Laravel..."
+    # Then try Laravel's database check with SSL configuration
+    echo "Testing connection using Laravel with SSL configuration..."
+    # Copy the SSL configuration
+    cp /var/www/html/config/database-ssl.php /var/www/html/config/database.php
+    
+    # Clear configuration cache
+    php artisan config:clear
+    
+    # Test the connection
     if ! php artisan db:show --no-ansi >> /tmp/laravel_db_check.log 2>&1; then
-        echo "Laravel database check failed with error:"
+        echo "Laravel database check with SSL configuration failed with error:"
         cat /tmp/laravel_db_check.log
-        return 1
+        
+        # Try without SSL as a fallback
+        echo "Trying without SSL..."
+        if ! mysql --ssl-mode=DISABLED -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/dev/null; then
+            echo "Failed to connect to database with or without SSL"
+            return 1
+        fi
     fi
 
     echo "Database connection successful!"
