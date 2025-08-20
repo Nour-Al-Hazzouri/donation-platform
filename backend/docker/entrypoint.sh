@@ -9,12 +9,38 @@ check_db_connection() {
     echo "DB_DATABASE: $DB_DATABASE"
     echo "DB_USERNAME: $DB_USERNAME"
 
-    # First try to connect using mysql client
-    if command -v mysql &> /dev/null; then
-        echo "Testing connection using mysql client..."
-        if ! mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
-            echo "MySQL client connection failed with error:"
+    # First try to connect using DB_URL if it exists
+    if [ -n "$DB_URL" ]; then
+        echo "Testing connection using DB_URL..."
+        if ! mysql "$DB_URL" -e "SELECT 1" 2>/tmp/mysql_error; then
+            echo "DB_URL connection failed with error:"
             cat /tmp/mysql_error
+            echo "Falling back to individual connection parameters..."
+            
+            # Fall back to individual parameters if DB_URL fails
+            if [ -n "$DB_HOST" ] && [ -n "$DB_PORT" ] && [ -n "$DB_USERNAME" ] && [ -n "$DB_PASSWORD" ] && [ -n "$DB_DATABASE" ]; then
+                echo "Testing connection with individual parameters..."
+                if ! mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -e "SELECT 1" 2>/tmp/mysql_error; then
+                    echo "Individual parameter connection also failed with error:"
+                    cat /tmp/mysql_error
+                    return 1
+                fi
+            else
+                echo "Missing required database connection parameters"
+                return 1
+            fi
+        fi
+    else
+        # If no DB_URL, use individual parameters
+        if [ -n "$DB_HOST" ] && [ -n "$DB_PORT" ] && [ -n "$DB_USERNAME" ] && [ -n "$DB_PASSWORD" ] && [ -n "$DB_DATABASE" ]; then
+            echo "Testing connection with individual parameters..."
+            if ! mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -e "SELECT 1" 2>/tmp/mysql_error; then
+                echo "Database connection failed with error:"
+                cat /tmp/mysql_error
+                return 1
+            fi
+        else
+            echo "No valid database connection parameters found"
             return 1
         fi
     fi
