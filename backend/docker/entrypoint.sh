@@ -9,41 +9,22 @@ check_db_connection() {
     echo "DB_DATABASE: $DB_DATABASE"
     echo "DB_USERNAME: $DB_USERNAME"
 
-    # First try to connect using mysql client with SSL disabled
+    # First try to connect using mysql client
     if command -v mysql &> /dev/null; then
-        echo "Testing connection using mysql client (with SSL disabled)..."
-        if ! mysql --skip-ssl -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
-            echo "MySQL client connection with SSL disabled failed with error:"
+        echo "Testing connection using mysql client..."
+        if ! mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
+            echo "MySQL client connection failed with error:"
             cat /tmp/mysql_error
-            echo "Trying with SSL but skip certificate verification..."
-            if ! mysql --ssl -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" --ssl-verify-server-cert=0 -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
-                echo "MySQL client connection with SSL (skip verify) also failed with error:"
-                cat /tmp/mysql_error
-                return 1
-            fi
+            return 1
         fi
     fi
 
-    # Then try Laravel's database check with SSL configuration
-    echo "Testing connection using Laravel with SSL configuration..."
-    # Copy the SSL configuration
-    cp /var/www/html/config/database-ssl.php /var/www/html/config/database.php
-    
-    # Clear configuration cache
-    php artisan config:clear
-    
-    # Test the connection
+    # Then try Laravel's database check
+    echo "Testing connection using Laravel..."
     if ! php artisan db:show --no-ansi >> /tmp/laravel_db_check.log 2>&1; then
-        echo "Laravel database check with SSL configuration failed with error:"
+        echo "Laravel database check failed with error:"
         cat /tmp/laravel_db_check.log
-        
-        # Try without SSL as a fallback
-        echo "Trying without SSL..."
-        if ! mysql --skip-ssl -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_fallback_error; then
-            echo "Fallback connection without SSL failed with error:"
-            cat /tmp/mysql_fallback_error
-            return 1
-        fi
+        return 1
     fi
 
     echo "Database connection successful!"
