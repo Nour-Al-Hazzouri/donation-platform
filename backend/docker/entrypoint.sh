@@ -1,17 +1,55 @@
 #!/bin/bash
 set -e
 
-# Function to check if database is ready
+# Function to check if database is ready with detailed error output
 check_db_connection() {
-    php artisan db:show > /dev/null 2>&1
-    return $?
+    echo "Attempting to connect to database..."
+    echo "DB_HOST: $DB_HOST"
+    echo "DB_PORT: $DB_PORT"
+    echo "DB_DATABASE: $DB_DATABASE"
+    echo "DB_USERNAME: $DB_USERNAME"
+
+    # First try to connect using mysql client
+    if command -v mysql &> /dev/null; then
+        echo "Testing connection using mysql client..."
+        if ! mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" "-p$DB_PASSWORD" -e "SELECT 1" "$DB_DATABASE" 2>/tmp/mysql_error; then
+            echo "MySQL client connection failed with error:"
+            cat /tmp/mysql_error
+            return 1
+        fi
+    fi
+
+    # Then try Laravel's database check
+    echo "Testing connection using Laravel..."
+    if ! php artisan db:show --no-ansi >> /tmp/laravel_db_check.log 2>&1; then
+        echo "Laravel database check failed with error:"
+        cat /tmp/laravel_db_check.log
+        return 1
+    fi
+
+    echo "Database connection successful!"
+    return 0
 }
 
-# Wait for database to be ready
+# Wait for database to be ready with timeout
 echo "Checking database connection..."
-until check_db_connection; do
-    echo "Waiting for database to be ready..."
+max_attempts=30
+attempt=1
+
+while [ $attempt -le $max_attempts ]; do
+    if check_db_connection; then
+        echo "Database is ready!"
+        break
+    fi
+
+    echo "Attempt $attempt of $max_attempts - Waiting for database to be ready..."
     sleep 5
+    attempt=$((attempt + 1))
+
+    if [ $attempt -gt $max_attempts ]; then
+        echo "Error: Could not connect to database after $max_attempts attempts. Exiting."
+        exit 1
+    fi
 done
 
 # Check if maintenance mode is enabled
@@ -45,7 +83,7 @@ php artisan route:clear || true
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Running database migrations..."
     php artisan migrate --force
-    
+
     # Run database seeders if needed
     if [ "$RUN_SEEDERS" = "true" ]; then
         echo "Running database seeders..."
