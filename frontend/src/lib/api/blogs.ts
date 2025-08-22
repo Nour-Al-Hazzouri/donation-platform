@@ -180,18 +180,3 @@ const blogService = {
 };
 
 export { blogService };
-
-export interface CreateAnnouncementData {
-  title: string;
-  content: string;
-  priority: string;
-  image_urls?: File[];
-}
-
-export interface UpdateAnnouncementData {
-  title?: string;
-  content?: string;
-  priority?: string;
-  image_urls?: File[];
-  remove_image_urls?: string[];
-}

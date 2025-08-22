@@ -17,7 +17,6 @@ type User = {
   updated_at: string;
   token: string;
   isAdmin?: boolean;
-  verified?: boolean;
   location?: {
     id: number;
     governorate: string;

@@ -29,7 +29,7 @@ export function CommunityChart() {
         setError(null);
 
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-        const endpoint = `${backendUrl.replace(/\/$/, "")}/statistics`;
+        const endpoint = `${backendUrl.replace(/\/$/, "")}/api/statistics`;
 
         // read token from localStorage (auth-storage.persisted zustand shape)
         let token: string | null = null;

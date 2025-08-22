@@ -1,8 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-export const fetchCache = 'force-no-store'
-
 import React from "react"
 import { Header } from "@/components/common/Header"
 import { Footer } from "@/components/common/Footer"

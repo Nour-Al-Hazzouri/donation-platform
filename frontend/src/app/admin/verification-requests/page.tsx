@@ -1,5 +1,15 @@
-import { VerificationRequestsPageClient } from "@/components/admin/verification-requests/VerificationRequestsPageClient"
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export default function VerificationRequestsPage() {
-  return <VerificationRequestsPageClient />
+  const router = useRouter()
+
+  // Redirect to the users page with the verification tab active
+  useEffect(() => {
+    router.replace("/admin/users?tab=verification")
+  }, [router])
+
+  return null
 }

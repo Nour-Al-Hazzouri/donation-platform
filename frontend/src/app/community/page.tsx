@@ -1,13 +1,37 @@
-export const dynamic = 'force-dynamic'
-export const fetchCache = 'force-no-store'
+"use client"
 
 import { MainLayout } from "@/components/layouts/MainLayout";
-import CommunityPageClient from "@/components/community/CommunityPageClient";
+import CommunityFeed from "@/components/community/communityFeed";
+import CommunityWritePost from "@/components/community/communityWritePost";
+import { useState } from 'react';
+import { CommunityPost } from '@/types';
 
 export default function CommunityPage() {
+  const [isWritingPost, setIsWritingPost] = useState(false);
+  const [newPost, setNewPost] = useState<CommunityPost | null>(null);
+
+  const handlePostSubmit = (createdPost: CommunityPost) => {
+    setNewPost(createdPost);
+    setIsWritingPost(false);
+  };
+
   return (
     <MainLayout>
-      <CommunityPageClient />
+      <div className="container py-8">
+        {isWritingPost ? (
+          <CommunityWritePost 
+            onCancel={() => setIsWritingPost(false)}
+            onSubmitSuccess={handlePostSubmit}
+          />
+        ) : (
+          <CommunityFeed 
+            onWritePost={() => setIsWritingPost(true)} 
+            newPost={newPost}
+          />
+        )}
+      </div>
     </MainLayout>
   );
 }
+
+// Using CommunityPost interface imported from @/types
