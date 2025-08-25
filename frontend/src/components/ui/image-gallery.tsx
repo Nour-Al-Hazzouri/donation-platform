@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, ImageIcon } from 'lucide-react'
 import { cn } from '@/utils'
+import Image from 'next/image'
 
 interface ImageGalleryProps {
   images: string[] | undefined
@@ -12,9 +13,15 @@ interface ImageGalleryProps {
 export function ImageGallery({ images, className }: ImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [imgError, setImgError] = useState<Record<number, boolean>>({})
 
   if (!images || images.length === 0) {
-    return null
+    return (
+      <div className="flex items-center justify-center h-40 bg-muted rounded-lg">
+        <ImageIcon className="h-10 w-10 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground ml-2">No images available</p>
+      </div>
+    )
   }
 
   const handlePrevious = (e: React.MouseEvent) => {
@@ -43,13 +50,21 @@ export function ImageGallery({ images, className }: ImageGalleryProps) {
         className={cn("relative rounded-lg overflow-hidden cursor-pointer", className)}
         onClick={toggleFullscreen}
       >
-        <img
-          src={images[0]}
-          alt="Post image"
-          className="w-full h-auto max-h-96 object-cover"
-        />
+        {imgError[0] ? (
+          <div className="flex items-center justify-center h-40 bg-muted rounded-lg">
+            <ImageIcon className="h-10 w-10 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground ml-2">Image unavailable</p>
+          </div>
+        ) : (
+          <img
+            src={images[0]}
+            alt="Post image"
+            className="w-full h-auto max-h-96 object-cover"
+            onError={() => setImgError(prev => ({ ...prev, 0: true }))}
+          />
+        )}
         
-        {isFullscreen && (
+        {isFullscreen && !imgError[0] && (
           <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center" onClick={closeFullscreen}>
             <button 
               className="absolute top-4 right-4 text-white p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70"
@@ -61,6 +76,7 @@ export function ImageGallery({ images, className }: ImageGalleryProps) {
               src={images[0]}
               alt="Post image fullscreen"
               className="max-w-full max-h-full object-contain p-4"
+              onError={() => setImgError(prev => ({ ...prev, 0: true }))}
             />
           </div>
         )}
@@ -76,11 +92,19 @@ export function ImageGallery({ images, className }: ImageGalleryProps) {
         className="relative rounded-lg overflow-hidden cursor-pointer"
         onClick={toggleFullscreen}
       >
-        <img
-          src={images[currentIndex]}
-          alt={`Post image ${currentIndex + 1}`}
-          className="w-full h-auto max-h-96 object-cover"
-        />
+        {imgError[currentIndex] ? (
+          <div className="flex items-center justify-center h-40 bg-muted rounded-lg">
+            <ImageIcon className="h-10 w-10 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground ml-2">Image unavailable</p>
+          </div>
+        ) : (
+          <img
+            src={images[currentIndex]}
+            alt={`Post image ${currentIndex + 1}`}
+            className="w-full h-auto max-h-96 object-cover"
+            onError={() => setImgError(prev => ({ ...prev, [currentIndex]: true }))}
+          />
+        )}
         
         {/* Image counter */}
         <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
@@ -100,11 +124,18 @@ export function ImageGallery({ images, className }: ImageGalleryProps) {
               )}
               onClick={() => setCurrentIndex(index)}
             >
-              <img 
-                src={image} 
-                alt={`Thumbnail ${index + 1}`} 
-                className="w-full h-full object-cover"
-              />
+              {imgError[index] ? (
+                <div className="flex items-center justify-center w-full h-full bg-muted">
+                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                </div>
+              ) : (
+                <img 
+                  src={image} 
+                  alt={`Thumbnail ${index + 1}`} 
+                  className="w-full h-full object-cover"
+                  onError={() => setImgError(prev => ({ ...prev, [index]: true }))}
+                />
+              )}
             </div>
           ))}
         </div>
@@ -126,7 +157,7 @@ export function ImageGallery({ images, className }: ImageGalleryProps) {
       </button>
       
       {/* Fullscreen mode */}
-      {isFullscreen && (
+      {isFullscreen && !imgError[currentIndex] && (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center" onClick={closeFullscreen}>
           <button 
             className="absolute top-4 right-4 text-white p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70"
@@ -139,6 +170,7 @@ export function ImageGallery({ images, className }: ImageGalleryProps) {
             src={images[currentIndex]}
             alt={`Post image ${currentIndex + 1} fullscreen`}
             className="max-w-full max-h-full object-contain p-4"
+            onError={() => setImgError(prev => ({ ...prev, [currentIndex]: true }))}
           />
           
           <button
