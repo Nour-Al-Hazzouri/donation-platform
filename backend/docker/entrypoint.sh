@@ -9,40 +9,57 @@ check_db_connection() {
     echo "DB_DATABASE: $DB_DATABASE"
     echo "DB_USERNAME: $DB_USERNAME"
 
-    # First try to connect using DB_URL if it exists
+    # Function to test MySQL connection with TCP/IP
+    test_mysql_connection() {
+        local host="$1"
+        local port="$2"
+        local user="$3"
+        local pass="$4"
+        local db="$5"
+        
+        echo "Testing connection to $user@$host:$port/$db..."
+        
+        # First try with TCP/IP
+        if mysql --protocol=TCP -h "$host" -P "$port" -u "$user" -p"$pass" "$db" -e "SELECT 1" 2>/dev/null; then
+            echo "Successfully connected using TCP/IP"
+            return 0
+        fi
+        
+        # If that fails, try with socket (for local development)
+        if [ "$host" = "localhost" ] || [ "$host" = "127.0.0.1" ]; then
+            echo "Trying with local socket..."
+            if mysql -u "$user" -p"$pass" "$db" -e "SELECT 1" 2>/dev/null; then
+                echo "Successfully connected using local socket"
+                return 0
+            fi
+        fi
+        
+        # If we get here, both methods failed
+        echo "Failed to connect to database"
+        return 1
+    }
+
+    # Try to connect using available parameters
     if [ -n "$DB_URL" ]; then
         echo "Testing connection using DB_URL..."
         if ! mysql "$DB_URL" -e "SELECT 1" 2>/tmp/mysql_error; then
             echo "DB_URL connection failed with error:"
             cat /tmp/mysql_error
             echo "Falling back to individual connection parameters..."
-            
-            # Fall back to individual parameters if DB_URL fails
-            if [ -n "$DB_HOST" ] && [ -n "$DB_PORT" ] && [ -n "$DB_USERNAME" ] && [ -n "$DB_PASSWORD" ] && [ -n "$DB_DATABASE" ]; then
-                echo "Testing connection with individual parameters..."
-                if ! mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -e "SELECT 1" 2>/tmp/mysql_error; then
-                    echo "Individual parameter connection also failed with error:"
-                    cat /tmp/mysql_error
-                    return 1
-                fi
-            else
-                echo "Missing required database connection parameters"
-                return 1
-            fi
-        fi
-    else
-        # If no DB_URL, use individual parameters
-        if [ -n "$DB_HOST" ] && [ -n "$DB_PORT" ] && [ -n "$DB_USERNAME" ] && [ -n "$DB_PASSWORD" ] && [ -n "$DB_DATABASE" ]; then
-            echo "Testing connection with individual parameters..."
-            if ! mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -e "SELECT 1" 2>/tmp/mysql_error; then
-                echo "Database connection failed with error:"
-                cat /tmp/mysql_error
-                return 1
-            fi
         else
-            echo "No valid database connection parameters found"
+            return 0
+        fi
+    fi
+    
+    # Try with individual parameters if available
+    if [ -n "$DB_HOST" ] && [ -n "$DB_PORT" ] && [ -n "$DB_USERNAME" ] && [ -n "$DB_PASSWORD" ] && [ -n "$DB_DATABASE" ]; then
+        if ! test_mysql_connection "$DB_HOST" "$DB_PORT" "$DB_USERNAME" "$DB_PASSWORD" "$DB_DATABASE"; then
+            echo "Database connection failed"
             return 1
         fi
+    else
+        echo "Missing required database connection parameters"
+        return 1
     fi
 
     # Then try Laravel's database check
