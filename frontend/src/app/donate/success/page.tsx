@@ -104,7 +104,7 @@ export default function DonationSuccessPage() {
 
         <p className="text-lg text-muted-foreground mb-2">
           Your donation of <span className="font-semibold text-yellow-600 dark:text-yellow-400">
-            ${parseInt(requestDetails.amount).toLocaleString()}
+            {parseInt(requestDetails.amount).toLocaleString()}
           </span> is <strong>pending approval</strong> by the request creator.
         </p>
 

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CheckCircle, Upload, AlertCircle } from "lucide-react"
+import { CheckCircle, Upload, AlertCircle, X, Plus } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
 import { useModal } from "@/contexts/ModalContext"
 import { verificationService } from "@/lib/api"
@@ -12,7 +12,7 @@ import { verificationService } from "@/lib/api"
 export default function AccVerification() {
   const { user, updateVerification } = useAuthStore()
   const { closeModal } = useModal()
-  const [idImage, setIdImage] = useState<File | null>(null)
+  const [documentImages, setDocumentImages] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [verificationSuccess, setVerificationSuccess] = useState(false)
   const [documentType, setDocumentType] = useState<'id_card' | 'passport' | 'driver_license'>('id_card')
@@ -20,13 +20,20 @@ export default function AccVerification() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setIdImage(e.target.files[0])
+      const newFiles = Array.from(e.target.files);
+      // Limit to 7 files total as per API documentation
+      const updatedFiles = [...documentImages, ...newFiles].slice(0, 7);
+      setDocumentImages(updatedFiles);
     }
+  }
+  
+  const removeFile = (index: number) => {
+    setDocumentImages(documentImages.filter((_, i) => i !== index));
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!idImage) return
+    if (documentImages.length === 0) return
     
     setIsSubmitting(true)
     setError(null)
@@ -34,11 +41,10 @@ export default function AccVerification() {
     try {
       const response = await verificationService.submitVerification({
         document_type: documentType,
-        document_image: idImage
+        documents: documentImages
       })
       
-      // Update the user's verification status in the auth store
-      updateVerification(true, new Date().toISOString())
+      // Do not update verification status - it will remain pending until admin approval
       setVerificationSuccess(true)
       setTimeout(() => closeModal(), 2000)
     } catch (error: any) {
@@ -67,7 +73,7 @@ export default function AccVerification() {
               <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-green-600 mb-2">Documents Submitted</h3>
               <p className="text-gray-600">
-                Your identity documents have been received. We'll notify you once verification is complete.
+                Your identity documents have been received and are pending admin approval. We'll notify you once verification is complete.
               </p>
             </div>
           ) : (
@@ -102,29 +108,43 @@ export default function AccVerification() {
                     </Button>
                   </div>
                   
-                  <Label className="text-[#5a5a5a] text-sm">Upload Document</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    {idImage ? (
-                      <div className="flex flex-col items-center">
-                        <CheckCircle className="w-8 h-8 text-green-500 mb-2" />
-                        <p className="text-sm text-gray-700">{idImage.name}</p>
-                        <button
-                          type="button"
-                          onClick={() => setIdImage(null)}
-                          className="mt-2 text-sm text-[#f90404] hover:underline"
-                        >
-                          Change file
-                        </button>
+                  <Label className="text-[#5a5a5a] text-sm">Upload Documents</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    {documentImages.length > 0 && (
+                      <div className="mb-4 space-y-2">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Uploaded Documents ({documentImages.length}/7):</p>
+                        <div className="space-y-2">
+                          {documentImages.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                              <div className="flex items-center">
+                                <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                                <p className="text-sm text-gray-700 truncate max-w-[200px]">{file.name}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeFile(index)}
+                                className="text-gray-500 hover:text-red-500"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    ) : (
-                      <label className="cursor-pointer">
+                    )}
+                    
+                    {documentImages.length < 7 && (
+                      <label className="cursor-pointer block text-center">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <Upload className="w-8 h-8 text-gray-400" />
                           <p className="text-sm text-gray-600">
-                            Click to upload your ID document
+                            Click to upload your ID documents
                           </p>
                           <p className="text-xs text-gray-500">
-                            Accepted: JPG, PNG, PDF (max. 5MB)
+                            Accepted: JPG, PNG, PDF (max. 10MB per file)
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            You can upload up to 7 documents
                           </p>
                         </div>
                         <input
@@ -132,7 +152,7 @@ export default function AccVerification() {
                           onChange={handleFileChange}
                           className="hidden"
                           accept="image/jpeg,image/png,application/pdf"
-                          required
+                          multiple
                         />
                       </label>
                     )}
@@ -157,7 +177,7 @@ export default function AccVerification() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={!idImage || isSubmitting}
+                    disabled={documentImages.length === 0 || isSubmitting}
                     className="bg-[#f90404] hover:bg-[#d90404] text-white"
                   >
                     {isSubmitting ? "Submitting..." : "Submit Documents"}

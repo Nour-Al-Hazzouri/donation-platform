@@ -51,6 +51,8 @@ class ImageService
         $this->validateImage($file);
 
         $disk = $isPublic ? 'public' : 'private';
+        // remove after development and the private storage is working
+        $disk = 'public';
         $extension = $this->getSafeExtension($file);
         $filename = $this->generateFilename($extension);
 
@@ -154,6 +156,8 @@ class ImageService
     public function deleteImage(string $path, bool $isPublic = true): bool
     {
         $disk = $isPublic ? 'public' : 'private';
+        // remove after development and the private storage is working
+        $disk = 'public';
 
         \Log::info('Deleting image: ' . $path);
         if (Storage::disk($disk)->exists($path)) {
@@ -179,6 +183,8 @@ class ImageService
         }
 
         $disk = $isPublic ? 'public' : 'private';
+        // remove after development and the private storage is working
+        $disk = 'public';
         $storage = Storage::disk($disk);
 
         // Normalize path for the current OS

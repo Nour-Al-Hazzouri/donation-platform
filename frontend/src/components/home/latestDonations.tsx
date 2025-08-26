@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -9,11 +9,11 @@ import { cn } from '@/utils'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useDonationsStore, DonationData } from '@/store/donationsStore'
+import router from 'next/router'
 
 interface DonationItem extends Omit<DonationData, 'location'> {
   location: string
   timeAgo: string
-  isAvailable: boolean
   quantity?: number
 }
 
@@ -26,7 +26,6 @@ const FALLBACK_IMAGE = '/images/fallback.jpg'
 const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
   const router = useRouter()
 
-  // Make sure image URLs work with Next.js Image
   const imageSrc = donation.imageUrl
     ? donation.imageUrl.startsWith('http')
       ? donation.imageUrl
@@ -36,7 +35,7 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
   return (
     <Card
       className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-background cursor-pointer"
-      onClick={() => donation.isAvailable && router.push(`/donations/${donation.id}`)}
+      onClick={() => router.push(`/donations/${donation.id}`)}
     >
       <CardContent className="p-4 sm:p-6 flex flex-col h-full">
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
@@ -47,24 +46,13 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
                 {donation.initials}
               </AvatarFallback>
             </Avatar>
-            {donation.isVerified && (
-              <div className="absolute -top-1 -right-1">
-                <Image
-                  src="/verification.png"
-                  alt="Verified"
-                  width={16}
-                  height={16}
-                  className="rounded-full border border-white"
-                />
-              </div>
-            )}
           </div>
           <span className="text-foreground font-medium text-sm sm:text-base">{donation.name}</span>
         </div>
 
         <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
           <h3 className="font-semibold text-base sm:text-lg line-clamp-2">
-            {donation.title} ({donation.quantity} available)
+            {donation.title} ({donation.quantity})
           </h3>
 
           {imageSrc && (
@@ -75,10 +63,6 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.src = FALLBACK_IMAGE
-                }}
               />
             </div>
           )}
@@ -95,17 +79,14 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
 
         <div className="mt-auto">
           <Button
-            className={`w-full text-sm sm:text-base ${
-              donation.isAvailable ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-secondary text-secondary-foreground'
-            }`}
-            variant={donation.isAvailable ? 'default' : 'secondary'}
-            disabled={!donation.isAvailable}
+            className="w-full text-sm sm:text-base bg-red-500 text-white hover:bg-red-600"
+            variant="default"
             onClick={(e) => {
               e.stopPropagation()
-              donation.isAvailable && router.push(`/donations/${donation.id}`)
+              router.push(`/donations/${donation.id}`)
             }}
           >
-            {donation.isAvailable ? 'Request' : 'Unavailable'}
+            Request
           </Button>
         </div>
       </CardContent>
@@ -115,79 +96,52 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
 
 const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
   const { getDonationOffers } = useDonationsStore()
-  const [donations, setDonations] = useState<DonationItem[]>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [visibleCards, setVisibleCards] = useState(3)
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
+  const [donations, setDonations] = React.useState<DonationItem[]>([])
+  const [currentIndex, setCurrentIndex] = React.useState(0)
+  const [visibleCards, setVisibleCards] = React.useState(3)
+  const [isTransitioning, setIsTransitioning] = React.useState(false)
 
-  const getTimeAgo = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMins / 60)
-    const diffDays = Math.floor(diffHours / 24)
-
-    if (diffDays > 0) return `${diffDays}d ago`
-    if (diffHours > 0) return `${diffHours}h ago`
-    return `${diffMins}m ago`
-  }
-
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchDonations = async () => {
-      try {
-        const donationData = await getDonationOffers()
-        const transformedDonations: DonationItem[] = donationData.map((donation) => ({
-          ...donation,
-          quantity: donation.possibleAmount ? Math.floor(donation.possibleAmount) : 0,
-          location: donation.location?.district || 'Unknown',
-          timeAgo: getTimeAgo(donation.createdAt || ''),
-          isAvailable: donation.status === 'active' && (donation.possibleAmount || 0) > 0,
-        }))
-        setDonations(transformedDonations)
-      } catch (error) {
-        console.error('Error fetching donations:', error)
-      } finally {
-        setIsLoading(false)
-      }
+      const donationData = await getDonationOffers()
+      const transformed: DonationItem[] = donationData.map((donation) => ({
+        ...donation,
+        quantity: donation.possibleAmount ? Math.floor(donation.possibleAmount) : 0,
+        location: donation.location?.district || 'Unknown',
+        timeAgo: 'Just now',
+      }))
+      setDonations(transformed)
     }
-
     fetchDonations()
-  }, [])
+  }, [getDonationOffers])
 
-  // Duplicate items for smooth looping
-  const extendedDonations = donations.length > 0 ? [...donations, ...donations.slice(0, visibleCards)] : []
+  const extendedDonations = [...donations, ...donations.slice(0, visibleCards)]
 
-  useEffect(() => {
+  React.useEffect(() => {
     const updateVisibleCards = () => {
       if (window.innerWidth < 640) setVisibleCards(1)
       else if (window.innerWidth < 768) setVisibleCards(1)
       else if (window.innerWidth < 1024) setVisibleCards(2)
       else setVisibleCards(3)
     }
-
     updateVisibleCards()
     window.addEventListener('resize', updateVisibleCards)
     return () => window.removeEventListener('resize', updateVisibleCards)
   }, [])
 
   const scrollLeft = () => {
-    if (donations.length === 0) return
     setIsTransitioning(true)
     setCurrentIndex((prev) => (prev - 1 < 0 ? donations.length - 1 : prev - 1))
     setTimeout(() => setIsTransitioning(false), 300)
   }
 
   const scrollRight = () => {
-    if (donations.length === 0) return
     setIsTransitioning(true)
     setCurrentIndex((prev) => (prev + 1 >= donations.length ? 0 : prev + 1))
     setTimeout(() => setIsTransitioning(false), 300)
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     const interval = setInterval(() => {
       if (!isTransitioning) scrollRight()
     }, 5000)
@@ -203,11 +157,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
           </h2>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
-          </div>
-        ) : donations.length === 0 ? (
+        {donations.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No donations available at the moment.</p>
           </div>
@@ -216,8 +166,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
             <div className="flex items-center justify-center">
               <Button
                 onClick={scrollLeft}
-                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
-                aria-label="Previous donations"
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-2 z-10 flex items-center justify-center"
               >
                 <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
@@ -228,11 +177,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
                   style={{ transform: `translateX(-${currentIndex * (100 / visibleCards)}%)` }}
                 >
                   {extendedDonations.map((donation, index) => (
-                    <div
-                      key={`${donation.id}-${index}`}
-                      className="flex-shrink-0 px-1 sm:px-2"
-                      style={{ width: `${100 / visibleCards}%` }}
-                    >
+                    <div key={`${donation.id}-${index}`} className="flex-shrink-0 px-1 sm:px-2" style={{ width: `${100 / visibleCards}%` }}>
                       <div className="h-full pb-4">
                         <DonationCard donation={donation} />
                       </div>
@@ -243,8 +188,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
 
               <Button
                 onClick={scrollRight}
-                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
-                aria-label="Next donations"
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-2 z-10 flex items-center justify-center"
               >
                 <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>

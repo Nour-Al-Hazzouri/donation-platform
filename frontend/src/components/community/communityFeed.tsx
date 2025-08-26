@@ -1,13 +1,15 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { MessageCircle, ThumbsUp, ThumbsDown, Pen, Loader2 } from 'lucide-react'
+import { MessageCircle, ThumbsUp, ThumbsDown, Pen, Loader2, ExternalLink } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useModal } from '@/contexts/ModalContext'
 import Image from 'next/image'
+import Link from 'next/link'
 import { CommunityPost, CommentResource } from '@/types'
 import { communityService } from '@/lib/api/community'
 import { toast } from '@/components/ui/use-toast'
+import { ImageGallery } from '@/components/ui/image-gallery'
 
 interface User {
   id: string
@@ -95,7 +97,6 @@ const convertMockToCommunityPost = (mockPost: MockCommunityPost): CommunityPost 
   return {
     id: parseInt(mockPost.id),
     user_id: parseInt(mockPost.user.id.replace('user', '')) || 1,
-    title: mockPost.content.substring(0, 50) + (mockPost.content.length > 50 ? '...' : ''), // Generate title from content
     content: mockPost.content,
     image_urls: mockPost.images,
     image_full_urls: mockPost.images,
@@ -337,11 +338,20 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           </div>
         </div>
 
-        {/* Post title and content */}
+        {/* Post content */}
         <div className="mb-2 whitespace-pre-line">
-          <h3 className="text-foreground font-medium text-base mb-1">
-            {post.title}
-          </h3>
+          {/* Display event reference if available */}
+          {post.event && (
+            <div className="mb-2 bg-primary/5 rounded-md p-1.5 border border-primary/10">
+              <Link 
+                href={post.event.type === 'request' ? `/request/${post.event.id}` : `/donate/${post.event.id}`} 
+                className="text-primary text-xs font-medium hover:underline inline-flex items-center gap-1"
+              >
+                <ExternalLink size={12} />
+                <span>{post.event.title}</span>
+              </Link>
+            </div>
+          )}
           <p className="text-foreground text-sm mb-1 line-clamp-3 leading-snug">
             {post.content}
           </p>
@@ -360,14 +370,10 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
           )}
         </div>
 
-        {/* Image */}
+        {/* Image Gallery */}
         {post.image_urls && post.image_urls.length > 0 && (
-          <div className="mb-2 rounded-lg overflow-hidden">
-            <img
-              src={post.image_urls[0]}
-              alt="post"
-              className="w-full h-auto max-h-96 object-cover"
-            />
+          <div className="mb-2">
+            <ImageGallery images={post.image_full_urls || post.image_urls} />
           </div>
         )}
 

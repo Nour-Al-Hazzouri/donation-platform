@@ -55,21 +55,50 @@ verificationApi.interceptors.request.use(
 
 export interface VerificationSubmitData {
   document_type: 'id_card' | 'passport' | 'driver_license';
-  document_image: File;
+  documents: File[];
 }
 
 export interface VerificationResponse {
+  success: boolean;
   message: string;
-  verification: {
+  data: {
     id: number;
     user_id: number;
     document_type: string;
     image_urls: string[];
+    image_full_urls?: string[];
     status: 'pending' | 'approved' | 'rejected';
     notes?: string;
     verified_at?: string;
     created_at: string;
     updated_at: string;
+    user?: {
+      id: number;
+      first_name: string;
+      last_name: string;
+      username: string;
+      email?: string;
+      is_verified?: boolean;
+    };
+    verifier?: {
+      id: number;
+      first_name: string;
+      last_name: string;
+      username?: string;
+    };
+  };
+}
+
+export interface VerificationListResponse {
+  success: boolean;
+  message: string;
+  data: Array<VerificationResponse['data']>;
+  meta: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    to?: number;
   };
 }
 
@@ -78,7 +107,11 @@ const verificationService = {
   submitVerification: async (data: VerificationSubmitData): Promise<VerificationResponse> => {
     const formData = new FormData();
     formData.append('document_type', data.document_type);
-    formData.append('document_image', data.document_image);
+    
+    // Append multiple documents
+    data.documents.forEach((file, index) => {
+      formData.append(`documents[${index}]`, file);
+    });
     
     const response = await verificationApi.post('/verifications', formData, {
       headers: {
@@ -89,9 +122,52 @@ const verificationService = {
     return response.data;
   },
   
-  // Get verification status
-  getVerificationStatus: async (): Promise<VerificationResponse> => {
-    const response = await verificationApi.get('/verifications/status');
+  // Get user's verification requests
+  getUserVerifications: async (userId: number, perPage: number = 15): Promise<VerificationListResponse> => {
+    const response = await verificationApi.get(`/users/${userId}/verifications`, {
+      params: { per_page: perPage }
+    });
+    return response.data;
+  },
+  
+  // Get a specific verification request
+  getVerification: async (verificationId: number): Promise<VerificationResponse> => {
+    const response = await verificationApi.get(`/verifications/${verificationId}`);
+    return response.data;
+  },
+  
+  // Admin: Get all verification requests
+  getAllVerifications: async (params?: {
+    perPage?: number;
+    status?: 'pending' | 'approved' | 'rejected';
+    query?: string;
+  }): Promise<VerificationListResponse> => {
+    const response = await verificationApi.get('/verifications', {
+      params: {
+        per_page: params?.perPage || 15,
+        status: params?.status,
+        query: params?.query
+      }
+    });
+    return response.data;
+  },
+  
+  // Admin: Update verification status
+  updateVerificationStatus: async (
+    verificationId: number,
+    status: 'approved' | 'rejected',
+    notes?: string
+  ): Promise<VerificationResponse> => {
+    const response = await verificationApi.put(
+      `/verifications/${verificationId}/${status}`,
+      notes ? { notes } : {}
+    );
+    return response.data;
+  },
+  
+  // Delete verification request
+  deleteVerification: async (verificationId: number): Promise<{success: boolean; message: string}> => {
+    const response = await verificationApi.delete(`/verifications/${verificationId}`);
     return response.data;
   },
 };
