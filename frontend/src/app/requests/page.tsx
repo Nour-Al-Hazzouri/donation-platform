@@ -40,12 +40,14 @@ export default function RequestsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const postsPerPage = 9
 
-  // Load requests from API
+  // Load requests from API with pagination
   useEffect(() => {
     const loadRequests = async () => {
+      setIsLoading(true)
       try {
-        const res = await requestsService.getAllRequests()
+        const res = await requestsService.getAllRequests(currentPage, postsPerPage)
         setRequests(res.data)
+        setTotalPages(res.meta.last_page)
       } catch (error) {
         console.error('Error loading requests:', error)
       } finally {
@@ -53,7 +55,7 @@ export default function RequestsPage() {
       }
     }
     loadRequests()
-  }, [])
+  }, [currentPage, postsPerPage])
 
   // Show success message if request just created
   useEffect(() => {
@@ -69,14 +71,33 @@ export default function RequestsPage() {
     return searchRequests(requests, searchTerm)
   }, [requests, searchTerm, isSearchActive])
   
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredRequests.length / postsPerPage)
-  const indexOfLastPost = currentPage * postsPerPage
-  const indexOfFirstPost = indexOfLastPost - postsPerPage
-  const currentPosts = filteredRequests.slice(indexOfFirstPost, indexOfLastPost)
+  // State for total pages from API
+  const [totalPages, setTotalPages] = useState(1)
+  
+  // Get current posts based on pagination and search
+  const currentPosts = useMemo(() => {
+    if (isSearchActive || searchTerm.trim()) {
+      // If searching, use client-side pagination on filtered results
+      const indexOfLastPost = currentPage * postsPerPage
+      const indexOfFirstPost = indexOfLastPost - postsPerPage
+      return filteredRequests.slice(indexOfFirstPost, indexOfLastPost)
+    }
+    // Otherwise use the server-paginated results directly
+    return requests
+  }, [requests, filteredRequests, currentPage, postsPerPage, isSearchActive, searchTerm])
   
   const handlePageChange = (pageNumber: number) => {
+    // If searching, just update the page locally
+    // If not searching, this will trigger a new API call via the useEffect
     setCurrentPage(pageNumber)
+    
+    // Clear search when changing pages if not in search mode
+    if (!isSearchActive && !searchTerm) {
+      setSearchTerm('')
+      setIsSearchActive(false)
+    }
+    
+    // Scroll to top when changing pages
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -91,7 +112,6 @@ export default function RequestsPage() {
   const clearSearch = () => {
     setSearchTerm('')
     setIsSearchActive(false)
-    setCurrentPage(1)
   }
 
   if (isLoading) {
