@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle, AlertTriangle } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
 import { useModal } from "@/contexts/ModalContext"
+import { profileService } from "@/lib/api/profile"
 import ProfileSidebar from "./Sidebar"
 import AccVerification from "./AccVerification"
 
@@ -51,6 +52,22 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     district: user?.location?.district || "",
   })
 
+  const handleProfileUpdate = useCallback(async () => {
+    // Refresh user profile data after avatar update
+    try {
+      const updatedProfile = await profileService.getProfile()
+      setProfileData({
+        fullName: `${updatedProfile.first_name} ${updatedProfile.last_name}`,
+        phoneNumber: updatedProfile.phone || "",
+        email: updatedProfile.email || "",
+        governorate: updatedProfile.location?.governorate || "",
+        district: updatedProfile.location?.district || "",
+      })
+    } catch (error) {
+      console.error('Error refreshing profile data:', error)
+    }
+  }, [])
+
   const getDistricts = () => {
     if (!profileData.governorate) return []
     return locations
@@ -93,8 +110,9 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
             <ProfileSidebar 
               activeItem="profile" 
               fullName={profileData.fullName} 
-              profileImage={user?.avatar_url || undefined}
+              profileImage={user?.avatar_url_full || user?.avatar_url || undefined}
               onViewChange={onViewChange}
+              onProfileUpdate={handleProfileUpdate}
             />
           </div>
         </div>

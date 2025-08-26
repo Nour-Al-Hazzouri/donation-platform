@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { User, Bell, LogOut } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { User, Bell, LogOut, Camera, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/authStore"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/utils"
 import {
   Sidebar,
@@ -16,24 +17,31 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useTheme } from "next-themes"
+import { profileService } from "@/lib/api/profile"
+import { toast } from "sonner"
 
 interface SidebarProps {
   activeItem: "profile" | "notifications"
   fullName: string
   profileImage?: string
   onViewChange?: (view: 'profile' | 'notifications') => void
+  onProfileUpdate?: () => void
 }
 
 export default function ProfileSidebar({ 
   activeItem, 
   fullName, 
   profileImage,
-  onViewChange
+  onViewChange,
+  onProfileUpdate
 }: SidebarProps) {
   // Check if screen is mobile for styling purposes only
   const [isMobile, setIsMobile] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(profileImage)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const { theme } = useTheme()
-  const { logout, user } = useAuthStore()
+  const { logout, user, updateUserProfile } = useAuthStore()
   const router = useRouter()
 
   useEffect(() => {
@@ -46,6 +54,24 @@ export default function ProfileSidebar({
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
+  // Set initial avatar URL only on first load (not during uploads)
+  useEffect(() => {
+    if (user && !currentAvatarUrl && !isUploadingAvatar) {
+      console.log('Initial avatar URL setup:', {
+        avatar_url_full: user?.avatar_url_full,
+        avatar_url: user?.avatar_url,
+        profileImage
+      })
+      
+      // Only set on initial load, don't override during uploads
+      const newAvatarUrl = user?.avatar_url_full || user?.avatar_url || profileImage
+      if (newAvatarUrl) {
+        console.log('Setting initial avatar URL to:', newAvatarUrl)
+        setCurrentAvatarUrl(newAvatarUrl)
+      }
+    }
+  }, [user]) // Only depend on user, not avatar URLs
+
   const handleLogout = () => {
     logout()
     router.push('/')
@@ -56,6 +82,103 @@ export default function ProfileSidebar({
       onViewChange(view)
     } else {
       router.push(`/${view}`)
+    }
+  }
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please select a valid image file (JPEG, PNG, JPG, GIF, or WebP)')
+      return
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024 // 5MB in bytes
+    if (file.size > maxSize) {
+      toast.error('File size must be less than 5MB')
+      return
+    }
+
+    setIsUploadingAvatar(true)
+    
+    // Create preview URL immediately for instant feedback
+    const previewUrl = URL.createObjectURL(file)
+    setCurrentAvatarUrl(previewUrl)
+    
+    try {
+      console.log('Starting avatar upload...')
+      const updatedUser = await profileService.updateProfile({ avatar_url: file })
+      console.log('Upload response:', updatedUser)
+      
+      // Update the auth store with the new user data
+      updateUserProfile({
+        avatar_url: updatedUser.avatar_url,
+        avatar_url_full: updatedUser.avatar_url_full
+      })
+      
+      // Keep the preview URL permanently - don't switch to server URL
+      console.log('Upload successful, keeping preview image permanently')
+      // Don't revoke the preview URL or switch to server URL
+      // The preview image will stay visible forever
+      
+      toast.success('Profile picture updated successfully!')
+      
+      // Trigger profile update callback if provided
+      if (onProfileUpdate) {
+        onProfileUpdate()
+      }
+    } catch (error: any) {
+      console.error('Error updating profile picture:', error)
+      // Clean up the preview URL on error
+      URL.revokeObjectURL(previewUrl)
+      // Revert to previous avatar
+      const fallbackUrl = user?.avatar_url_full || user?.avatar_url || undefined
+      setCurrentAvatarUrl(fallbackUrl)
+      toast.error(error.response?.data?.message || 'Failed to update profile picture')
+    } finally {
+      setIsUploadingAvatar(false)
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleRemoveAvatar = async () => {
+    if (!user?.avatar_url) return
+
+    setIsUploadingAvatar(true)
+    try {
+      const updatedUser = await profileService.updateProfile({ delete_avatar: true })
+      
+      // Update the auth store with the new user data
+      updateUserProfile({
+        avatar_url: null,
+        avatar_url_full: null
+      })
+      
+      // Clear local avatar URL
+      setCurrentAvatarUrl(undefined)
+      
+      toast.success('Profile picture removed successfully!')
+      
+      // Trigger profile update callback if provided
+      if (onProfileUpdate) {
+        onProfileUpdate()
+      }
+    } catch (error: any) {
+      console.error('Error removing profile picture:', error)
+      toast.error(error.response?.data?.message || 'Failed to remove profile picture')
+    } finally {
+      setIsUploadingAvatar(false)
     }
   }
 
@@ -91,23 +214,77 @@ export default function ProfileSidebar({
               {/* User Info */}
               <SidebarMenuItem>
                 <div className="flex flex-col items-center space-y-3 px-2 py-4 rounded-md hover:bg-secondary/50">
-                  <div className="relative">
-                    <Avatar className="w-20 h-20">
-                      <AvatarImage src={profileImage} alt={fullName} />
-                      <AvatarFallback className="bg-primary">
-                        <User size={40} className="text-primary-foreground" />
-                      </AvatarFallback>
-                    </Avatar>
-                    {user?.verified && (
+                  <div className="relative group">
+                    <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200">
+                      {currentAvatarUrl ? (
+                        <img 
+                          src={currentAvatarUrl} 
+                          alt={fullName}
+                          className="w-full h-full object-cover"
+                          onLoad={() => {
+                            console.log('Avatar image loaded successfully:', currentAvatarUrl)
+                          }}
+                          onError={(e) => {
+                            console.error('Avatar image failed to load:', currentAvatarUrl)
+                            console.error('Error details:', e)
+                            // Don't change the URL on error to prevent infinite loops
+                            // Just log the error and keep the current state
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-primary flex items-center justify-center">
+                          <User size={40} className="text-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Avatar Upload Overlay */}
+                    <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                      {isUploadingAvatar ? (
+                        <Loader2 className="h-6 w-6 text-white animate-spin" />
+                      ) : (
+                        <Button
+                          onClick={handleAvatarClick}
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-2 text-white hover:bg-white/20"
+                          disabled={isUploadingAvatar}
+                        >
+                          <Camera className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    
+                    {user?.email_verified_at && (
                       <img
-                        src={theme === 'dark' ? "/verification-dark.png" : "/verification.png"}
+                        src={theme === 'dark' ? "/verification-dark.svg" : "/verification.png"}
                         alt="Verified"
-                        className="absolute top-1 right-1 w-5 h-5"
+                        className="absolute top-1 right-1 w-5 h-5 z-10"
                       />
                     )}
                   </div>
                   <div className="flex flex-col items-center">
                     <span className="font-semibold text-foreground text-lg">{fullName}</span>
+                    {(currentAvatarUrl || user?.avatar_url_full || user?.avatar_url) && (
+                      <Button
+                        onClick={handleRemoveAvatar}
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs text-muted-foreground hover:text-destructive mt-1"
+                        disabled={isUploadingAvatar}
+                      >
+                        Remove photo
+                      </Button>
+                    )}
                   </div>
                 </div>
               </SidebarMenuItem>

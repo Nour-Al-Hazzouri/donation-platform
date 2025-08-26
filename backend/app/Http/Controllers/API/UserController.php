@@ -197,8 +197,11 @@ class UserController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('avatar_url')) {
+            \Log::info('Processing avatar upload for user: ' . $user->id);
+            
             // Delete old avatar if it exists
             if ($user->avatar_url) {
+                \Log::info('Deleting old avatar: ' . $user->avatar_url);
                 $this->imageService->deleteImage($user->avatar_url);
             }
 
@@ -207,10 +210,11 @@ class UserController extends Controller
                 $request->file('avatar_url'),
                 'avatars',
                 true, // isPublic
-                500,  // maxWidth
-                90    // quality
+                400,  // maxWidth - reduced for better performance
+                85    // quality - slightly reduced for better compression
             );
 
+            \Log::info('New avatar uploaded to: ' . $avatarPath);
             $validated['avatar_url'] = $avatarPath;
         }
 

@@ -49,11 +49,12 @@ type AuthState = {
     password_confirmation: string;
   }) => Promise<{ message: string }>;
   updateVerification: (verified: boolean, verifiedAt?: string) => void;
+  updateUserProfile: (profileData: Partial<User>) => void;
   deductBalance: (amount: number) => void; // For backward compatibility
   clearError: () => void;
 }
 
-const persistOptions: PersistOptions<AuthState, Omit<AuthState, 'login' | 'register' | 'logout' | 'forgotPassword' | 'resetPassword' | 'updateVerification' | 'deductBalance' | 'clearError' | 'isLoading' | 'error'>> = {
+const persistOptions: PersistOptions<AuthState, Omit<AuthState, 'login' | 'register' | 'logout' | 'forgotPassword' | 'resetPassword' | 'updateVerification' | 'updateUserProfile' | 'deductBalance' | 'clearError' | 'isLoading' | 'error'>> = {
   name: 'auth-storage',
   partialize: (state) => ({
     isAuthenticated: state.isAuthenticated,
@@ -68,50 +69,49 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
-      
 
-login: async (email: string, password: string) => {
-  set({ isLoading: true, error: null });
-  try {
-    const response = await authService.login({ email, password });
+      login: async (email: string, password: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.login({ email, password });
 
-    const user: User = {
-      ...response.user,
-      token: response.access_token,
-      isAdmin: response.isAdmin,
-      balance: 10000,
-    };
+          const user: User = {
+            ...response.user,
+            token: response.access_token,
+            isAdmin: response.isAdmin,
+            balance: 10000,
+          };
 
-    // Save user in Zustand
-    set({
-      user,
-      isAuthenticated: true,
-      isLoading: false,
-    });
+          // Save user in Zustand
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
 
-    // Create the auth storage state object
-    const authState = { state: { user, isAuthenticated: true } };
-    
-    // Save in localStorage for client-side access
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('auth-storage', JSON.stringify(authState));
-    }
-    
-    // Save user in cookie for server-side middleware
-    Cookies.set('auth-storage', JSON.stringify(authState), {
-      path: '/',
-      expires: 7, // expires in 7 days
-      sameSite: 'strict',
-    });
+          // Create the auth storage state object
+          const authState = { state: { user, isAuthenticated: true } };
+          
+          // Save in localStorage for client-side access
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('auth-storage', JSON.stringify(authState));
+          }
+          
+          // Save user in cookie for server-side middleware
+          Cookies.set('auth-storage', JSON.stringify(authState), {
+            path: '/',
+            expires: 7, // expires in 7 days
+            sameSite: 'strict',
+          });
 
-  } catch (error: any) {
-    set({
-      isLoading: false,
-      error: error.response?.data?.message || 'Failed to login. Please check your credentials.',
-    });
-    throw error;
-  }
-},
+        } catch (error: any) {
+          set({
+            isLoading: false,
+            error: error.response?.data?.message || 'Failed to login. Please check your credentials.',
+          });
+          throw error;
+        }
+      },
       
       register: async (userData) => {
         set({ isLoading: true, error: null });
@@ -227,6 +227,31 @@ login: async (email: string, password: string) => {
             email_verified_at: verifiedAt || state.user.email_verified_at 
           } : null
         })),
+      
+      updateUserProfile: (profileData) => {
+        set((state) => {
+          if (!state.user) return state;
+          
+          const updatedUser = { ...state.user, ...profileData };
+          
+          // Update localStorage
+          const authState = { state: { user: updatedUser, isAuthenticated: true } };
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('auth-storage', JSON.stringify(authState));
+          }
+          
+          // Update cookies
+          Cookies.set('auth-storage', JSON.stringify(authState), {
+            path: '/',
+            expires: 7,
+            sameSite: 'strict',
+          });
+          
+          return {
+            user: updatedUser,
+          };
+        });
+      },
       
       deductBalance: (amount) => {
         set((state) => {

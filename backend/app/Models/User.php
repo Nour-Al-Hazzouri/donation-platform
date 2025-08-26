@@ -53,6 +53,11 @@ class User extends Authenticatable
             return null;
         }
 
+        // For development, always use 127.0.0.1:8000
+        if (app()->environment('local')) {
+            return 'http://127.0.0.1:8000/storage/' . $this->avatar_url;
+        }
+
         return app(ImageService::class)->getImageUrl($this->avatar_url);
     }
 
