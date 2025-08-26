@@ -29,8 +29,10 @@ export default function RequestPage() {
   const [isCustom, setIsCustom] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Pending transactions state.
-  const [pendingTransactions, setPendingTransactions] = useState<{ id: string; amount: number; requestId: string }[]>([])
+  // Pending transactions state
+  const [pendingTransactions, setPendingTransactions] = useState<
+    { id: string; amount: number; requestId: string }[]
+  >([])
 
   // Fetch donation by ID
   useEffect(() => {
@@ -38,7 +40,6 @@ export default function RequestPage() {
       setIsLoading(true)
       try {
         const donationData = await getDonationById(donationId)
-        // Check if donationData is undefined (not found or error)
         if (!donationData) {
           console.warn(`Donation with ID ${donationId} not found or could not be loaded`)
           setDonation(null)
@@ -95,17 +96,13 @@ export default function RequestPage() {
 
     setIsProcessing(true)
     try {
-      // Simulate pending request (replace with actual API call)
       const requestId = Math.floor(Math.random() * 1000000).toString()
-
       await new Promise(resolve => setTimeout(resolve, 2000)) // simulate processing
 
-      // Save pending request to localStorage
       const storedPending = JSON.parse(localStorage.getItem('pendingDonations') || '[]')
       storedPending.push({ id: requestId, amount: finalAmount, requestId: params.id })
       localStorage.setItem('pendingDonations', JSON.stringify(storedPending))
 
-      // Redirect to success page with request info
       router.push(`/request/success?requestId=${requestId}&donationId=${donationId}&amount=${finalAmount}`)
     } catch (error) {
       console.error('Failed to submit request:', error)
@@ -131,8 +128,12 @@ export default function RequestPage() {
         <div className="bg-card rounded-lg shadow-sm border p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-4">Donation Info</h2>
           <div className="space-y-2 mb-6">
-            <p className="text-card-foreground"><span className="font-medium">Donation title:</span> {donation.title}</p>
-            <p className="text-card-foreground"><span className="font-medium">Donation amount:</span> ${donationAmount.toLocaleString()}</p>
+            <p className="text-card-foreground">
+              <span className="font-medium">Donation title:</span> {donation.title}
+            </p>
+            <p className="text-card-foreground">
+              <span className="font-medium">Donation amount:</span> {donationAmount.toLocaleString()}
+            </p>
           </div>
           <div className="border-t pt-4">
             <h3 className="font-semibold text-foreground mb-2">Description</h3>
@@ -147,8 +148,12 @@ export default function RequestPage() {
           {/* Slider */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
-              <Label className="text-sm font-medium text-foreground">Amount: ${finalAmount.toLocaleString()}</Label>
-              <span className="text-sm text-muted-foreground">Max: ${remainingAmount.toLocaleString()}</span>
+              <Label className="text-sm font-medium text-foreground">
+                Amount: {finalAmount.toLocaleString()}
+              </Label>
+              <span className="text-sm text-muted-foreground">
+                Max: {remainingAmount.toLocaleString()}
+              </span>
             </div>
             <Slider
               value={requestAmount}
@@ -159,27 +164,30 @@ export default function RequestPage() {
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-2">
-              <span>$1</span>
-              <span>${remainingAmount.toLocaleString()}</span>
+              <span>1</span>
+              <span>{remainingAmount.toLocaleString()}</span>
             </div>
           </div>
 
           {/* Custom Amount Input */}
-          <div className="mb-8">
-            <Label htmlFor="custom-amount" className="text-sm font-medium text-foreground mb-2 block">
-              Or enter a custom amount
-            </Label>
-            <Input
-              id="custom-amount"
-              type="number"
-              placeholder="Enter amount"
-              value={customAmount}
-              onChange={(e) => handleCustomAmountChange(e.target.value)}
-              className="w-full"
-              min="1"
-              max={remainingAmount}
-            />
-          </div>
+      <div className="mb-8 space-y-4">
+  <Label 
+    htmlFor="custom-amount" 
+    className="text-sm font-medium text-foreground block"
+  >
+    Or enter a custom amount
+  </Label>
+  <Input
+    id="custom-amount"
+    type="number"
+    placeholder="Enter amount"
+    value={customAmount}
+    onChange={(e) => handleCustomAmountChange(e.target.value)}
+    className="w-full"
+    min="1"
+    max={remainingAmount}
+  />
+</div>
 
           {/* Preset Amount Buttons */}
           <div className="grid grid-cols-4 gap-3 mb-8">
@@ -195,7 +203,7 @@ export default function RequestPage() {
                 className="text-sm"
                 disabled={amount > remainingAmount}
               >
-                ${amount}
+                {amount}
               </Button>
             ))}
           </div>
@@ -206,7 +214,7 @@ export default function RequestPage() {
             disabled={isProcessing || finalAmount <= 0}
             className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-medium"
           >
-            {isProcessing ? 'Processing...' : `Request $${finalAmount.toLocaleString()}`}
+            {isProcessing ? 'Processing...' : `Request ${finalAmount.toLocaleString()}`}
           </Button>
         </div>
 
@@ -217,7 +225,7 @@ export default function RequestPage() {
             <ul className="list-disc list-inside text-yellow-900 text-sm">
               {pendingTransactions.map(txn => (
                 <li key={txn.id}>
-                  ${txn.amount.toLocaleString()} — Pending approval
+                  {txn.amount.toLocaleString()} — Pending approval
                 </li>
               ))}
             </ul>
@@ -241,7 +249,10 @@ function NotFoundState({ router }: { router: any }) {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center text-center">
       <h1 className="text-2xl font-bold text-foreground mb-4">Donation Not Found</h1>
-      <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white">
+      <Button 
+        onClick={() => router.push('/donations')} 
+        className="bg-red-500 hover:bg-red-600 text-white"
+      >
         Back to Donations
       </Button>
     </div>
