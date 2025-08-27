@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle, AlertTriangle } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
 import { useModal } from "@/contexts/ModalContext"
+import { Location, locationsService } from "@/lib/api/locations"
+import { toast } from "sonner"
 import ProfileSidebar from "./Sidebar"
 import AccVerification from "./AccVerification"
 
@@ -15,34 +17,13 @@ interface UserProfileDashboardProps {
   onViewChange?: (view: 'profile' | 'notifications') => void
 }
 
-const locations = [
-  { governorate: 'Beirut', district: 'Achrafieh' },
-  { governorate: 'Beirut', district: 'Hamra' },
-  { governorate: 'Beirut', district: 'Verdun' },
-  { governorate: 'Mount Lebanon', district: 'Jounieh' },
-  { governorate: 'Mount Lebanon', district: 'Baabda' },
-  { governorate: 'Mount Lebanon', district: 'Metn' },
-  { governorate: 'North', district: 'Tripoli' },
-  { governorate: 'North', district: 'Koura' },
-  { governorate: 'North', district: 'Zgharta' },
-  { governorate: 'South', district: 'Sidon' },
-  { governorate: 'South', district: 'Tyre' },
-  { governorate: 'South', district: 'Nabatieh' },
-  { governorate: 'Bekaa', district: 'Zahle' },
-  { governorate: 'Bekaa', district: 'Baalbek' },
-  { governorate: 'Bekaa', district: 'Rachaya' },
-  { governorate: 'Nabatieh', district: 'Bint Jbeil' },
-  { governorate: 'Nabatieh', district: 'Marjeyoun' },
-  { governorate: 'Akkar', district: 'Halba' },
-  { governorate: 'Baalbek-Hermel', district: 'Hermel' },
-]
-
-const governorates = [...new Set(locations.map(loc => loc.governorate))]
 
 export default function UserProfileDashboard({ onViewChange }: UserProfileDashboardProps) {
   const { user } = useAuthStore()
   const { openModal, modalType } = useModal()
   const [isEditing, setIsEditing] = useState(false)
+  const [locations, setLocations] = useState<Location[]>([])
+  const [loadingLocations, setLoadingLocations] = useState(true)
   const [profileData, setProfileData] = useState({
     fullName: user ? `${user.first_name} ${user.last_name}` : "",
     phoneNumber: user?.phone || "",
@@ -50,6 +31,27 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     governorate: user?.location?.governorate || "",
     district: user?.location?.district || "",
   })
+
+  // Load locations from API
+  useEffect(() => {
+    const loadLocations = async () => {
+      try {
+        setLoadingLocations(true)
+        const locationsData = await locationsService.listLocations()
+        setLocations(locationsData)
+      } catch (err) {
+        console.error("Error loading locations:", err)
+        toast.error("Failed to load locations")
+      } finally {
+        setLoadingLocations(false)
+      }
+    }
+    
+    loadLocations()
+  }, [])
+
+  // Get unique governorates from locations
+  const governorates = [...new Set(locations.map(loc => loc.governorate))].sort()
 
   const getDistricts = () => {
     if (!profileData.governorate) return []
