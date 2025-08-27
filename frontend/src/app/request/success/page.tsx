@@ -16,41 +16,47 @@ export default function RequestSuccessPage() {
     title: string
     amount: number
     requestId: string
+    donationId: number
     transactionId?: string
   } | null>(null)
+
   const [pendingTransactions, setPendingTransactions] = useState<{ id: string; amount: number; requestId: string }[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const requestId = searchParams.get('requestId')
     const amountStr = searchParams.get('amount')
+    const donationIdStr = searchParams.get('donationId')
     const transactionId = searchParams.get('transactionId')
 
-    if (!requestId || !amountStr) {
+    if (!requestId || !amountStr || !donationIdStr) {
       setIsLoading(false)
       return
     }
 
+    const donationId = Number(donationIdStr)
     const loadRequest = async () => {
       try {
-        const data = await getDonationById(Number(requestId))
+        const donation = await getDonationById(donationId)
         setRequestDetails({
-          title: data?.title || 'Request',
+          title: donation?.title || 'Donation',
           amount: Number(amountStr),
           requestId,
+          donationId,
           transactionId: transactionId || undefined
         })
 
-        // Load pending from localStorage
+        // Load pending transactions from localStorage
         const storedPending = JSON.parse(localStorage.getItem('pendingDonations') || '[]')
         const filtered = storedPending.filter((tx: any) => tx.requestId === requestId)
         setPendingTransactions(filtered)
       } catch (err) {
-        console.error(err)
+        console.error("Error loading donation:", err)
         setRequestDetails({
-          title: 'Request',
+          title: 'Donation',
           amount: Number(amountStr),
           requestId,
+          donationId,
           transactionId: transactionId || undefined
         })
       } finally {
@@ -76,7 +82,10 @@ export default function RequestSuccessPage() {
       <MainLayout>
         <div className="max-w-2xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold">Request Not Found</h1>
-          <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white mt-4">
+          <Button 
+            onClick={() => router.push('/donations')} 
+            className="bg-red-500 hover:bg-red-600 text-white mt-4"
+          >
             Browse Donations
           </Button>
         </div>
@@ -87,16 +96,27 @@ export default function RequestSuccessPage() {
   return (
     <MainLayout>
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+        {/* Success Icon */}
         <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 dark:bg-yellow-900 mb-6">
           <CheckCircle2 className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
         </div>
 
-        <h1 className="text-3xl font-bold text-foreground mb-4">Your Request Has Been Submitted!</h1>
+        {/* Title */}
+        <h1 className="text-3xl font-bold text-foreground mb-4">
+          Your Request Has Been Submitted!
+        </h1>
 
+        {/* Request Info */}
         <p className="text-lg text-muted-foreground mb-2">
-          Your request of <span className="font-semibold text-yellow-600">${requestDetails.amount.toLocaleString()}</span> is <strong>pending approval</strong>.
+          Your request of{" "}
+          <span className="font-semibold text-yellow-600">
+            {requestDetails.amount.toLocaleString()}
+          </span>{" "}
+          for <span className="font-semibold">{requestDetails.title}</span> is{" "}
+          <strong>pending approval</strong>.
         </p>
 
+        {/* Pending Transactions */}
         {pendingTransactions.length > 0 && (
           <div className="mt-6 bg-yellow-50 border border-yellow-400 p-4 rounded-lg">
             <h4 className="font-medium text-yellow-800 mb-2">Your Pending Requests</h4>
@@ -110,17 +130,13 @@ export default function RequestSuccessPage() {
           </div>
         )}
 
+        {/* Info */}
         <p className="text-muted-foreground mb-8">
           You will be notified once your request is reviewed.
         </p>
 
+        {/* Actions */}
         <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center mb-8">
-          {/* <Button
-            onClick={() => router.push(`/requests/${requestDetails.requestId}`)}
-            className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white"
-          >
-            View Request
-          </Button> */}
           <Button
             onClick={() => router.push('/donations')}
             variant="outline"
@@ -130,6 +146,7 @@ export default function RequestSuccessPage() {
           </Button>
         </div>
 
+        {/* Next Steps */}
         <div className="mt-12 p-6 bg-muted rounded-lg">
           <h3 className="text-lg font-semibold text-foreground mb-4">What happens next?</h3>
           <div className="space-y-3 text-sm text-muted-foreground">

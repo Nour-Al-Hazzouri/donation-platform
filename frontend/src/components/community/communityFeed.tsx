@@ -373,7 +373,10 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
         {/* Image Gallery */}
         {post.image_urls && post.image_urls.length > 0 && (
           <div className="mb-2">
-            <ImageGallery images={post.image_full_urls || post.image_urls} />
+            <ImageGallery 
+              images={post.image_full_urls?.length ? post.image_full_urls : post.image_urls} 
+              className="w-full"
+            />
           </div>
         )}
 
@@ -481,28 +484,20 @@ export default function CommunityFeed({ onWritePost, newPost }: CommunityFeedPro
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [perPage] = useState(10); // Fixed at 10 posts per page
 
   // Fetch posts from API
-  const fetchPosts = async (pageNum = 1, append = false) => {
+  const fetchPosts = async (pageNum = 1) => {
     try {
-      if (pageNum === 1) {
-        setIsLoading(true);
-      } else {
-        setIsLoadingMore(true);
-      }
+      setIsLoading(true);
       setError(null);
 
-      const response = await communityService.getAllPosts(undefined, pageNum);
+      const response = await communityService.getAllPosts(undefined, pageNum, perPage);
       
       if (response.success) {
-        if (append) {
-          setPosts(prev => [...prev, ...response.data]);
-        } else {
-          setPosts(response.data);
-        }
-        setHasMore(response.meta.current_page < response.meta.last_page);
+        setPosts(response.data);
+        setTotalPages(response.meta.last_page);
         setPage(response.meta.current_page);
       } else {
         setError('Failed to fetch posts');
@@ -512,14 +507,13 @@ export default function CommunityFeed({ onWritePost, newPost }: CommunityFeedPro
       setError('Failed to fetch posts. Please try again.');
     } finally {
       setIsLoading(false);
-      setIsLoadingMore(false);
     }
   };
 
-  // Load more posts
-  const loadMore = () => {
-    if (!isLoadingMore && hasMore) {
-      fetchPosts(page + 1, true);
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      fetchPosts(newPage);
     }
   };
 
@@ -534,12 +528,21 @@ export default function CommunityFeed({ onWritePost, newPost }: CommunityFeedPro
       setPosts(prevPosts => {
         // Check if the post already exists to prevent duplicates
         if (!prevPosts.some(post => post.id === newPost.id)) {
-          return [newPost, ...prevPosts];
+          // If we're on page 1, add the new post and remove the last one if we have 10 posts
+          if (page === 1) {
+            const updatedPosts = [newPost, ...prevPosts];
+            if (updatedPosts.length > perPage) {
+              return updatedPosts.slice(0, perPage);
+            }
+            return updatedPosts;
+          }
+          // If we're not on page 1, refresh to page 1 to see the new post
+          fetchPosts(1);
         }
         return prevPosts;
       });
     }
-  }, [newPost]);
+  }, [newPost, page, perPage]);
 
   return (
     <div className="min-h-screen py-3 px-2 sm:px-4">
@@ -578,22 +581,72 @@ export default function CommunityFeed({ onWritePost, newPost }: CommunityFeedPro
           <PostItem key={post.id} post={post} />
         ))}
         
-        {/* Load more button */}
-        {hasMore && posts.length > 0 && (
-          <button
-            onClick={loadMore}
-            disabled={isLoadingMore}
-            className="bg-background rounded-lg p-3 mb-3 shadow-sm border border-border text-center hover:bg-secondary/50 transition-colors"
-          >
-            {isLoadingMore ? (
-              <div className="flex items-center justify-center">
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                <span>Loading more...</span>
-              </div>
-            ) : (
-              <span>Load more posts</span>
-            )}
-          </button>
+        {/* Pagination controls */}
+        {!isLoading && posts.length > 0 && totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-4 mb-6">
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={page === 1}
+              className={`w-8 h-8 flex items-center justify-center rounded ${page === 1 ? 'text-muted-foreground bg-muted cursor-not-allowed' : 'text-foreground bg-background border border-border hover:bg-secondary/50'}`}
+            >
+              &laquo;
+            </button>
+            
+            <button
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+              className={`w-8 h-8 flex items-center justify-center rounded ${page === 1 ? 'text-muted-foreground bg-muted cursor-not-allowed' : 'text-foreground bg-background border border-border hover:bg-secondary/50'}`}
+            >
+              &lsaquo;
+            </button>
+            
+            {/* Page number display */}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                // Logic to show pages around current page
+                let pageNum;
+                if (totalPages <= 5) {
+                  // If 5 or fewer pages, show all
+                  pageNum = i + 1;
+                } else if (page <= 3) {
+                  // If near start, show first 5 pages
+                  pageNum = i + 1;
+                } else if (page >= totalPages - 2) {
+                  // If near end, show last 5 pages
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  // Otherwise show 2 before and 2 after current page
+                  pageNum = page - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`w-8 h-8 flex items-center justify-center rounded ${page === pageNum ? 'bg-red-500 text-white' : 'bg-background border border-border hover:bg-secondary/50'}`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page === totalPages}
+              className={`w-8 h-8 flex items-center justify-center rounded ${page === totalPages ? 'text-muted-foreground bg-muted cursor-not-allowed' : 'text-foreground bg-background border border-border hover:bg-secondary/50'}`}
+            >
+              &rsaquo;
+            </button>
+            
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={page === totalPages}
+              className={`w-8 h-8 flex items-center justify-center rounded ${page === totalPages ? 'text-muted-foreground bg-muted cursor-not-allowed' : 'text-foreground bg-background border border-border hover:bg-secondary/50'}`}
+            >
+              &raquo;
+            </button>
+          </div>
         )}
       </div>
     </div>
