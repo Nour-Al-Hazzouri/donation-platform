@@ -143,4 +143,51 @@ class VoteController extends Controller
             ] : null,
         ], Response::HTTP_OK);
     }
+
+    /**
+     * Remove the authenticated user's vote on a post.
+     *
+     * @param  int  $postId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function removeVote($postId): JsonResponse
+    {
+        $user = Auth::user();
+        $post = CommunityPost::findOrFail($postId);
+        $vote = Vote::where('user_id', $user->id)
+            ->where('post_id', $postId)
+            ->first();
+
+        if ($vote) {
+            $vote->delete();
+            // Get vote counts
+            $upvotes = $post->votes()->where('type', 'upvote')->count();
+            $downvotes = $post->votes()->where('type', 'downvote')->count();
+            $totalVotes = $upvotes - $downvotes;
+            return response()->json([
+                'success' => true,
+                'message' => 'Vote removed successfully',
+                'data' => [
+                    'upvotes' => $upvotes,
+                    'downvotes' => $downvotes,
+                    'total_votes' => $totalVotes,
+                ],
+            ], Response::HTTP_OK);
+        }
+
+        // Get vote counts
+        $upvotes = $post->votes()->where('type', 'upvote')->count();
+        $downvotes = $post->votes()->where('type', 'downvote')->count();
+        $totalVotes = $upvotes - $downvotes;
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Vote not found',
+            'data' => [
+                'upvotes' => $upvotes,
+                'downvotes' => $downvotes,
+                'total_votes' => $totalVotes,
+            ],
+        ], Response::HTTP_NOT_FOUND);
+    }
 }
