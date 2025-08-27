@@ -94,8 +94,20 @@ class ImageService
             $image->scale(width: $maxWidth);
         }
 
-        // Encode with specified quality
-        return (string) $image->toJpeg($quality);
+        // Get original format and encode accordingly
+        $originalExtension = strtolower($file->getClientOriginalExtension());
+
+        switch ($originalExtension) {
+            case 'png':
+                return (string) $image->toPng();
+            case 'gif':
+                return (string) $image->toGif();
+            case 'webp':
+                return (string) $image->toWebp($quality);
+            default:
+                // Default to JPEG for jpg, jpeg, and unknown formats
+                return (string) $image->toJpeg($quality);
+        }
     }
 
     /**
@@ -194,14 +206,30 @@ class ImageService
             return null;
         }
 
-        // Always return the full URL for web display
-        // Remove 'public/' prefix if it exists
-        $relativePath = ltrim(str_replace('public' . DIRECTORY_SEPARATOR, '', $normalizedPath), DIRECTORY_SEPARATOR);
-        // Convert to forward slashes for URLs
-        $urlPath = str_replace('\\', '/', $relativePath);
-        return asset('storage/' . $urlPath);
-        
-        // For cloud storage, use the configured URL when needed
-        // return $storage->url($normalizedPath);
+        // Always return the full URL using the public disk URL
+        // Convert path to forward slashes for URLs
+        $urlPath = str_replace('\\', '/', $path);
+
+        // For development with artisan serve, always use the correct server URL
+        if (app()->environment('local')) {
+            // Use 127.0.0.1:8000 for artisan serve
+            $baseUrl = 'http://127.0.0.1:8000';
+            $fullUrl = $baseUrl . '/storage/' . $urlPath;
+            \Log::info('Generated image URL (local): ' . $fullUrl . ' for path: ' . $urlPath);
+
+            // Verify the file exists before returning the URL
+            $publicPath = public_path('storage/' . $urlPath);
+            if (!file_exists($publicPath)) {
+                \Log::warning('Image file does not exist at: ' . $publicPath);
+                return null;
+            }
+
+            return $fullUrl;
+        }
+
+        // Use the storage URL method which handles the full URL generation for production
+        $fullUrl = $storage->url($urlPath);
+        \Log::info('Generated image URL (production): ' . $fullUrl . ' for path: ' . $urlPath);
+        return $fullUrl;
     }
 }
