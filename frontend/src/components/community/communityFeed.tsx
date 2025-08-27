@@ -373,7 +373,10 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
         {/* Image Gallery */}
         {post.image_urls && post.image_urls.length > 0 && (
           <div className="mb-2">
-            <ImageGallery images={post.image_full_urls || post.image_urls} />
+            <ImageGallery 
+              images={post.image_full_urls?.length ? post.image_full_urls : post.image_urls} 
+              className="w-full"
+            />
           </div>
         )}
 

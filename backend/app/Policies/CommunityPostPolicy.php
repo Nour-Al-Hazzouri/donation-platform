@@ -31,6 +31,12 @@ class CommunityPostPolicy
      */
     public function create(User $user): bool
     {
+        // Allow admin users to create posts without verification
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
+        // For non-admin users, require verification and appropriate permissions
         return $this->isVerified($user) &&
             ($user->can('create posts') || $user->can('manage posts'));
     }
@@ -40,6 +46,11 @@ class CommunityPostPolicy
      */
     public function update(User $user, CommunityPost $communityPost): bool
     {
+        // Allow admin users to update any post
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
         if ($user->can('edit posts') || $user->can('manage posts')) {
             return true;
         }
@@ -54,6 +65,11 @@ class CommunityPostPolicy
      */
     public function delete(User $user, CommunityPost $communityPost): bool
     {
+        // Allow admin users to delete any post
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
         if ($user->can('delete posts') || $user->can('manage posts')) {
             return true;
         }
@@ -68,6 +84,11 @@ class CommunityPostPolicy
      */
     public function restore(User $user, CommunityPost $communityPost): bool
     {
+        // Allow admin users to restore any post
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
         return $this->isVerified($user) &&
             $user->can('manage posts');
     }
@@ -77,6 +98,11 @@ class CommunityPostPolicy
      */
     public function forceDelete(User $user, CommunityPost $communityPost): bool
     {
+        // Allow admin users to force delete any post
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
         return $this->isVerified($user) &&
             $user->can('manage posts');
     }

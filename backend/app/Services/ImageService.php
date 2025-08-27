@@ -194,17 +194,14 @@ class ImageService
             return null;
         }
 
-        // For local storage, return the full URL
-        if (config('filesystems.default') === 'local') {
-            // Remove 'public/' prefix if it exists
-            $relativePath = ltrim(str_replace('public' . DIRECTORY_SEPARATOR, '', $normalizedPath), DIRECTORY_SEPARATOR);
-            // Convert to forward slashes for URLs
-            $urlPath = str_replace('\\', '/', $relativePath);
-            return asset('storage/' . $urlPath);
-        }
-
-        // For cloud storage, use the configured URL
+        // Always return the full URL for web display
+        // Remove 'public/' prefix if it exists
+        $relativePath = ltrim(str_replace('public' . DIRECTORY_SEPARATOR, '', $normalizedPath), DIRECTORY_SEPARATOR);
+        // Convert to forward slashes for URLs
+        $urlPath = str_replace('\\', '/', $relativePath);
+        return asset('storage/' . $urlPath);
+        
+        // For cloud storage, use the configured URL when needed
         // return $storage->url($normalizedPath);
-        return $storage->path($normalizedPath);
     }
 }

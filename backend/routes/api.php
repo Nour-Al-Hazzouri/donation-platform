@@ -118,6 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('community-posts/{postId}')->group(function () {
         Route::post('/vote', [VoteController::class, 'vote']);
         Route::get('/my-vote', [VoteController::class, 'getUserVote']);
+        Route::delete('/vote', [VoteController::class, 'removeVote']);
     });
 
     // Comments for community posts
