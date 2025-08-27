@@ -49,7 +49,7 @@ export default function DonationDetailsPage() {
     router.push(`/request/${donationId}`)
   }
 
-  // FIX: Normalize donation image URL
+  // Normalize donation image URL
   const imageSrc = donation.imageUrl
     ? donation.imageUrl.startsWith('http')
       ? donation.imageUrl
@@ -86,13 +86,21 @@ export default function DonationDetailsPage() {
                   </Avatar>
                   {donation.isVerified && (
                     <div className="absolute -top-1 -right-1">
-                      <Image src="/verification.png" alt="Verified" width={16} height={16} className="rounded-full border-2 border-white" />
+                      <Image 
+                        src="/verification.png" 
+                        alt="Verified" 
+                        width={16} 
+                        height={16} 
+                        className="rounded-full border-2 border-white" 
+                      />
                     </div>
                   )}
                 </div>
                 <div>
                   <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">{donation.name}</h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Lebanon • {new Date().toLocaleDateString()}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Lebanon • {new Date().toLocaleDateString()}
+                  </p>
                 </div>
               </div>
             </div>
@@ -105,19 +113,31 @@ export default function DonationDetailsPage() {
             {/* Donation Image */}
             {imageSrc && (
               <div className="mb-4 md:mb-6 w-full aspect-video relative rounded-lg overflow-hidden">
-                <Image src={imageSrc} alt={donation.title || 'Donation image'} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px" priority />
+                <Image 
+                  src={imageSrc} 
+                  alt={donation.title || 'Donation image'} 
+                  fill 
+                  className="object-cover" 
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px" 
+                  priority 
+                />
               </div>
             )}
 
             {/* Full Description */}
             <div className="mb-6 md:mb-8">
               <h4 className="text-base md:text-lg font-semibold text-foreground mb-2 md:mb-3">About this donation</h4>
-              <p className="text-sm sm:text-base text-card-foreground leading-relaxed whitespace-pre-line">{donation.description}</p>
+              <p className="text-sm sm:text-base text-card-foreground leading-relaxed whitespace-pre-line">
+                {donation.description}
+              </p>
             </div>
 
             {/* Request Button */}
             <div className="flex justify-center">
-              <Button onClick={handleRequest} className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg">
+              <Button 
+                onClick={handleRequest} 
+                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg"
+              >
                 Request Now
               </Button>
             </div>
@@ -132,7 +152,7 @@ export default function DonationDetailsPage() {
   )
 }
 
-// Loading & Not Found states
+// Loading state
 function LoadingState() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
@@ -141,11 +161,17 @@ function LoadingState() {
   )
 }
 
+// Not found state
 function NotFoundState({ router }: { router: any }) {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center text-center">
       <h1 className="text-2xl font-bold text-foreground mb-4">Donation Not Found</h1>
-      <Button onClick={() => router.push('/donations')} className="bg-red-500 hover:bg-red-600 text-white">Back to Donations</Button>
+      <Button 
+        onClick={() => router.push('/donations')} 
+        className="bg-red-500 hover:bg-red-600 text-white"
+      >
+        Back to Donations
+      </Button>
     </div>
   )
 }
