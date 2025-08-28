@@ -15,7 +15,7 @@ export interface DonationEvent {
   start_date: string;
   end_date: string;
   image_urls: string[];
-  image_full_urls?: string[]; // computed full urls
+  image_full_urls: string[]; 
   user: {
     id: number;
     username: string;
@@ -69,23 +69,6 @@ export interface CreateDonationTransactionData {
   amount: number;
 }
 
-const buildFullImageUrls = (imagePaths: string[] | undefined): string[] => {
-  if (!imagePaths || imagePaths.length === 0) return [];
-  // prefer axios instance baseURL, fallback to env var
-  const base = authApi.defaults.baseURL || process.env.NEXT_PUBLIC_API_URL || '';
-  return imagePaths.map((p) => {
-    // if already absolute URL, return as-is
-    try {
-      const url = new URL(p);
-      return url.href;
-    } catch (e) {
-      // relative path -> join with base (ensure no double slashes)
-      if (!base) return p;
-      return `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
-    }
-  });
-};
-
 const handle404AsEmptyList = (err: any) => {
   if (err?.response?.status === 404) {
     return { data: [], meta: {} };
@@ -103,14 +86,7 @@ const donationsService = {
   }): Promise<{ data: DonationEvent[]; meta: any }> => {
     try {
       const response = await authApi.get('/donation-events', { params });
-      const payload = response.data;
-      if (Array.isArray(payload?.data)) {
-        payload.data = payload.data.map((ev: DonationEvent) => ({
-          ...ev,
-          image_full_urls: buildFullImageUrls(ev.image_urls),
-        }));
-      }
-      return payload;
+      return response.data;
     } catch (err) {
       return handle404AsEmptyList(err);
     }
@@ -120,14 +96,7 @@ const donationsService = {
   getRequests: async (params?: { page?: number }): Promise<{ data: DonationEvent[]; meta: any }> => {
     try {
       const response = await authApi.get('/donation-events/requests', { params });
-      const payload = response.data;
-      if (Array.isArray(payload?.data)) {
-        payload.data = payload.data.map((ev: DonationEvent) => ({
-          ...ev,
-          image_full_urls: buildFullImageUrls(ev.image_urls),
-        }));
-      }
-      return payload;
+      return response.data;
     } catch (err) {
       return handle404AsEmptyList(err);
     }
@@ -137,14 +106,7 @@ const donationsService = {
   getOffers: async (params?: { page?: number }): Promise<{ data: DonationEvent[]; meta: any }> => {
     try {
       const response = await authApi.get('/donation-events/offers', { params });
-      const payload = response.data;
-      if (Array.isArray(payload?.data)) {
-        payload.data = payload.data.map((ev: DonationEvent) => ({
-          ...ev,
-          image_full_urls: buildFullImageUrls(ev.image_urls),
-        }));
-      }
-      return payload;
+      return response.data;
     } catch (err) {
       return handle404AsEmptyList(err);
     }
@@ -153,14 +115,7 @@ const donationsService = {
   // Get donation events for a specific user
   getUserEvents: async (userId: number, params?: { page?: number }): Promise<{ data: DonationEvent[]; meta: any }> => {
     const response = await authApi.get(`/donation-events/user/${userId}`, { params });
-    const payload = response.data;
-    if (Array.isArray(payload?.data)) {
-      payload.data = payload.data.map((ev: DonationEvent) => ({
-        ...ev,
-        image_full_urls: buildFullImageUrls(ev.image_urls),
-      }));
-    }
-    return payload;
+    return response.data;
   },
 
   // Get a specific donation event by ID
@@ -168,11 +123,7 @@ const donationsService = {
   getEvent: async (eventId: number): Promise<{ data: DonationEvent } | null> => {
     try {
       const response = await authApi.get(`/donation-events/${eventId}`);
-      const payload = response.data;
-      if (payload?.data) {
-        payload.data.image_full_urls = buildFullImageUrls(payload.data.image_urls);
-      }
-      return payload;
+      return response.data;
     } catch (err: any) {
       if (err?.response?.status === 404) {
         // not found -> return null (safe for callers)
