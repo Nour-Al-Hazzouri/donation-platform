@@ -39,6 +39,23 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const openModal = (type: ModalType, params: Record<string, any> = {}) => {
+    // For auth-related modals, check if we already have auth data in localStorage
+    if (['signIn', 'signUp'].includes(type as string) && typeof window !== 'undefined') {
+      try {
+        const storedAuth = localStorage.getItem('auth-storage')
+        if (storedAuth) {
+          const parsedAuth = JSON.parse(storedAuth)
+          // If user is already authenticated, don't show auth modals
+          if (parsedAuth?.state?.isAuthenticated && parsedAuth?.state?.user) {
+            console.log('User already authenticated, not showing auth modal')
+            return
+          }
+        }
+      } catch (error) {
+        console.error('Error checking auth state:', error)
+      }
+    }
+    
     // If there's already a modal open, transition between them
     if (modalType) {
       // Don't do anything if trying to open the same modal

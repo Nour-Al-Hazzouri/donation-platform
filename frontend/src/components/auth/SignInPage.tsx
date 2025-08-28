@@ -66,19 +66,25 @@ const handleSubmit = async (e: React.FormEvent) => {
       router.push(redirectUrl)
     } else {
       // Redirect based on user role
-if (user?.isAdmin) {
-  router.push('/admin/dashboard'); // go directly to dashboard
-  toast({
-    title: "Welcome, Administrator!",
-    description: "You have been redirected to the admin dashboard.",
-  });
-} else {
-  router.push('/profile');
-  toast({
-    title: "Logged in successfully",
-    description: `Welcome back, ${user?.first_name || 'User'}!`,
-  });
-}
+      if (user?.isAdmin) {
+        router.push('/admin/dashboard'); // go directly to dashboard
+        toast({
+          title: "Welcome, Administrator!",
+          description: "You have been redirected to the admin dashboard.",
+        });
+      } else {
+        router.push('/profile');
+        toast({
+          title: "Logged in successfully",
+          description: `Welcome back, ${user?.first_name || 'User'}!`,
+        });
+      }
+    }
+    
+    // Force a page refresh to ensure all components recognize the authentication state
+    // This helps with components that might have already mounted with isAuthenticated=false
+    if (typeof window !== 'undefined') {
+      window.location.reload()
     }
   } catch (error: any) {
     toast({
