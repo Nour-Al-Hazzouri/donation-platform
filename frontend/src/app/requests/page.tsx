@@ -40,11 +40,12 @@ export default function RequestsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const postsPerPage = 9
 
-  // Load requests from API with pagination
+  // Load requests from API with pagination - only get donation requests (type='request')
   useEffect(() => {
     const loadRequests = async () => {
       setIsLoading(true)
       try {
+        // Only fetch donation requests (type='request')
         const res = await requestsService.getAllRequests(currentPage, postsPerPage)
         setRequests(res.data)
         setTotalPages(res.meta.last_page)

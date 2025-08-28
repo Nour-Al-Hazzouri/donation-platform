@@ -89,14 +89,15 @@ export default function DonationsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const postsPerPage = 9
 
-  // Fetch directly from API
+  // Fetch directly from API - only get donation offers (type='offer')
   useEffect(() => {
     let mounted = true
     const load = async () => {
       setIsLoading(true)
       setError(null)
       try {
-        const res = await donationsService.getAllEvents()
+        // Only fetch donation offers (type='offer')
+        const res = await donationsService.getOffers()
         // res.data is expected to be DonationEvent[]
         const mapped = (res.data || []).map((ev: any) => mapEventToDonationData(ev))
         if (!mounted) return
