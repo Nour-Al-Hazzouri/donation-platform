@@ -79,6 +79,7 @@ export default function RequestDetailsPage() {
     <div className="min-h-screen bg-background">
       <MainLayout>
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+          {/* Back button */}
           <div className="mb-4 md:mb-6">
             <Button 
               onClick={() => router.back()}
@@ -88,11 +89,14 @@ export default function RequestDetailsPage() {
             </Button>
           </div>
 
+          {/* Page title */}
           <div className="text-center mb-6 md:mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">Request Details</h1>
           </div>
 
+          {/* Request card */}
           <div className="bg-card rounded-lg shadow-sm border p-4 md:p-8">
+            {/* User info */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center">
                 <div className="relative mr-3 md:mr-4">
@@ -114,10 +118,12 @@ export default function RequestDetailsPage() {
               </div>
             </div>
 
+            {/* Title */}
             <div className="mb-4 md:mb-6">
               <h3 className="text-xl md:text-2xl font-bold text-foreground mb-1 md:mb-2">{request.title}</h3>
             </div>
 
+            {/* Progress */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs sm:text-sm font-medium text-card-foreground">Progress</span>
@@ -131,30 +137,35 @@ export default function RequestDetailsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
                 <div className="bg-muted rounded-lg p-2 sm:p-4">
-                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-500 dark:text-red-400">${currentAmount.toLocaleString()}</p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-500 dark:text-red-400">
+                    {currentAmount.toLocaleString()}
+                  </p>
                   <p className="text-xs sm:text-sm text-muted-foreground">Raised so far</p>
                 </div>
                 <div className="bg-muted rounded-lg p-2 sm:p-4">
-                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">${goalAmount.toLocaleString()}</p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
+                    {goalAmount.toLocaleString()}
+                  </p>
                   <p className="text-xs sm:text-sm text-muted-foreground">Goal amount</p>
                 </div>
               </div>
             </div>
 
+            {/* Image */}
             {request.image_urls?.[0] && (
               <div className="mb-4 md:mb-6 w-full aspect-video relative rounded-lg overflow-hidden">
-<Image
-  src={request.image_urls[0].startsWith('http') ? request.image_urls[0] : '/' + request.image_urls[0]}
-  alt={request.title}
-  fill
-  className="object-cover"
-  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
-  priority
-/>
-
+                <Image
+                  src={request.image_urls[0].startsWith('http') ? request.image_urls[0] : '/' + request.image_urls[0]}
+                  alt={request.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
+                  priority
+                />
               </div>
             )}
 
+            {/* Description */}
             <div className="mb-6 md:mb-8">
               <h4 className="text-base md:text-lg font-semibold text-foreground mb-2 md:mb-3">About this request</h4>
               <p className="text-sm sm:text-base text-card-foreground leading-relaxed whitespace-pre-line">
@@ -162,6 +173,7 @@ export default function RequestDetailsPage() {
               </p>
             </div>
 
+            {/* Donate button */}
             <div className="flex justify-center">
               <Button 
                 onClick={handleDonateClick}
@@ -172,6 +184,7 @@ export default function RequestDetailsPage() {
             </div>
           </div>
 
+          {/* Extra info */}
           <div className="mt-6 md:mt-8">
             <HowDonationHelps />
           </div>

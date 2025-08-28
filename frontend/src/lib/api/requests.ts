@@ -1,4 +1,5 @@
 import { authApi } from './auth';
+import { PaginatedResponse } from '@/types';
 
 export interface RequestEvent {
   id: number;
@@ -37,9 +38,11 @@ export interface CreateRequestData {
 }
 
 const requestsService = {
-  // List all active donation requests
-  getAllRequests: async (): Promise<{ data: RequestEvent[]; message: string }> => {
-    const response = await authApi.get('/donation-events/requests');
+  // List all active donation requests with pagination support
+  getAllRequests: async (page: number = 1, perPage: number = 9): Promise<PaginatedResponse<RequestEvent>> => {
+    const response = await authApi.get('/donation-events/requests', {
+      params: { page, per_page: perPage }
+    });
     return response.data;
   },
 

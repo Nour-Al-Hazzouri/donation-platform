@@ -110,45 +110,44 @@ export default function DonatePage() {
     return true
   }
 
- const handleDonate = async () => {
-  if (!handleDonateAction()) return
+  const handleDonate = async () => {
+    if (!handleDonateAction()) return
 
-  const finalAmount = isCustom ? Number(customAmount) : donationAmount[0]
+    const finalAmount = isCustom ? Number(customAmount) : donationAmount[0]
 
-  if (!finalAmount || finalAmount <= 0) {
-    setDonationError('Please enter a valid donation amount.')
-    return
+    if (!finalAmount || finalAmount <= 0) {
+      setDonationError('Please enter a valid donation amount.')
+      return
+    }
+    if (finalAmount > remainingAmountNeeded) {
+      setDonationError(`This request only needs ${remainingAmountNeeded.toLocaleString()} more.`)
+      return
+    }
+
+    setIsProcessing(true)
+    setDonationError(null)
+
+    try {
+      const transaction = await transactionsApi.createTransaction(requestId, { amount: finalAmount })
+
+      // Save pending transaction to localStorage
+      const storedPending = JSON.parse(localStorage.getItem('pendingDonations') || '[]')
+      storedPending.push({ id: transaction.id, amount: finalAmount, requestId })
+      localStorage.setItem('pendingDonations', JSON.stringify(storedPending))
+
+      // Redirect to success page using query params
+      router.push(
+        `/donate/success?amount=${finalAmount}&requestId=${requestId}&transactionId=${transaction.id}`
+      )
+
+    } catch (err: any) {
+      console.error('Donation failed:', err)
+      const serverMessage = err?.response?.data?.message ?? err?.message
+      setDonationError(serverMessage || 'Donation failed. Please try again.')
+    } finally {
+      setIsProcessing(false)
+    }
   }
-  if (finalAmount > remainingAmountNeeded) {
-    setDonationError(`This request only needs $${remainingAmountNeeded.toLocaleString()} more.`)
-    return
-  }
-
-  setIsProcessing(true)
-  setDonationError(null)
-
-  try {
-    const transaction = await transactionsApi.createTransaction(requestId, { amount: finalAmount })
-
-    // Save pending transaction to localStorage
-    const storedPending = JSON.parse(localStorage.getItem('pendingDonations') || '[]')
-    storedPending.push({ id: transaction.id, amount: finalAmount, requestId })
-    localStorage.setItem('pendingDonations', JSON.stringify(storedPending))
-
-    // Redirect to success page using query params
-router.push(
-  `/donate/success?amount=${finalAmount}&requestId=${requestId}&transactionId=${transaction.id}`
-)
-
-  } catch (err: any) {
-    console.error('Donation failed:', err)
-    const serverMessage = err?.response?.data?.message ?? err?.message
-    setDonationError(serverMessage || 'Donation failed. Please try again.')
-  } finally {
-    setIsProcessing(false)
-  }
-}
-
 
   const displayAmount = isCustom ? (Number(customAmount) || 0) : donationAmount[0]
 
@@ -188,9 +187,9 @@ router.push(
         {/* Request Info */}
         <div className="bg-card rounded-lg shadow-sm border p-6 mb-8">
           <h2 className="text-xl font-bold mb-4">Request Info</h2>
-          <p><span className="font-medium">Request amount:</span> ${requestGoalAmount.toLocaleString()}</p>
-          <p><span className="font-medium">Current amount:</span> ${requestCurrentAmount.toLocaleString()}</p>
-          <p><span className="font-medium">Remaining needed:</span> ${remainingAmountNeeded.toLocaleString()}</p>
+          <p><span className="font-medium">Request amount:</span> {requestGoalAmount.toLocaleString()}</p>
+          <p><span className="font-medium">Current amount:</span> {requestCurrentAmount.toLocaleString()}</p>
+          <p><span className="font-medium">Remaining needed:</span> {remainingAmountNeeded.toLocaleString()}</p>
           <div className="border-t pt-4 mt-4">
             <h3 className="font-semibold">{request.title}</h3>
             <p className="text-sm text-muted-foreground">{request.description}</p>
@@ -204,8 +203,8 @@ router.push(
             {/* Slider */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
-                <Label>Amount: ${displayAmount.toLocaleString()}</Label>
-                <span className="text-sm text-muted-foreground">Max: ${remainingAmountNeeded.toLocaleString()}</span>
+                <Label>Amount: {displayAmount.toLocaleString()}</Label>
+                <span className="text-sm text-muted-foreground">Max: {remainingAmountNeeded.toLocaleString()}</span>
               </div>
               <Slider
                 value={donationAmount}
@@ -216,25 +215,27 @@ router.push(
                 disabled={remainingAmountNeeded <= 0}
               />
               <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>$1</span>
-                <span>${remainingAmountNeeded.toLocaleString()}</span>
+                <span>1</span>
+                <span>{remainingAmountNeeded.toLocaleString()}</span>
               </div>
             </div>
 
             {/* Custom Amount */}
-            <div className="mb-8">
-              <Label htmlFor="custom-amount">Or enter a custom amount</Label>
-              <Input
-                id="custom-amount"
-                type="number"
-                placeholder="Enter amount"
-                value={customAmount}
-                onChange={(e) => handleCustomAmountChange(e.target.value)}
-                min="1"
-                max={remainingAmountNeeded}
-                disabled={remainingAmountNeeded <= 0}
-              />
-            </div>
+         <div className="mb-8 space-y-2">
+  <Label htmlFor="custom-amount" className="block text-sm font-medium text-foreground">
+    Or enter a custom amount
+  </Label>
+  <Input
+    id="custom-amount"
+    type="number"
+    placeholder="Enter amount"
+    value={customAmount}
+    onChange={(e) => handleCustomAmountChange(e.target.value)}
+    min="1"
+    max={remainingAmountNeeded}
+    disabled={remainingAmountNeeded <= 0}
+  />
+</div>
 
             {/* Preset Buttons */}
             <div className="grid grid-cols-4 gap-3 mb-8">
@@ -250,7 +251,7 @@ router.push(
                   }}
                   disabled={amount > remainingAmountNeeded || remainingAmountNeeded <= 0}
                 >
-                  ${amount}
+                  {amount}
                 </Button>
               ))}
             </div>
@@ -267,7 +268,7 @@ router.push(
               disabled={isProcessing || displayAmount <= 0 || displayAmount > remainingAmountNeeded || remainingAmountNeeded <= 0}
               className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-medium"
             >
-              {isProcessing ? 'Processing...' : `Donate $${displayAmount.toLocaleString()}`}
+              {isProcessing ? 'Processing...' : `Donate ${displayAmount.toLocaleString()}`}
             </Button>
 
             {/* Pending Donations */}
@@ -277,7 +278,7 @@ router.push(
                 <ul className="list-disc list-inside text-yellow-900 text-sm">
                   {pendingTransactions.map(txn => (
                     <li key={txn.id}>
-                      ${txn.amount.toLocaleString()} — Pending approval
+                      {txn.amount.toLocaleString()} — Pending approval
                     </li>
                   ))}
                 </ul>
