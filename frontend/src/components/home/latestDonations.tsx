@@ -21,8 +21,6 @@ interface LatestDonationsProps {
   className?: string
 }
 
-const FALLBACK_IMAGE = '/images/fallback.jpg'
-
 const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
   const router = useRouter()
 
@@ -30,7 +28,7 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
     ? donation.imageUrl.startsWith('http')
       ? donation.imageUrl
       : `${process.env.NEXT_PUBLIC_API_URL || ''}/${donation.imageUrl.replace(/^\/?/, '')}`
-    : FALLBACK_IMAGE
+    : undefined
 
   return (
     <Card
