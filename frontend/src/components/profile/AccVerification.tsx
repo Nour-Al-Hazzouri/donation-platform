@@ -56,7 +56,7 @@ export default function AccVerification() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
       {/* Blurred backdrop */}
       <div 
         className="fixed inset-0 bg-black/30 backdrop-blur-[2px]"
@@ -64,7 +64,7 @@ export default function AccVerification() {
       />
       
       {/* Modal container */}
-      <div className="relative bg-card dark:bg-card rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="relative bg-card dark:bg-card rounded-lg shadow-xl w-full max-w-md mx-4 my-8 overflow-hidden min-h-min">
         <div className="p-6">
           <h2 className="text-2xl font-semibold text-foreground mb-6">Verify Your Identity</h2>
           
