@@ -11,6 +11,7 @@ export interface RequestEvent {
   type: 'request';
   status: 'active' | 'fulfilled' | 'expired' | 'cancelled';
   image_urls: string[];
+  image_full_urls: string[];
   user: {
     id: number;
     username: string;

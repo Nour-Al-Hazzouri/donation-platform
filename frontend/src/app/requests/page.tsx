@@ -178,7 +178,7 @@ export default function RequestsPage() {
             name: `${r.user.first_name} ${r.user.last_name}`,
             title: r.title,
             description: r.description,
-            imageUrl: r.image_urls?.[0] ?? undefined,
+            imageUrl: r.image_full_urls?.[0] ?? undefined,
             avatarUrl: r.user.avatar_url ?? undefined,
             initials: r.user.first_name.charAt(0) + r.user.last_name.charAt(0),
             isVerified: false,

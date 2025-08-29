@@ -152,10 +152,10 @@ export default function RequestDetailsPage() {
             </div>
 
             {/* Image */}
-            {request.image_urls?.[0] && (
+            {request.image_full_urls?.[0] && (
               <div className="mb-4 md:mb-6 w-full aspect-video relative rounded-lg overflow-hidden">
                 <Image
-                  src={request.image_urls[0].startsWith('http') ? request.image_urls[0] : '/' + request.image_urls[0]}
+                  src={request.image_full_urls[0].startsWith('http') ? request.image_full_urls[0] : '/' + request.image_urls[0]}
                   alt={request.title}
                   fill
                   className="object-cover"
