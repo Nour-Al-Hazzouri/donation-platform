@@ -236,7 +236,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
               // Map verification data to include user information
               const requests = response.data.map((verification: any) => ({
                 id: verification.id,
-                name: verification.user?.name || 'Unknown User',
+                name: verification.user ? `${verification.user.first_name} ${verification.user.last_name}` : 'Unknown User',
                 email: verification.user?.email || 'No email',
                 phone: verification.user?.phone || 'No phone',
                 avatar: verification.user?.avatar || "/placeholder.svg?height=40&width=40",
@@ -335,7 +335,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                         if (response.success) {
                           const requests = response.data.map((verification: any) => ({
                             id: verification.id,
-                            name: verification.user?.name || 'Unknown User',
+                            name: verification.user ? `${verification.user.first_name} ${verification.user.last_name}` : 'Unknown User',
                             email: verification.user?.email || 'No email',
                             phone: verification.user?.phone || 'No phone',
                             avatar: verification.user?.avatar || "/placeholder.svg?height=40&width=40",
