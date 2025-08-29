@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { RequestEvent } from '@/lib/api/requests'
 
 export interface RequestData {
   id: number
@@ -12,20 +13,84 @@ export interface RequestData {
   avatarUrl?: string
   initials: string
   isVerified: boolean
-  goalAmount: string // Changed to be always present and string for consistency with input
-  currentAmount: number // Added currentAmount as a number
+  goalAmount: string
+  currentAmount: number
+  possibleAmount: number
+  unit?: string
+  type: 'request'
+  status: 'active' | 'fulfilled' | 'expired' | 'cancelled'
+  userId?: number
+  locationId?: number
   createdAt?: string
+  endDate?: string
+  location?: {
+    id: number
+    governorate: string
+    district: string
+  } | null
+}
+
+const mapEventToRequestData = (event: RequestEvent | null): RequestData | undefined => {
+  if (!event) {
+    console.warn('Attempted to map null or undefined event to RequestData');
+    return undefined;
+  }
+
+  if (!event.user) {
+    console.warn(`Event ID ${event.id} has missing user data`);
+    return {
+      id: event.id,
+      name: 'Unknown User',
+      title: event.title || 'Untitled Request',
+      description: event.description || '',
+      initials: 'UN',
+      isVerified: false,
+      goalAmount: event.goal_amount?.toString() || '0',
+      currentAmount: event.current_amount || 0,
+      possibleAmount: event.possible_amount || 0,
+      type: 'request',
+      status: event.status,
+      unit: event.unit,
+      location: event.location,
+      endDate: event.end_date,
+      createdAt: event.created_at
+    };
+  }
+
+  return {
+    id: event.id,
+    name: `${event.user.first_name || ''} ${event.user.last_name || ''}`.trim() || 'Unknown User',
+    title: event.title || 'Untitled Request',
+    description: event.description || '',
+    imageUrl: event.image_full_urls?.[0] || event.image_urls?.[0],
+    avatarUrl: event.user.avatar_url || undefined,
+    initials: `${event.user.first_name?.[0] ?? ''}${event.user.last_name?.[0] ?? ''}` || 'UN',
+    isVerified: true,
+    goalAmount: event.goal_amount?.toString() || '0',
+    currentAmount: event.current_amount || 0,
+    possibleAmount: event.possible_amount || 0,
+    unit: event.unit,
+    type: 'request',
+    status: event.status,
+    userId: event.user.id,
+    locationId: event.location?.id,
+    location: event.location || null,
+    endDate: event.end_date,
+    createdAt: event.created_at
+  };
 }
 
 interface RequestsState {
   requests: RequestData[]
-  addRequest: (request: Omit<RequestData, 'id' | 'currentAmount'>) => void // Omit currentAmount as it's initialized to 0
-  updateRequestCurrentAmount: (requestId: number, amount: number) => void // New action to update current amount
+  isLoading: boolean
+  error: string | null
+  addRequest: (request: Omit<RequestData, 'id' | 'currentAmount' | 'possibleAmount' | 'status' | 'type'>) => void
+  updateRequestCurrentAmount: (requestId: number, amount: number) => void
   getRequests: () => RequestData[]
   initializeRequests: (initialRequests: RequestData[]) => void
+  replaceRequest: (event: RequestEvent) => void
 }
 
-// Initial mock data with fixed currentAmount values
 export const initialRequestsData: RequestData[] = [
   {
     id: 1,
@@ -37,8 +102,11 @@ export const initialRequestsData: RequestData[] = [
     initials: "RK",
     isVerified: true,
     goalAmount: "50000",
-    currentAmount: 12500, // Fixed current amount
-    createdAt: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+    currentAmount: 12500,
+    possibleAmount: 0,
+    type: 'request',
+    status: 'active',
+    createdAt: new Date(Date.now() - 86400000).toISOString()
   },
   {
     id: 2,
@@ -49,8 +117,11 @@ export const initialRequestsData: RequestData[] = [
     initials: "RK",
     isVerified: true,
     goalAmount: "75000",
-    currentAmount: 23000, // Fixed current amount
-    createdAt: new Date(Date.now() - 172800000).toISOString() // 2 days ago
+    currentAmount: 23000,
+    possibleAmount: 0,
+    type: 'request',
+    status: 'active',
+    createdAt: new Date(Date.now() - 172800000).toISOString()
   },
   {
     id: 3,
@@ -61,8 +132,11 @@ export const initialRequestsData: RequestData[] = [
     initials: "RJ",
     isVerified: true,
     goalAmount: "25000",
-    currentAmount: 8750, // Fixed current amount
-    createdAt: new Date(Date.now() - 259200000).toISOString() // 3 days ago
+    currentAmount: 8750,
+    possibleAmount: 0,
+    type: 'request',
+    status: 'active',
+    createdAt: new Date(Date.now() - 259200000).toISOString()
   },
   {
     id: 4,
@@ -73,8 +147,11 @@ export const initialRequestsData: RequestData[] = [
     initials: "SA",
     isVerified: true,
     goalAmount: "30000",
-    currentAmount: 5200, // Fixed current amount
-    createdAt: new Date(Date.now() - 345600000).toISOString() // 4 days ago
+    currentAmount: 5200,
+    possibleAmount: 0,
+    type: 'request',
+    status: 'active',
+    createdAt: new Date(Date.now() - 345600000).toISOString()
   },
   {
     id: 5,
@@ -85,8 +162,11 @@ export const initialRequestsData: RequestData[] = [
     initials: "MC",
     isVerified: false,
     goalAmount: "15000",
-    currentAmount: 3800, // Fixed current amount
-    createdAt: new Date(Date.now() - 432000000).toISOString() // 5 days ago
+    currentAmount: 3800,
+    possibleAmount: 0,
+    type: 'request',
+    status: 'active',
+    createdAt: new Date(Date.now() - 432000000).toISOString()
   },
   {
     id: 6,
@@ -97,8 +177,11 @@ export const initialRequestsData: RequestData[] = [
     initials: "PS",
     isVerified: true,
     goalAmount: "10000",
-    currentAmount: 2100, // Fixed current amount
-    createdAt: new Date(Date.now() - 518400000).toISOString() // 6 days ago
+    currentAmount: 2100,
+    possibleAmount: 0,
+    type: 'request',
+    status: 'active',
+    createdAt: new Date(Date.now() - 518400000).toISOString()
   }
 ]
 
@@ -106,41 +189,54 @@ export const useRequestsStore = create<RequestsState>()(
   persist(
     (set, get) => ({
       requests: [],
-
-      initializeRequests: (initialRequests) => {
-        const currentRequests = get().requests
-        if (currentRequests.length === 0) {
-          set({ requests: initialRequests })
-        }
-      },
-
+      isLoading: false,
+      error: null,
       addRequest: (newRequest) => {
-        const currentRequests = get().requests
-        const newId = Math.max(...currentRequests.map((r) => r.id), 0) + 1
-
-        const requestWithId: RequestData = {
-          ...newRequest,
-          id: newId,
-          currentAmount: 0, // Initialize currentAmount to 0
-          createdAt: new Date().toISOString()
-        }
-
-        set({ requests: [requestWithId, ...currentRequests] })
+        set((state) => ({
+          requests: [
+            ...state.requests,
+            {
+              ...newRequest,
+              id: Math.max(0, ...state.requests.map((r) => r.id)) + 1,
+              currentAmount: 0,
+              possibleAmount: 0,
+              type: 'request',
+              status: 'active',
+            } as RequestData,
+          ],
+        }))
       },
-
       updateRequestCurrentAmount: (requestId, amount) => {
         set((state) => ({
           requests: state.requests.map((request) =>
-            request.id === requestId
-              ? { ...request, currentAmount: request.currentAmount + amount }
-              : request
-          )
+            request.id === requestId ? { ...request, currentAmount: amount } : request
+          ),
         }))
       },
-
       getRequests: () => {
-        const currentRequests = get().requests
-        return currentRequests.length > 0 ? currentRequests : initialRequestsData
+        return get().requests
+      },
+      initializeRequests: (initialRequests) => {
+        set({ requests: initialRequests })
+      },
+      replaceRequest: (event) => {
+        const mappedRequest = mapEventToRequestData(event);
+        if (!mappedRequest) return;
+
+        set((state) => {
+          const exists = state.requests.some(r => r.id === event.id);
+          if (exists) {
+            return {
+              requests: state.requests.map(r => 
+                r.id === event.id ? { ...mappedRequest } : r
+              )
+            };
+          } else {
+            return {
+              requests: [...state.requests, mappedRequest]
+            };
+          }
+        });
       }
     }),
     {

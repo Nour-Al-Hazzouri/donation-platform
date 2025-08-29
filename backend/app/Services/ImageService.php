@@ -94,8 +94,20 @@ class ImageService
             $image->scale(width: $maxWidth);
         }
 
-        // Encode with specified quality
-        return (string) $image->toJpeg($quality);
+        // Get original format and encode accordingly
+        $originalExtension = strtolower($file->getClientOriginalExtension());
+
+        switch ($originalExtension) {
+            case 'png':
+                return (string) $image->toPng();
+            case 'gif':
+                return (string) $image->toGif();
+            case 'webp':
+                return (string) $image->toWebp($quality);
+            default:
+                // Default to JPEG for jpg, jpeg, and unknown formats
+                return (string) $image->toJpeg($quality);
+        }
     }
 
     /**
@@ -106,7 +118,7 @@ class ImageService
      */
     protected function generateFilename(string $extension): string
     {
-        return time() . '-' . Str::random(10) . '.' . $extension;
+        return uniqid() . '-' . Str::random(10) . '.' . $extension;
     }
 
     /**
@@ -191,6 +203,7 @@ class ImageService
         $normalizedPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
 
         if (!$storage->exists($normalizedPath)) {
+            \Log::warning('Image not found at path: ' . $normalizedPath);
             return null;
         }
 
@@ -199,9 +212,12 @@ class ImageService
         $relativePath = ltrim(str_replace('public' . DIRECTORY_SEPARATOR, '', $normalizedPath), DIRECTORY_SEPARATOR);
         // Convert to forward slashes for URLs
         $urlPath = str_replace('\\', '/', $relativePath);
-        return asset('storage/' . $urlPath);
-        
+        $fullUrl = asset('storage/' . $urlPath);
+
         // For cloud storage, use the configured URL when needed
         // return $storage->url($normalizedPath);
+        // $fullUrl = $storage->url($urlPath);
+        \Log::info('Generated image URL (production): ' . $fullUrl . ' for path: ' . $urlPath);
+        return $fullUrl;
     }
 }
