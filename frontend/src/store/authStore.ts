@@ -49,11 +49,12 @@ type AuthState = {
     password_confirmation: string;
   }) => Promise<{ message: string }>;
   updateVerification: (verified: boolean, verifiedAt?: string) => void;
+  updateUser: (userData: Partial<User>) => void;
   deductBalance: (amount: number) => void; // For backward compatibility
   clearError: () => void;
 }
 
-const persistOptions: PersistOptions<AuthState, Omit<AuthState, 'login' | 'register' | 'logout' | 'forgotPassword' | 'resetPassword' | 'updateVerification' | 'deductBalance' | 'clearError' | 'isLoading' | 'error'>> = {
+const persistOptions: PersistOptions<AuthState, Omit<AuthState, 'login' | 'register' | 'logout' | 'forgotPassword' | 'resetPassword' | 'updateVerification' | 'updateUser' | 'deductBalance' | 'clearError' | 'isLoading' | 'error'>> = {
   name: 'auth-storage',
   partialize: (state) => ({
     isAuthenticated: state.isAuthenticated,
@@ -240,6 +241,36 @@ login: async (email: string, password: string) => {
             };
           }
           return state;
+        });
+      },
+
+      updateUser: (userData) => {
+        set((state) => {
+          if (!state.user) return state;
+          
+          const updatedUser = {
+            ...state.user,
+            ...userData
+          };
+          
+          // Create the auth storage state object
+          const authState = { state: { user: updatedUser, isAuthenticated: true } };
+          
+          // Save in localStorage for client-side access
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('auth-storage', JSON.stringify(authState));
+          }
+          
+          // Save user in cookie for server-side middleware
+          Cookies.set('auth-storage', JSON.stringify(authState), {
+            path: '/',
+            expires: 7, // expires in 7 days
+            sameSite: 'strict',
+          });
+          
+          return {
+            user: updatedUser
+          };
         });
       },
       
