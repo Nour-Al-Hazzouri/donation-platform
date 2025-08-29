@@ -37,7 +37,7 @@ function mapEventToDonationData(event: any): DonationData {
     name: `${event.user?.first_name ?? ''} ${event.user?.last_name ?? ''}`.trim(),
     title: event.title,
     description: event.description,
-    imageUrl: event.image_urls?.[0] || undefined,
+    imageUrl: event.image_full_urls?.[0] || undefined,
     avatarUrl: event.user?.avatar_url || undefined,
     initials: (event.user?.first_name?.[0] ?? '?') + (event.user?.last_name?.[0] ?? '?'),
     isVerified: true,
@@ -99,7 +99,9 @@ export default function DonationsPage() {
         // Only fetch donation offers (type='offer')
         const res = await donationsService.getOffers()
         // res.data is expected to be DonationEvent[]
+        console.log(res.data)
         const mapped = (res.data || []).map((ev: any) => mapEventToDonationData(ev))
+        console.log(mapped)
         if (!mounted) return
         setDonations(mapped)
       } catch (err: any) {
