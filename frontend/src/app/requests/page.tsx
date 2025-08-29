@@ -183,7 +183,12 @@ export default function RequestsPage() {
             initials: r.user.first_name.charAt(0) + r.user.last_name.charAt(0),
             isVerified: false,
             goalAmount: r.goal_amount.toString(),
-            currentAmount: r.current_amount
+            currentAmount: r.current_amount,
+            possibleAmount: r.possible_amount,
+            type: r.type,
+            status: r.status,
+            location: r.location,
+            createdAt: r.created_at
           }))}
           searchTerm={isSearchActive ? searchTerm : ''}
         />
