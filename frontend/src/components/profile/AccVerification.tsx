@@ -56,7 +56,7 @@ export default function AccVerification() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
       {/* Blurred backdrop */}
       <div 
         className="fixed inset-0 bg-black/30 backdrop-blur-[2px]"
@@ -64,9 +64,9 @@ export default function AccVerification() {
       />
       
       {/* Modal container */}
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="relative bg-card dark:bg-card rounded-lg shadow-xl w-full max-w-md mx-4 my-8 overflow-hidden min-h-min">
         <div className="p-6">
-          <h2 className="text-2xl font-semibold text-[#5a5a5a] mb-6">Verify Your Identity</h2>
+          <h2 className="text-2xl font-semibold text-foreground mb-6">Verify Your Identity</h2>
           
           {verificationSuccess ? (
             <div className="text-center py-8">
@@ -80,12 +80,12 @@ export default function AccVerification() {
             <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label className="text-[#5a5a5a] text-sm">Document Type</Label>
+                  <Label className="text-foreground text-sm">Document Type</Label>
                   <div className="grid grid-cols-3 gap-2 mb-4">
                     <Button 
                       type="button"
                       variant={documentType === 'id_card' ? 'default' : 'outline'}
-                      className={documentType === 'id_card' ? 'bg-[#f90404] hover:bg-[#d90404] text-white' : 'text-[#5a5a5a]'}
+                      className={documentType === 'id_card' ? 'bg-[#f90404] hover:bg-[#d90404] text-white' : 'text-foreground'}
                       onClick={() => setDocumentType('id_card')}
                     >
                       ID Card
@@ -93,7 +93,7 @@ export default function AccVerification() {
                     <Button 
                       type="button"
                       variant={documentType === 'passport' ? 'default' : 'outline'}
-                      className={documentType === 'passport' ? 'bg-[#f90404] hover:bg-[#d90404] text-white' : 'text-[#5a5a5a]'}
+                      className={documentType === 'passport' ? 'bg-[#f90404] hover:bg-[#d90404] text-white' : 'text-foreground'}
                       onClick={() => setDocumentType('passport')}
                     >
                       Passport
@@ -101,24 +101,24 @@ export default function AccVerification() {
                     <Button 
                       type="button"
                       variant={documentType === 'driver_license' ? 'default' : 'outline'}
-                      className={documentType === 'driver_license' ? 'bg-[#f90404] hover:bg-[#d90404] text-white' : 'text-[#5a5a5a]'}
+                      className={documentType === 'driver_license' ? 'bg-[#f90404] hover:bg-[#d90404] text-white' : 'text-foreground'}
                       onClick={() => setDocumentType('driver_license')}
                     >
                       Driver's License
                     </Button>
                   </div>
                   
-                  <Label className="text-[#5a5a5a] text-sm">Upload Documents</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                  <Label className="text-foreground text-sm">Upload Documents</Label>
+                  <div className="border-2 border-dashed border-gray-300 dark:border-muted rounded-lg p-6 dark:bg-muted/20">
                     {documentImages.length > 0 && (
                       <div className="mb-4 space-y-2">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Uploaded Documents ({documentImages.length}/7):</p>
+                        <p className="text-sm font-medium text-gray-700 dark:text-foreground mb-2">Uploaded Documents ({documentImages.length}/7):</p>
                         <div className="space-y-2">
                           {documentImages.map((file, index) => (
-                            <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                            <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-muted p-2 rounded-md">
                               <div className="flex items-center">
                                 <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                                <p className="text-sm text-gray-700 truncate max-w-[200px]">{file.name}</p>
+                                <p className="text-sm text-gray-700 dark:text-foreground truncate max-w-[200px]">{file.name}</p>
                               </div>
                               <button
                                 type="button"
@@ -137,13 +137,13 @@ export default function AccVerification() {
                       <label className="cursor-pointer block text-center">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <Upload className="w-8 h-8 text-gray-400" />
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-600 dark:text-foreground">
                             Click to upload your ID documents
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-muted-foreground">
                             Accepted: JPG, PNG, PDF (max. 10MB per file)
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-muted-foreground">
                             You can upload up to 7 documents
                           </p>
                         </div>
@@ -171,7 +171,7 @@ export default function AccVerification() {
                     type="button"
                     variant="outline"
                     onClick={closeModal}
-                    className="text-[#5a5a5a] border-gray-300 hover:bg-gray-50"
+                    className="text-foreground border-border hover:bg-muted dark:hover:bg-muted"
                   >
                     Cancel
                   </Button>

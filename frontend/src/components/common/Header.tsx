@@ -57,7 +57,7 @@ export function Header() {
   const handleLogout = () => {
     closeMobileMenu()
     logout()
-    router.push('/')
+    router.push('/home')
   }
 
   const scrollToTop = () => {
@@ -223,7 +223,10 @@ export function Header() {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem 
-                      onClick={() => logout()} 
+                      onClick={() => {
+                        logout()
+                        router.push('/home')
+                      }} 
                       className="flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
                     >
                       <LogOut size={16} />
@@ -394,7 +397,11 @@ export function Header() {
                       <Button
                         variant="ghost"
                         className="w-full text-center py-2 px-4 rounded-md flex items-center justify-start gap-2 hover:bg-accent hover:text-accent-foreground"
-                        onClick={handleLogout}
+                        onClick={() => {
+                          closeMobileMenu()
+                          logout()
+                          router.push('/home')
+                        }}
                       >
                         <LogOut size={16} />
                         Log out

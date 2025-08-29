@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class DonationEvent extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'user_id',
         'location_id',
@@ -68,7 +68,7 @@ class DonationEvent extends Model
         }
 
         return array_map(function ($image) {
-            return app(ImageService::class)->getImageUrl($image);
+            return app(ImageService::class)->getImageUrl($image, true);
         }, $this->image_urls);
     }
 

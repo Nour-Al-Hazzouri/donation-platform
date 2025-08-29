@@ -40,11 +40,12 @@ export default function RequestsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const postsPerPage = 9
 
-  // Load requests from API with pagination
+  // Load requests from API with pagination - only get donation requests (type='request')
   useEffect(() => {
     const loadRequests = async () => {
       setIsLoading(true)
       try {
+        // Only fetch donation requests (type='request')
         const res = await requestsService.getAllRequests(currentPage, postsPerPage)
         setRequests(res.data)
         setTotalPages(res.meta.last_page)
@@ -177,12 +178,17 @@ export default function RequestsPage() {
             name: `${r.user.first_name} ${r.user.last_name}`,
             title: r.title,
             description: r.description,
-            imageUrl: r.image_urls?.[0] ?? undefined,
+            imageUrl: r.image_full_urls?.[0] ?? undefined,
             avatarUrl: r.user.avatar_url ?? undefined,
             initials: r.user.first_name.charAt(0) + r.user.last_name.charAt(0),
             isVerified: false,
             goalAmount: r.goal_amount.toString(),
-            currentAmount: r.current_amount
+            currentAmount: r.current_amount,
+            possibleAmount: r.possible_amount,
+            type: r.type,
+            status: r.status,
+            location: r.location,
+            createdAt: r.created_at
           }))}
           searchTerm={isSearchActive ? searchTerm : ''}
         />
