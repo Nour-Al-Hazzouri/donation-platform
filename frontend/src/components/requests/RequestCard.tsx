@@ -92,9 +92,11 @@ export function RequestCard({
         
         {imageUrl && (
           <div className="mb-4">
-            <img 
+            <Image 
               src={imageUrl || "/placeholder.svg"} 
               alt={title} 
+              width={500}
+              height={500}
               className="w-full h-32 object-cover rounded-md"
             />
           </div>
