@@ -8,7 +8,7 @@ import { ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from 'lucide-react'
 import { cn } from '@/utils'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { initialRequestsData } from '@/store/requestsStore'
+import { initialDonationsData } from '@/store/donationsStore'
 
 interface RequestItem {
   id: number
@@ -30,7 +30,7 @@ interface LatestRequestsProps {
 }
 
 // Generate deterministic quantities based on request ID
-const mockRequests: RequestItem[] = initialRequestsData.map((request, index) => ({
+const mockRequests: RequestItem[] = initialDonationsData.map((request, index) => ({
   ...request,
   userId: `user${request.id}`,
   userName: request.name,

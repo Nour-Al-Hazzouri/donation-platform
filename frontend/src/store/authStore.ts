@@ -22,7 +22,16 @@ type User = {
     governorate: string;
     district: string;
   } | null;
-  balance?: number; // For backward compatibility
+  balance: number; // Made required for consistency
+  // Legacy fields for backward compatibility
+  name?: string;
+  verified?: boolean;
+  verifiedAt?: string;
+  profileImage?: string;
+  gender?: string;
+  phoneNumber?: string;
+  governorate?: string;
+  district?: string;
 }
 
 type AuthState = {
@@ -30,7 +39,7 @@ type AuthState = {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (emailOrUserData: string | Omit<User, 'balance'>, password?: string) => Promise<void>;
   register: (userData: {
     first_name: string;
     last_name: string;
@@ -50,7 +59,7 @@ type AuthState = {
   }) => Promise<{ message: string }>;
   updateVerification: (verified: boolean, verifiedAt?: string) => void;
   updateUser: (userData: Partial<User>) => void;
-  deductBalance: (amount: number) => void; // For backward compatibility
+  deductBalance: (amount: number) => void;
   clearError: () => void;
 }
 
@@ -69,50 +78,65 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
-      
 
-login: async (email: string, password: string) => {
-  set({ isLoading: true, error: null });
-  try {
-    const response = await authService.login({ email, password });
+      login: async (emailOrUserData: string | Omit<User, 'balance'>, password?: string) => {
+        // Handle legacy login (direct user object) for backward compatibility
+        if (typeof emailOrUserData === 'object') {
+          const userData = emailOrUserData;
+          set({ 
+            user: { ...userData, balance: 10000 } as User,
+            isAuthenticated: true 
+          });
+          return;
+        }
 
-    const user: User = {
-      ...response.user,
-      token: response.access_token,
-      isAdmin: response.isAdmin,
-      balance: 10000,
-    };
+        // Handle new login with API
+        const email = emailOrUserData;
+        if (!password) {
+          throw new Error('Password is required for email login');
+        }
 
-    // Save user in Zustand
-    set({
-      user,
-      isAuthenticated: true,
-      isLoading: false,
-    });
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.login({ email, password });
 
-    // Create the auth storage state object
-    const authState = { state: { user, isAuthenticated: true } };
-    
-    // Save in localStorage for client-side access
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('auth-storage', JSON.stringify(authState));
-    }
-    
-    // Save user in cookie for server-side middleware
-    Cookies.set('auth-storage', JSON.stringify(authState), {
-      path: '/',
-      expires: 7, // expires in 7 days
-      sameSite: 'strict',
-    });
+          const user: User = {
+            ...response.user,
+            token: response.access_token,
+            isAdmin: response.isAdmin,
+            balance: 10000,
+          };
 
-  } catch (error: any) {
-    set({
-      isLoading: false,
-      error: error.response?.data?.message || 'Failed to login. Please check your credentials.',
-    });
-    throw error;
-  }
-},
+          // Save user in Zustand
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+
+          // Create the auth storage state object
+          const authState = { state: { user, isAuthenticated: true } };
+          
+          // Save in localStorage for client-side access
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('auth-storage', JSON.stringify(authState));
+          }
+          
+          // Save user in cookie for server-side middleware
+          Cookies.set('auth-storage', JSON.stringify(authState), {
+            path: '/',
+            expires: 7, // expires in 7 days
+            sameSite: 'strict',
+          });
+
+        } catch (error: any) {
+          set({
+            isLoading: false,
+            error: error.response?.data?.message || 'Failed to login. Please check your credentials.',
+          });
+          throw error;
+        }
+      },
       
       register: async (userData) => {
         set({ isLoading: true, error: null });
@@ -123,7 +147,7 @@ login: async (email: string, password: string) => {
           const user: User = {
             ...response.user,
             token: response.access_token,
-            balance: 10000, // For backward compatibility
+            balance: 10000, // Set initial balance
           };
           
           set({ 
@@ -225,19 +249,36 @@ login: async (email: string, password: string) => {
         set((state) => ({
           user: state.user ? { 
             ...state.user, 
+            verified, // Legacy field
+            verifiedAt, // Legacy field
             email_verified_at: verifiedAt || state.user.email_verified_at 
           } : null
         })),
       
       deductBalance: (amount) => {
         set((state) => {
-          if (state.user && state.user.balance) {
+          if (state.user) {
             const newBalance = state.user.balance - amount;
+            const updatedUser = {
+              ...state.user,
+              balance: newBalance,
+            };
+
+            // Update localStorage and cookies
+            const authState = { state: { user: updatedUser, isAuthenticated: true } };
+            
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('auth-storage', JSON.stringify(authState));
+            }
+            
+            Cookies.set('auth-storage', JSON.stringify(authState), {
+              path: '/',
+              expires: 7,
+              sameSite: 'strict',
+            });
+
             return {
-              user: {
-                ...state.user,
-                balance: newBalance,
-              },
+              user: updatedUser,
             };
           }
           return state;
