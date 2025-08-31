@@ -52,11 +52,13 @@ const profileService = {
     if (data.avatar_url) formData.append('avatar_url', data.avatar_url);
     if (data.delete_avatar) formData.append('delete_avatar', 'true');
 
+    console.log("updating profile...")    
     const response = await authApi.put('/user/profile', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
+    console.log("updated profile:", response.data.data)
     return response.data.data;
   },
 };
