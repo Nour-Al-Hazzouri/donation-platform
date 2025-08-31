@@ -1,144 +1,112 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { AdminLayout } from "@/components/layouts/AdminLayout"
 import { DashboardSidebar } from "@/components/admin/dashboard/dashboardSiderbar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { COLORS } from "@/lib/constants"
-
-// Mock data constants based on provided locations
-const LOCATIONS = [
-  { governorate: 'Beirut', district: 'Achrafieh' },
-  { governorate: 'Beirut', district: 'Hamra' },
-  { governorate: 'Beirut', district: 'Verdun' },
-  { governorate: 'Mount Lebanon', district: 'Jounieh' },
-  { governorate: 'Mount Lebanon', district: 'Baabda' },
-  { governorate: 'Mount Lebanon', district: 'Metn' },
-  { governorate: 'North', district: 'Tripoli' },
-  { governorate: 'North', district: 'Koura' },
-  { governorate: 'North', district: 'Zgharta' },
-  { governorate: 'South', district: 'Sidon' },
-  { governorate: 'South', district: 'Tyre' },
-  { governorate: 'South', district: 'Nabatieh' },
-  { governorate: 'Bekaa', district: 'Zahle' },
-  { governorate: 'Bekaa', district: 'Baalbek' },
-  { governorate: 'Bekaa', district: 'Rachaya' },
-  { governorate: 'Nabatieh', district: 'Bint Jbeil' },
-  { governorate: 'Nabatieh', district: 'Marjeyoun' },
-  { governorate: 'Akkar', district: 'Halba' },
-  { governorate: 'Baalbek-Hermel', district: 'Hermel' },
-]
-
-interface Location {
-  id: string
-  governorate: string
-  district: string
-}
+import { Location, locationsService } from "@/lib/api/locations"
+import { toast } from "sonner"
 
 export function LocationsAdminPage() {
   const router = useRouter()
-  
-  // Initialize locations state
   const [locations, setLocations] = useState<Location[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   
-  // Load locations from localStorage or use mock data if none exist
-  useEffect(() => {
-    const storedLocations = localStorage.getItem('adminLocations')
-    if (storedLocations) {
-      // Use locations from localStorage
-      setLocations(JSON.parse(storedLocations))
-    } else {
-      // Initialize with mock data
-      const initialLocations = LOCATIONS.slice(0, 4).map((location, index) => ({
-        id: `location-${index + 1}`,
-        ...location
-      }))
-      setLocations(initialLocations)
-      
-      // Store initial locations in localStorage
-      localStorage.setItem('adminLocations', JSON.stringify(initialLocations))
-    }
-  }, [])
-
   const [selectedGovernorate, setSelectedGovernorate] = useState("")
   const [selectedDistrict, setSelectedDistrict] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Get unique governorates for dropdown
-  const governorates = useMemo(() => {
-    const unique = [...new Set(LOCATIONS.map(location => location.governorate))]
-    return unique.sort()
+  // Load locations from API
+  useEffect(() => {
+    loadLocations()
   }, [])
 
-  // Get districts for selected governorate
-  const availableDistricts = useMemo(() => {
-    if (!selectedGovernorate) return []
-    return LOCATIONS
-      .filter(location => location.governorate === selectedGovernorate)
-      .map(location => location.district)
-      .sort()
-  }, [selectedGovernorate])
-
-  const handleGovernorateChange = (value: string) => {
-    setSelectedGovernorate(value)
-    setSelectedDistrict("") // Reset district when governorate changes
+  const loadLocations = async () => {
+    try {
+      setLoading(true)
+      const locationsData = await locationsService.listLocations()
+      setLocations(locationsData)
+      setError(null)
+    } catch (err) {
+      setError("Failed to load locations")
+      toast.error("Failed to load locations")
+      console.error("Error loading locations:", err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleDistrictChange = (value: string) => {
-    setSelectedDistrict(value)
-  }
-
-  const handleAdd = () => {
-    if (selectedGovernorate && selectedDistrict) {
-      const newLocation = {
-        governorate: selectedGovernorate,
-        district: selectedDistrict
-      }
+  const handleAdd = async () => {
+    if (!selectedGovernorate || !selectedDistrict) {
+      toast.error("Please fill in both governorate and district")
+      return
+    }
+    
+    // Check for duplicate location
+    const isDuplicate = locations.some(loc => 
+      loc.governorate.toLowerCase() === selectedGovernorate.toLowerCase() && 
+      loc.district.toLowerCase() === selectedDistrict.toLowerCase()
+    )
+    
+    if (isDuplicate) {
+      toast.error("This location already exists")
+      return
+    }
+    
+    try {
+      setIsSubmitting(true)
+      setError(null)
+      const newLocation = await locationsService.createLocation({
+        governorate: selectedGovernorate.trim(),
+        district: selectedDistrict.trim()
+      })
       
-      // Add to local state
-      const newLocationWithId = {
-        id: `location-${Date.now()}`,
-        ...newLocation
-      }
-      const updatedLocations = [...locations, newLocationWithId]
-      setLocations(updatedLocations)
-      
-      // Update localStorage
-      localStorage.setItem('adminLocations', JSON.stringify(updatedLocations))
-      
-      // Reset form
+      setLocations(prev => [...prev, newLocation])
       setSelectedGovernorate("")
       setSelectedDistrict("")
+      toast.success("Location added successfully")
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || "Failed to add location"
+      setError(errorMessage)
+      toast.error(errorMessage)
+      console.error("Error adding location:", err)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  const handleEdit = (id: string) => {
-    // Find the location to edit
-    const locationToEdit = locations.find(loc => loc.id === id)
-    if (locationToEdit) {
-      // Navigate to edit page with location data
-      const params = new URLSearchParams()
-      params.set('id', id)
-      params.set('governorate', locationToEdit.governorate)
-      params.set('district', locationToEdit.district)
-      router.push(`/admin/locations/edit?${params.toString()}`)
-    }
+  const handleEdit = (id: number) => {
+    router.push(`/admin/locations/edit?id=${id}`)
   }
 
-  const handleDelete = (id: string) => {
-    const updatedLocations = locations.filter(loc => loc.id !== id)
-    setLocations(updatedLocations)
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this location?")) return
     
-    // Update localStorage
-    localStorage.setItem('adminLocations', JSON.stringify(updatedLocations))
+    try {
+      setError(null)
+      await locationsService.deleteLocation(id)
+      setLocations(prev => prev.filter(loc => loc.id !== id))
+      toast.success("Location deleted successfully")
+    } catch (err: any) {
+      let errorMessage = "Failed to delete location"
+      
+      if (err?.response?.status === 409) {
+        errorMessage = "Cannot delete location as it's being used by other records"
+      } else if (err?.response?.status === 404) {
+        errorMessage = "Location not found"
+      } else if (err?.response?.status === 403) {
+        errorMessage = "You don't have permission to delete locations"
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message
+      }
+      
+      setError(errorMessage)
+      toast.error(errorMessage)
+      console.error("Error deleting location:", err)
+    }
   }
 
   const handleCancel = () => {
@@ -147,6 +115,16 @@ export function LocationsAdminPage() {
   }
 
   const isFormValid = selectedGovernorate && selectedDistrict
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        </div>
+      </AdminLayout>
+    )
+  }
 
   return (
     <AdminLayout>
@@ -164,6 +142,12 @@ export function LocationsAdminPage() {
                 <div className="w-full mx-auto">
                   {/* Page Title */}
                   <h1 className="text-xl lg:text-2xl font-semibold text-foreground mb-6 lg:mb-8">Manage Locations</h1>
+
+                  {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                      {error}
+                    </div>
+                  )}
 
                   {/* Locations Table */}
                   <div className="bg-background rounded-lg shadow-sm mb-6 lg:mb-8 w-full overflow-hidden border border-border">
@@ -192,7 +176,7 @@ export function LocationsAdminPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleEdit(location.id)}
-                                className="bg-red-500 hover:bg-red-600 text-white flex-1"
+                                className="bg-red-300 hover:bg-red-400 text-white flex-1"
                               >
                                 Edit
                               </Button>
@@ -214,7 +198,7 @@ export function LocationsAdminPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleEdit(location.id)}
-                                className="bg-red-500 hover:bg-red-600 text-white px-2"
+                                className="bg-red-300 hover:bg-red-400 text-white px-2"
                               >
                                 Edit
                               </Button>
@@ -230,6 +214,12 @@ export function LocationsAdminPage() {
                         </div>
                       ))}
                     </div>
+
+                    {locations.length === 0 && (
+                      <div className="p-8 text-center text-muted-foreground">
+                        No locations found. Add your first location below.
+                      </div>
+                    )}
                   </div>
 
                   {/* Add New Location Form */}
@@ -241,21 +231,13 @@ export function LocationsAdminPage() {
                         <label htmlFor="governorate" className="block text-base lg:text-lg font-medium text-foreground mb-2">
                           Governorate:
                         </label>
-                        <Select
+                        <input
+                          type="text"
                           value={selectedGovernorate}
-                          onValueChange={handleGovernorateChange}
-                        >
-                          <SelectTrigger className="w-full border-border focus:border-primary focus:ring-primary">
-                            <SelectValue placeholder="--Select Governorate--" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {governorates.map((governorate) => (
-                              <SelectItem key={governorate} value={governorate}>
-                                {governorate}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          onChange={(e) => setSelectedGovernorate(e.target.value)}
+                          placeholder="Enter governorate name"
+                          className="w-full p-2 border border-border rounded-md focus:border-primary focus:ring-primary"
+                        />
                       </div>
 
                       {/* District Field */}
@@ -263,22 +245,13 @@ export function LocationsAdminPage() {
                         <label htmlFor="district" className="block text-base lg:text-lg font-medium text-foreground mb-2">
                           District
                         </label>
-                        <Select
+                        <input
+                          type="text"
                           value={selectedDistrict}
-                          onValueChange={handleDistrictChange}
-                          disabled={!selectedGovernorate}
-                        >
-                          <SelectTrigger className="w-full border-border focus:border-primary focus:ring-primary disabled:opacity-50">
-                            <SelectValue placeholder="A Random District" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableDistricts.map((district) => (
-                              <SelectItem key={district} value={district}>
-                                {district}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          onChange={(e) => setSelectedDistrict(e.target.value)}
+                          placeholder="Enter district name"
+                          className="w-full p-2 border border-border rounded-md focus:border-primary focus:ring-primary"
+                        />
                       </div>
                     </div>
 
@@ -294,12 +267,12 @@ export function LocationsAdminPage() {
                       </Button>
                       <Button
                         type="button"
-                        disabled={!isFormValid}
+                        disabled={!isFormValid || isSubmitting}
                         onClick={handleAdd}
                         variant="default"
                         className="bg-red-500 hover:bg-red-600 text-white px-4 lg:px-8 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Add
+                        {isSubmitting ? "Adding..." : "Add"}
                       </Button>
                     </div>
                   </div>

@@ -1,38 +1,15 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Location, locationsService } from "@/lib/api/locations";
+import { toast } from "sonner";
 import { COLORS } from "@/utils/constants";
 import { cn } from '@/utils';
 
-// Location data structure
-const locations = [
-  { governorate: 'Beirut', district: 'Achrafieh' },
-  { governorate: 'Beirut', district: 'Hamra' },
-  { governorate: 'Beirut', district: 'Verdun' },
-  { governorate: 'Mount Lebanon', district: 'Jounieh' },
-  { governorate: 'Mount Lebanon', district: 'Baabda' },
-  { governorate: 'Mount Lebanon', district: 'Metn' },
-  { governorate: 'North', district: 'Tripoli' },
-  { governorate: 'North', district: 'Koura' },
-  { governorate: 'North', district: 'Zgharta' },
-  { governorate: 'South', district: 'Sidon' },
-  { governorate: 'South', district: 'Tyre' },
-  { governorate: 'South', district: 'Nabatieh' },
-  { governorate: 'Bekaa', district: 'Zahle' },
-  { governorate: 'Bekaa', district: 'Baalbek' },
-  { governorate: 'Bekaa', district: 'Rachaya' },
-  { governorate: 'Nabatieh', district: 'Bint Jbeil' },
-  { governorate: 'Nabatieh', district: 'Marjeyoun' },
-  { governorate: 'Akkar', district: 'Halba' },
-  { governorate: 'Baalbek-Hermel', district: 'Hermel' },
-];
-
-// Get unique governorates
-const governorates = [...new Set(locations.map(loc => loc.governorate))];
 
 // Mock data constants
 const INITIAL_USER_DATA = {
@@ -97,13 +74,36 @@ export default function EditUserProfile({
   });
 
   const [imageFileName, setImageFileName] = useState<string>("");
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(true);
+
+  // Load locations from API
+  useEffect(() => {
+    const loadLocations = async () => {
+      try {
+        setLoadingLocations(true);
+        const locationsData = await locationsService.listLocations();
+        setLocations(locationsData);
+      } catch (err) {
+        console.error("Error loading locations:", err);
+        toast.error("Failed to load locations");
+      } finally {
+        setLoadingLocations(false);
+      }
+    };
+    
+    loadLocations();
+  }, []);
+
+  // Get unique governorates from locations
+  const governorates = [...new Set(locations.map((loc: Location) => loc.governorate))].sort();
 
   // Get districts for the selected governorate
   const getDistricts = () => {
     if (!formData.personalDetails.address.governorate) return [];
     return locations
-      .filter(loc => loc.governorate === formData.personalDetails.address.governorate)
-      .map(loc => loc.district);
+      .filter((loc: Location) => loc.governorate === formData.personalDetails.address.governorate)
+      .map((loc: Location) => loc.district);
   };
 
   const handleInputChange = (field: string, value: string) => {

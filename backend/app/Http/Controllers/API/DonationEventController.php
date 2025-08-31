@@ -252,7 +252,13 @@ class DonationEventController extends Controller
 
             if ($request->hasFile('image_urls')) {
                 foreach ($request->file('image_urls') as $image) {
-                    $path = $this->imageService->uploadImage($image, 'donation_events');
+                    $path = $this->imageService->uploadImage(
+                        $image,
+                        'donation_events',
+                        true,
+                        1200,
+                        85
+                    );
                     if ($path) {
                         $imagePaths[] = $path;
                     }

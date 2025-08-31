@@ -1,49 +1,29 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CheckCircle, AlertTriangle } from "lucide-react"
+import { CheckCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
 import { useModal } from "@/contexts/ModalContext"
-import { profileService } from "@/lib/api/profile"
+import { locationsService } from "@/lib/api/locations"
 import ProfileSidebar from "./Sidebar"
 import AccVerification from "./AccVerification"
+import { profileService, UpdateProfileData } from "@/lib/api/profile"
 
 interface UserProfileDashboardProps {
   onViewChange?: (view: 'profile' | 'notifications') => void
 }
 
-const locations = [
-  { governorate: 'Beirut', district: 'Achrafieh' },
-  { governorate: 'Beirut', district: 'Hamra' },
-  { governorate: 'Beirut', district: 'Verdun' },
-  { governorate: 'Mount Lebanon', district: 'Jounieh' },
-  { governorate: 'Mount Lebanon', district: 'Baabda' },
-  { governorate: 'Mount Lebanon', district: 'Metn' },
-  { governorate: 'North', district: 'Tripoli' },
-  { governorate: 'North', district: 'Koura' },
-  { governorate: 'North', district: 'Zgharta' },
-  { governorate: 'South', district: 'Sidon' },
-  { governorate: 'South', district: 'Tyre' },
-  { governorate: 'South', district: 'Nabatieh' },
-  { governorate: 'Bekaa', district: 'Zahle' },
-  { governorate: 'Bekaa', district: 'Baalbek' },
-  { governorate: 'Bekaa', district: 'Rachaya' },
-  { governorate: 'Nabatieh', district: 'Bint Jbeil' },
-  { governorate: 'Nabatieh', district: 'Marjeyoun' },
-  { governorate: 'Akkar', district: 'Halba' },
-  { governorate: 'Baalbek-Hermel', district: 'Hermel' },
-]
-
-const governorates = [...new Set(locations.map(loc => loc.governorate))]
-
 export default function UserProfileDashboard({ onViewChange }: UserProfileDashboardProps) {
-  const { user } = useAuthStore()
+  const { user, updateUser } = useAuthStore()
   const { openModal, modalType } = useModal()
   const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [locations, setLocations] = useState<{id: number, governorate: string, district: string}[]>([])
+  const [error, setError] = useState<string | null>(null)
   const [profileData, setProfileData] = useState({
     fullName: user ? `${user.first_name} ${user.last_name}` : "",
     phoneNumber: user?.phone || "",
@@ -68,34 +48,291 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     }
   }, [])
 
-  const getDistricts = () => {
-    if (!profileData.governorate) return []
-    return locations
+  // Districts are now handled by the districtsForSelectedGovernorate useMemo
+
+  // Get districts for selected governorate
+  const districtsForSelectedGovernorate = useMemo(() => {
+    if (!profileData.governorate || !locations.length) return []
+    return [...new Set(locations
       .filter(loc => loc.governorate === profileData.governorate)
-      .map(loc => loc.district)
-  }
+      .map(loc => loc.district))]
+  }, [profileData.governorate, locations])
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => {
+      let newData;
       if (field === 'governorate') {
-        return {
+        newData = {
           ...prev,
           governorate: value,
           district: ''
+        };
+      } else {
+        newData = {
+          ...prev,
+          [field]: value,
+        };
+      }
+      
+      // Save location data to localStorage when it changes (only in browser environment)
+      if ((field === 'governorate' || field === 'district') && typeof window !== 'undefined' && user?.id) {
+        // Create a user-specific key for localStorage
+        const userLocationKey = `userLocation_${user.id}`;
+        
+        // Only save to localStorage if we have valid data
+        if (field === 'governorate' && value !== '') {
+          const locationToSave = {
+            governorate: value,
+            district: ''
+          };
+          localStorage.setItem(userLocationKey, JSON.stringify(locationToSave));
+        } else if (field === 'district' && value !== '' && prev.governorate !== '') {
+          const locationToSave = {
+            governorate: prev.governorate,
+            district: value
+          };
+          localStorage.setItem(userLocationKey, JSON.stringify(locationToSave));
+        } else if (value === '') {
+          // If clearing a field, remove from localStorage to prevent defaults
+          localStorage.removeItem(userLocationKey);
         }
       }
-      return {
-        ...prev,
-        [field]: value,
-      }
-    })
+      
+      return newData;
+    });
   }
+  
+  // Get unique governorates from fetched locations
+  const governorates = useMemo(() => {
+    return [...new Set(locations.map(loc => loc.governorate))]
+  }, [locations])
 
-  const handleEdit = () => {
-    setIsEditing(!isEditing)
-    if (isEditing) {
-      console.log("Saving profile data:", profileData)
+  // Fetch locations on component mount and load saved location from localStorage
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const locationsData = await locationsService.listLocations()
+        // Use all locations from the backend without filtering
+        setLocations(locationsData)
+        
+        // Try to load location from localStorage first (only in browser environment)
+        let savedLocation: { governorate: string; district: string } | null = null;
+        if (typeof window !== 'undefined' && user?.id) {
+          // Create a user-specific key for localStorage
+          const userLocationKey = `userLocation_${user.id}`;
+          
+          try {
+            const savedLocationStr = localStorage.getItem(userLocationKey);
+            if (savedLocationStr) {
+              savedLocation = JSON.parse(savedLocationStr);
+              
+              // Validate that the saved location exists in our locations data
+              const isValidLocation = locationsData.some(
+                loc => loc.governorate === savedLocation?.governorate && loc.district === savedLocation?.district
+              );
+              
+              if (!isValidLocation) {
+                console.warn('Saved location not found in available locations, clearing localStorage');
+                localStorage.removeItem(userLocationKey);
+                savedLocation = null;
+              }
+            }
+          } catch (e) {
+            console.error("Error parsing saved location:", e);
+            localStorage.removeItem(userLocationKey);
+          }
+        }
+        
+        // Validate user location exists in our locations data
+        let userLocationValid = false;
+        if (user?.location) {
+          userLocationValid = locationsData.some(
+            loc => loc.governorate === user.location?.governorate && loc.district === user.location?.district
+          );
+        }
+        
+        // Check if default Beirut Achrafieh is being set incorrectly
+        const defaultBeirutAchrafieh = locationsData.find(
+          loc => loc.governorate === 'Beirut' && loc.district === 'Achrafieh'
+        );
+        
+        // Update profile data with location from: localStorage > valid user object > empty
+        // Explicitly avoid setting Beirut Achrafieh as default if no valid location is found
+        setProfileData(prev => {
+          // Only use saved location if it's valid
+          if (savedLocation) {
+            return {
+              ...prev,
+              governorate: savedLocation.governorate,
+              district: savedLocation.district
+            };
+          }
+          
+          // Only use user location if it's valid
+          if (userLocationValid && user?.location) {
+            return {
+              ...prev,
+              governorate: user.location.governorate,
+              district: user.location.district
+            };
+          }
+          
+          // If no valid location, use empty strings (not default Beirut Achrafieh)
+          return {
+            ...prev,
+            governorate: '',
+            district: ''
+          };
+        });
+      } catch (err) {
+        console.error("Error fetching locations:", err)
+      }
     }
+    
+    fetchLocations()
+    // Only depend on user to avoid infinite loops
+  }, [user])
+
+  const handleEdit = async () => {
+    if (isEditing) {
+      // Save profile data
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        // Find location ID based on governorate and district
+        let locationId = null
+        
+        // Only look for a location ID if both governorate and district are selected
+        if (profileData.governorate && profileData.district) {
+          const matchingLocation = locations.find(
+            loc => loc.governorate === profileData.governorate && loc.district === profileData.district
+          )
+          
+          if (matchingLocation) {
+            locationId = matchingLocation.id
+          } else {
+            console.warn('No matching location found for selected governorate and district')
+          }
+        }
+        
+        // Split full name into first and last name
+        const nameParts = profileData.fullName.trim().split(' ')
+        const firstName = nameParts[0] || ''
+        const lastName = nameParts.slice(1).join(' ') || ''
+        
+        // Update profile with location_id only if a valid location was selected
+        const profileUpdateData: UpdateProfileData = {
+          first_name: firstName,
+          last_name: lastName,
+          phone: profileData.phoneNumber || null,
+          email: profileData.email,
+        }
+        
+        // Handle location_id explicitly
+        if (locationId !== null) {
+          // Only include location_id if we have a valid one
+          profileUpdateData.location_id = locationId
+        } else if (profileData.governorate === '' && profileData.district === '') {
+          // If both governorate and district are empty, explicitly set location_id to null
+          // This ensures we're clearing any existing location
+          profileUpdateData.location_id = null
+        }
+        // If governorate/district are selected but no matching locationId was found,
+        // we don't include location_id at all to avoid changing the current location
+        
+        // Update profile
+        const updatedProfile = await profileService.updateProfile(profileUpdateData)
+        
+        // Log the response to help with debugging
+        console.log('Profile update response:', updatedProfile)
+        
+        // Update auth store with new user data
+         if (user) {
+           const updatedUser = {
+             ...user,
+             first_name: updatedProfile.first_name,
+             last_name: updatedProfile.last_name,
+             phone: updatedProfile.phone,
+             email: updatedProfile.email,
+             location: updatedProfile.location
+           }
+           
+           // Update the user in the auth store
+           updateUser(updatedUser)
+           
+           // Update the local state with the values from the API response
+           // If location was updated in the profile, use those values
+           // If location was not included in the update (null location_id), keep the current values
+           let updatedGovernorate = '';
+           let updatedDistrict = '';
+           
+           if (updatedProfile.location) {
+             // If API returned a location, use it
+             updatedGovernorate = updatedProfile.location.governorate;
+             updatedDistrict = updatedProfile.location.district;
+           } else if (profileData.governorate && profileData.district) {
+             // If we didn't update location but had valid values before, keep them
+             updatedGovernorate = profileData.governorate;
+             updatedDistrict = profileData.district;
+           }
+           
+           // Explicitly check for Beirut Achrafieh default and clear if not intentionally set
+           if (updatedGovernorate === 'Beirut' && updatedDistrict === 'Achrafieh') {
+             // Only keep Beirut Achrafieh if it was explicitly selected by the user
+             const wasExplicitlySelected = 
+               (profileData.governorate === 'Beirut' && profileData.district === 'Achrafieh') ||
+               (locationId && locations.some(loc => 
+                 loc.id === locationId && loc.governorate === 'Beirut' && loc.district === 'Achrafieh'
+               ));
+               
+             if (!wasExplicitlySelected) {
+               updatedGovernorate = '';
+               updatedDistrict = '';
+             }
+           }
+           
+           setProfileData({
+             fullName: `${updatedProfile.first_name} ${updatedProfile.last_name}`,
+             phoneNumber: updatedProfile.phone || "",
+             email: updatedProfile.email,
+             governorate: updatedGovernorate,
+             district: updatedDistrict
+           });
+           
+           // Save updated location to localStorage only if we have valid location data
+            if (typeof window !== 'undefined' && user?.id) {
+              // Create a user-specific key for localStorage
+              const userLocationKey = `userLocation_${user.id}`;
+              
+              if (updatedProfile.location) {
+                // If the API returned a location, save it
+                localStorage.setItem(userLocationKey, JSON.stringify({
+                  governorate: updatedGovernorate,
+                  district: updatedDistrict
+                }));
+              } else if (profileData.governorate && profileData.district) {
+                // If we're keeping the existing location data (not updating it), ensure localStorage matches
+                localStorage.setItem(userLocationKey, JSON.stringify({
+                  governorate: profileData.governorate,
+                  district: profileData.district
+                }));
+              } else {
+                // If no location data is available, clear localStorage to prevent defaults
+                localStorage.removeItem(userLocationKey);
+              }
+            }
+        }
+        
+        setIsLoading(false)
+      } catch (err: any) {
+        console.error("Error updating profile:", err)
+        setError(err.response?.data?.message || "Failed to update profile")
+        setIsLoading(false)
+      }
+    }
+    
+    setIsEditing(!isEditing)
   }
 
   const handleVerify = () => {
@@ -122,11 +359,23 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground">
               Welcome, {profileData.fullName.split(' ')[0]}
             </h1>
+            {error && (
+              <div className="text-red-500 text-sm flex items-center gap-1">
+                <AlertTriangle size={16} />
+                {error}
+              </div>
+            )}
             <Button
               onClick={handleEdit}
+              disabled={isLoading}
               className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto"
             >
-              {isEditing ? "Save" : "Edit"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : isEditing ? "Save" : "Edit"}
             </Button>
           </div>
 
@@ -218,7 +467,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                         <SelectValue placeholder={profileData.governorate ? "Select district" : "First select governorate"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {getDistricts().map((dist) => (
+                        {districtsForSelectedGovernorate.map((dist) => (
                           <SelectItem key={dist} value={dist}>
                             {dist}
                           </SelectItem>

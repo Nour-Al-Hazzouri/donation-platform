@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,8 +18,23 @@ export default function SignInPage() {
   const [passwordError, setPasswordError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { openModal, closeModal } = useModal()
-  const { login } = useAuthStore()
+  const { login, user } = useAuthStore()
   const router = useRouter()
+  
+  // Check if user is already authenticated and redirect if needed
+  useEffect(() => {
+    if (user) {
+      // User is already authenticated, close the modal
+      closeModal()
+      
+      // Redirect based on user role
+      if (user.isAdmin) {
+        router.push('/admin/dashboard')
+      } else {
+        router.push('/profile')
+      }
+    }
+  }, [user, closeModal, router])
 
   const togglePasswordVisibility = () => {
     setShowPassword(prev => !prev)

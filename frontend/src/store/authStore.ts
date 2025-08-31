@@ -267,6 +267,36 @@ export const useAuthStore = create<AuthState>()(
           return state;
         });
       },
+
+      updateUser: (userData) => {
+        set((state) => {
+          if (!state.user) return state;
+          
+          const updatedUser = {
+            ...state.user,
+            ...userData
+          };
+          
+          // Create the auth storage state object
+          const authState = { state: { user: updatedUser, isAuthenticated: true } };
+          
+          // Save in localStorage for client-side access
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('auth-storage', JSON.stringify(authState));
+          }
+          
+          // Save user in cookie for server-side middleware
+          Cookies.set('auth-storage', JSON.stringify(authState), {
+            path: '/',
+            expires: 7, // expires in 7 days
+            sameSite: 'strict',
+          });
+          
+          return {
+            user: updatedUser
+          };
+        });
+      },
       
       clearError: () => set({ error: null }),
     }),

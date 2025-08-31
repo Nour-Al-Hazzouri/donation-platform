@@ -214,10 +214,12 @@ class ImageService
         $urlPath = str_replace('\\', '/', $relativePath);
         return asset('storage/' . $urlPath);
 
+        $fullUrl = asset('storage/' . $urlPath);
+
         // For cloud storage, use the configured URL when needed
         // return $storage->url($normalizedPath);
         // $fullUrl = $storage->url($urlPath);
-        // \Log::info('Generated image URL (production): ' . $fullUrl . ' for path: ' . $urlPath);
-        // return $fullUrl;
+        \Log::info('Generated image URL (production): ' . $fullUrl . ' for path: ' . $urlPath);
+        return $fullUrl;
     }
 }
