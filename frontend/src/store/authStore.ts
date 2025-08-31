@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, PersistOptions } from 'zustand/middleware'
 import { authService } from '@/lib/api/auth'
+import { profileService, UpdateProfileData } from '@/lib/api/profile'
 import Cookies from 'js-cookie'
 
 type User = {
@@ -58,7 +59,7 @@ type AuthState = {
     password_confirmation: string;
   }) => Promise<{ message: string }>;
   updateVerification: (verified: boolean, verifiedAt?: string) => void;
-  updateUserProfile: (profileData: Partial<User>) => void;
+  updateUserProfile: (profileData: unknown) => void;
   deductBalance: (amount: number) => void;
   clearError: () => void;
 }
@@ -73,7 +74,7 @@ const persistOptions: PersistOptions<AuthState, Omit<AuthState, 'login' | 'regis
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       isAuthenticated: false,
       isLoading: false,
@@ -255,29 +256,41 @@ export const useAuthStore = create<AuthState>()(
           } : null
         })),
       
-      updateUserProfile: (profileData) => {
-        set((state) => {
-          if (!state.user) return state;
+      updateUserProfile: async (profileData) => {
+        try {
+          set({ isLoading: true, error: null });
           
-          const updatedUser = { ...state.user, ...profileData };
+          // Call the profile service to update the profile
+          const updatedProfile = await profileService.updateProfile(profileData as UpdateProfileData);
           
-          // Update localStorage
-          const authState = { state: { user: updatedUser, isAuthenticated: true } };
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('auth-storage', JSON.stringify(authState));
-          }
-          
-          // Update cookies
-          Cookies.set('auth-storage', JSON.stringify(authState), {
-            path: '/',
-            expires: 7,
-            sameSite: 'strict',
+          // Update the local state with the new profile data
+          set((state) => {
+            if (!state.user) return state;
+            
+            const updatedUser = { ...state.user, ...updatedProfile };
+            
+            // Update localStorage
+            const authState = { state: { user: updatedUser, isAuthenticated: true } };
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('auth-storage', JSON.stringify(authState));
+            }
+            
+            // Update cookies
+            Cookies.set('auth-storage', JSON.stringify(authState), {
+              path: '/',
+              expires: 7,
+              sameSite: 'strict',
+            });
+            
+            return { user: updatedUser, isLoading: false };
           });
           
-          return {
-            user: updatedUser,
-          };
-        });
+          return updatedProfile;
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || 'Failed to update profile';
+          set({ error: errorMessage, isLoading: false });
+          throw error;
+        }
       },
       
       deductBalance: (amount) => {
