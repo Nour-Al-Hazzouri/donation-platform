@@ -22,7 +22,16 @@ type User = {
     governorate: string;
     district: string;
   } | null;
-  balance?: number; // For backward compatibility
+  balance: number; // Made required for consistency
+  // Legacy fields for backward compatibility
+  name?: string;
+  verified?: boolean;
+  verifiedAt?: string;
+  profileImage?: string;
+  gender?: string;
+  phoneNumber?: string;
+  governorate?: string;
+  district?: string;
 }
 
 type AuthState = {
@@ -30,7 +39,7 @@ type AuthState = {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (emailOrUserData: string | Omit<User, 'balance'>, password?: string) => Promise<void>;
   register: (userData: {
     first_name: string;
     last_name: string;
@@ -50,7 +59,7 @@ type AuthState = {
   }) => Promise<{ message: string }>;
   updateVerification: (verified: boolean, verifiedAt?: string) => void;
   updateUserProfile: (profileData: Partial<User>) => void;
-  deductBalance: (amount: number) => void; // For backward compatibility
+  deductBalance: (amount: number) => void;
   clearError: () => void;
 }
 
@@ -70,7 +79,23 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
-      login: async (email: string, password: string) => {
+      login: async (emailOrUserData: string | Omit<User, 'balance'>, password?: string) => {
+        // Handle legacy login (direct user object) for backward compatibility
+        if (typeof emailOrUserData === 'object') {
+          const userData = emailOrUserData;
+          set({ 
+            user: { ...userData, balance: 10000 } as User,
+            isAuthenticated: true 
+          });
+          return;
+        }
+
+        // Handle new login with API
+        const email = emailOrUserData;
+        if (!password) {
+          throw new Error('Password is required for email login');
+        }
+
         set({ isLoading: true, error: null });
         try {
           const response = await authService.login({ email, password });
@@ -122,7 +147,7 @@ export const useAuthStore = create<AuthState>()(
           const user: User = {
             ...response.user,
             token: response.access_token,
-            balance: 10000, // For backward compatibility
+            balance: 10000, // Set initial balance
           };
           
           set({ 
@@ -224,6 +249,8 @@ export const useAuthStore = create<AuthState>()(
         set((state) => ({
           user: state.user ? { 
             ...state.user, 
+            verified, // Legacy field
+            verifiedAt, // Legacy field
             email_verified_at: verifiedAt || state.user.email_verified_at 
           } : null
         })),
@@ -255,13 +282,28 @@ export const useAuthStore = create<AuthState>()(
       
       deductBalance: (amount) => {
         set((state) => {
-          if (state.user && state.user.balance) {
+          if (state.user) {
             const newBalance = state.user.balance - amount;
+            const updatedUser = {
+              ...state.user,
+              balance: newBalance,
+            };
+
+            // Update localStorage and cookies
+            const authState = { state: { user: updatedUser, isAuthenticated: true } };
+            
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('auth-storage', JSON.stringify(authState));
+            }
+            
+            Cookies.set('auth-storage', JSON.stringify(authState), {
+              path: '/',
+              expires: 7,
+              sameSite: 'strict',
+            });
+
             return {
-              user: {
-                ...state.user,
-                balance: newBalance,
-              },
+              user: updatedUser,
             };
           }
           return state;

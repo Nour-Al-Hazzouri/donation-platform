@@ -1,4 +1,3 @@
-// src/store/donationsStore.ts
 'use client'
 
 import { create } from 'zustand'
@@ -37,20 +36,70 @@ interface DonationsState {
   isLoading: boolean
   error: string | null
 
-  // existing methods
+  // API-based methods (from new store)
   addDonation: (donation: Omit<DonationData, 'id'>) => Promise<void>
   getDonations: () => Promise<DonationData[]>
   getDonationById: (id: number) => Promise<DonationData | undefined>
   getUserDonations: (userId: number) => Promise<DonationData[]>
   getDonationRequests: () => Promise<DonationData[]>
   getDonationOffers: () => Promise<DonationData[]>
-  initializeDonations: (force?: boolean) => Promise<void>
+  initializeDonations: (initialDonationsOrForce?: DonationData[] | boolean) => Promise<void>
   createTransaction: (eventId: number, amount: number) => Promise<any>
   getTransaction: (transactionId: number) => Promise<any>
-
-  // NEW: replace or upsert a donation (after API updates like transaction create)
   replaceDonation: (event: DonationEvent) => void
+
+  // Legacy methods for backward compatibility
+  addDonationLegacy: (donation: Omit<DonationData, 'id'>) => void
+  getDonationsLegacy: () => DonationData[]
+  initializeDonationsLegacy: (initialDonations: DonationData[]) => void
 }
+
+// Initial mock data (from legacy store)
+export const initialDonationsData: DonationData[] = [
+  {
+    id: 1,
+    name: "Rahul Kadam",
+    title: "Offering help for cancer treatment",
+    description:
+      "I want to support families battling cancer. My donation will help cover treatment costs for those in need.",
+    imageUrl: "/cancer.jpg",
+    avatarUrl: "/admin.jpg",
+    initials: "RK",
+    isVerified: true,
+    donationAmount: "50000",
+    createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    goalAmount: 100000,
+    currentAmount: 50000
+  },
+  {
+    id: 2,
+    name: "Rahul Kadam",
+    title: "Funding for heart surgeries",
+    description:
+      "I'm committing funds to help cover heart surgeries for those who can't afford them.",
+    avatarUrl: "/placeholder.svg",
+    initials: "RK",
+    isVerified: true,
+    donationAmount: "75000",
+    createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    goalAmount: 150000,
+    currentAmount: 75000
+  },
+  {
+    id: 3,
+    name: "Rajesh Joy",
+    title: "Supporting lifelong medical care",
+    description:
+      "I'm establishing a fund to support individuals needing lifelong medical care.",
+    avatarUrl: "/placeholder.svg",
+    initials: "RJ",
+    isVerified: true,
+    donationAmount: "25000",
+    createdAt: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+    goalAmount: 50000,
+    currentAmount: 25000
+  }
+]
 
 // Helper function to convert API DonationEvent to DonationData
 const mapEventToDonationData = (event: DonationEvent | null): DonationData | undefined => {
@@ -112,8 +161,19 @@ export const useDonationsStore = create<DonationsState>()(
       isLoading: false,
       error: null,
 
-      // Initialize donations from API. `force=true` can be used to always fetch
-      initializeDonations: async (force = false): Promise<void> => {
+      // API-based methods (from new store)
+      initializeDonations: async (initialDonationsOrForce?: DonationData[] | boolean): Promise<void> => {
+        // Handle legacy usage with initial donations array
+        if (Array.isArray(initialDonationsOrForce)) {
+          const currentDonations = get().donations
+          if (currentDonations.length === 0) {
+            set({ donations: initialDonationsOrForce })
+          }
+          return
+        }
+
+        // Handle new API-based initialization
+        const force = initialDonationsOrForce === true
         set({ isLoading: true, error: null })
         try {
           // Always fetch fresh data from API (force param reserved for future logic)
@@ -127,8 +187,13 @@ export const useDonationsStore = create<DonationsState>()(
           return
         } catch (error: any) {
           console.error('Error initializing donations:', error)
+          // Fall back to initial mock data if API fails
+          const currentDonations = get().donations
+          if (currentDonations.length === 0) {
+            set({ donations: initialDonationsData })
+          }
           set({
-            error: error?.response?.data?.message || 'Failed to load donations',
+            error: error?.response?.data?.message || 'Failed to load donations, using cached data',
             isLoading: false
           })
           return
@@ -166,17 +231,30 @@ export const useDonationsStore = create<DonationsState>()(
           const eventPayload = response?.data ?? response
           const mappedDonation = mapEventToDonationData(eventPayload)
 
-          const currentDonations = get().donations
-          set({
-            isLoading: false
-          })
+          if (mappedDonation) {
+            const currentDonations = get().donations
+            set({
+              donations: [mappedDonation, ...currentDonations],
+              isLoading: false
+            })
+          }
         } catch (error: any) {
           console.error('Error adding donation:', error)
-          set({
-            error: error?.response?.data?.message || 'Failed to add donation',
+          // Fall back to legacy behavior if API fails
+          const currentDonations = get().donations
+          const newId = Math.max(...currentDonations.map((d) => d.id), 0) + 1
+
+          const donationWithId: DonationData = {
+            ...newDonation,
+            id: newId,
+            createdAt: new Date().toISOString()
+          }
+
+          set({ 
+            donations: [donationWithId, ...currentDonations],
+            error: error?.response?.data?.message || 'Failed to add donation via API, added locally',
             isLoading: false
           })
-          throw error
         }
       },
 
@@ -197,7 +275,7 @@ export const useDonationsStore = create<DonationsState>()(
             error: error?.response?.data?.message || 'Failed to load donations',
             isLoading: false
           })
-          return []
+          return get().donations // Return cached donations
         }
       },
 
@@ -216,6 +294,7 @@ export const useDonationsStore = create<DonationsState>()(
           }
           const payload = response?.data ?? response
           const mappedDonation = mapEventToDonationData(payload)
+          set({ isLoading: false })
           return mappedDonation
         } catch (error: any) {
           console.error(`Error getting donation with ID ${id}:`, error)
@@ -224,8 +303,6 @@ export const useDonationsStore = create<DonationsState>()(
             isLoading: false
           })
           return undefined
-        } finally {
-          set({ isLoading: false })
         }
       },
 
@@ -324,7 +401,7 @@ export const useDonationsStore = create<DonationsState>()(
         }
       },
 
-      // NEW: Replace or upsert a donation using the API DonationEvent object
+      // Replace or upsert a donation using the API DonationEvent object
       replaceDonation: (event: DonationEvent) => {
         try {
           const mapped = mapEventToDonationData(event)
@@ -348,10 +425,36 @@ export const useDonationsStore = create<DonationsState>()(
         } catch (e) {
           console.warn('replaceDonation failed:', e)
         }
+      },
+
+      // Legacy methods for backward compatibility
+      addDonationLegacy: (newDonation) => {
+        const currentDonations = get().donations
+        const newId = Math.max(...currentDonations.map((d) => d.id), 0) + 1
+
+        const donationWithId: DonationData = {
+          ...newDonation,
+          id: newId,
+          createdAt: new Date().toISOString()
+        }
+
+        set({ donations: [donationWithId, ...currentDonations] })
+      },
+
+      getDonationsLegacy: () => {
+        return get().donations
+      },
+
+      initializeDonationsLegacy: (initialDonations) => {
+        const currentDonations = get().donations
+        if (currentDonations.length === 0) {
+          set({ donations: initialDonations })
+        }
       }
     }),
     {
-      name: 'donations-storage'
+      name: 'donations-storage',
+      partialize: (state) => ({ donations: state.donations })
     }
   )
 )

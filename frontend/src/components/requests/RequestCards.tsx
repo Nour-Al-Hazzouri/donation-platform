@@ -1,6 +1,6 @@
 import { RequestCard } from "./RequestCard"
 import { type RequestData } from "@/store/requestsStore"
-import { initialRequestsData } from "@/store/requestsStore"
+import { initialDonationsData } from "@/store/donationsStore"
 
 interface RequestCardsProps {
   requests: RequestData[]
@@ -44,4 +44,4 @@ export function RequestCards({ requests, searchTerm }: RequestCardsProps) {
 
 // Export the RequestData type and initial data for backward compatibility
 export type { RequestData }
-export { initialRequestsData as requestsData }
+export { initialDonationsData as requestsData }
