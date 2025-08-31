@@ -17,7 +17,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useTheme } from "next-themes"
-import { profileService } from "@/lib/api/profile"
 import { toast } from "sonner"
 
 interface SidebarProps {
@@ -115,14 +114,8 @@ export default function ProfileSidebar({
     
     try {
       console.log('Starting avatar upload...')
-      const updatedUser = await profileService.updateProfile({ avatar_url: file })
+      const updatedUser = await updateUserProfile({ avatar_url: file })
       console.log('Upload response:', updatedUser)
-      
-      // Update the auth store with the new user data
-      updateUserProfile({
-        avatar_url: updatedUser.avatar_url,
-        avatar_url_full: updatedUser.avatar_url_full
-      })
       
       // Keep the preview URL permanently - don't switch to server URL
       console.log('Upload successful, keeping preview image permanently')
@@ -157,13 +150,7 @@ export default function ProfileSidebar({
 
     setIsUploadingAvatar(true)
     try {
-      const updatedUser = await profileService.updateProfile({ delete_avatar: true })
-      
-      // Update the auth store with the new user data
-      updateUserProfile({
-        avatar_url: null,
-        avatar_url_full: null
-      })
+      await updateUserProfile({ delete_avatar: true })
       
       // Clear local avatar URL
       setCurrentAvatarUrl(undefined)
@@ -239,7 +226,7 @@ export default function ProfileSidebar({
                     </div>
                     
                     {/* Avatar Upload Overlay */}
-                    <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                       {isUploadingAvatar ? (
                         <Loader2 className="h-6 w-6 text-white animate-spin" />
                       ) : (

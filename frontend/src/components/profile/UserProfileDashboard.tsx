@@ -18,7 +18,7 @@ interface UserProfileDashboardProps {
 }
 
 export default function UserProfileDashboard({ onViewChange }: UserProfileDashboardProps) {
-  const { user, updateUser } = useAuthStore()
+  const { user, updateUserProfile } = useAuthStore()
   const { openModal, modalType } = useModal()
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -259,7 +259,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
            }
            
            // Update the user in the auth store
-           updateUser(updatedUser)
+           updateUserProfile(updatedUser)
            
            // Update the local state with the values from the API response
            // If location was updated in the profile, use those values
