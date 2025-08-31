@@ -196,9 +196,13 @@ class UserController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
+        \Log::info('Updating profile for user: ' . $user->id);
+        \Log::info('Request data: ' . json_encode($request->all()));
+        \Log::info('Avatar URL: ' . $request->file('avatar_url'));
+        \Log::info('Delete avatar: ' . $request->delete_avatar);
         if ($request->hasFile('avatar_url')) {
             \Log::info('Processing avatar upload for user: ' . $user->id);
-            
+
             // Delete old avatar if it exists
             if ($user->avatar_url) {
                 \Log::info('Deleting old avatar: ' . $user->avatar_url);
@@ -220,6 +224,7 @@ class UserController extends Controller
 
         // Handle avatar deletion
         if ($request->has('delete_avatar') && $request->delete_avatar) {
+            \Log::info('Deleting avatar for user: ' . $user->id);
             // Delete old avatar if it exists
             if ($user->avatar_url) {
                 $this->imageService->deleteImage($user->avatar_url);
