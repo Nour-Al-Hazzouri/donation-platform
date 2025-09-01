@@ -8,6 +8,7 @@ use App\Models\DonationEvent;
 use App\Observers\DonationTransactionObserver;
 use App\Observers\DonationEventObserver;
 use App\Services\NotificationService;
+use App\Services\ImageService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(NotificationService::class, function () {
             return new NotificationService();
+        });
+        $this->app->singleton(ImageService::class, function () {
+            return new ImageService();
         });
     }
 
