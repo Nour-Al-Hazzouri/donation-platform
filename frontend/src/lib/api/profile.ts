@@ -1,4 +1,5 @@
 // C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\lib\api\profile.ts
+import axios from 'axios';
 import { authApi } from './auth';
 
 export interface UpdateProfileData {
@@ -51,14 +52,22 @@ const profileService = {
     }
     if (data.avatar_url) formData.append('avatar_url', data.avatar_url);
     if (data.delete_avatar) formData.append('delete_avatar', 'true');
+    else formData.append('delete_avatar', 'false');
 
-    console.log("updating profile...")    
-    const response = await authApi.put('/user/profile', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    // Log form data contents for debugging
+    console.log('Form data contents:');
+    for (const [key, value] of formData.entries()) {
+      console.log(key, value instanceof File ? `File: ${value.name} (${value.type}, ${value.size} bytes)` : value);
+    }
+    
+    const response = await authApi.post(`/user/profile`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            'X-HTTP-Method-Override': 'PATCH',
+        },
     });
-    console.log("updated profile:", response.data.data)
+    
+    console.log('Profile update response:', response);
     return response.data.data;
   },
 };

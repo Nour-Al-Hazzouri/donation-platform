@@ -249,18 +249,6 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         
         // Update auth store with new user data
          if (user) {
-           const updatedUser = {
-             ...user,
-             first_name: updatedProfile.first_name,
-             last_name: updatedProfile.last_name,
-             phone: updatedProfile.phone,
-             email: updatedProfile.email,
-             location: updatedProfile.location
-           }
-           
-           // Update the user in the auth store
-           updateUserProfile(updatedUser)
-           
            // Update the local state with the values from the API response
            // If location was updated in the profile, use those values
            // If location was not included in the update (null location_id), keep the current values

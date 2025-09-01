@@ -132,7 +132,7 @@ class UserController extends Controller
             $validated['avatar_url'] = $avatarPath;
         }
 
-        if ($request->has('delete_avatar') && $request->delete_avatar) {
+        if ($request->has('delete_avatar') && $request->delete_avatar === 'true') {
             // Delete old avatar if it exists
             if ($user->avatar_url) {
                 $this->imageService->deleteImage($user->avatar_url);
@@ -144,7 +144,7 @@ class UserController extends Controller
         $user->refresh();
 
         return response()->json([
-            'data' => new UserResource($user),
+            'data' => new UserResource($user->load('location')),
             'message' => 'User updated successfully',
         ], Response::HTTP_OK);
     }
@@ -196,10 +196,6 @@ class UserController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        \Log::info('Updating profile for user: ' . $user->id);
-        \Log::info('Request data: ' . json_encode($request->all()));
-        \Log::info('Avatar URL: ' . $request->file('avatar_url'));
-        \Log::info('Delete avatar: ' . $request->delete_avatar);
         if ($request->hasFile('avatar_url')) {
             \Log::info('Processing avatar upload for user: ' . $user->id);
 
@@ -223,7 +219,7 @@ class UserController extends Controller
         }
 
         // Handle avatar deletion
-        if ($request->has('delete_avatar') && $request->delete_avatar) {
+        if ($request->has('delete_avatar') && $request->delete_avatar === 'true') {
             \Log::info('Deleting avatar for user: ' . $user->id);
             // Delete old avatar if it exists
             if ($user->avatar_url) {

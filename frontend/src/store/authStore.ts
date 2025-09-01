@@ -59,7 +59,7 @@ type AuthState = {
     password_confirmation: string;
   }) => Promise<{ message: string }>;
   updateVerification: (verified: boolean, verifiedAt?: string) => void;
-  updateUserProfile: (profileData: unknown) => void;
+  updateUserProfile: (profileData: UpdateProfileData) => unknown;
   deductBalance: (amount: number) => void;
   clearError: () => void;
 }
@@ -256,12 +256,11 @@ export const useAuthStore = create<AuthState>()(
           } : null
         })),
       
-      updateUserProfile: async (profileData) => {
+      updateUserProfile: async (profileData: UpdateProfileData) => {
         try {
           set({ isLoading: true, error: null });
-          
           // Call the profile service to update the profile
-          const updatedProfile = await profileService.updateProfile(profileData as UpdateProfileData);
+          const updatedProfile = await profileService.updateProfile(profileData);
           
           // Update the local state with the new profile data
           set((state) => {
