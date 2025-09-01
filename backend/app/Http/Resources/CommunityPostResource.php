@@ -42,6 +42,7 @@ class CommunityPostResource extends JsonResource
                     'last_name' => $this->user->last_name,
                     'avatar_url' => $this->user->avatar_url ?? null,
                     'avatar_url_full' => $this->user->avatar_url_full ?? null,
+                    'verified' => $this->user->is_verified,
                 ];
             }),
             'event' => $this->whenLoaded('event', function () {
