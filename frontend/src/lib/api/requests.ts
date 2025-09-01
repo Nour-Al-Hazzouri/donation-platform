@@ -18,6 +18,7 @@ export interface RequestEvent {
     first_name: string;
     last_name: string;
     avatar_url: string | null;
+    avatar_url_full: string | null;
   };
   location: {
     id: number;
