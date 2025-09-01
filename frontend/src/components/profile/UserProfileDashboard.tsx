@@ -45,6 +45,15 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   // Effect to update profile and original data when user changes
   useEffect(() => {
     if (user) {
+      // Clear any existing profile data first to prevent stale data
+      setProfileData({
+        fullName: "",
+        phoneNumber: "",
+        email: "",
+        governorate: "",
+        district: ""
+      });
+      
       // Check for backup in session storage first
       let newProfileData;
       
@@ -52,8 +61,15 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         const backupData = sessionStorage.getItem('profile-data-backup');
         if (backupData) {
           try {
-            newProfileData = JSON.parse(backupData);
-            console.log('Loaded profile data from session backup');
+            const parsedData = JSON.parse(backupData);
+            // Only use backup data if it's for the current user (check email)
+            if (parsedData.email === user.email) {
+              newProfileData = parsedData;
+              console.log('Loaded profile data from session backup');
+            } else {
+              // If backup data is for a different user, remove it
+              sessionStorage.removeItem('profile-data-backup');
+            }
           } catch (e) {
             console.error('Error parsing backup profile data:', e);
             sessionStorage.removeItem('profile-data-backup');
@@ -82,12 +98,14 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         sessionStorage.setItem('profile-data-backup', JSON.stringify(newProfileData));
       }
     }
-  }, [user])
+  }, [user?.id]) // Use user.id instead of user to ensure the effect runs when the user changes
 
   const handleProfileUpdate = useCallback(async () => {
     // Refresh user profile data after avatar update
     try {
       const updatedProfile = await profileService.getProfile()
+      
+      // Update local profile data
       setProfileData({
         fullName: `${updatedProfile.first_name} ${updatedProfile.last_name}`,
         phoneNumber: updatedProfile.phone || "",
@@ -95,6 +113,14 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         governorate: updatedProfile.location?.governorate || "",
         district: updatedProfile.location?.district || "",
       })
+      
+      // Also update the user in the auth store to ensure avatar URLs are updated
+      if (updatedProfile) {
+        updateUserProfile({
+          // Empty update to trigger a refresh of the user state
+          // The actual profile data will come from the API response
+        })
+      }
     } catch (error) {
       console.error('Error refreshing profile data:', error)
     }
@@ -271,8 +297,8 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     }
     
     fetchLocations()
-    // Only depend on user to avoid infinite loops
-  }, [user])
+    // Use user.id instead of user to ensure the effect runs when the user changes
+  }, [user?.id])
 
   const handleCancel = () => {
     // Revert to original data

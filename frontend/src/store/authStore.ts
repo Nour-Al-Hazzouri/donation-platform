@@ -115,13 +115,28 @@ const persistOptions: PersistOptions<AuthState, Omit<AuthState, 'login' | 'regis
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
 
       login: async (emailOrUserData: string | Omit<User, 'balance'>, password?: string) => {
+        // Clear any existing profile data from previous sessions
+        if (typeof window !== 'undefined') {
+          // Clear profile-related sessionStorage items
+          sessionStorage.removeItem('profile-data-backup');
+          sessionStorage.removeItem('profile-data-before-save');
+          sessionStorage.removeItem('current-user-session');
+          
+          // Clear any potential user-specific localStorage items
+          Object.keys(localStorage).forEach(key => {
+            if (key.includes('userLocation_') || key.includes('user_location_')) {
+              localStorage.removeItem(key);
+            }
+          });
+        }
+        
         // Handle legacy login (direct user object) for backward compatibility
         if (typeof emailOrUserData === 'object') {
           const userData = emailOrUserData;
@@ -201,11 +216,32 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         set({ isLoading: true, error: null });
         try {
+          // Get the current user ID before clearing state
+          const userId = get().user?.id;
+          
           await authService.logout();
           set({ user: null, isAuthenticated: false, isLoading: false });
           
-          // The persist middleware will handle clearing storage
-          // No need for manual localStorage or Cookies operations here
+          // The persist middleware will handle clearing auth-storage
+          // But we need to manually clear other user-specific data
+          if (typeof window !== 'undefined' && userId) {
+            // Clear profile-related sessionStorage items
+            sessionStorage.removeItem('profile-data-backup');
+            sessionStorage.removeItem('profile-data-before-save');
+            sessionStorage.removeItem('current-user-session');
+            
+            // Clear user-specific localStorage items
+            localStorage.removeItem(`userLocation_${userId}`);
+            localStorage.removeItem(`user_location_${userId}`);
+            
+            // Clear any other potential user-specific items
+            // Scan localStorage for keys containing the user ID
+            Object.keys(localStorage).forEach(key => {
+              if (key.includes(userId.toString())) {
+                localStorage.removeItem(key);
+              }
+            });
+          }
         } catch (error: any) {
           console.error('Logout error:', error);
           // Even if the API call fails, we should still clear the local state
@@ -216,8 +252,21 @@ export const useAuthStore = create<AuthState>()(
             error: error.response?.data?.message || 'Failed to logout properly.'
           });
           
-          // The persist middleware will handle clearing storage even on error
-          // No need for manual localStorage or Cookies operations here
+          // Clear all user-specific data even on error
+          if (typeof window !== 'undefined') {
+            // Clear profile-related sessionStorage items
+            sessionStorage.removeItem('profile-data-backup');
+            sessionStorage.removeItem('profile-data-before-save');
+            sessionStorage.removeItem('current-user-session');
+            
+            // Clear any potential user-specific localStorage items
+            // Since we don't have the user ID, we'll clear all profile-related items
+            Object.keys(localStorage).forEach(key => {
+              if (key.includes('userLocation_') || key.includes('user_location_')) {
+                localStorage.removeItem(key);
+              }
+            });
+          }
         }
       },
       
@@ -279,7 +328,9 @@ export const useAuthStore = create<AuthState>()(
                 last_name: updatedProfile.last_name || state.user.last_name,
                 email: updatedProfile.email || state.user.email,
                 phone: updatedProfile.phone || state.user.phone,
-                location: updatedProfile.location || state.user.location
+                location: updatedProfile.location || state.user.location,
+                avatar_url: updatedProfile.avatar_url,
+                avatar_url_full: updatedProfile.avatar_url_full
                 // Explicit fields to ensure they're properly updated
               };
               

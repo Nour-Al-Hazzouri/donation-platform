@@ -53,23 +53,28 @@ export default function ProfileSidebar({
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
-  // Set initial avatar URL only on first load (not during uploads)
+  // Update avatar URL when user changes or when profileImage prop changes
   useEffect(() => {
-    if (user && !currentAvatarUrl && !isUploadingAvatar) {
-      console.log('Initial avatar URL setup:', {
+    if (user && !isUploadingAvatar) {
+      console.log('Avatar URL update check:', {
         avatar_url_full: user?.avatar_url_full,
         avatar_url: user?.avatar_url,
-        profileImage
+        profileImage,
+        currentAvatarUrl
       })
       
-      // Only set on initial load, don't override during uploads
       const newAvatarUrl = user?.avatar_url_full || user?.avatar_url || profileImage
-      if (newAvatarUrl) {
-        console.log('Setting initial avatar URL to:', newAvatarUrl)
+      
+      // Update if we have a new URL that's different from current
+      if (newAvatarUrl && newAvatarUrl !== currentAvatarUrl) {
+        console.log('Setting avatar URL to:', newAvatarUrl)
         setCurrentAvatarUrl(newAvatarUrl)
+      } else if (!newAvatarUrl && currentAvatarUrl) {
+        // Clear avatar URL if user no longer has one
+        setCurrentAvatarUrl(undefined)
       }
     }
-  }, [user]) // Only depend on user, not avatar URLs
+  }, [user, profileImage, currentAvatarUrl]) // Update when user, profileImage, or currentAvatarUrl changes
 
   const handleLogout = () => {
     logout()
@@ -117,10 +122,14 @@ export default function ProfileSidebar({
       const updatedUser = await updateUserProfile({ avatar_url: file })
       console.log('Upload response:', updatedUser)
       
-      // Keep the preview URL permanently - don't switch to server URL
-      console.log('Upload successful, keeping preview image permanently')
-      // Don't revoke the preview URL or switch to server URL
-      // The preview image will stay visible forever
+      // Revoke the preview URL to prevent memory leaks
+      URL.revokeObjectURL(previewUrl)
+      
+      // Update to the server URL after successful upload
+      if (updatedUser && typeof updatedUser === 'object' && 'avatar_url_full' in updatedUser) {
+        console.log('Upload successful, updating to server URL:', updatedUser.avatar_url_full)
+        setCurrentAvatarUrl(updatedUser.avatar_url_full as string | undefined)
+      }
       
       toast.success('Profile picture updated successfully!')
       
