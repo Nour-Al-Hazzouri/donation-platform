@@ -39,10 +39,13 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <div className="relative">
             <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-              <AvatarImage src={donation.avatarUrl || undefined} alt={donation.name} />
-              <AvatarFallback className="bg-red-500 text-white text-xs sm:text-sm">
-                {donation.initials}
-              </AvatarFallback>
+                {donation.avatarUrl ? (
+                    <AvatarImage src={donation.avatarUrl || undefined} alt={donation.name} />
+                ) : (
+                    <AvatarFallback className="bg-red-500 text-white text-xs sm:text-sm">
+                        {donation.initials}
+                    </AvatarFallback>
+                )}
             </Avatar>
           </div>
           <span className="text-foreground font-medium text-sm sm:text-base">{donation.name}</span>

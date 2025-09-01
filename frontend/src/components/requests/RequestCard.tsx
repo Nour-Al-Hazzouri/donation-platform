@@ -66,8 +66,11 @@ export function RequestCard({
         <div className="flex items-center mb-4 gap-4">
           <div className="relative">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={name} />
-              <AvatarFallback>{initials}</AvatarFallback>
+              {avatarUrl? (
+                  <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={name} />
+              ) : (
+                  <AvatarFallback>{initials}</AvatarFallback>
+              )}
             </Avatar>
             {isVerified && (
               <div className="absolute -top-1 -right-1">

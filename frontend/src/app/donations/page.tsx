@@ -38,7 +38,7 @@ function mapEventToDonationData(event: any): DonationData {
     title: event.title,
     description: event.description,
     imageUrl: event.image_full_urls?.[0] || undefined,
-    avatarUrl: event.user?.avatar_url || undefined,
+    avatarUrl: event.user?.avatar_url_full || event.user?.avatar_url || undefined,
     initials: (event.user?.first_name?.[0] ?? '?') + (event.user?.last_name?.[0] ?? '?'),
     isVerified: true,
     createdAt: event.created_at,

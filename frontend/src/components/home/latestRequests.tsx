@@ -53,10 +53,13 @@ const RequestCard: React.FC<{ request: RequestItem }> = ({ request }) => {
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <div className="relative">
             <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-              <AvatarImage src={request.avatarUrl || undefined} alt={request.name} />
-              <AvatarFallback className="bg-red-500 text-white text-xs sm:text-sm">
-                {request.initials}
-              </AvatarFallback>
+              {request.avatarUrl ? (
+                <AvatarImage src={request.avatarUrl || undefined} alt={request.name} />
+              ) : (
+                <AvatarFallback className="bg-red-500 text-white text-xs sm:text-sm">
+                  {request.initials}
+                </AvatarFallback>
+              )}
             </Avatar>
             {request.isVerified && (
               <div className="absolute -top-1 -right-1">
