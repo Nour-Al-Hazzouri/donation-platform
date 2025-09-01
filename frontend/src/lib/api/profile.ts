@@ -11,6 +11,12 @@ export interface UpdateProfileData {
   location_id?: number | null;
   avatar_url?: File | null;
   delete_avatar?: boolean;
+  // Added location property to support direct location updates
+  location?: {
+    id: number;
+    governorate: string;
+    district: string;
+  } | null;
 }
 
 export interface UserProfile {

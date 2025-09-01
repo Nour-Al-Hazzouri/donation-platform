@@ -54,12 +54,48 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         district: ""
       });
       
-      // Check for backup in session storage first
+      // First try to load location from localStorage (user-specific)
+      let savedLocation: { governorate: string; district: string } | null = null;
+      if (typeof window !== 'undefined' && user?.id) {
+        // Create a user-specific key for localStorage
+        const userLocationKey = `userLocation_${user.id}`;
+        // Also check legacy key format for backward compatibility
+        const legacyLocationKey = `user_location_${user.id}`;
+        
+        try {
+          const savedLocationStr = localStorage.getItem(userLocationKey) || localStorage.getItem(legacyLocationKey);
+          if (savedLocationStr) {
+            savedLocation = JSON.parse(savedLocationStr);
+            console.log('Loaded location from localStorage:', savedLocation);
+          }
+        } catch (e) {
+          console.error("Error parsing saved location:", e);
+          localStorage.removeItem(userLocationKey);
+        }
+      }
+      
+      // Check for backup in session storage
       let newProfileData;
       
       if (typeof window !== 'undefined') {
         const backupData = sessionStorage.getItem('profile-data-backup');
-        if (backupData) {
+        const preSaveData = sessionStorage.getItem('profile-data-before-save');
+        
+        if (preSaveData) {
+          // If we have pre-save data, it means the last save operation didn't complete
+          try {
+            const parsedData = JSON.parse(preSaveData);
+            if (parsedData.email === user.email) {
+              newProfileData = parsedData;
+              console.log('Restored profile data from pre-save backup');
+            } else {
+              sessionStorage.removeItem('profile-data-before-save');
+            }
+          } catch (e) {
+            console.error('Error parsing pre-save profile data:', e);
+            sessionStorage.removeItem('profile-data-before-save');
+          }
+        } else if (backupData) {
           try {
             const parsedData = JSON.parse(backupData);
             // Only use backup data if it's for the current user (check email)
@@ -83,9 +119,14 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
           fullName: `${user.first_name} ${user.last_name}`,
           phoneNumber: user.phone || "",
           email: user.email || "",
-          governorate: user?.location?.governorate || "",
-          district: user?.location?.district || "",
+          // Prioritize saved location from localStorage over user object data
+          governorate: savedLocation?.governorate || user?.location?.governorate || "",
+          district: savedLocation?.district || user?.location?.district || "",
         };
+      } else if (savedLocation) {
+        // If we have backup data but also have saved location, prioritize the saved location
+        newProfileData.governorate = savedLocation.governorate;
+        newProfileData.district = savedLocation.district;
       }
       
       setProfileData(newProfileData);
@@ -227,9 +268,11 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         if (typeof window !== 'undefined' && user?.id) {
           // Create a user-specific key for localStorage
           const userLocationKey = `userLocation_${user.id}`;
+          // Also check legacy key format for backward compatibility
+          const legacyLocationKey = `user_location_${user.id}`;
           
           try {
-            const savedLocationStr = localStorage.getItem(userLocationKey);
+            const savedLocationStr = localStorage.getItem(userLocationKey) || localStorage.getItem(legacyLocationKey);
             if (savedLocationStr) {
               savedLocation = JSON.parse(savedLocationStr);
               
@@ -241,12 +284,22 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
               if (!isValidLocation) {
                 console.warn('Saved location not found in available locations, clearing localStorage');
                 localStorage.removeItem(userLocationKey);
+                localStorage.removeItem(legacyLocationKey);
                 savedLocation = null;
+              } else {
+                console.log('Loaded location from localStorage:', savedLocation);
+                // If using legacy key, migrate to new format
+                if (localStorage.getItem(legacyLocationKey) && !localStorage.getItem(userLocationKey)) {
+                  localStorage.setItem(userLocationKey, savedLocationStr);
+                  localStorage.removeItem(legacyLocationKey);
+                  console.log('Migrated location from legacy storage format');
+                }
               }
             }
           } catch (e) {
             console.error("Error parsing saved location:", e);
             localStorage.removeItem(userLocationKey);
+            localStorage.removeItem(legacyLocationKey);
           }
         }
         
@@ -425,42 +478,49 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
              sessionStorage.removeItem('profile-data-before-save');
            }
            
-           // Save location data to localStorage for persistence
-           if (updatedGovernorate && updatedDistrict) {
-             localStorage.setItem(`user_location_${user.id}`, JSON.stringify({
-               governorate: updatedGovernorate,
-               district: updatedDistrict
-             }));
+           // Always save location data to localStorage for persistence, even if empty
+           // This ensures we're always using the most recent user selection
+           if (typeof window !== 'undefined' && user?.id) {
+             const userLocationKey = `userLocation_${user.id}`;
+             
+             if (updatedGovernorate && updatedDistrict) {
+               // Save non-empty location data
+               localStorage.setItem(userLocationKey, JSON.stringify({
+                 governorate: updatedGovernorate,
+                 district: updatedDistrict
+               }));
+               console.log('Saved location to localStorage:', { governorate: updatedGovernorate, district: updatedDistrict });
+             } else {
+               // If location was explicitly cleared, remove from localStorage
+               localStorage.removeItem(userLocationKey);
+               console.log('Cleared location from localStorage');
+             }
            }
+           
+           // Also update the auth store with the location data
+           // This ensures the location data is properly saved in the auth store
+           // and will be available on subsequent logins
+           updateUserProfile({
+             // We don't need to include other fields as they're already updated
+             // by the profileService.updateProfile call above
+             // Just ensure the location is properly updated in the auth store
+             location_id: locationId,
+             // Pass the location data directly to ensure it's properly saved
+             // This is a backup in case the backend doesn't return the location
+             ...(updatedProfile.location ? {} : {
+               location: updatedGovernorate && updatedDistrict ? {
+                 id: locationId || 0,
+                 governorate: updatedGovernorate,
+                 district: updatedDistrict
+               } : null
+             })
+           });
            
            // Show success message
            toast({
              title: "Profile updated",
              description: "Your profile has been updated successfully.",
            });
-           
-           // Save updated location to localStorage only if we have valid location data
-            if (typeof window !== 'undefined' && user?.id) {
-              // Create a user-specific key for localStorage
-              const userLocationKey = `userLocation_${user.id}`;
-              
-              if (updatedProfile.location) {
-                // If the API returned a location, save it
-                localStorage.setItem(userLocationKey, JSON.stringify({
-                  governorate: updatedGovernorate,
-                  district: updatedDistrict
-                }));
-              } else if (profileData.governorate && profileData.district) {
-                // If we're keeping the existing location data (not updating it), ensure localStorage matches
-                localStorage.setItem(userLocationKey, JSON.stringify({
-                  governorate: profileData.governorate,
-                  district: profileData.district
-                }));
-              } else {
-                // If no location data is available, clear localStorage to prevent defaults
-                localStorage.removeItem(userLocationKey);
-              }
-            }
         }
         
         setIsLoading(false)

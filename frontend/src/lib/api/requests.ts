@@ -19,6 +19,7 @@ export interface RequestEvent {
     last_name: string;
     avatar_url: string | null;
     avatar_url_full: string | null;
+    is_verified?: boolean;
   };
   location: {
     id: number;

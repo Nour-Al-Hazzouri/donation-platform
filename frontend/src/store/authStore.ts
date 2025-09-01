@@ -122,19 +122,16 @@ export const useAuthStore = create<AuthState>()(
       error: null,
 
       login: async (emailOrUserData: string | Omit<User, 'balance'>, password?: string) => {
-        // Clear any existing profile data from previous sessions
+        // Clear only session-specific profile data from previous sessions
         if (typeof window !== 'undefined') {
           // Clear profile-related sessionStorage items
           sessionStorage.removeItem('profile-data-backup');
           sessionStorage.removeItem('profile-data-before-save');
           sessionStorage.removeItem('current-user-session');
           
-          // Clear any potential user-specific localStorage items
-          Object.keys(localStorage).forEach(key => {
-            if (key.includes('userLocation_') || key.includes('user_location_')) {
-              localStorage.removeItem(key);
-            }
-          });
+          // We no longer clear user location data from localStorage
+          // This ensures location preferences persist across sessions
+          console.log('Login: Preserving location data across sessions');
         }
         
         // Handle legacy login (direct user object) for backward compatibility
@@ -157,12 +154,41 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authService.login({ email, password });
 
+          // Ensure location data is properly handled
           const user: User = {
             ...response.user,
             token: response.access_token,
             isAdmin: response.isAdmin,
             balance: 10000,
           };
+
+          // Check if we have saved location data in localStorage for this user
+          if (typeof window !== 'undefined' && user.id) {
+            const userLocationKey = `userLocation_${user.id}`;
+            const legacyLocationKey = `user_location_${user.id}`;
+            
+            try {
+              const savedLocationStr = localStorage.getItem(userLocationKey) || localStorage.getItem(legacyLocationKey);
+              if (savedLocationStr) {
+                const savedLocation = JSON.parse(savedLocationStr);
+                
+                // Only use saved location if the user doesn't already have location data from the API
+                // This ensures backend data takes priority over localStorage data
+                if ((!user.location || user.location === null) && 
+                    savedLocation && savedLocation.governorate && savedLocation.district) {
+                  console.log('Using saved location from localStorage:', savedLocation);
+                  // Update user object with location data from localStorage
+                  user.location = {
+                    id: 0, // We don't know the actual ID from localStorage
+                    governorate: savedLocation.governorate,
+                    district: savedLocation.district
+                  };
+                }
+              }
+            } catch (e) {
+              console.error('Error parsing saved location:', e);
+            }
+          }
 
           // Save user in Zustand
           set({
@@ -219,6 +245,23 @@ export const useAuthStore = create<AuthState>()(
           // Get the current user ID before clearing state
           const userId = get().user?.id;
           
+          // Save location data before logout to preserve it across sessions
+          let savedLocation = null;
+          if (typeof window !== 'undefined' && userId) {
+            const userLocationKey = `userLocation_${userId}`;
+            const legacyLocationKey = `user_location_${userId}`;
+            
+            try {
+              const savedLocationStr = localStorage.getItem(userLocationKey) || localStorage.getItem(legacyLocationKey);
+              if (savedLocationStr) {
+                savedLocation = JSON.parse(savedLocationStr);
+                console.log('Preserved location data before logout:', savedLocation);
+              }
+            } catch (e) {
+              console.error('Error parsing saved location during logout:', e);
+            }
+          }
+          
           await authService.logout();
           set({ user: null, isAuthenticated: false, isLoading: false });
           
@@ -230,17 +273,23 @@ export const useAuthStore = create<AuthState>()(
             sessionStorage.removeItem('profile-data-before-save');
             sessionStorage.removeItem('current-user-session');
             
-            // Clear user-specific localStorage items
-            localStorage.removeItem(`userLocation_${userId}`);
-            localStorage.removeItem(`user_location_${userId}`);
+            // DO NOT clear location data from localStorage to preserve it across sessions
+            // Instead, clear other user-specific items
             
-            // Clear any other potential user-specific items
-            // Scan localStorage for keys containing the user ID
+            // Clear any other potential user-specific items except location data
             Object.keys(localStorage).forEach(key => {
-              if (key.includes(userId.toString())) {
+              if (key.includes(userId.toString()) && 
+                  !key.includes('userLocation_') && 
+                  !key.includes('user_location_')) {
                 localStorage.removeItem(key);
               }
             });
+            
+            // Restore location data if it was saved
+            if (savedLocation) {
+              const userLocationKey = `userLocation_${userId}`;
+              localStorage.setItem(userLocationKey, JSON.stringify(savedLocation));
+            }
           }
         } catch (error: any) {
           console.error('Logout error:', error);
@@ -252,20 +301,16 @@ export const useAuthStore = create<AuthState>()(
             error: error.response?.data?.message || 'Failed to logout properly.'
           });
           
-          // Clear all user-specific data even on error
+          // Clear session-specific data even on error, but preserve location data
           if (typeof window !== 'undefined') {
             // Clear profile-related sessionStorage items
             sessionStorage.removeItem('profile-data-backup');
             sessionStorage.removeItem('profile-data-before-save');
             sessionStorage.removeItem('current-user-session');
             
-            // Clear any potential user-specific localStorage items
-            // Since we don't have the user ID, we'll clear all profile-related items
-            Object.keys(localStorage).forEach(key => {
-              if (key.includes('userLocation_') || key.includes('user_location_')) {
-                localStorage.removeItem(key);
-              }
-            });
+            // DO NOT clear location data from localStorage
+            // This ensures location preferences persist across sessions even on error
+            console.log('Logout error: Still preserving location data across sessions');
           }
         }
       },
@@ -328,7 +373,14 @@ export const useAuthStore = create<AuthState>()(
                 last_name: updatedProfile.last_name || state.user.last_name,
                 email: updatedProfile.email || state.user.email,
                 phone: updatedProfile.phone || state.user.phone,
-                location: updatedProfile.location || state.user.location,
+                // Handle location explicitly to ensure null values are properly handled
+                // If location is null in the response, it means location was cleared
+                // If location is explicitly provided in profileData, use that instead
+                location: profileData.location !== undefined
+                  ? profileData.location
+                  : updatedProfile.location === null
+                    ? null
+                    : updatedProfile.location || state.user.location,
                 avatar_url: updatedProfile.avatar_url,
                 avatar_url_full: updatedProfile.avatar_url_full
                 // Explicit fields to ensure they're properly updated

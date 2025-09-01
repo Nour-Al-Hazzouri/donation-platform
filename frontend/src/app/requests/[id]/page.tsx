@@ -101,11 +101,22 @@ export default function RequestDetailsPage() {
               <div className="flex items-center">
                 <div className="relative mr-3 md:mr-4">
                   <Avatar className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16">
-                    <AvatarImage src={request.user.avatar_url || "/placeholder.svg"} alt={request.user.username} />
+                    <AvatarImage src={request.user.avatar_url_full || request.user.avatar_url || "/placeholder.svg"} alt={request.user.username} />
                     <AvatarFallback className="text-sm md:text-lg">
                       {request.user.first_name.charAt(0) + request.user.last_name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
+                  {(
+                    <div className="absolute -top-1 -right-1">
+                      <Image 
+                        src="/verification.png" 
+                        alt="Verified" 
+                        width={16} 
+                        height={16} 
+                        className="rounded-full border-2 border-white" 
+                      />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">
