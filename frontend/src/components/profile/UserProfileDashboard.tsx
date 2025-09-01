@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CheckCircle, AlertTriangle, Loader2 } from "lucide-react"
+import { CheckCircle, AlertTriangle, Loader2, X } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
 import { useModal } from "@/contexts/ModalContext"
 import { locationsService } from "@/lib/api/locations"
 import ProfileSidebar from "./Sidebar"
 import AccVerification from "./AccVerification"
 import { profileService, UpdateProfileData } from "@/lib/api/profile"
+import { toast } from "@/components/ui/use-toast"
 
 interface UserProfileDashboardProps {
   onViewChange?: (view: 'profile' | 'notifications') => void
@@ -31,6 +32,57 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     governorate: user?.location?.governorate || "",
     district: user?.location?.district || "",
   })
+  
+  // Store original data for cancel functionality
+  const [originalData, setOriginalData] = useState({
+    fullName: user ? `${user.first_name} ${user.last_name}` : "",
+    phoneNumber: user?.phone || "",
+    email: user?.email || "",
+    governorate: user?.location?.governorate || "",
+    district: user?.location?.district || "",
+  })
+  
+  // Effect to update profile and original data when user changes
+  useEffect(() => {
+    if (user) {
+      // Check for backup in session storage first
+      let newProfileData;
+      
+      if (typeof window !== 'undefined') {
+        const backupData = sessionStorage.getItem('profile-data-backup');
+        if (backupData) {
+          try {
+            newProfileData = JSON.parse(backupData);
+            console.log('Loaded profile data from session backup');
+          } catch (e) {
+            console.error('Error parsing backup profile data:', e);
+            sessionStorage.removeItem('profile-data-backup');
+          }
+        }
+      }
+      
+      // If no backup found, use user object data
+      if (!newProfileData) {
+        newProfileData = {
+          fullName: `${user.first_name} ${user.last_name}`,
+          phoneNumber: user.phone || "",
+          email: user.email || "",
+          governorate: user?.location?.governorate || "",
+          district: user?.location?.district || "",
+        };
+      }
+      
+      setProfileData(newProfileData);
+      
+      // Also update original data for cancel functionality
+      setOriginalData(newProfileData);
+      
+      // Store a session backup of the profile data
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('profile-data-backup', JSON.stringify(newProfileData));
+      }
+    }
+  }, [user])
 
   const handleProfileUpdate = useCallback(async () => {
     // Refresh user profile data after avatar update
@@ -108,6 +160,35 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   }, [locations])
 
   // Fetch locations on component mount and load saved location from localStorage
+  // Effect to recover profile data if page is refreshed during editing
+  useEffect(() => {
+    // Check if there's any saved profile data in session storage
+    if (typeof window !== 'undefined' && isEditing) {
+      const savedProfileData = sessionStorage.getItem('profile-data-before-save');
+      if (savedProfileData) {
+        try {
+          const parsedData = JSON.parse(savedProfileData);
+          setProfileData(parsedData);
+          console.log('Recovered profile data from session storage');
+        } catch (e) {
+          console.error('Error parsing saved profile data:', e);
+          sessionStorage.removeItem('profile-data-before-save');
+        }
+      }
+      
+      // Add event listener for beforeunload to save data if user refreshes during editing
+      const handleBeforeUnload = () => {
+        sessionStorage.setItem('profile-data-before-save', JSON.stringify(profileData));
+      };
+      
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [isEditing, profileData]);
+
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -193,6 +274,19 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     // Only depend on user to avoid infinite loops
   }, [user])
 
+  const handleCancel = () => {
+    // Revert to original data
+    setProfileData({
+      ...originalData
+    })
+    setIsEditing(false)
+    
+    // Clean up any session storage data for editing
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('profile-data-before-save')
+    }
+  }
+
   const handleEdit = async () => {
     if (isEditing) {
       // Save profile data
@@ -200,6 +294,12 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
       setError(null)
       
       try {
+        // Store current state in session storage before making changes
+        // This provides an additional recovery mechanism if the update fails
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('profile-data-before-save', JSON.stringify(profileData));
+        }
+        
         // Find location ID based on governorate and district
         let locationId = null
         
@@ -280,12 +380,37 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
              }
            }
            
-           setProfileData({
+           const updatedProfileData = {
              fullName: `${updatedProfile.first_name} ${updatedProfile.last_name}`,
              phoneNumber: updatedProfile.phone || "",
              email: updatedProfile.email,
              governorate: updatedGovernorate,
              district: updatedDistrict
+           };
+           
+           setProfileData(updatedProfileData);
+           // Update original data for future cancel operations
+           setOriginalData(updatedProfileData);
+           
+           // Persist updated profile data to session storage for recovery
+           if (typeof window !== 'undefined') {
+             sessionStorage.setItem('profile-data-backup', JSON.stringify(updatedProfileData));
+             // Remove the pre-save backup as it's no longer needed
+             sessionStorage.removeItem('profile-data-before-save');
+           }
+           
+           // Save location data to localStorage for persistence
+           if (updatedGovernorate && updatedDistrict) {
+             localStorage.setItem(`user_location_${user.id}`, JSON.stringify({
+               governorate: updatedGovernorate,
+               district: updatedDistrict
+             }));
+           }
+           
+           // Show success message
+           toast({
+             title: "Profile updated",
+             description: "Your profile has been updated successfully.",
            });
            
            // Save updated location to localStorage only if we have valid location data
@@ -353,18 +478,31 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                 {error}
               </div>
             )}
-            <Button
-              onClick={handleEdit}
-              disabled={isLoading}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : isEditing ? "Save" : "Edit"}
-            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              {isEditing && (
+                <Button
+                  onClick={handleCancel}
+                  disabled={isLoading}
+                  variant="outline"
+                  className="px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+              )}
+              <Button
+                onClick={handleEdit}
+                disabled={isLoading}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : isEditing ? "Save" : "Edit"}
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 w-full">

@@ -70,6 +70,47 @@ const persistOptions: PersistOptions<AuthState, Omit<AuthState, 'login' | 'regis
     isAuthenticated: state.isAuthenticated,
     user: state.user,
   }),
+  // Ensure storage is synchronized across tabs/windows
+  storage: {
+    getItem: (name) => {
+      if (typeof window === 'undefined') return null;
+      const value = localStorage.getItem(name);
+      // Also check cookies for SSR consistency
+      const cookieValue = Cookies.get(name);
+      const rawValue = value || cookieValue || null;
+      
+      // Parse the string value to return the expected object type
+      if (rawValue) {
+        try {
+          return JSON.parse(rawValue);
+        } catch (e) {
+          console.error('Error parsing storage value:', e);
+          return null;
+        }
+      }
+      return null;
+    },
+    setItem: (name, value) => {
+      if (typeof window !== 'undefined') {
+        // Convert object to string before storing
+        const stringValue = JSON.stringify(value);
+        localStorage.setItem(name, stringValue);
+        // Set cookie with same expiration as in other methods
+        Cookies.set(name, stringValue, {
+          path: '/',
+          expires: 7,
+          sameSite: 'strict',
+        });
+      }
+    },
+    removeItem: (name) => {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(name);
+        // Also remove from cookies for consistency
+        Cookies.remove(name, { path: '/' });
+      }
+    },
+  },
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -115,20 +156,8 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
 
-          // Create the auth storage state object
-          const authState = { state: { user, isAuthenticated: true } };
-          
-          // Save in localStorage for client-side access
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('auth-storage', JSON.stringify(authState));
-          }
-          
-          // Save user in cookie for server-side middleware
-          Cookies.set('auth-storage', JSON.stringify(authState), {
-            path: '/',
-            expires: 7, // expires in 7 days
-            sameSite: 'strict',
-          });
+          // The persist middleware will handle saving to storage
+          // No need for manual localStorage or Cookies operations here
 
         } catch (error: any) {
           set({
@@ -157,20 +186,8 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
           
-          // Create the auth storage state object
-          const authState = { state: { user, isAuthenticated: true } };
-          
-          // Save in localStorage for client-side access
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('auth-storage', JSON.stringify(authState));
-          }
-          
-          // Save user in cookie for server-side middleware
-          Cookies.set('auth-storage', JSON.stringify(authState), {
-            path: '/',
-            expires: 7, // expires in 7 days
-            sameSite: 'strict',
-          });
+          // The persist middleware will handle saving to storage
+          // No need for manual localStorage or Cookies operations here
         } catch (error: any) {
           console.error('Registration error:', error);
           set({ 
@@ -187,13 +204,8 @@ export const useAuthStore = create<AuthState>()(
           await authService.logout();
           set({ user: null, isAuthenticated: false, isLoading: false });
           
-          // Clear localStorage
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('auth-storage');
-          }
-          
-          // Clear cookies
-          Cookies.remove('auth-storage', { path: '/' });
+          // The persist middleware will handle clearing storage
+          // No need for manual localStorage or Cookies operations here
         } catch (error: any) {
           console.error('Logout error:', error);
           // Even if the API call fails, we should still clear the local state
@@ -204,13 +216,8 @@ export const useAuthStore = create<AuthState>()(
             error: error.response?.data?.message || 'Failed to logout properly.'
           });
           
-          // Clear localStorage and cookies even on error
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('auth-storage');
-          }
-          
-          // Clear cookies
-          Cookies.remove('auth-storage', { path: '/' });
+          // The persist middleware will handle clearing storage even on error
+          // No need for manual localStorage or Cookies operations here
         }
       },
       
@@ -259,31 +266,31 @@ export const useAuthStore = create<AuthState>()(
       updateUserProfile: async (profileData: UpdateProfileData) => {
         try {
           set({ isLoading: true, error: null });
-          // Call the profile service to update the profile
           const updatedProfile = await profileService.updateProfile(profileData);
           
-          // Update the local state with the new profile data
-          set((state) => {
-            if (!state.user) return state;
-            
-            const updatedUser = { ...state.user, ...updatedProfile };
-            
-            // Update localStorage
-            const authState = { state: { user: updatedUser, isAuthenticated: true } };
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('auth-storage', JSON.stringify(authState));
-            }
-            
-            // Update cookies
-            Cookies.set('auth-storage', JSON.stringify(authState), {
-              path: '/',
-              expires: 7,
-              sameSite: 'strict',
+          if (updatedProfile) {
+            set((state) => {
+              if (!state.user) return state;
+              
+              // Create a properly updated user object with all fields
+              const updatedUser = { 
+                ...state.user, 
+                first_name: updatedProfile.first_name || state.user.first_name,
+                last_name: updatedProfile.last_name || state.user.last_name,
+                email: updatedProfile.email || state.user.email,
+                phone: updatedProfile.phone || state.user.phone,
+                location: updatedProfile.location || state.user.location
+                // Explicit fields to ensure they're properly updated
+              };
+              
+              // The persist middleware will handle saving to storage
+              // No need for manual localStorage or Cookies operations here
+              
+              return { user: updatedUser, isLoading: false };
             });
-            
-            return { user: updatedUser, isLoading: false };
-          });
+          }
           
+          set({ isLoading: false });
           return updatedProfile;
         } catch (error: any) {
           const errorMessage = error.response?.data?.message || 'Failed to update profile';
@@ -322,29 +329,31 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      updateUser: (userData) => {
+      updateUser: (userData: Partial<User>) => {
         set((state) => {
           if (!state.user) return state;
           
+          // Handle nested objects properly, especially location
           const updatedUser = {
             ...state.user,
-            ...userData
+            ...userData,
+            // Handle location separately if it exists in userData
+            location: userData.location ? {
+              ...state.user.location,
+              ...userData.location
+            } : state.user.location
           };
           
-          // Create the auth storage state object
-          const authState = { state: { user: updatedUser, isAuthenticated: true } };
+          // The persist middleware will handle saving to storage
+          // No need for manual localStorage or Cookies operations here
           
-          // Save in localStorage for client-side access
+          // Still use sessionStorage for temporary session data if needed
           if (typeof window !== 'undefined') {
-            localStorage.setItem('auth-storage', JSON.stringify(authState));
+            sessionStorage.setItem('current-user-session', JSON.stringify({
+              lastUpdated: new Date().toISOString(),
+              user: updatedUser
+            }));
           }
-          
-          // Save user in cookie for server-side middleware
-          Cookies.set('auth-storage', JSON.stringify(authState), {
-            path: '/',
-            expires: 7, // expires in 7 days
-            sameSite: 'strict',
-          });
           
           return {
             user: updatedUser
