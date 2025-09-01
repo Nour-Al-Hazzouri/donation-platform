@@ -8,17 +8,9 @@ import { ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from 'lucide-react'
 import { cn } from '@/utils'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { initialDonationsData } from '@/store/donationsStore'
+import { useDonationsStore, DonationData } from '@/store/donationsStore'
 
-interface RequestItem {
-  id: number
-  name: string
-  title: string
-  description: string
-  imageUrl?: string
-  avatarUrl?: string
-  initials: string
-  isVerified: boolean
+interface RequestItem extends Omit<DonationData, 'location'> {
   location: string
   timeAgo: string
   isAvailable: boolean
@@ -29,21 +21,17 @@ interface LatestRequestsProps {
   className?: string
 }
 
-// Generate deterministic quantities based on request ID
-const mockRequests: RequestItem[] = initialDonationsData.map((request, index) => ({
-  ...request,
-  userId: `user${request.id}`,
-  userName: request.name,
-  userAvatar: request.avatarUrl,
-  itemName: request.title,
-  quantity: (request.id % 20) + 5, // Deterministic quantity between 5-24 based on ID
-  location: ['Tripoli', 'Beirut', 'Sidon', 'Tyre', 'Baalbek'][index % 5],
-  timeAgo: `${index + 1}h ago`,
-  isAvailable: true
-}))
+// This will be populated with real data from the API
 
 const RequestCard: React.FC<{ request: RequestItem }> = ({ request }) => {
   const router = useRouter();
+  
+  const imageSrc = request.imageUrl
+    ? request.imageUrl.startsWith('http')
+      ? request.imageUrl
+      : `${process.env.NEXT_PUBLIC_API_URL || ''}/${request.imageUrl.replace(/^\/?\//, '')}`
+    : undefined;
+    
   return (
     <Card 
       className="flex-shrink-0 w-full h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] mx-1 sm:mx-2 flex flex-col bg-background cursor-pointer"
@@ -83,10 +71,10 @@ const RequestCard: React.FC<{ request: RequestItem }> = ({ request }) => {
             {request.title} ({request.quantity} needed)
           </h3>
           
-          {request.imageUrl && (
+          {imageSrc && (
             <div className="w-full h-32 sm:h-40 relative rounded-md overflow-hidden">
               <Image 
-                src={request.imageUrl} 
+                src={imageSrc} 
                 alt={request.title}
                 fill
                 className="object-cover"
@@ -125,12 +113,29 @@ const RequestCard: React.FC<{ request: RequestItem }> = ({ request }) => {
 
 const LatestRequests: React.FC<LatestRequestsProps> = ({ className }) => {
   const router = useRouter();
+  const { getDonationRequests } = useDonationsStore()
+  const [requests, setRequests] = React.useState<RequestItem[]>([])
   const [currentIndex, setCurrentIndex] = React.useState(0)
   const [visibleCards, setVisibleCards] = React.useState(3)
   const [isTransitioning, setIsTransitioning] = React.useState(false)
+  
+  React.useEffect(() => {
+    const fetchRequests = async () => {
+      const requestData = await getDonationRequests()
+      const transformed: RequestItem[] = requestData.map((request) => ({
+        ...request,
+        quantity: request.possibleAmount ? Math.floor(request.possibleAmount) : 0,
+        location: request.location?.district || 'Unknown',
+        timeAgo: 'Just now',
+        isAvailable: request.status === 'active'
+      }))
+      setRequests(transformed)
+    }
+    fetchRequests()
+  }, [getDonationRequests])
 
   // Clone the first few items to create infinite loop effect
-  const extendedRequests = [...mockRequests, ...mockRequests.slice(0, visibleCards)]
+  const extendedRequests = [...requests, ...requests.slice(0, visibleCards)]
 
   React.useEffect(() => {
     // Only run on client side
@@ -157,7 +162,7 @@ const LatestRequests: React.FC<LatestRequestsProps> = ({ className }) => {
     setIsTransitioning(true)
     setCurrentIndex(prev => {
       const newIndex = prev - 1
-      return newIndex < 0 ? mockRequests.length - 1 : newIndex
+      return newIndex < 0 ? requests.length - 1 : newIndex
     })
     setTimeout(() => setIsTransitioning(false), 300)
   }
@@ -166,7 +171,7 @@ const LatestRequests: React.FC<LatestRequestsProps> = ({ className }) => {
     setIsTransitioning(true)
     setCurrentIndex(prev => {
       const newIndex = prev + 1
-      return newIndex >= mockRequests.length ? 0 : newIndex
+      return newIndex >= requests.length ? 0 : newIndex
     })
     setTimeout(() => setIsTransitioning(false), 300)
   }
@@ -190,46 +195,52 @@ const LatestRequests: React.FC<LatestRequestsProps> = ({ className }) => {
           </h2>
         </div>
 
-        <div className="relative">
-          <div className="flex items-center justify-center">
-            <Button
-              onClick={scrollLeft}
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
-              aria-label="Previous requests"
-            >
-              <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-
-            <div className="overflow-hidden w-full max-w-6xl">
-              <div
-                className="flex transition-transform duration-300 ease-in-out"
-                style={{
-                  transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
-                }}
-              >
-                {extendedRequests.map((request, index) => (
-                  <div
-                    key={`${request.id}-${index}`}
-                    className="flex-shrink-0 px-1 sm:px-2"
-                    style={{ width: `${100 / visibleCards}%` }}
-                  >
-                    <div className="h-full pb-4">
-                      <RequestCard request={request} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Button
-              onClick={scrollRight}
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
-              aria-label="Next requests"
-            >
-              <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
+        {requests.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No requests available at the moment.</p>
           </div>
-        </div>
+        ) : (
+          <div className="relative">
+            <div className="flex items-center justify-center">
+              <Button
+                onClick={scrollLeft}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md mr-1 sm:mr-2 z-10 flex items-center justify-center transition-colors"
+                aria-label="Previous requests"
+              >
+                <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+
+              <div className="overflow-hidden w-full max-w-6xl">
+                <div
+                  className="flex transition-transform duration-300 ease-in-out"
+                  style={{
+                    transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
+                  }}
+                >
+                  {extendedRequests.map((request, index) => (
+                    <div
+                      key={`${request.id}-${index}`}
+                      className="flex-shrink-0 px-1 sm:px-2"
+                      style={{ width: `${100 / visibleCards}%` }}
+                    >
+                      <div className="h-full pb-4">
+                        <RequestCard request={request} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Button
+                onClick={scrollRight}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md ml-1 sm:ml-2 z-10 flex items-center justify-center transition-colors"
+                aria-label="Next requests"
+              >
+                <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-center mt-6 sm:mt-8">
           <Button 
