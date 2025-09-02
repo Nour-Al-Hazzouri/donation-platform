@@ -28,6 +28,7 @@ export default function RequestPage() {
   const [customAmount, setCustomAmount] = useState('')
   const [isCustom, setIsCustom] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(null)
 
   // Pending transactions state
   const [pendingTransactions, setPendingTransactions] = useState<
@@ -89,8 +90,18 @@ export default function RequestPage() {
   }
 
   const handleSubmitRequest = async () => {
+    // Reset any previous error
+    setVerificationError(null)
+    
     if (!isAuthenticated) {
       openModal('signIn')
+      return
+    }
+    
+    // Check if user is verified before allowing to make a request
+    const { user } = useAuthStore.getState()
+    if (!user?.verified && !user?.email_verified_at) {
+      setVerificationError('Only verified users can make requests. Please verify your account first to ensure donation security and prevent fraud.')
       return
     }
 
@@ -208,14 +219,21 @@ export default function RequestPage() {
             ))}
           </div>
 
-          {/* Submit Button */}
-          <Button
-            onClick={handleSubmitRequest}
-            disabled={isProcessing || finalAmount <= 0}
-            className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-medium"
-          >
-            {isProcessing ? 'Processing...' : `Request ${finalAmount.toLocaleString()}`}
-          </Button>
+          {/* Submit Button with Verification Error Label */}
+          <div className="relative">
+            {verificationError && (
+              <div className="text-red-600 text-sm font-medium mb-2">
+                {verificationError}
+              </div>
+            )}
+            <Button
+              onClick={handleSubmitRequest}
+              disabled={isProcessing || finalAmount <= 0}
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-medium"
+            >
+              {isProcessing ? 'Processing...' : `Request ${finalAmount.toLocaleString()}`}
+            </Button>
+          </div>
         </div>
 
         {/* Pending Requests */}

@@ -22,6 +22,8 @@ export default function DonationDetailsPage() {
   const [donation, setDonation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  const [verificationError, setVerificationError] = useState<string | null>(null)
+
   useEffect(() => {
     const loadDonation = async () => {
       try {
@@ -41,11 +43,22 @@ export default function DonationDetailsPage() {
   if (!donation) return <NotFoundState router={router} />
 
   const handleRequest = () => {
+    // Reset any previous error
+    setVerificationError(null)
+    
     if (!isAuthenticated) {
       localStorage.setItem('redirectAfterAuth', `/request/${donationId}`)
       openModal('signIn')
       return
     }
+    
+    // Check if user is verified before allowing to make a donation
+    const { user } = useAuthStore.getState()
+    if (!user?.verified && !user?.email_verified_at) {
+      setVerificationError('Only verified users can make donations. Please verify your account first to ensure donation security and prevent fraud.')
+      return
+    }
+    
     router.push(`/request/${donationId}`)
   }
 
@@ -132,8 +145,13 @@ export default function DonationDetailsPage() {
               </p>
             </div>
 
-            {/* Request Button */}
-            <div className="flex justify-center">
+            {/* Request Button with Verification Error Label */}
+            <div className="flex flex-col items-center">
+              {verificationError && (
+                <div className="text-red-600 text-sm font-medium mb-2">
+                  {verificationError}
+                </div>
+              )}
               <Button 
                 onClick={handleRequest} 
                 className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg"
