@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload } from 'lucide-react'
+import { Upload, AlertCircle } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -33,6 +33,7 @@ export function AddRequestForm() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(null)
 
   useEffect(() => {
     if (user) {
@@ -83,6 +84,15 @@ export function AddRequestForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Reset any previous verification error
+    setVerificationError(null)
+    
+    // Check if user is verified before allowing to create a request
+    if (!user?.verified && !user?.email_verified_at) {
+      setVerificationError('Only verified users can make requests. Please verify your account first to ensure request security and prevent fraud.')
+      return
+    }
+    
     if (!validateForm()) {
       return
     }
@@ -115,6 +125,10 @@ export function AddRequestForm() {
       router.push('/requests')
     } catch (error) {
       console.error('Error submitting request:', error)
+      // If we get a 403 error, it's likely due to verification
+      if ((error as any).response?.status === 403) {
+        setVerificationError('Only verified users can make requests. Please verify your account first to ensure request security and prevent fraud.')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -235,6 +249,13 @@ export function AddRequestForm() {
           )}
         </div>
 
+        {/* Verification Error */}
+      {verificationError && (
+        <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {verificationError}
+        </div>
+      )}
+        
         {/* Submit Button */}
         <div className="pt-6">
           <Button

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload } from 'lucide-react'
+import { Upload, AlertCircle } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -47,6 +47,7 @@ export function AddDonationForm({ onSubmit, submitting: submittingProp, error: e
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(null)
 
   // Sync external submitting prop if provided
   useEffect(() => {
@@ -132,8 +133,8 @@ export function AddDonationForm({ onSubmit, submitting: submittingProp, error: e
     }
 
     // Check if user is verified
-    if (!user.email_verified_at) {
-      setErrors(prev => ({ ...prev, form: 'You must be verified to create a donation event. Please verify your account first.' }))
+    if (!user.verified && !user.email_verified_at) {
+      setVerificationError('Only verified users can make donations. Please verify your account first to ensure donation security and prevent fraud.')
       return
     }
 
@@ -197,7 +198,9 @@ export function AddDonationForm({ onSubmit, submitting: submittingProp, error: e
       router.push('/donations')
     } catch (error: any) {
       console.error('Error submitting donation:', error)
-      if (error.response?.data?.message) {
+      if (error.response?.status === 403) {
+        setVerificationError('Only verified users can make donations. Please verify your account first to ensure donation security and prevent fraud.')
+      } else if (error.response?.data?.message) {
         setErrors(prev => ({ ...prev, form: error.response.data.message }))
       } else {
         setErrors(prev => ({ ...prev, form: 'Failed to create donation. Please try again later.' }))
@@ -323,6 +326,12 @@ export function AddDonationForm({ onSubmit, submitting: submittingProp, error: e
           </div>
         )}
       </div>
+
+      {verificationError && (
+        <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {verificationError}
+        </div>
+      )}
 
       <div className="pt-6">
         <Button
