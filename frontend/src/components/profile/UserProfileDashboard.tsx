@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback } from "react"
+import React, { useState, useEffect, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -32,6 +32,9 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     governorate: user?.location?.governorate || "",
     district: user?.location?.district || "",
   })
+  
+  // Create a ref to store the current profileData to avoid dependency issues
+  const profileDataRef = React.useRef(profileData)
   
   // Store original data for cancel functionality
   const [originalData, setOriginalData] = useState({
@@ -227,6 +230,11 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   }, [locations])
 
   // Fetch locations on component mount and load saved location from localStorage
+  // Update ref whenever profileData changes
+  useEffect(() => {
+    profileDataRef.current = profileData;
+  }, [profileData]);
+  
   // Effect to recover profile data if page is refreshed during editing
   useEffect(() => {
     // Check if there's any saved profile data in session storage
@@ -245,7 +253,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
       
       // Add event listener for beforeunload to save data if user refreshes during editing
       const handleBeforeUnload = () => {
-        sessionStorage.setItem('profile-data-before-save', JSON.stringify(profileData));
+        sessionStorage.setItem('profile-data-before-save', JSON.stringify(profileDataRef.current));
       };
       
       window.addEventListener('beforeunload', handleBeforeUnload);
@@ -254,7 +262,7 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         window.removeEventListener('beforeunload', handleBeforeUnload);
       };
     }
-  }, [isEditing, profileData]);
+  }, [isEditing]); // Only depend on isEditing to prevent infinite loop
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -525,13 +533,54 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         
         setIsLoading(false)
       } catch (err: any) {
-        console.error("Error updating profile:", err)
-        setError(err.response?.data?.message || "Failed to update profile")
+        // Check if this is an email already exists error
+        const isEmailError = err.response?.data?.errors?.email?.includes("The email has already been taken") ||
+                            err.response?.data?.message?.includes("email has already been taken") ||
+                            err.response?.data?.message?.toLowerCase().includes("email");
+        
+        if (isEmailError) {
+          // For email errors, use the specific error message from the API
+          setError(err.response?.data?.message || "The email has already been taken.")
+          
+          // Revert the email field to its original value but keep other changes intact
+          // Use a callback to ensure we're working with the latest state
+          setProfileData(prev => ({
+            ...prev,
+            email: originalData.email // Revert only the email field
+          }))
+          
+          // Remove the pre-save backup as we're handling the error
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('profile-data-before-save');
+          }
+          
+          // Silently handle email validation errors without console output
+          // This is an expected validation error, so we don't need to log it
+        } else {
+          // For non-email errors, log to console and set the general error message
+          console.error("Error updating profile:", err)
+          setError(err.response?.data?.message || "Failed to update profile")
+        }
+        
         setIsLoading(false)
+        
+        // If there was an error, keep the user in edit mode so they can fix it
+        // Only for email errors, we want to stay in edit mode
+        if (isEmailError) {
+          // Stay in edit mode
+          return;
+        }
       }
     }
     
-    setIsEditing(!isEditing)
+    // Only toggle edit mode if we're not already in an error state
+    // This prevents exiting edit mode when there's an error
+    // Check if we had an email error, in which case we want to stay in edit mode
+    const isEmailError = error?.toLowerCase().includes('email');
+    if (!isEmailError) {
+      // Only toggle if we're not in an error state
+      setIsEditing(prev => !prev);
+    }
   }
 
   const handleVerify = () => {
