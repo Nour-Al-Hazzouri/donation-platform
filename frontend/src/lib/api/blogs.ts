@@ -62,6 +62,21 @@ export interface Announcement {
   };
 }
 
+export interface CreateAnnouncementData {
+  title: string;
+  content: string;
+  priority: 'low' | 'medium' | 'high';
+  image_urls?: File[];
+}
+
+export interface UpdateAnnouncementData {
+  title?: string;
+  content?: string;
+  priority?: 'low' | 'medium' | 'high';
+  image_urls?: File[];
+  remove_image_urls?: string[];
+}
+
 const blogService = {
   // Get all announcements (blogs) - public access
   getAll: async (params?: {

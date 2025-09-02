@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { ArrowLeft } from 'lucide-react'
@@ -41,8 +41,10 @@ const VERIFICATION_REQUEST = {
   status: "pending"
 }
 
-export default function VerificationRequestDetailsPage({ params }: { params: { id: string } }) {
+export default function VerificationRequestDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
+  // Unwrap params using React.use() to avoid the warning
+  const { id } = use(params)
   const [notes, setNotes] = useState(VERIFICATION_REQUEST.notes)
 
   // In a real app, you would fetch the verification request data based on the ID
@@ -51,15 +53,15 @@ export default function VerificationRequestDetailsPage({ params }: { params: { i
 
   const handleApprove = async () => {
     // In a real app, you would call an API to approve the verification request
-    console.log(`Approving verification request ${params.id} with notes: ${notes}`)
-    // await approveVerificationRequest(params.id, notes);
+    console.log(`Approving verification request ${id} with notes: ${notes}`)
+    // await approveVerificationRequest(id, notes);
     router.push('/admin/users?tab=verification')
   }
 
   const handleDecline = async () => {
     // In a real app, you would call an API to decline the verification request
-    console.log(`Declining verification request ${params.id} with notes: ${notes}`)
-    // await declineVerificationRequest(params.id, notes);
+    console.log(`Declining verification request ${id} with notes: ${notes}`)
+    // await declineVerificationRequest(id, notes);
     router.push('/admin/users?tab=verification')
   }
 
