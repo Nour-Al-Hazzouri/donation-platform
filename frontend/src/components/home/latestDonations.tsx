@@ -9,7 +9,6 @@ import { cn } from '@/utils'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useDonationsStore, DonationData } from '@/store/donationsStore'
-import router from 'next/router'
 
 interface DonationItem extends Omit<DonationData, 'location'> {
   location: string
@@ -109,6 +108,7 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
 
 const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
   const { getDonationOffers } = useDonationsStore()
+  const router = useRouter()
   const [donations, setDonations] = React.useState<DonationItem[]>([])
   const [currentIndex, setCurrentIndex] = React.useState(0)
   const [visibleCards, setVisibleCards] = React.useState(3)
