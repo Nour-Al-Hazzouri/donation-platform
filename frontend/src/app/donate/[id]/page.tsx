@@ -112,6 +112,13 @@ export default function DonatePage() {
 
   const handleDonate = async () => {
     if (!handleDonateAction()) return
+    
+    // Check if user is verified before allowing to make a donation
+    const { user } = useAuthStore.getState()
+    if (!user?.verified && !user?.email_verified_at) {
+      setDonationError('Only verified users can make donations. Please verify your account first to ensure donation security and prevent fraud.')
+      return
+    }
 
     const finalAmount = isCustom ? Number(customAmount) : donationAmount[0]
 
@@ -257,7 +264,7 @@ export default function DonatePage() {
             </div>
 
             {donationError && (
-              <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded relative mb-4">
+              <div className="text-red-600 text-sm font-medium mb-2">
                 {donationError}
               </div>
             )}

@@ -10,7 +10,7 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { useModal } from '@/contexts/ModalContext'
 
 export default function ProfilePage() {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { openModal } = useModal()
@@ -18,9 +18,30 @@ export default function ProfilePage() {
 
   // Track if we've already shown the login modal
   const [hasShownLoginModal, setHasShownLoginModal] = useState(false)
+  // Track if we've checked for stored auth state
+  const [hasCheckedStorage, setHasCheckedStorage] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated && !hasShownLoginModal) {
+    // Check if auth state is stored in localStorage
+    if (typeof window !== 'undefined' && !hasCheckedStorage) {
+      const storedAuth = localStorage.getItem('auth-storage')
+      if (storedAuth) {
+        try {
+          const parsedAuth = JSON.parse(storedAuth)
+          // If we have valid auth data in storage, don't show the login modal
+          if (parsedAuth?.state?.isAuthenticated && parsedAuth?.state?.user) {
+            setHasCheckedStorage(true)
+            return
+          }
+        } catch (error) {
+          console.error('Error parsing auth storage:', error)
+        }
+      }
+      setHasCheckedStorage(true)
+    }
+
+    // Only show login modal if we've checked storage and user is not authenticated
+    if (!isAuthenticated && hasCheckedStorage && !hasShownLoginModal) {
       // Store current URL for redirection after authentication
       localStorage.setItem('redirectAfterAuth', window.location.pathname)
       // Open sign-in modal instead of redirecting
@@ -36,7 +57,7 @@ export default function ProfilePage() {
     } else if (view === 'profile') {
       setActiveView('profile')
     }
-  }, [isAuthenticated, openModal, searchParams, hasShownLoginModal])
+  }, [isAuthenticated, openModal, searchParams, hasShownLoginModal, hasCheckedStorage])
 
   if (!isAuthenticated) {
     return null

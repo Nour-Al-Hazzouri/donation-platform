@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, PersistOptions } from 'zustand/middleware'
 import { authService } from '@/lib/api/auth'
+import { profileService, UpdateProfileData } from '@/lib/api/profile'
 import Cookies from 'js-cookie'
 
 type User = {
@@ -58,17 +59,58 @@ type AuthState = {
     password_confirmation: string;
   }) => Promise<{ message: string }>;
   updateVerification: (verified: boolean, verifiedAt?: string) => void;
-  updateUser: (userData: Partial<User>) => void;
+  updateUserProfile: (profileData: UpdateProfileData) => unknown;
   deductBalance: (amount: number) => void;
   clearError: () => void;
 }
 
-const persistOptions: PersistOptions<AuthState, Omit<AuthState, 'login' | 'register' | 'logout' | 'forgotPassword' | 'resetPassword' | 'updateVerification' | 'updateUser' | 'deductBalance' | 'clearError' | 'isLoading' | 'error'>> = {
+const persistOptions: PersistOptions<AuthState, Omit<AuthState, 'login' | 'register' | 'logout' | 'forgotPassword' | 'resetPassword' | 'updateVerification' | 'updateUserProfile' | 'deductBalance' | 'clearError' | 'isLoading' | 'error'>> = {
   name: 'auth-storage',
   partialize: (state) => ({
     isAuthenticated: state.isAuthenticated,
     user: state.user,
   }),
+  // Ensure storage is synchronized across tabs/windows
+  storage: {
+    getItem: (name) => {
+      if (typeof window === 'undefined') return null;
+      const value = localStorage.getItem(name);
+      // Also check cookies for SSR consistency
+      const cookieValue = Cookies.get(name);
+      const rawValue = value || cookieValue || null;
+      
+      // Parse the string value to return the expected object type
+      if (rawValue) {
+        try {
+          return JSON.parse(rawValue);
+        } catch (e) {
+          console.error('Error parsing storage value:', e);
+          return null;
+        }
+      }
+      return null;
+    },
+    setItem: (name, value) => {
+      if (typeof window !== 'undefined') {
+        // Convert object to string before storing
+        const stringValue = JSON.stringify(value);
+        localStorage.setItem(name, stringValue);
+        // Set cookie with same expiration as in other methods
+        Cookies.set(name, stringValue, {
+          path: '/',
+          expires: 7,
+          sameSite: 'strict',
+        });
+      }
+    },
+    removeItem: (name) => {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(name);
+        // Also remove from cookies for consistency
+        Cookies.remove(name, { path: '/' });
+      }
+    },
+  },
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -80,6 +122,18 @@ export const useAuthStore = create<AuthState>()(
       error: null,
 
       login: async (emailOrUserData: string | Omit<User, 'balance'>, password?: string) => {
+        // Clear only session-specific profile data from previous sessions
+        if (typeof window !== 'undefined') {
+          // Clear profile-related sessionStorage items
+          sessionStorage.removeItem('profile-data-backup');
+          sessionStorage.removeItem('profile-data-before-save');
+          sessionStorage.removeItem('current-user-session');
+          
+          // We no longer clear user location data from localStorage
+          // This ensures location preferences persist across sessions
+          console.log('Login: Preserving location data across sessions');
+        }
+        
         // Handle legacy login (direct user object) for backward compatibility
         if (typeof emailOrUserData === 'object') {
           const userData = emailOrUserData;
@@ -100,12 +154,41 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authService.login({ email, password });
 
+          // Ensure location data is properly handled
           const user: User = {
             ...response.user,
             token: response.access_token,
             isAdmin: response.isAdmin,
             balance: 10000,
           };
+
+          // Check if we have saved location data in localStorage for this user
+          if (typeof window !== 'undefined' && user.id) {
+            const userLocationKey = `userLocation_${user.id}`;
+            const legacyLocationKey = `user_location_${user.id}`;
+            
+            try {
+              const savedLocationStr = localStorage.getItem(userLocationKey) || localStorage.getItem(legacyLocationKey);
+              if (savedLocationStr) {
+                const savedLocation = JSON.parse(savedLocationStr);
+                
+                // Only use saved location if the user doesn't already have location data from the API
+                // This ensures backend data takes priority over localStorage data
+                if ((!user.location || user.location === null) && 
+                    savedLocation && savedLocation.governorate && savedLocation.district) {
+                  console.log('Using saved location from localStorage:', savedLocation);
+                  // Update user object with location data from localStorage
+                  user.location = {
+                    id: 0, // We don't know the actual ID from localStorage
+                    governorate: savedLocation.governorate,
+                    district: savedLocation.district
+                  };
+                }
+              }
+            } catch (e) {
+              console.error('Error parsing saved location:', e);
+            }
+          }
 
           // Save user in Zustand
           set({
@@ -114,20 +197,8 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
 
-          // Create the auth storage state object
-          const authState = { state: { user, isAuthenticated: true } };
-          
-          // Save in localStorage for client-side access
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('auth-storage', JSON.stringify(authState));
-          }
-          
-          // Save user in cookie for server-side middleware
-          Cookies.set('auth-storage', JSON.stringify(authState), {
-            path: '/',
-            expires: 7, // expires in 7 days
-            sameSite: 'strict',
-          });
+          // The persist middleware will handle saving to storage
+          // No need for manual localStorage or Cookies operations here
 
         } catch (error: any) {
           set({
@@ -156,20 +227,8 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
           
-          // Create the auth storage state object
-          const authState = { state: { user, isAuthenticated: true } };
-          
-          // Save in localStorage for client-side access
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('auth-storage', JSON.stringify(authState));
-          }
-          
-          // Save user in cookie for server-side middleware
-          Cookies.set('auth-storage', JSON.stringify(authState), {
-            path: '/',
-            expires: 7, // expires in 7 days
-            sameSite: 'strict',
-          });
+          // The persist middleware will handle saving to storage
+          // No need for manual localStorage or Cookies operations here
         } catch (error: any) {
           console.error('Registration error:', error);
           set({ 
@@ -183,16 +242,55 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         set({ isLoading: true, error: null });
         try {
+          // Get the current user ID before clearing state
+          const userId = get().user?.id;
+          
+          // Save location data before logout to preserve it across sessions
+          let savedLocation = null;
+          if (typeof window !== 'undefined' && userId) {
+            const userLocationKey = `userLocation_${userId}`;
+            const legacyLocationKey = `user_location_${userId}`;
+            
+            try {
+              const savedLocationStr = localStorage.getItem(userLocationKey) || localStorage.getItem(legacyLocationKey);
+              if (savedLocationStr) {
+                savedLocation = JSON.parse(savedLocationStr);
+                console.log('Preserved location data before logout:', savedLocation);
+              }
+            } catch (e) {
+              console.error('Error parsing saved location during logout:', e);
+            }
+          }
+          
           await authService.logout();
           set({ user: null, isAuthenticated: false, isLoading: false });
           
-          // Clear localStorage
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('auth-storage');
+          // The persist middleware will handle clearing auth-storage
+          // But we need to manually clear other user-specific data
+          if (typeof window !== 'undefined' && userId) {
+            // Clear profile-related sessionStorage items
+            sessionStorage.removeItem('profile-data-backup');
+            sessionStorage.removeItem('profile-data-before-save');
+            sessionStorage.removeItem('current-user-session');
+            
+            // DO NOT clear location data from localStorage to preserve it across sessions
+            // Instead, clear other user-specific items
+            
+            // Clear any other potential user-specific items except location data
+            Object.keys(localStorage).forEach(key => {
+              if (key.includes(userId.toString()) && 
+                  !key.includes('userLocation_') && 
+                  !key.includes('user_location_')) {
+                localStorage.removeItem(key);
+              }
+            });
+            
+            // Restore location data if it was saved
+            if (savedLocation) {
+              const userLocationKey = `userLocation_${userId}`;
+              localStorage.setItem(userLocationKey, JSON.stringify(savedLocation));
+            }
           }
-          
-          // Clear cookies
-          Cookies.remove('auth-storage', { path: '/' });
         } catch (error: any) {
           console.error('Logout error:', error);
           // Even if the API call fails, we should still clear the local state
@@ -203,13 +301,17 @@ export const useAuthStore = create<AuthState>()(
             error: error.response?.data?.message || 'Failed to logout properly.'
           });
           
-          // Clear localStorage and cookies even on error
+          // Clear session-specific data even on error, but preserve location data
           if (typeof window !== 'undefined') {
-            localStorage.removeItem('auth-storage');
+            // Clear profile-related sessionStorage items
+            sessionStorage.removeItem('profile-data-backup');
+            sessionStorage.removeItem('profile-data-before-save');
+            sessionStorage.removeItem('current-user-session');
+            
+            // DO NOT clear location data from localStorage
+            // This ensures location preferences persist across sessions even on error
+            console.log('Logout error: Still preserving location data across sessions');
           }
-          
-          // Clear cookies
-          Cookies.remove('auth-storage', { path: '/' });
         }
       },
       
@@ -255,6 +357,51 @@ export const useAuthStore = create<AuthState>()(
           } : null
         })),
       
+      updateUserProfile: async (profileData: UpdateProfileData) => {
+        try {
+          set({ isLoading: true, error: null });
+          const updatedProfile = await profileService.updateProfile(profileData);
+          
+          if (updatedProfile) {
+            set((state) => {
+              if (!state.user) return state;
+              
+              // Create a properly updated user object with all fields
+              const updatedUser = { 
+                ...state.user, 
+                first_name: updatedProfile.first_name || state.user.first_name,
+                last_name: updatedProfile.last_name || state.user.last_name,
+                email: updatedProfile.email || state.user.email,
+                phone: updatedProfile.phone || state.user.phone,
+                // Handle location explicitly to ensure null values are properly handled
+                // If location is null in the response, it means location was cleared
+                // If location is explicitly provided in profileData, use that instead
+                location: profileData.location !== undefined
+                  ? profileData.location
+                  : updatedProfile.location === null
+                    ? null
+                    : updatedProfile.location || state.user.location,
+                avatar_url: updatedProfile.avatar_url,
+                avatar_url_full: updatedProfile.avatar_url_full
+                // Explicit fields to ensure they're properly updated
+              };
+              
+              // The persist middleware will handle saving to storage
+              // No need for manual localStorage or Cookies operations here
+              
+              return { user: updatedUser, isLoading: false };
+            });
+          }
+          
+          set({ isLoading: false });
+          return updatedProfile;
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || 'Failed to update profile';
+          set({ error: errorMessage, isLoading: false });
+          throw error;
+        }
+      },
+      
       deductBalance: (amount) => {
         set((state) => {
           if (state.user) {
@@ -285,29 +432,31 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      updateUser: (userData) => {
+      updateUser: (userData: Partial<User>) => {
         set((state) => {
           if (!state.user) return state;
           
+          // Handle nested objects properly, especially location
           const updatedUser = {
             ...state.user,
-            ...userData
+            ...userData,
+            // Handle location separately if it exists in userData
+            location: userData.location ? {
+              ...state.user.location,
+              ...userData.location
+            } : state.user.location
           };
           
-          // Create the auth storage state object
-          const authState = { state: { user: updatedUser, isAuthenticated: true } };
+          // The persist middleware will handle saving to storage
+          // No need for manual localStorage or Cookies operations here
           
-          // Save in localStorage for client-side access
+          // Still use sessionStorage for temporary session data if needed
           if (typeof window !== 'undefined') {
-            localStorage.setItem('auth-storage', JSON.stringify(authState));
+            sessionStorage.setItem('current-user-session', JSON.stringify({
+              lastUpdated: new Date().toISOString(),
+              user: updatedUser
+            }));
           }
-          
-          // Save user in cookie for server-side middleware
-          Cookies.set('auth-storage', JSON.stringify(authState), {
-            path: '/',
-            expires: 7, // expires in 7 days
-            sameSite: 'strict',
-          });
           
           return {
             user: updatedUser

@@ -132,7 +132,7 @@ class UserController extends Controller
             $validated['avatar_url'] = $avatarPath;
         }
 
-        if ($request->has('delete_avatar') && $request->delete_avatar) {
+        if ($request->has('delete_avatar') && $request->delete_avatar === 'true') {
             // Delete old avatar if it exists
             if ($user->avatar_url) {
                 $this->imageService->deleteImage($user->avatar_url);
@@ -144,7 +144,7 @@ class UserController extends Controller
         $user->refresh();
 
         return response()->json([
-            'data' => new UserResource($user),
+            'data' => new UserResource($user->load('location')),
             'message' => 'User updated successfully',
         ], Response::HTTP_OK);
     }
@@ -197,8 +197,11 @@ class UserController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('avatar_url')) {
+            \Log::info('Processing avatar upload for user: ' . $user->id);
+
             // Delete old avatar if it exists
             if ($user->avatar_url) {
+                \Log::info('Deleting old avatar: ' . $user->avatar_url);
                 $this->imageService->deleteImage($user->avatar_url);
             }
 
@@ -207,15 +210,17 @@ class UserController extends Controller
                 $request->file('avatar_url'),
                 'avatars',
                 true, // isPublic
-                500,  // maxWidth
-                90    // quality
+                400,  // maxWidth - reduced for better performance
+                85    // quality - slightly reduced for better compression
             );
 
+            \Log::info('New avatar uploaded to: ' . $avatarPath);
             $validated['avatar_url'] = $avatarPath;
         }
 
         // Handle avatar deletion
-        if ($request->has('delete_avatar') && $request->delete_avatar) {
+        if ($request->has('delete_avatar') && $request->delete_avatar === 'true') {
+            \Log::info('Deleting avatar for user: ' . $user->id);
             // Delete old avatar if it exists
             if ($user->avatar_url) {
                 $this->imageService->deleteImage($user->avatar_url);

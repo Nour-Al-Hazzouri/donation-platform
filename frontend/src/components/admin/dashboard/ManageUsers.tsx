@@ -422,7 +422,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
                         }
                       }}
                     >
-                      {activeTab === "Verification" ? "View Request" : "Manage"}
+                      {activeTab === "Verification" ? (user.status === 'pending' ? "Review" : "View Details") : "Manage"}
                     </Button>
                   </div>
                 </div>

@@ -212,6 +212,7 @@ class ImageService
         $relativePath = ltrim(str_replace('public' . DIRECTORY_SEPARATOR, '', $normalizedPath), DIRECTORY_SEPARATOR);
         // Convert to forward slashes for URLs
         $urlPath = str_replace('\\', '/', $relativePath);
+
         $fullUrl = asset('storage/' . $urlPath);
 
         // For cloud storage, use the configured URL when needed

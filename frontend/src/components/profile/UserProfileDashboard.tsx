@@ -1,24 +1,25 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CheckCircle, AlertTriangle, Loader2 } from "lucide-react"
+import { CheckCircle, AlertTriangle, Loader2, X } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
 import { useModal } from "@/contexts/ModalContext"
 import { locationsService } from "@/lib/api/locations"
 import ProfileSidebar from "./Sidebar"
 import AccVerification from "./AccVerification"
 import { profileService, UpdateProfileData } from "@/lib/api/profile"
+import { toast } from "@/components/ui/use-toast"
 
 interface UserProfileDashboardProps {
   onViewChange?: (view: 'profile' | 'notifications') => void
 }
 
 export default function UserProfileDashboard({ onViewChange }: UserProfileDashboardProps) {
-  const { user, updateUser } = useAuthStore()
+  const { user, updateUserProfile } = useAuthStore()
   const { openModal, modalType } = useModal()
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -31,6 +32,143 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     governorate: user?.location?.governorate || "",
     district: user?.location?.district || "",
   })
+  
+  // Create a ref to store the current profileData to avoid dependency issues
+  const profileDataRef = React.useRef(profileData)
+  
+  // Store original data for cancel functionality
+  const [originalData, setOriginalData] = useState({
+    fullName: user ? `${user.first_name} ${user.last_name}` : "",
+    phoneNumber: user?.phone || "",
+    email: user?.email || "",
+    governorate: user?.location?.governorate || "",
+    district: user?.location?.district || "",
+  })
+  
+  // Effect to update profile and original data when user changes
+  useEffect(() => {
+    if (user) {
+      // Clear any existing profile data first to prevent stale data
+      setProfileData({
+        fullName: "",
+        phoneNumber: "",
+        email: "",
+        governorate: "",
+        district: ""
+      });
+      
+      // First try to load location from localStorage (user-specific)
+      let savedLocation: { governorate: string; district: string } | null = null;
+      if (typeof window !== 'undefined' && user?.id) {
+        // Create a user-specific key for localStorage
+        const userLocationKey = `userLocation_${user.id}`;
+        // Also check legacy key format for backward compatibility
+        const legacyLocationKey = `user_location_${user.id}`;
+        
+        try {
+          const savedLocationStr = localStorage.getItem(userLocationKey) || localStorage.getItem(legacyLocationKey);
+          if (savedLocationStr) {
+            savedLocation = JSON.parse(savedLocationStr);
+            console.log('Loaded location from localStorage:', savedLocation);
+          }
+        } catch (e) {
+          console.error("Error parsing saved location:", e);
+          localStorage.removeItem(userLocationKey);
+        }
+      }
+      
+      // Check for backup in session storage
+      let newProfileData;
+      
+      if (typeof window !== 'undefined') {
+        const backupData = sessionStorage.getItem('profile-data-backup');
+        const preSaveData = sessionStorage.getItem('profile-data-before-save');
+        
+        if (preSaveData) {
+          // If we have pre-save data, it means the last save operation didn't complete
+          try {
+            const parsedData = JSON.parse(preSaveData);
+            if (parsedData.email === user.email) {
+              newProfileData = parsedData;
+              console.log('Restored profile data from pre-save backup');
+            } else {
+              sessionStorage.removeItem('profile-data-before-save');
+            }
+          } catch (e) {
+            console.error('Error parsing pre-save profile data:', e);
+            sessionStorage.removeItem('profile-data-before-save');
+          }
+        } else if (backupData) {
+          try {
+            const parsedData = JSON.parse(backupData);
+            // Only use backup data if it's for the current user (check email)
+            if (parsedData.email === user.email) {
+              newProfileData = parsedData;
+              console.log('Loaded profile data from session backup');
+            } else {
+              // If backup data is for a different user, remove it
+              sessionStorage.removeItem('profile-data-backup');
+            }
+          } catch (e) {
+            console.error('Error parsing backup profile data:', e);
+            sessionStorage.removeItem('profile-data-backup');
+          }
+        }
+      }
+      
+      // If no backup found, use user object data
+      if (!newProfileData) {
+        newProfileData = {
+          fullName: `${user.first_name} ${user.last_name}`,
+          phoneNumber: user.phone || "",
+          email: user.email || "",
+          // Prioritize saved location from localStorage over user object data
+          governorate: savedLocation?.governorate || user?.location?.governorate || "",
+          district: savedLocation?.district || user?.location?.district || "",
+        };
+      } else if (savedLocation) {
+        // If we have backup data but also have saved location, prioritize the saved location
+        newProfileData.governorate = savedLocation.governorate;
+        newProfileData.district = savedLocation.district;
+      }
+      
+      setProfileData(newProfileData);
+      
+      // Also update original data for cancel functionality
+      setOriginalData(newProfileData);
+      
+      // Store a session backup of the profile data
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('profile-data-backup', JSON.stringify(newProfileData));
+      }
+    }
+  }, [user?.id]) // Use user.id instead of user to ensure the effect runs when the user changes
+
+  const handleProfileUpdate = useCallback(async () => {
+    // Refresh user profile data after avatar update
+    try {
+      const updatedProfile = await profileService.getProfile()
+      
+      // Update local profile data
+      setProfileData({
+        fullName: `${updatedProfile.first_name} ${updatedProfile.last_name}`,
+        phoneNumber: updatedProfile.phone || "",
+        email: updatedProfile.email || "",
+        governorate: updatedProfile.location?.governorate || "",
+        district: updatedProfile.location?.district || "",
+      })
+      
+      // Also update the user in the auth store to ensure avatar URLs are updated
+      if (updatedProfile) {
+        updateUserProfile({
+          // Empty update to trigger a refresh of the user state
+          // The actual profile data will come from the API response
+        })
+      }
+    } catch (error) {
+      console.error('Error refreshing profile data:', error)
+    }
+  }, [])
 
   // Districts are now handled by the districtsForSelectedGovernorate useMemo
 
@@ -92,6 +230,40 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
   }, [locations])
 
   // Fetch locations on component mount and load saved location from localStorage
+  // Update ref whenever profileData changes
+  useEffect(() => {
+    profileDataRef.current = profileData;
+  }, [profileData]);
+  
+  // Effect to recover profile data if page is refreshed during editing
+  useEffect(() => {
+    // Check if there's any saved profile data in session storage
+    if (typeof window !== 'undefined' && isEditing) {
+      const savedProfileData = sessionStorage.getItem('profile-data-before-save');
+      if (savedProfileData) {
+        try {
+          const parsedData = JSON.parse(savedProfileData);
+          setProfileData(parsedData);
+          console.log('Recovered profile data from session storage');
+        } catch (e) {
+          console.error('Error parsing saved profile data:', e);
+          sessionStorage.removeItem('profile-data-before-save');
+        }
+      }
+      
+      // Add event listener for beforeunload to save data if user refreshes during editing
+      const handleBeforeUnload = () => {
+        sessionStorage.setItem('profile-data-before-save', JSON.stringify(profileDataRef.current));
+      };
+      
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [isEditing]); // Only depend on isEditing to prevent infinite loop
+
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -104,9 +276,11 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         if (typeof window !== 'undefined' && user?.id) {
           // Create a user-specific key for localStorage
           const userLocationKey = `userLocation_${user.id}`;
+          // Also check legacy key format for backward compatibility
+          const legacyLocationKey = `user_location_${user.id}`;
           
           try {
-            const savedLocationStr = localStorage.getItem(userLocationKey);
+            const savedLocationStr = localStorage.getItem(userLocationKey) || localStorage.getItem(legacyLocationKey);
             if (savedLocationStr) {
               savedLocation = JSON.parse(savedLocationStr);
               
@@ -118,12 +292,22 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
               if (!isValidLocation) {
                 console.warn('Saved location not found in available locations, clearing localStorage');
                 localStorage.removeItem(userLocationKey);
+                localStorage.removeItem(legacyLocationKey);
                 savedLocation = null;
+              } else {
+                console.log('Loaded location from localStorage:', savedLocation);
+                // If using legacy key, migrate to new format
+                if (localStorage.getItem(legacyLocationKey) && !localStorage.getItem(userLocationKey)) {
+                  localStorage.setItem(userLocationKey, savedLocationStr);
+                  localStorage.removeItem(legacyLocationKey);
+                  console.log('Migrated location from legacy storage format');
+                }
               }
             }
           } catch (e) {
             console.error("Error parsing saved location:", e);
             localStorage.removeItem(userLocationKey);
+            localStorage.removeItem(legacyLocationKey);
           }
         }
         
@@ -174,8 +358,21 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
     }
     
     fetchLocations()
-    // Only depend on user to avoid infinite loops
-  }, [user])
+    // Use user.id instead of user to ensure the effect runs when the user changes
+  }, [user?.id])
+
+  const handleCancel = () => {
+    // Revert to original data
+    setProfileData({
+      ...originalData
+    })
+    setIsEditing(false)
+    
+    // Clean up any session storage data for editing
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('profile-data-before-save')
+    }
+  }
 
   const handleEdit = async () => {
     if (isEditing) {
@@ -184,6 +381,12 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
       setError(null)
       
       try {
+        // Store current state in session storage before making changes
+        // This provides an additional recovery mechanism if the update fails
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('profile-data-before-save', JSON.stringify(profileData));
+        }
+        
         // Find location ID based on governorate and district
         let locationId = null
         
@@ -233,18 +436,6 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
         
         // Update auth store with new user data
          if (user) {
-           const updatedUser = {
-             ...user,
-             first_name: updatedProfile.first_name,
-             last_name: updatedProfile.last_name,
-             phone: updatedProfile.phone,
-             email: updatedProfile.email,
-             location: updatedProfile.location
-           }
-           
-           // Update the user in the auth store
-           updateUser(updatedUser)
-           
            // Update the local state with the values from the API response
            // If location was updated in the profile, use those values
            // If location was not included in the update (null location_id), keep the current values
@@ -276,47 +467,120 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
              }
            }
            
-           setProfileData({
+           const updatedProfileData = {
              fullName: `${updatedProfile.first_name} ${updatedProfile.last_name}`,
              phoneNumber: updatedProfile.phone || "",
              email: updatedProfile.email,
              governorate: updatedGovernorate,
              district: updatedDistrict
+           };
+           
+           setProfileData(updatedProfileData);
+           // Update original data for future cancel operations
+           setOriginalData(updatedProfileData);
+           
+           // Persist updated profile data to session storage for recovery
+           if (typeof window !== 'undefined') {
+             sessionStorage.setItem('profile-data-backup', JSON.stringify(updatedProfileData));
+             // Remove the pre-save backup as it's no longer needed
+             sessionStorage.removeItem('profile-data-before-save');
+           }
+           
+           // Always save location data to localStorage for persistence, even if empty
+           // This ensures we're always using the most recent user selection
+           if (typeof window !== 'undefined' && user?.id) {
+             const userLocationKey = `userLocation_${user.id}`;
+             
+             if (updatedGovernorate && updatedDistrict) {
+               // Save non-empty location data
+               localStorage.setItem(userLocationKey, JSON.stringify({
+                 governorate: updatedGovernorate,
+                 district: updatedDistrict
+               }));
+               console.log('Saved location to localStorage:', { governorate: updatedGovernorate, district: updatedDistrict });
+             } else {
+               // If location was explicitly cleared, remove from localStorage
+               localStorage.removeItem(userLocationKey);
+               console.log('Cleared location from localStorage');
+             }
+           }
+           
+           // Also update the auth store with the location data
+           // This ensures the location data is properly saved in the auth store
+           // and will be available on subsequent logins
+           updateUserProfile({
+             // We don't need to include other fields as they're already updated
+             // by the profileService.updateProfile call above
+             // Just ensure the location is properly updated in the auth store
+             location_id: locationId,
+             // Pass the location data directly to ensure it's properly saved
+             // This is a backup in case the backend doesn't return the location
+             ...(updatedProfile.location ? {} : {
+               location: updatedGovernorate && updatedDistrict ? {
+                 id: locationId || 0,
+                 governorate: updatedGovernorate,
+                 district: updatedDistrict
+               } : null
+             })
            });
            
-           // Save updated location to localStorage only if we have valid location data
-            if (typeof window !== 'undefined' && user?.id) {
-              // Create a user-specific key for localStorage
-              const userLocationKey = `userLocation_${user.id}`;
-              
-              if (updatedProfile.location) {
-                // If the API returned a location, save it
-                localStorage.setItem(userLocationKey, JSON.stringify({
-                  governorate: updatedGovernorate,
-                  district: updatedDistrict
-                }));
-              } else if (profileData.governorate && profileData.district) {
-                // If we're keeping the existing location data (not updating it), ensure localStorage matches
-                localStorage.setItem(userLocationKey, JSON.stringify({
-                  governorate: profileData.governorate,
-                  district: profileData.district
-                }));
-              } else {
-                // If no location data is available, clear localStorage to prevent defaults
-                localStorage.removeItem(userLocationKey);
-              }
-            }
+           // Show success message
+           toast({
+             title: "Profile updated",
+             description: "Your profile has been updated successfully.",
+           });
         }
         
         setIsLoading(false)
       } catch (err: any) {
-        console.error("Error updating profile:", err)
-        setError(err.response?.data?.message || "Failed to update profile")
+        // Check if this is an email already exists error
+        const isEmailError = err.response?.data?.errors?.email?.includes("The email has already been taken") ||
+                            err.response?.data?.message?.includes("email has already been taken") ||
+                            err.response?.data?.message?.toLowerCase().includes("email");
+        
+        if (isEmailError) {
+          // For email errors, use the specific error message from the API
+          setError(err.response?.data?.message || "The email has already been taken.")
+          
+          // Revert the email field to its original value but keep other changes intact
+          // Use a callback to ensure we're working with the latest state
+          setProfileData(prev => ({
+            ...prev,
+            email: originalData.email // Revert only the email field
+          }))
+          
+          // Remove the pre-save backup as we're handling the error
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('profile-data-before-save');
+          }
+          
+          // Silently handle email validation errors without console output
+          // This is an expected validation error, so we don't need to log it
+        } else {
+          // For non-email errors, log to console and set the general error message
+          console.error("Error updating profile:", err)
+          setError(err.response?.data?.message || "Failed to update profile")
+        }
+        
         setIsLoading(false)
+        
+        // If there was an error, keep the user in edit mode so they can fix it
+        // Only for email errors, we want to stay in edit mode
+        if (isEmailError) {
+          // Stay in edit mode
+          return;
+        }
       }
     }
     
-    setIsEditing(!isEditing)
+    // Only toggle edit mode if we're not already in an error state
+    // This prevents exiting edit mode when there's an error
+    // Check if we had an email error, in which case we want to stay in edit mode
+    const isEmailError = error?.toLowerCase().includes('email');
+    if (!isEmailError) {
+      // Only toggle if we're not in an error state
+      setIsEditing(prev => !prev);
+    }
   }
 
   const handleVerify = () => {
@@ -331,8 +595,9 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
             <ProfileSidebar 
               activeItem="profile" 
               fullName={profileData.fullName} 
-              profileImage={user?.avatar_url || undefined}
+              profileImage={user?.avatar_url_full || user?.avatar_url || undefined}
               onViewChange={onViewChange}
+              onProfileUpdate={handleProfileUpdate}
             />
           </div>
         </div>
@@ -348,18 +613,31 @@ export default function UserProfileDashboard({ onViewChange }: UserProfileDashbo
                 {error}
               </div>
             )}
-            <Button
-              onClick={handleEdit}
-              disabled={isLoading}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : isEditing ? "Save" : "Edit"}
-            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              {isEditing && (
+                <Button
+                  onClick={handleCancel}
+                  disabled={isLoading}
+                  variant="outline"
+                  className="px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+              )}
+              <Button
+                onClick={handleEdit}
+                disabled={isLoading}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : isEditing ? "Save" : "Edit"}
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 w-full">

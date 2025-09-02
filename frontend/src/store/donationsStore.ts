@@ -137,7 +137,7 @@ const mapEventToDonationData = (event: DonationEvent | null): DonationData | und
     title: event.title || 'Untitled Donation',
     description: event.description || '',
     imageUrl: event.image_full_urls?.[0] || event.image_urls?.[0] || undefined,
-    avatarUrl: (event.user as any).avatar || (event.user as any).avatar_url || undefined,
+    avatarUrl: event.user.avatar_url_full || event.user.avatar_url || undefined,
     initials: `${event.user.first_name?.[0] ?? ''}${event.user.last_name?.[0] ?? ''}` || 'UN',
     isVerified: true, // assume donation creators are verified; adjust as needed
     createdAt: event.created_at,

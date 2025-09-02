@@ -10,6 +10,8 @@ import { CommunityPost, CommentResource } from '@/types'
 import { communityService } from '@/lib/api/community'
 import { toast } from '@/components/ui/use-toast'
 import { ImageGallery } from '@/components/ui/image-gallery'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+
 
 interface User {
   id: string
@@ -313,12 +315,18 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
         {/* User header with verification badge */}
         <div className="flex items-center gap-2 mb-2">
           <div className="relative">
-            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-bold">
-                {post.user?.first_name && post.user?.last_name ? `${post.user.first_name[0]}${post.user.last_name[0]}` : 'U'}
-              </span>
-            </div>
-            {post.user?.first_name && (
+            <Avatar className="h-8 w-8 bg-red-500 rounded-full flex items-center justify-center">
+                {
+                    post.user?.avatar_url_full ? (
+                        <AvatarImage src={post.user?.avatar_url_full || undefined} alt={`${post.user?.first_name}${post.user?.last_name}`} />
+                    ) : (
+                        <AvatarFallback className="bg-red-500 text-white text-xs font-bold">
+                            {post.user?.first_name && post.user?.last_name ? `${post.user.first_name[0]}${post.user.last_name[0]}` : 'U'}
+                        </AvatarFallback>
+                    )
+                }
+            </Avatar>
+            {post.user?.verified && (
               <div className="absolute -top-1 -right-1">
                 <Image 
                   src="/verification.png" 
@@ -429,10 +437,20 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
             {!isLoadingComments && comments.map((comment, idx) => (
               <div key={idx} className="flex items-start gap-2 mb-2">
                 <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary-foreground text-[10px] font-bold">
-                    {comment.user.first_name && comment.user.last_name ? 
-                      `${comment.user.first_name[0]}${comment.user.last_name[0]}` : 'U'}
-                  </span>
+                  {comment.user.avatar_url_full ? (
+                    <Image 
+                      src={comment.user.avatar_url_full} 
+                      alt={`${comment.user.first_name}${comment.user.last_name}`} 
+                      width={24} 
+                      height={24}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <span className="text-primary-foreground text-[10px] font-bold">
+                      {comment.user.first_name && comment.user.last_name ? 
+                        `${comment.user.first_name[0]}${comment.user.last_name[0]}` : 'U'}
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="text-xs font-medium text-foreground mb-0.5">

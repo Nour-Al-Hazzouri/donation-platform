@@ -68,7 +68,9 @@ export interface CommunityPost {
     username: string;
     first_name: string;
     last_name: string;
-    avatar?: string;
+    avatar_url?: string;
+    avatar_url_full?: string;
+    verified: boolean;
   };
   event?: {
     id: number;
@@ -89,7 +91,9 @@ export interface CommentResource {
     username: string;
     first_name: string;
     last_name: string;
-    avatar?: string;
+    avatar_url?: string;
+    avatar_url_full?: string;
+    verified: boolean;
   };
 }
 

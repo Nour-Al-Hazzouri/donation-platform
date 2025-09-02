@@ -37,7 +37,8 @@ class NotificationResource extends JsonResource
                     'username' => $this->user->username,
                     'first_name' => $this->user->first_name,
                     'last_name' => $this->user->last_name,
-                    'avatar' => $this->user->profile_photo_url ?? null,
+                    'avatar_url' => $this->user->avatar_url ?? null,
+                    'avatar_url_full' => $this->user->avatar_url_full ?? null,
                 ];
             }),
             // Related user who triggered the notification (if any)
@@ -50,7 +51,8 @@ class NotificationResource extends JsonResource
                         'username' => $relatedUser->username,
                         'first_name' => $relatedUser->first_name,
                         'last_name' => $relatedUser->last_name,
-                        'avatar' => $relatedUser->profile_photo_url ?? null,
+                        'avatar_url' => $relatedUser->avatar_url ?? null,
+                        'avatar_url_full' => $relatedUser->avatar_url_full ?? null,
                     ] : null;
                 }
             ),

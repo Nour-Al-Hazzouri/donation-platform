@@ -9,12 +9,12 @@ import { cn } from '@/utils'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useDonationsStore, DonationData } from '@/store/donationsStore'
-import router from 'next/router'
 
 interface DonationItem extends Omit<DonationData, 'location'> {
   location: string
   timeAgo: string
   quantity?: number
+  verified?: boolean
 }
 
 interface LatestDonationsProps {
@@ -39,11 +39,25 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <div className="relative">
             <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-              <AvatarImage src={donation.avatarUrl || undefined} alt={donation.name} />
-              <AvatarFallback className="bg-red-500 text-white text-xs sm:text-sm">
-                {donation.initials}
-              </AvatarFallback>
+                {donation.avatarUrl ? (
+                    <AvatarImage src={donation.avatarUrl || undefined} alt={donation.name} />
+                ) : (
+                    <AvatarFallback className="bg-red-500 text-white text-xs sm:text-sm">
+                        {donation.initials}
+                    </AvatarFallback>
+                )}
             </Avatar>
+            {donation.isVerified && (
+              <div className="absolute -top-1 -right-1">
+                <Image 
+                  src="/verification.png" 
+                  alt="Verified" 
+                  width={16} 
+                  height={16}
+                  className="w-4 h-4"
+                />
+              </div>
+            )}
           </div>
           <span className="text-foreground font-medium text-sm sm:text-base">{donation.name}</span>
         </div>
@@ -94,6 +108,7 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
 
 const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
   const { getDonationOffers } = useDonationsStore()
+  const router = useRouter()
   const [donations, setDonations] = React.useState<DonationItem[]>([])
   const [currentIndex, setCurrentIndex] = React.useState(0)
   const [visibleCards, setVisibleCards] = React.useState(3)
@@ -107,6 +122,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
         quantity: donation.possibleAmount ? Math.floor(donation.possibleAmount) : 0,
         location: donation.location?.district || 'Unknown',
         timeAgo: 'Just now',
+        verified: donation.isVerified
       }))
       setDonations(transformed)
     }

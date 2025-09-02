@@ -15,6 +15,7 @@ use App\Http\Controllers\API\NotificationController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,13 @@ use Illuminate\Support\Facades\Route;
 Route::get("/up", function () {
     return response()->json([
         'message' => 'Application is up and running',
+    ], 200);
+});
+
+Route::any('/logger', function (Request $request) {
+    Log::info($request->all());
+    return response()->json([
+        'message' => 'Logged successfully',
     ], 200);
 });
 
@@ -71,7 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // User profile (no special permissions needed for own profile)
     Route::prefix('user')->group(function () {
         Route::get('/profile', [UserController::class, 'profile']);
-        Route::put('/profile', [UserController::class, 'updateProfile']);
+        Route::patch('/profile', [UserController::class, 'updateProfile']);
     });
 
     // Verification routes

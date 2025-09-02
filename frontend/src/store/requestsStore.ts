@@ -61,7 +61,7 @@ const mapEventToRequestData = (event: RequestEvent | null): RequestData | undefi
     title: event.title || 'Untitled Request',
     description: event.description || '',
     imageUrl: event.image_full_urls?.[0] || event.image_urls?.[0],
-    avatarUrl: event.user.avatar_url || undefined,
+    avatarUrl: event.user.avatar_url_full || event.user.avatar_url || undefined,
     initials: `${event.user.first_name?.[0] ?? ''}${event.user.last_name?.[0] ?? ''}` || 'UN',
     isVerified: true,
     goalAmount: event.goal_amount?.toString() || '0',
