@@ -15,6 +15,7 @@ interface DonationItem extends Omit<DonationData, 'location'> {
   location: string
   timeAgo: string
   quantity?: number
+  verified?: boolean
 }
 
 interface LatestDonationsProps {
@@ -47,6 +48,17 @@ const DonationCard: React.FC<{ donation: DonationItem }> = ({ donation }) => {
                     </AvatarFallback>
                 )}
             </Avatar>
+            {donation.isVerified && (
+              <div className="absolute -top-1 -right-1">
+                <Image 
+                  src="/verification.png" 
+                  alt="Verified" 
+                  width={16} 
+                  height={16}
+                  className="w-4 h-4"
+                />
+              </div>
+            )}
           </div>
           <span className="text-foreground font-medium text-sm sm:text-base">{donation.name}</span>
         </div>
@@ -110,6 +122,7 @@ const LatestDonations: React.FC<LatestDonationsProps> = ({ className }) => {
         quantity: donation.possibleAmount ? Math.floor(donation.possibleAmount) : 0,
         location: donation.location?.district || 'Unknown',
         timeAgo: 'Just now',
+        verified: donation.isVerified
       }))
       setDonations(transformed)
     }
