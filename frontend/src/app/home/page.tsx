@@ -1,4 +1,4 @@
-// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\app\home\page.tsx
+import { Suspense } from "react";
 import { MainLayout } from "@/components/layouts/MainLayout";
 import { Hero } from "@/components/home/Hero";
 import LatestDonations from "@/components/home/latestDonations";
@@ -9,13 +9,15 @@ import BlogCarousel from "@/components/blog/BlogCarousel";
 
 export default function HomePage() {
   return (
-    <MainLayout>
-      <Hero />
-      <AboutIntroSection showButton={false} />
-      <LatestDonations />
-      <LatestRequests />
-      <BlogCarousel />
-      <ContactUs />
-    </MainLayout>
+    <Suspense fallback={<div>Loading...</div>}>
+      <MainLayout>
+        <Hero />
+        <AboutIntroSection showButton={false} />
+        <LatestDonations />
+        <LatestRequests />
+        <BlogCarousel />
+        <ContactUs />
+      </MainLayout>
+    </Suspense>
   );
 }

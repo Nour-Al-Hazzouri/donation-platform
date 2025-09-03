@@ -1,5 +1,5 @@
-import { MainLayout } from "@/components/layouts/MainLayout";
-import NewsBlogSection from "@/components/blog/NewsBlogSection";
+import { Suspense } from 'react';
+import { BlogPageClient } from './BlogPageClient';
 
 export const metadata = {
   title: "Blog - Lebanon Donation Platform",
@@ -8,8 +8,8 @@ export const metadata = {
 
 export default function BlogPage() {
   return (
-    <MainLayout>
-      <NewsBlogSection />
-    </MainLayout>
+    <Suspense fallback={<div>Loading...</div>}>
+      <BlogPageClient />
+    </Suspense>
   );
 }
