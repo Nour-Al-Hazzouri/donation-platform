@@ -114,12 +114,6 @@ export function DonationSuccessPageClient() {
 
         <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center mb-8">
           <Button
-            onClick={() => router.push(`/requests/${requestDetails.requestId}`)}
-            className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white"
-          >
-            View Request
-          </Button>
-          <Button
             onClick={() => router.push('/requests')}
             variant="outline"
             className="w-full sm:w-auto"
