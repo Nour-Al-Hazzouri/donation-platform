@@ -116,7 +116,9 @@ const convertMockToCommunityPost = (mockPost: MockCommunityPost): CommunityPost 
       username: `${mockPost.user.first_name.toLowerCase()}${mockPost.user.last_name.toLowerCase()}`,
       first_name: mockPost.user.first_name,
       last_name: mockPost.user.last_name,
-      avatar: undefined
+      avatar_url: undefined,
+      avatar_url_full: undefined,
+      verified: mockPost.user.verified
     },
     comments_count: mockPost.comments.length
   }

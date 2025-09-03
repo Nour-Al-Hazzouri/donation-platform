@@ -7,13 +7,21 @@ import { usePathname } from "next/navigation"
 import { Menu, X, LayoutDashboard, FileText, Users, MapPin } from "lucide-react"
 import Image from "next/image"
 import { ThemeToggleProvider } from "./ThemeToggleProvider"
+import { useAuthStore } from "@/store/authStore"
 
 export function AdminHeader() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { user } = useAuthStore()
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
+
+  // Get admin profile data from current user
+  const adminProfile = {
+    name: user ? `${user.first_name} ${user.last_name}` : "Admin",
+    avatar: user?.avatar_url_full || user?.avatar_url || "/placeholder.svg?height=40&width=40&text=Admin",
+  }
 
   const renderNavLink = (item: (typeof NAV_ITEMS)[0], isMobile = false) => {
     const isActive = pathname === item.href
@@ -126,14 +134,14 @@ export function AdminHeader() {
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden">
                       <Image
-                        src="/placeholder.svg?height=40&width=40"
+                        src={adminProfile.avatar}
                         alt="Admin Profile"
                         width={40}
                         height={40}
                         className="object-cover"
                       />
                     </div>
-                    <span className="text-base font-medium text-foreground">Admin</span>
+                    <span className="text-base font-medium text-foreground">{adminProfile.name}</span>
                   </div>
                   
                   {/* Theme Toggle in Mobile Menu */}

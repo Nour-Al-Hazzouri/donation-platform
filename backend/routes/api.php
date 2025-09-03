@@ -34,6 +34,14 @@ Route::get("/up", function () {
     ], 200);
 });
 
+// Health check endpoint for Railway
+Route::get("/health", function () {
+    return response()->json([
+        'status' => 'healthy',
+        'timestamp' => now(),
+    ], 200);
+});
+
 Route::any('/logger', function (Request $request) {
     Log::info($request->all());
     return response()->json([
