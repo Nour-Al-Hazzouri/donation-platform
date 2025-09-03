@@ -39,8 +39,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Enable static exports for better performance
-  output: 'standalone',
+  // Disable standalone output to fix build issues
+  // output: 'standalone',
 }
 
 export default nextConfig
