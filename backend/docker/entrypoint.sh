@@ -2,17 +2,17 @@
 set -e
 
 # Function to check if database is ready
-# check_db_connection() {
-#     php artisan db:show > /dev/null 2>&1
-#     return $?
-# }
+check_db_connection() {
+    php artisan db:show > /dev/null 2>&1
+    return $?
+}
 
-# # Wait for database to be ready
-# echo "Checking database connection..."
-# until check_db_connection; do
-#     echo "Waiting for database to be ready..."
-#     sleep 5
-# done
+# Wait for database to be ready
+echo "Checking database connection..."
+until check_db_connection; do
+    echo "Waiting for database to be ready..."
+    sleep 5
+done
 
 # Check if maintenance mode is enabled
 if [ "$MAINTENANCE_MODE" = "true" ]; then
