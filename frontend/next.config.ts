@@ -3,44 +3,36 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     remotePatterns: [
-      // Production Railway backend
-      {
-        protocol: 'https',
-        hostname: '*.railway.app',
-        pathname: '/**',
-      },
-      // Development localhost
+      // matches http://localhost:8000/...
       {
         protocol: 'http',
         hostname: 'localhost',
         port: '8000',
         pathname: '/**',
       },
-      // Supabase storage
+      // matches http://localhost/... (no explicit port)
       {
-        protocol: 'https',
-        hostname: '*.supabase.co',
-        pathname: '/storage/**',
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '/**',
       },
-      // Common development aliases
+      // common aliases that might appear in Docker/WSL
       {
         protocol: 'http',
         hostname: '127.0.0.1',
         port: '8000',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'host.docker.internal',
+        port: '8000',
+        pathname: '/**',
+      },
     ],
   },
-  // Disable standalone output to fix build issues
-  // output: 'standalone',
 }
 
 export default nextConfig
