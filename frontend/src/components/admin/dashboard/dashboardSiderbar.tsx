@@ -13,14 +13,7 @@ import {
 import { LayoutDashboard, FileText, Users, MapPin } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-
-// Mock data for admin profile
-const ADMIN_PROFILE = {
-  name: "Admin",
-  role: "Administrator",
-  avatar: "admin.jpg",
-  avatarFallback: "A",
-}
+import { useAuthStore } from "@/store/authStore"
 
 const getSidebarMenuItems = (pathname: string) => [
   { 
@@ -52,6 +45,15 @@ const getSidebarMenuItems = (pathname: string) => [
 export function DashboardSidebar() {
   const pathname = usePathname()
   const sidebarMenuItems = getSidebarMenuItems(pathname)
+  const { user } = useAuthStore()
+
+  // Get admin profile data from current user
+  const adminProfile = {
+    name: user ? `${user.first_name} ${user.last_name}` : "Admin",
+    role: user?.isAdmin ? "Administrator" : "User",
+    avatar: user?.avatar_url_full || user?.avatar_url || "/placeholder.svg?height=40&width=40&text=Admin",
+    avatarFallback: user ? user.first_name.charAt(0).toUpperCase() : "A",
+  }
 
   return (
     <Sidebar className="w-64 border-r">
@@ -64,14 +66,14 @@ export function DashboardSidebar() {
                 <div className="flex items-center justify-between px-2 py-2 rounded-md hover:bg-secondary/50">
                   <div className="flex items-center space-x-3">
                     <Avatar className="w-10 h-10">
-                      <AvatarImage src={ADMIN_PROFILE.avatar || "/placeholder.svg"} alt={ADMIN_PROFILE.name} />
+                      <AvatarImage src={adminProfile.avatar} alt={adminProfile.name} />
                       <AvatarFallback className="bg-red-500 text-white font-semibold">
-                        {ADMIN_PROFILE.avatarFallback}
+                        {adminProfile.avatarFallback}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <span className="font-semibold text-foreground text-sm">{ADMIN_PROFILE.name}</span>
-                      <span className="text-xs text-muted-foreground">{ADMIN_PROFILE.role}</span>
+                      <span className="font-semibold text-foreground text-sm">{adminProfile.name}</span>
+                      <span className="text-xs text-muted-foreground">{adminProfile.role}</span>
                     </div>
                   </div>
                 </div>

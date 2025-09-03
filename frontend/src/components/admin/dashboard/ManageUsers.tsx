@@ -6,6 +6,7 @@ import { Search } from 'lucide-react'
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { usersService } from "@/lib/api"
 
 interface User {
   id: string
@@ -88,46 +89,112 @@ interface ManageUsersProps {
 // Create a custom hook to manage users state
 export function useUsers() {
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load users from localStorage on component mount
+  // Fetch users from API on component mount
   useEffect(() => {
-    const storedUsers = getUsersFromStorage();
-    setUsers(storedUsers);
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await usersService.getAllUsers();
+        if (response.data && Array.isArray(response.data)) {
+          // Transform API user data to match our User interface
+          const transformedUsers: User[] = response.data.map((apiUser: any) => ({
+            id: apiUser.id.toString(),
+            name: `${apiUser.first_name} ${apiUser.last_name}`,
+            email: apiUser.email,
+            phone: apiUser.phone || 'No phone',
+            avatar: apiUser.avatar_url_full || apiUser.avatar_url || "/placeholder.svg?height=40&width=40"
+          }));
+          setUsers(transformedUsers);
+        } else {
+          setError('Failed to fetch users - Invalid response format');
+          // Fallback to mock data if API fails
+          const storedUsers = getUsersFromStorage();
+          setUsers(storedUsers);
+        }
+      } catch (err: any) {
+        console.error('Error fetching users:', err);
+        
+        // Provide more specific error messages based on the error type
+        let errorMessage = 'Error fetching users';
+        if (err.response?.status === 403) {
+          errorMessage = 'Access denied: You do not have permission to view users';
+        } else if (err.response?.status === 401) {
+          errorMessage = 'Authentication required: Please log in again';
+        } else if (err.response?.status === 404) {
+          errorMessage = 'Users endpoint not found';
+        } else if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
+        setError(errorMessage);
+        // Fallback to mock data if API fails
+        const storedUsers = getUsersFromStorage();
+        setUsers(storedUsers);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   // Function to add a new user
-  const addUser = (userData: any) => {
-    // Generate a unique ID for the new user
-    const userId = String(Date.now());
-    
-    // Create a new user object from the form data
-    const newUser: User = {
-      id: userId,
-      name: userData.personalDetails.name,
-      email: userData.personalDetails.email,
-      phone: userData.personalDetails.phoneNumber,
-      avatar: "/placeholder.svg?height=40&width=40" // Default avatar
-    };
-
-    // Add the new user to the list
-    const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
-    
-    // Save to localStorage
-    saveUsersToStorage(updatedUsers);
-    
-    // Store address information in localStorage
-    if (typeof window !== 'undefined') {
-      const addressKey = `user_${userId}_address`;
-      const addressData = {
-        governorate: userData.personalDetails.address?.governorate,
-        district: userData.personalDetails.address?.district
+  const addUser = async (userData: any) => {
+    try {
+      const userPayload = {
+        first_name: userData.personalDetails.name.split(' ')[0] || userData.personalDetails.name,
+        last_name: userData.personalDetails.name.split(' ').slice(1).join(' ') || '',
+        username: userData.personalDetails.email, // Use email as username
+        email: userData.personalDetails.email,
+        phone: userData.personalDetails.phoneNumber,
+        password: 'defaultPassword123',
+        password_confirmation: 'defaultPassword123',
+        location_id: 1 // Default location ID
       };
-      localStorage.setItem(addressKey, JSON.stringify(addressData));
-      console.log('Saved address data for new user:', addressData);
+
+      const response = await usersService.createUser(userPayload);
+      
+      if (response.success && response.data) {
+        // Transform the new user data
+        const newUser: User = {
+          id: response.data.id.toString(),
+          name: `${response.data.first_name} ${response.data.last_name}`,
+          email: response.data.email,
+          phone: response.data.phone || 'No phone',
+          avatar: response.data.avatar_url_full || response.data.avatar_url || "/placeholder.svg?height=40&width=40"
+        };
+
+        // Add the new user to the list
+        setUsers(prevUsers => [...prevUsers, newUser]);
+        return newUser;
+      } else {
+        throw new Error('Failed to create user');
+      }
+    } catch (err) {
+      console.error('Error creating user:', err);
+      // Fallback to localStorage method for now
+      const userId = String(Date.now());
+      const newUser: User = {
+        id: userId,
+        name: userData.personalDetails.name,
+        email: userData.personalDetails.email,
+        phone: userData.personalDetails.phoneNumber,
+        avatar: "/placeholder.svg?height=40&width=40"
+      };
+
+      const updatedUsers = [...users, newUser];
+      setUsers(updatedUsers);
+      saveUsersToStorage(updatedUsers);
+      
+      return newUser;
     }
-    
-    return newUser;
   };
   
   // Function to update an existing user
@@ -181,7 +248,7 @@ export function useUsers() {
     return true;
   };
 
-  return { users, addUser, updateUser, deleteUser };
+  return { users, loading, error, addUser, updateUser, deleteUser };
 }
 
 // Create a global context for users
@@ -189,7 +256,9 @@ import { createContext, useContext } from "react";
 
 interface UsersContextType {
   users: User[];
-  addUser: (userData: any) => User;
+  loading: boolean;
+  error: string | null;
+  addUser: (userData: any) => Promise<User>;
   updateUser: (updatedData: any) => User | null;
   deleteUser: (userId: string) => boolean;
 }
@@ -217,16 +286,16 @@ export function useUsersContext() {
 export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [verificationRequests, setVerificationRequests] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [verificationLoading, setVerificationLoading] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(null)
   const router = useRouter()
-  const { users } = useUsersContext();
+  const { users, loading: usersLoading, error: usersError } = useUsersContext();
   
   // Fetch verification requests when the component mounts or when activeTab changes
   useEffect(() => {
     if (activeTab === "Verification") {
-      setLoading(true);
-      setError(null);
+      setVerificationLoading(true);
+      setVerificationError(null);
       
       // Import verificationService dynamically to avoid circular dependencies
       import("@/lib/api").then(({ verificationService }) => {
@@ -245,15 +314,15 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
               }));
               setVerificationRequests(requests);
             } else {
-              setError('Failed to fetch verification requests');
+              setVerificationError('Failed to fetch verification requests');
             }
           })
           .catch(err => {
             console.error('Error fetching verification requests:', err);
-            setError('Error fetching verification requests');
+            setVerificationError('Error fetching verification requests');
           })
           .finally(() => {
-            setLoading(false);
+            setVerificationLoading(false);
           });
       });
     }
@@ -309,7 +378,7 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
         </div>
 
         {/* Loading State */}
-        {activeTab === "Verification" && loading && (
+        {((activeTab === "Verification" && verificationLoading) || (activeTab === "All" && usersLoading)) && (
           <div className="p-8 text-center text-muted-foreground">
             <div className="animate-pulse flex flex-col items-center">
               <div className="h-4 bg-muted rounded w-32 mb-4"></div>
@@ -319,42 +388,44 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
         )}
 
         {/* Error State */}
-        {activeTab === "Verification" && error && (
+        {((activeTab === "Verification" && verificationError) || (activeTab === "All" && usersError)) && (
           <div className="p-8 text-center text-red-500">
-            {error}
+            {activeTab === "Verification" ? verificationError : usersError}
             <div className="mt-2">
               <Button 
                 size="sm" 
                 variant="outline"
                 onClick={() => {
-                  setLoading(true);
-                  setError(null);
-                  import("@/lib/api").then(({ verificationService }) => {
-                    verificationService.getAllVerifications()
-                      .then(response => {
-                        if (response.success) {
-                          const requests = response.data.map((verification: any) => ({
-                            id: verification.id,
-                            name: verification.user ? `${verification.user.first_name} ${verification.user.last_name}` : 'Unknown User',
-                            email: verification.user?.email || 'No email',
-                            phone: verification.user?.phone || 'No phone',
-                            avatar: verification.user?.avatar || "/placeholder.svg?height=40&width=40",
-                            status: verification.status,
-                            created_at: verification.created_at
-                          }));
-                          setVerificationRequests(requests);
-                        } else {
-                          setError('Failed to fetch verification requests');
-                        }
-                      })
-                      .catch(err => {
-                        console.error('Error fetching verification requests:', err);
-                        setError('Error fetching verification requests');
-                      })
-                      .finally(() => {
-                        setLoading(false);
-                      });
-                  });
+                  if (activeTab === "Verification") {
+                    setVerificationLoading(true);
+                    setVerificationError(null);
+                    import("@/lib/api").then(({ verificationService }) => {
+                      verificationService.getAllVerifications()
+                        .then(response => {
+                          if (response.success) {
+                            const requests = response.data.map((verification: any) => ({
+                              id: verification.id,
+                              name: verification.user ? `${verification.user.first_name} ${verification.user.last_name}` : 'Unknown User',
+                              email: verification.user?.email || 'No email',
+                              phone: verification.user?.phone || 'No phone',
+                              avatar: verification.user?.avatar || "/placeholder.svg?height=40&width=40",
+                              status: verification.status,
+                              created_at: verification.created_at
+                            }));
+                            setVerificationRequests(requests);
+                          } else {
+                            setVerificationError('Failed to fetch verification requests');
+                          }
+                        })
+                        .catch(err => {
+                          console.error('Error fetching verification requests:', err);
+                          setVerificationError('Error fetching verification requests');
+                        })
+                        .finally(() => {
+                          setVerificationLoading(false);
+                        });
+                    });
+                  }
                 }}
               >
                 Try Again
@@ -364,7 +435,8 @@ export function ManageUsers({ activeTab = "All" }: ManageUsersProps) {
         )}
 
         {/* Table Body */}
-        {!loading && !error && (
+        {!((activeTab === "Verification" && verificationLoading) || (activeTab === "All" && usersLoading)) && 
+         !((activeTab === "Verification" && verificationError) || (activeTab === "All" && usersError)) && (
           <div className="divide-y overflow-x-auto">
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
