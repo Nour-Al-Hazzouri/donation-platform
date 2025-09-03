@@ -5,34 +5,36 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
-      // matches http://localhost:8000/...
+      // Production Railway backend
+      {
+        protocol: 'https',
+        hostname: '*.railway.app',
+        pathname: '/**',
+      },
+      // Development localhost
       {
         protocol: 'http',
         hostname: 'localhost',
         port: '8000',
         pathname: '/**',
       },
-      // matches http://localhost/... (no explicit port)
+      // Supabase storage
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        pathname: '/**',
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/**',
       },
-      // common aliases that might appear in Docker/WSL
+      // Common development aliases
       {
         protocol: 'http',
         hostname: '127.0.0.1',
         port: '8000',
         pathname: '/**',
       },
-      {
-        protocol: 'http',
-        hostname: 'host.docker.internal',
-        port: '8000',
-        pathname: '/**',
-      },
     ],
   },
+  // Enable static exports for better performance
+  output: 'standalone',
 }
 
 export default nextConfig
