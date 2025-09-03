@@ -99,12 +99,12 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 EXPOSE 80
 
 # Copy entrypoint script
-# COPY docker/entrypoint.sh /usr/local/bin/
-# RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY docker/entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Set entrypoint
-# ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Default command
-# CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-CMD ["php", "artisan", "migrate", "--force", "&&", "php", "artisan", "seed", "--force", "&&", "php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
