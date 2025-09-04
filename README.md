@@ -13,39 +13,34 @@
 
 ## 🌟 Overview
 
-GiveLeb is a modern, full-stack donation platform designed specifically for Lebanon, enabling seamless connections between generous donors and individuals or organizations in need. The platform combines cutting-edge technology with user-centric design to create a transparent, secure, and efficient donation ecosystem.
+GiveLeb is a modern, full-stack donation platform that connects generous donors with individuals or organizations in need. The platform is designed with transparency, security, and community engagement at its core, creating a trusted ecosystem for giving and receiving support.
 
 ## ✨ Key Features
 
 ### 🎯 Core Functionality
-- **Donation Management**: Create, manage, and track donation requests and offers
-- **Real-time Matching**: Intelligent matching system between donors and recipients
-- **Secure Transactions**: Safe and transparent donation processing
-- **Location-based Services**: Geographic filtering and location-specific donations
+- **Donation Management**: Users can create donations, request donations, and contribute to others
+- **Request System**: Easily request support from the community
+- **Contribution Tracking**: Follow your donations and requests
 
-### 👥 User Management
-- **Role-based Access Control**: Admin and User roles with specific permissions
-- **User Verification System**: Identity verification for enhanced trust and security
-- **Profile Management**: Comprehensive user profiles with donation history
-- **Authentication**: Secure login/registration with password recovery
+### 👥 User Features
+- **Profile Management**: Create and edit user profiles
+- **Account Verification**: Users can apply for verification, and admins can manage the process
+- **Notifications**: Real-time updates for donations, requests, blogs, votes, comments, and verification status
 
 ### 🏘️ Community Features
-- **Community Posts**: Share stories, updates, and engage with the community
-- **Commenting System**: Interactive discussions on posts and donation events
-- **Voting System**: Community-driven content curation
-- **Blog Platform**: Educational content and platform updates
+- **Community Posts**: Users can share posts with the community
+- **Engagement Tools**: Upvote, downvote, and comment on posts
+- **Blog Platform**: Stay updated with blog posts and platform news
 
 ### 📊 Administrative Dashboard
-- **Statistics & Analytics**: Comprehensive platform metrics and insights
-- **User Management**: Admin tools for user oversight and moderation
-- **Content Moderation**: Review and manage community posts and comments
-- **Announcement System**: Platform-wide announcements and notifications
-- **Verification Management**: Handle user verification requests
+- **Statistics & Analytics**: View platform metrics, including total users, donations, and contributions
+- **User Management**: Admins can oversee and manage users
+- **Verification Management**: Handle and review user verification requests
+- **Location Management**: Admins can manage donation-related locations
+- **Blog Management**: Full control over blogs posted on the platform
 
 ### 🔔 Communication
-- **Notification System**: Real-time notifications for important events
-- **Email Integration**: Automated email notifications and updates
-- **Activity Tracking**: Comprehensive audit trail of user actions
+- **Notification System**: Users receive alerts related to donations, requests, community activity, blog posts, and account verification
 
 ## 🏗️ Technical Architecture
 
