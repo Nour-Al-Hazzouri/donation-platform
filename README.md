@@ -114,7 +114,7 @@ Meet the talented team behind GiveLeb:
 - **Nour Al Hazzouri** - Team Leader, Front-end Developer
 - **Mariam Kanj** - UI/UX Designer, Front-end Developer  
 - **Ali Atat** - Front-end Developer
-- **Ayman DanDan** - Back-end Developer
+- **Ayman Dandan** - Back-end Developer
 - **Mouhamad Moussa** - Back-end Developer
 
 ---
