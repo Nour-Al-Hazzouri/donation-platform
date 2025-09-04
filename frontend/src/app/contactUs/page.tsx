@@ -1,4 +1,3 @@
-// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\app\contactUs\page.tsx
 import { Suspense } from "react";
 import { MainLayout } from "@/components/layouts/MainLayout";
 import ContactUs from "@/components/contactUs/contactUs";

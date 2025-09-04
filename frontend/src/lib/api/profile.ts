@@ -1,4 +1,3 @@
-// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\lib\api\profile.ts
 import axios from 'axios';
 import { authApi } from './auth';
 

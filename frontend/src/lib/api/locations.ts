@@ -1,4 +1,3 @@
-// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\lib\api\locations.ts
 import { authApi } from './auth';
 
 export interface Location {

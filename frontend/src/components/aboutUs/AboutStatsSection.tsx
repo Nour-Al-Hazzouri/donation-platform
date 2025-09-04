@@ -1,4 +1,3 @@
-// C:\Users\MC\Desktop\Donation\donation-platform\frontend\src\components\aboutUs\AboutStatsSection.tsx
 import { Rocket, Building2, Globe, Gift } from 'lucide-react'
 
 export default function AboutStatsSection() {
