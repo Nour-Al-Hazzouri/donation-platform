@@ -107,6 +107,32 @@ GiveLeb/
 └── docs/                   # Documentation files
 ```
 
+## Starting the development servers (localhost):
+
+### backend:
+
+** Make sure you have a server that can run php like laragon or xamp**
+
+- **For laragon: install laragon and then set up environment variables (Press Win + S → Search "Edit environment variables" → Open):**
+  
+  - C:\laragon\bin\php\php-8.3.x-Win32-vs16-x64
+    
+  - C:\laragon\bin\composer
+    
+  - C:\laragon\bin\mysql\mysql-8.0.x-winx64\bin
+    **(Replace x with your actual version numbers.)**
+    
+- The rest of the steps will be in the README.md file in the backend directory.
+  
+
+### frontend:
+
+- cd frontend
+  
+- pnpm install (npm install -g pnpm - if you don't have pnpm)
+  
+- pnpm dev
+
 ## 👥 Team
 
 Meet the talented team behind GiveLeb:
