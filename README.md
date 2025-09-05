@@ -111,7 +111,7 @@ GiveLeb/
 
 ### backend:
 
-** Make sure you have a server that can run php like laragon or xamp**
+**Make sure you have a server that can run php like laragon or xamp**
 
 - **For laragon: install laragon and then set up environment variables (Press Win + S → Search "Edit environment variables" → Open):**
   
